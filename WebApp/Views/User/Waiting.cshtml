@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewBag.Title = "Waiting";
+}
+
+
+<link href="~/Content/Testing/Index.css" rel="stylesheet" />
+<script src="~/Content/f-awesome.js"></script>
+<div id="main-window">
+    <div v-if="!hasPlaceConfig">
+        <div class="input-pin">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <span class="input-group-text" id="basic-addon1"><i class="fa fa-key"></i></span>
+                </div>
+                <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN" aria-describedby="basic-addon1">
+            </div>
+            @*<div class="center"><i class="fa fa-key"></i><input type="number" maxlength="4" v-model="PIN" /></div>*@
+        </div>
+    </div>
+    <div v-if="hasPlaceConfig">
+        <div v-if="!testInProcess">
+            <div v-if="tests.length == 0">Режим ожидания</div>
+            <div v-if="tests.length != 0">
+                Назначен <b>{{user}}</b>
+                <br />
+                Вам доступны следующие тесты для прохождения:
+            </div>
+            <ul class="list-group list-group-flush">
+                <li v-for="test in tests" class="list-group-item">
+                     @*- {{test.TestingDate}}*@
+                    <div class="justify-content-between row" style="cursor: pointer;" v-on:click="startTest(test.Id)">
+                        <span class="col-8">{{test.DisciplineName}}</span>
+                        <span class="col">
+                            <button class="btn"><i class="far fa-play-circle"></i></button>
+                        </span>
+                    </div>
+                    <br />
+                    <br />
+                </li>
+            </ul>
+            
+        </div>
+        <div v-if="testInProcess">
+            <div class="panel-top">{{showTimeLeft()}}</div>
+            <div>
+                Вопрос:
+                <img v-bind:src="'data:image/png;base64, ' + selectedQwestion.QwestionImage" style="max-width: 1024px;" />
+            </div>
+            <div class="answer-list">
+                Ответы:
+                <div v-for="answer in selectedQwestion.Answers" class="row">
+                    <label v-if="selectedQwestion.TypeAnswerId == 2" class="option-container">
+                        <input type="checkbox" class=" checkbox" value="true" v-model="answer.IsAnswered" v-on:change="changeCheck()" />
+                        <span class="checkmark"></span>
+                    </label>
+                    <label v-if="selectedQwestion.TypeAnswerId == 1" class="option-rb-container">
+                        <input type="radio" class=" checkbox" v-bind:value="answer.Id" name="answer" v-model="selectedQwestion.answer" v-on:change="changeRadio(answer.Id)" />
+                        <span class="checkmark"></span>
+                    </label>
+                    
+                    @*<div v-if="selectedQwestion.TypeAnswerId == 1"> 
+                    <input type="radio" class="option-input radio" name="answer"  v-model="selectedQwestion.answer" v-on:change="changeRadio(answer.Id)" /></div>*@
+                    <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" style="max-width: 1024px; margin-bottom: 15px" />
+                    <br />
+                    <br />
+                </div>
+            </div>
+            <nav aria-label="Вопросы">
+                <ul class="pagination pagination-sm">
+                    <li class="page-item" v-on:click="selectQwestion(page-1)" v-bind:class="{'disabled': page == 1}">
+                        <a class="page-link"><span class="far fa-chevron-double-left"></span></a>
+                    </li>
+                    <template v-for="i in qwestions.length">
+                        <li class="page-item" v-bind:class="{'active': page == i}" v-on:click="selectQwestion(i)"><a class="page-link" v-bind:class="{'answered': IsQwestionAnswered(i)}">{{i}}</a></li>
+                    </template>
+                    <li class="page-item" v-on:click="selectQwestion(page+1)" v-bind:class="{'disabled': page == qwestions.length}">
+                        <a class="page-link"><span class="far fa-chevron-double-right"></span></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+<script src="~/Content/aes.js"></script>
+<script src="~/Content/Testing/test.js"></script>

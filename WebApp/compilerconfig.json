@@ -1,0 +1,14 @@
+﻿[
+  {
+    "outputFile": "Content/Auditory/index.css",
+    "inputFile": "Content/Auditory/index.less"
+  },
+  {
+    "outputFile": "Content/Testing/Index.css",
+    "inputFile": "Content/Testing/Index.less"
+  },
+  {
+    "outputFile": "Content/site.css",
+    "inputFile": "Content/site.less"
+  }
+]

@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - My ASP.NET Application</title>
+    <link href="~/Content/Site.css" rel="stylesheet" type="text/css" />
+    @*<script src="~/Scripts/modernizr-2.8.3.js"></script>*@
+    <script src="~/Scripts/jquery-3.4.1.min.js"></script>
+    <script src="~/Content/bootstrap.bundle.js"></script>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Content/f-awesome.js"></script>
+    <link href="~/Content/font-awesome.css" rel="stylesheet" />
+    <script src="~/Content/vue.js"></script>
+</head>
+<body>
+    <nav @*class="navbar navbar-expand-lg navbar-light bg-light"*@ class="navbar-system">
+        <div class="container">
+            <div class="base-nav">
+                <a class="navbar-brand" href="/">Система тестирования СКФУ</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse1" id="navbarSupportedContent">
+                    <ul class="navbar-nav mr-auto">
+                        <li class="nav-item active">
+                            <a class="nav-link" href="/auditory/list">Список аудиторий <span class="sr-only">(current)</span></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="nav-item">
+                @if (!Request.IsAuthenticated)
+                {
+                    <a class="nav-link" href="/account/login" tabindex="-1">Вход</a>
+                }
+                else
+                {
+                    <a class="nav-link" href="/account/logout" tabindex="-1">Выход</a>
+                }
+            </div>
+        </div>
+    </nav>
+
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+        </footer>
+    </div>
+
+    <script>
+        window.onload = function () {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/account/IsAuthenticated',
+                success: function (d) {
+                    if (!d) {
+                        if (localStorage['placeConfig'] && localStorage['placeConfig'].trim() != '') {
+                            let flag = true;
+                            if (window.location.pathname == '/user/waiting' || window.location.pathname == '/account/login') {
+                                flag = false;
+                            }
+                            console.log(flag);
+                            if (flag) {
+                                window.open('/user/waiting', '_self');
+                            }
+                        }
+                        if (window.location.pathname == '/user/waiting' || window.location.pathname == '/account/login') {
+                            return;
+                        }
+                        window.open('/user/waiting', '_self');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

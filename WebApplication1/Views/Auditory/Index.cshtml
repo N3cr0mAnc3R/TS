@@ -1,0 +1,47 @@
+﻿@using WebApplication1.Models;
+@model Auditory
+@{
+    ViewBag.Title = "Index";
+}
+
+<div class="auditory-header">
+    Аудитория-@Model.Name
+</div>
+<input type="submit" class="btn btn-primary" value="Назад" />
+
+<input type="hidden" value="@Json.Encode(@Model.ComputerList)" id="computer-list" />
+
+<table id="table-comp">
+
+</table>
+
+
+<script>
+    window.onload = function () {
+        let elem = $('#computer-list');
+        let list = this.JSON.parse(elem.val());
+        let maxX = 0, maxY = 0;
+        list.forEach(a => { maxX = Math.max(maxX, a.PositionX); maxY = Math.max(maxY, a.PositionY); })
+        maxX++;
+        maxY++;
+        let table = $('#table-comp');
+
+        for (let i = 0; i < maxX; i++) {
+            let tr = document.createElement("tr");
+            for (let j = 0; j < maxY; j++) {
+                let td = document.createElement("td");
+                let item = list.find(a => a.PositionY == j && a.PositionX == i);
+                if (item) {
+                    let div = this.document.createElement('div');
+                    div.classList.add('comp-item');
+                    div.className = item.Busy ? "busy" : "";
+                    div.innerText = item.Name;
+                    td.appendChild(div);
+                }
+                tr.appendChild(td);
+            }
+            table.append(tr);
+        }
+
+    }
+</script>

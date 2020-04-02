@@ -1,0 +1,28 @@
+﻿@using WebApplication1.Models
+@model IEnumerable<Auditory>
+@{
+    ViewBag.Title = "List";
+}
+
+<h2>Список аудиторий</h2>
+
+<input type="submit" class="btn btn-primary" value="Назад" />
+
+<div class="auditory-list">
+    @foreach (Auditory item in Model)
+    {
+    <form action="/auditory/index" method="get">
+        <input type="hidden" name="Id" value="@item.Id" />
+        <input type="submit" class="btn btn-primary" value="Открыть" />
+    </form>
+    <a class="auditory-item">
+        <div class="name">
+            @item.Name
+        </div>
+        <div class="video" id="'item-' + @item.Id">
+            @*<img src="'data:image/png;base64, ' + @item.Stream" />*@
+        </div>
+    </a>
+    }
+
+</div>

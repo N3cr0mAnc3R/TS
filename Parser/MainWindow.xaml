@@ -1,0 +1,41 @@
+﻿<Window x:Class="Parser.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Parser"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.1*"></RowDefinition>
+            <RowDefinition Height="0.9*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button Width="150" Height="30" Click="Button_Click">Начать</Button>
+            <Button Width="150" Height="30" Click="Button_Click1">Остановить</Button>
+            <Button Width="150" Height="30" Click="Button_Click2">Скачать все</Button>
+            <CheckBox x:Name="IsQwestion" Checked="IsQwestion_Checked">Вопросы</CheckBox>
+            <CheckBox x:Name="IsStraightCh" Checked="IsStraight_Checked" IsChecked="True">В прямом порядке</CheckBox>
+            <CheckBox Checked="IsNorm_Checked" IsChecked="True">Юрин</CheckBox>
+            <TextBox x:Name="dpi" Width="100" TextChanged="dpi_TextChanged">300</TextBox>
+        </StackPanel>
+        <ScrollViewer Grid.Row="1">
+            <StackPanel Name="sp" Orientation="Vertical">
+                <TextBlock>All</TextBlock>
+                <TextBlock x:Name="ttal"></TextBlock>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock x:Name="left"></TextBlock>
+                    <TextBlock x:Name="left1"></TextBlock>
+                </StackPanel>
+                <TextBlock>Current</TextBlock>
+                <ProgressBar x:Name="progressBar2" Maximum="100" Value="0" Height="20"></ProgressBar>
+                <TextBlock x:Name="errors"></TextBlock>
+                <TextBlock x:Name="errors1"></TextBlock>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>

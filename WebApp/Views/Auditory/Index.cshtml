@@ -1,0 +1,134 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+<script src="~/Content/aes.js"></script>
+<script src="~/Content/f-awesome.js"></script>
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+<link href="~/Content/Auditory/index.css" rel="stylesheet" />
+<div id="main-window">
+
+    <div class="container auditory row">
+        <div class="container computer-list">
+            <div class="auditory-header">
+                Аудитория {{auditoryName}} <span v-if="NeedPin" title="Необходимо сконфигурировать аудиторию"><i class="fa fa-key"></i></span>
+            </div>
+            <div class="place-table">
+                <div v-for="i in maxX+1" class="place-row row">
+                    <div v-for="item in filterComps(i-1)" class="col">
+                        <div class="place-item" v-on:click="select(item.Id)" v-bind:class="isSelected(item)" :title="item.Name">
+                            <span class="name">
+                                {{item.Name}}
+                                <br />
+                                <span v-if="item.PIN && item.PIN != 0" class="pin">{{item.PIN}}</span>
+                            </span>
+                            <div v-if="!item.IsNeedPlaceConfig" class="configured">
+                                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0)">
+                                        <path d="M9.62608 1.3175C9.1275 0.808911 8.31945 0.808911 7.82086 1.3175L3.30763 5.92074L2.17917 4.76978C1.68058 4.26119 0.872527 4.26119 0.37394 4.76978C-0.124647 5.27836 -0.124647 6.10267 0.37394 6.61095L2.40486 8.68249C2.90344 9.19107 3.71149 9.19107 4.21008 8.68249L9.62607 3.15898C10.1247 2.6504 10.1247 1.82608 9.62608 1.3175Z" fill="white" />
+                                    </g>
+                                </svg>
+
+
+                            </div>
+                            <div class="delete" title="Удалить место" v-on:click="deletePlace(item.Id)" v-if="!item.Deleted">
+                                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g clip-path="url(#clip0)">
+                                        <path d="M6.49475 5.00007L9.69023 1.80459C10.1031 1.39173 10.1031 0.722755 9.69023 0.309892C9.27737 -0.102972 8.60839 -0.102972 8.19555 0.309892L5.00007 3.50573L1.80459 0.310251C1.39173 -0.102612 0.722755 -0.102612 0.309891 0.310251C-0.102972 0.723114 -0.102972 1.39209 0.309891 1.80495L3.50537 5.00043L0.309891 8.19591C-0.102972 8.60877 -0.102972 9.27774 0.309891 9.69059C0.722755 10.1035 1.39173 10.1035 1.80459 9.69059L5.00007 6.49513L8.19555 9.69059C8.60841 10.1035 9.27738 10.1035 9.69023 9.69059C10.1031 9.27773 10.1031 8.60875 9.69023 8.19591L6.49475 5.00007Z" fill="white" />
+                                    </g>
+                                    <defs>
+                                        <clipPath id="clip0">
+                                            <rect width="10" height="10" fill="white" />
+                                        </clipPath>
+                                    </defs>
+                                </svg>
+                            </div>
+                            <div class="delete restore" title="Восстановить место" v-on:click="deletePlace(item.Id)" v-if="item.Deleted">
+                                <svg width="14" height="12" viewBox="0 0 14 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M13.9 5.75001C13.9 8.8445 11.3818 11.3623 8.28775 11.3623C7.72374 11.3623 7.26673 10.9053 7.26673 10.3413C7.26673 9.77729 7.72374 9.32029 8.28775 9.32029C10.2559 9.32029 11.858 7.71852 11.858 5.75001C11.858 3.7815 10.2559 2.17974 8.28775 2.17974C6.44216 2.17974 4.92086 3.58587 4.73626 5.38245H6.64147L3.72137 9.19736L0.800049 5.38245H2.69382C2.88496 2.4599 5.31742 0.137711 8.28775 0.137711C11.3818 0.137711 13.9 2.65553 13.9 5.75001Z" fill="white" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <button class="btn-gray save-btn" v-on:click="saveChanges()">Сохранить</button>
+        </div>
+        <div class="control">
+            <ul>
+                <template v-if="!selectedComp.Id">
+                    <li v-on:click="addRow()">Добавить ряд</li>
+                    <li v-on:click="addColumn()">Добавить столбец</li>
+                </template>
+                <template v-if="selectedComp.Id">
+                    <li data-toggle="modal" data-target="#renameModal">Переименовать место</li>
+                    <li v-on:click="setIpConfig()" v-if="selectedComp.IsNeedPlaceConfig">Закрепить место</li>
+                    <li v-on:click="resetIpConfig()" v-if="!selectedComp.IsNeedPlaceConfig">Сбросить место</li>
+                    @*<li v-on:click="deletePlace()"><span v-if="selectedComp.Deleted">Восстановить</span><span v-if="!selectedComp.Deleted">Удалить</span> место</li>*@
+                </template>
+                <template v-if="!selectedComp.Id">
+                    <li data-toggle="modal" data-target="#availableModal">Заполнить аудиторию</li>
+                    <li v-if="NeedPin" v-on:click="generateConfiguration()">Сконфигурировать аудиторию</li>
+                </template>
+            </ul>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="renameModal" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label">Переименовать элемент</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input class="form-control col-12" type="text" v-model="selectedComp.Name" autofocus />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" v-on:click="rename()" data-dismiss="modal">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="availableModal" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label">Быстрая конфигурация</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img />
+                    <label>
+                        <input type="radio" v-model="fastModel.position" value="1" />
+                        Своя
+                    </label>
+                    <label>
+                        <input type="radio" v-model="fastModel.position" value="2" />
+                        Пустой квадратик
+                    </label>
+                    <label>
+                        <input type="radio" v-model="fastModel.position" value="3" />
+                        Рельсы
+                    </label>
+                    <input type="number" max="100" min="0" v-model="fastModel.count" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" class="btn btn-primary" v-on:click="buildAuditory()" data-dismiss="modal">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/Content/Auditory/audVue.js"></script>

@@ -1,0 +1,202 @@
+﻿.page-item {
+  cursor: pointer;
+}
+.page-item .answered {
+  background-color: #d5ecfd;
+}
+.answer-list {
+  font-family: "Helvetica Neue", "Helvetica", "Roboto", "Arial", sans-serif;
+  text-align: center;
+}
+.answer-list label {
+  display: block;
+  line-height: 40px;
+}
+@keyframes click-wave {
+  0% {
+    height: 40px;
+    width: 40px;
+    opacity: 0.35;
+    position: relative;
+  }
+  100% {
+    height: 200px;
+    width: 200px;
+    margin-left: -80px;
+    margin-top: -80px;
+    opacity: 0;
+  }
+}
+.option-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -o-appearance: none;
+  appearance: none;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 40px;
+  width: 40px;
+  transition: all 0.15s ease-out 0s;
+  background: #cbd1d8;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  margin-right: 0.5rem;
+  outline: none;
+  position: relative;
+  z-index: 1000;
+}
+.option-input:hover {
+  background: #9faab7;
+}
+.option-input:checked {
+  background: #40e0d0;
+}
+.option-container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.option-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.option-container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+.option-container input:checked ~ .checkmark:after {
+  display: block;
+}
+.option-container .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+}
+.option-container .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 11px;
+  top: 6px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+.option-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+.option-rb-container {
+  display: block;
+  position: relative;
+  padding-left: 35px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  font-size: 22px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.option-rb-container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+.option-rb-container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+.option-rb-container input:checked ~ .checkmark:after {
+  display: block;
+}
+.option-rb-container .checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 25px;
+  width: 25px;
+  background-color: #eee;
+  border-radius: 50%;
+}
+.option-rb-container .checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  top: 9px;
+  left: 9px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: white;
+}
+.option-rb-container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+/*.option-input:checked::before {
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    content: '✔';
+    display: inline-block;
+    font-size: 26.66667px;
+    text-align: center;
+    line-height: 40px;
+}
+
+.option-input:checked::after {
+    -webkit-animation: click-wave 0.65s;
+    -moz-animation: click-wave 0.65s;
+    animation: click-wave 0.65s;
+    background: #40e0d0;
+    content: '';
+    display: block;
+    position: relative;
+    z-index: 100;
+}*/
+.option-input.radio {
+  border-radius: 50%;
+}
+.option-input.radio::after {
+  border-radius: 50%;
+}
+.input-pin {
+  width: 1024px;
+  height: 1024px;
+}
+.input-pin #basic-addon1 {
+  font-size: 200px;
+}
+.input-pin input {
+  font-size: 200px;
+  min-width: 600px;
+}
+.input-pin input::-webkit-outer-spin-button,
+.input-pin input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+.input-pin input[type='number'] {
+  -moz-appearance: textfield;
+}
+.list-group-item {
+  height: 55px;
+  width: 300px;
+}
