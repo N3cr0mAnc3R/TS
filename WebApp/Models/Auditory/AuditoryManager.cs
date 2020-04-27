@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using WebApp.Models.DB;
 
@@ -54,16 +55,23 @@ namespace WebApp.Models
             {
                 foreach (TestComputer comp in auditory.ComputerList)
                 {
-                    cnt.Execute(sql: "[dbo].[Administrator_PlaceProfileWithPinUpdate]", new { placeId = comp.Id, placeProfileId = comp.PlaceProfileId, comp.PIN,  userUID }, commandType: CommandType.StoredProcedure);
+                    cnt.Execute(sql: "[dbo].[Administrator_PlaceProfileWithPinUpdate]", new { placeId = comp.Id, placeProfileId = comp.PlaceProfileId, comp.PIN, userUID }, commandType: CommandType.StoredProcedure);
                 }
 
+            }
+        }
+        public async Task<int> GetProfileByPlaceConfig(string placeConfig, Guid guid)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<int>(sql: "[dbo].[Administrator_PlaceProfilePlaceConfigGET]", new { placeConfig, guid }, commandType: CommandType.StoredProcedure);
             }
         }
         public void UpdatePlaceConfig(PlaceConfigModel config, Guid userUID)
         {
             using (var cnt = Concrete.OpenConnection())
             {
-                cnt.Execute(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0? config.Id : (int?)null, placeConfig = config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
+                cnt.Execute(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
         public dynamic GetPlaceConfig(int pin, Guid userUID)
@@ -74,7 +82,7 @@ namespace WebApp.Models
                 {
                     return cnt.QueryFirst<TestComputer>(sql: "[dbo].[Administrator_PlaceProfileGet]", new { pin, userUID }, commandType: CommandType.StoredProcedure);
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     return new
                     {

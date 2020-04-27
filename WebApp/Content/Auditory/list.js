@@ -12,14 +12,23 @@
                 type: "POST",
                 async: false,
                 success: function (auditories) {
+                    auditories.map(a => { a.Deleted = false; a.IsNew = false });
                     self.auditoryList = auditories;
+
                 }
             });
         },
         addAuditory() {
             let Id = 0;
             this.auditoryList.forEach(a => Id = Math.max(Id, a.Id));
-            this.auditoryList.push({Id: Id + 1, IsNew: true, Name: ""});
+            this.auditoryList.push({ Id: Id + 1, IsNew: true, Name: "" });
+        },
+        deleteAud(id) {
+            let item = this.auditoryList.find(a => a.Id == id);
+            item.Deleted = !item.Deleted;
+            if (item.IsNew) {
+                this.auditoryList = this.auditoryList.filter(a => a.Id != id);
+            }
         },
         startRename(item) {
             $('#renameModal').modal('show');
@@ -36,11 +45,21 @@
             let self = this;
             //ToDo Добавляются новые аудитории...
         },
-        openAud(Id) {
+        configAud(Id) {
             let flag = false;
             flag = this.auditoryList.find(a => a.Id == Id).IsNew;
             if (!flag) {
                 window.open('/auditory/index?Id=' + Id, '_self');
+            }
+            else {
+                $('.toast').toast('show');
+            }
+        },
+        showAud(Id) {
+            let flag = false;
+            flag = this.auditoryList.find(a => a.Id == Id).IsNew;
+            if (!flag) {
+                window.open('/auditory/Moderate?Id=' + Id, '_self');
             }
             else {
                 $('.toast').toast('show');

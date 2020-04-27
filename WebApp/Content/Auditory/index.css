@@ -1,6 +1,10 @@
 ﻿.auditory {
   display: flex;
   margin-bottom: 40px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .auditory .btn-gray {
   width: 135px;
@@ -42,6 +46,7 @@
   font-family: Montserrat;
   font-style: normal;
   font-weight: 900;
+  /*background-color: #ddd;*/
 }
 .auditory .computer-list .place-table .place-row .place-item.hasPin {
   line-height: 1.5;
@@ -109,10 +114,6 @@
   left: 6px;
   top: 5px;
 }
-.auditory .computer-list .place-table .place-row .place-item:hover {
-  color: #ddd;
-  /*background-color: #ddd;*/
-}
 .auditory .computer-list .place-table .place-row .place-item.selected {
   box-shadow: -3px 4px 4px #6e6e6e;
   color: #565c72;
@@ -131,6 +132,22 @@
   border-left-color: #28a745;
   border-top-color: #28a745;
 }
+.auditory .computer-list .place-table .place-row .place-item.current:before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  width: 16px;
+  height: 16px;
+  border: 8px solid transparent;
+  border-left: 8px solid #000;
+  border-top: 8px solid #000;
+  border-left-color: #565c72;
+  border-top-color: #565c72;
+}
+.auditory .computer-list .place-table .place-row .place-item:hover .configured ~ .delete {
+  display: none;
+}
 .auditory .computer-list .place-table .place-row .place-item.deleted:before {
   content: "";
   display: block;
@@ -143,6 +160,18 @@
   border-top: 8px solid #000;
   border-left-color: red;
   border-top-color: red;
+}
+.auditory .computer-list .place-table .place-row .place-item.empty {
+  background-color: inherit;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.auditory .computer-list .place-table .place-row .place-item.empty:hover {
+  border: 1px solid #ddd;
+  background-image: url(AddBtn.svg);
+}
+.auditory .computer-list .place-table .place-row .place-item.empty:hover .delete {
+  display: none;
 }
 .auditory .computer-list .save-btn {
   font-family: Montserrat;
@@ -184,7 +213,7 @@
   width: 160px;
 }
 .main-window .auditory-header {
-  margin-top: 30px;
+  margin-top: 70px;
   font-family: Montserrat;
   font-style: normal;
   font-weight: 600;
@@ -204,13 +233,14 @@
   margin-top: 40px;
   box-shadow: #a2a2a2 0px 3px 4px;
   width: 230px;
-  height: 310px;
+  height: 330px;
   border-top: none;
 }
 .main-window .auditory-list .auditory-wrapper .video {
   outline: 1px solid #000;
   width: 230px;
   height: 180px;
+  margin-bottom: 15px;
 }
 .main-window .auditory-list .auditory-wrapper .title {
   height: 60px;
@@ -239,6 +269,35 @@
 }
 .main-window .auditory-list .auditory-wrapper .add-btn-wrapper svg {
   margin: auto;
+}
+.main-window .auditory-list .auditory-wrapper:hover .delete {
+  display: block;
+}
+.main-window .auditory-list .auditory-wrapper:hover .delete:hover {
+  transition: transform ease 0.4s;
+  transform: scale(1.2);
+}
+.main-window .auditory-list .auditory-wrapper .delete {
+  cursor: pointer;
+  display: none;
+  position: relative;
+  background: red;
+  width: 22px;
+  height: 22px;
+  border-radius: 11px;
+  left: 219px;
+  top: -365px;
+}
+.main-window .auditory-list .auditory-wrapper .delete.restore {
+  background: #565c72;
+}
+.main-window .auditory-list .auditory-wrapper .delete.restore svg {
+  left: 3px;
+}
+.main-window .auditory-list .auditory-wrapper .delete svg {
+  position: absolute;
+  left: 6px;
+  top: 5px;
 }
 .main-window .btn-gray {
   width: 135px;

@@ -39,7 +39,7 @@ namespace Parser
                 object fileFormat = WdSaveFormat.wdFormatPDF;
                 //outputFileName = GetExeDirectory().Substring(0, GetExeDirectory().LastIndexOf('/')).Substring(0, GetExeDirectory().LastIndexOf('/')).Substring(0, GetExeDirectory().LastIndexOf('/')) + "/Content/TMP/" + path.Substring(path.LastIndexOf('\\') + 1).Replace(".doc", ".pdf");
                 outputFileName = outputPath.Replace(".doc", ".pdf");
-
+                doc.Content.Font.Size = 12;
                 doc.SaveAs(ref outputFileName,
            ref fileFormat, ref oMissing, ref oMissing,
            ref oMissing, ref oMissing, ref oMissing, ref oMissing,

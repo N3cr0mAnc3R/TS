@@ -5,6 +5,7 @@
 
 
 <link href="~/Content/Testing/Index.css" rel="stylesheet" />
+<script src="~/Content/jQuery-webcam-master/jquery.webcam.js"></script>
 <script src="~/Content/f-awesome.js"></script>
 <div id="main-window">
     <div v-if="!hasPlaceConfig">
@@ -18,67 +19,138 @@
             @*<div class="center"><i class="fa fa-key"></i><input type="number" maxlength="4" v-model="PIN" /></div>*@
         </div>
     </div>
-    <div v-if="hasPlaceConfig">
-        <div v-if="!testInProcess">
-            <div v-if="tests.length == 0">Режим ожидания</div>
-            <div v-if="tests.length != 0">
-                Назначен <b>{{user}}</b>
-                <br />
-                Вам доступны следующие тесты для прохождения:
-            </div>
-            <ul class="list-group list-group-flush">
-                <li v-for="test in tests" class="list-group-item">
-                     @*- {{test.TestingDate}}*@
-                    <div class="justify-content-between row" style="cursor: pointer;" v-on:click="startTest(test.Id)">
-                        <span class="col-8">{{test.DisciplineName}}</span>
-                        <span class="col">
-                            <button class="btn"><i class="far fa-play-circle"></i></button>
-                        </span>
+    <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
+        <div v-if="!testInProcess" class="not-test">
+            <div v-if="tests && tests.length == 0" class="waiting">Режим ожидания</div>
+            <template v-if="!hasActiveTest()">
+                <div v-if="tests && tests.length != 0" class="user-info">
+                    {{user}},
+                    <br />
+                    <br />
+                    Вам доступны следующие тесты для прохождения:
+                </div>
+                <div class="test-list">
+                    <div v-for="test in tests" class="test-wrapper">
+                        @*- {{test.TestingDate}}*@
+                        <div class="test-item" v-on:click="startTest(test.Id)">
+                            <span class="test-name">{{test.DisciplineName}}</span>
+                            <span class="test-icon">
+                                <i class="far fa-play-circle"></i>
+                            </span>
+                        </div>
                     </div>
+                </div>
+            </template>
+            <template v-if="hasActiveTest()">
+                <div v-if="tests && tests.length != 0" class="user-info">
+                    {{user}},
                     <br />
                     <br />
-                </li>
-            </ul>
-            
+                    Вы не завершили следующие тесты:
+                </div>
+                <div class="test-list">
+                    <div v-for="test in activeTests" class="test-wrapper">
+                        @*- {{test.TestingDate}}*@
+                        <div class="test-item" v-on:click="resumeTest(test.Id)">
+                            <span class="test-name">{{test.DisciplineName}}</span>
+                            <span class="test-icon">
+                                <i class="far fa-play-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+            <div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>
+            <div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>
         </div>
-        <div v-if="testInProcess">
-            <div class="panel-top">{{showTimeLeft()}}</div>
-            <div>
-                Вопрос:
-                <img v-bind:src="'data:image/png;base64, ' + selectedQwestion.QwestionImage" style="max-width: 1024px;" />
+        <div v-if="testInProcess" class="test-process">
+            <div class="main-wrapper">
+                <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer">Осталось: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()"><i class="fa fa-question"></i></span></div></div>
+                <div class="panel-center">
+                    <div v-loader="loadObject">
+                        <div class="question-wrapper">
+                            <img v-bind:src="'data:image/png;base64, ' + selectedQuestion.QuestionImage" />
+                        </div>
+                        <div class="answer-list">
+                            <div class="answer-wrapper" v-for="answer in selectedQuestion.Answers">
+                                <label v-if="selectedQuestion.TypeAnswerId == 2" class="option-container" v-bind:class="getHeight(answer.Id)">
+                                    <input type="checkbox" class="checkbox" value="true" v-model="answer.IsAnswered" v-on:change="changeCheck()" />
+                                    <span class="checkmark"></span>
+                                    <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
+                                </label>
+                                <label v-if="selectedQuestion.TypeAnswerId == 1" class="option-rb-container" v-bind:class="getHeight(answer.Id)">
+                                    <input type="radio" class=" checkbox" v-bind:value="answer.Id" name="answer" v-model="selectedQuestion.answer" v-on:change="changeRadio(answer.Id)" />
+                                    <span class="checkmark"></span>
+                                    <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
+                                </label>
+                                @*<img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tip">
+                        * Выберите <span v-if="selectedQuestion.TypeAnswerId == 2">несколько ответов</span>
+                        <span v-if="selectedQuestion.TypeAnswerId == 1">один ответ</span>
+                    </div>
+                    <div class="question-pagination">
+                        <div class="page" v-on:click="selectQuestion(page-1)" v-bind:class="{'disabled': page == 1}">
+                            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.50019 15.875C8.38504 15.8757 8.27088 15.8536 8.16427 15.8101C8.05766 15.7665 7.9607 15.7024 7.87894 15.6213L0.878941 8.62126C0.796928 8.53992 0.731834 8.44314 0.687411 8.33651C0.642988 8.22989 0.620117 8.11552 0.620117 8.00001C0.620117 7.8845 0.642988 7.77013 0.687411 7.6635C0.731834 7.55688 0.796928 7.4601 0.878941 7.37876L7.87894 0.37876C8.04371 0.213994 8.26718 0.121429 8.50019 0.121429C8.7332 0.121429 8.95667 0.213994 9.12144 0.37876C9.28621 0.543525 9.37877 0.766996 9.37877 1.00001C9.37877 1.23302 9.28621 1.45649 9.12144 1.62126L2.73394 8.00001L9.12144 14.3788C9.20345 14.4601 9.26855 14.5569 9.31297 14.6635C9.35739 14.7701 9.38026 14.8845 9.38026 15C9.38026 15.1155 9.35739 15.2299 9.31297 15.3365C9.26855 15.4431 9.20345 15.5399 9.12144 15.6213C9.03968 15.7024 8.94272 15.7665 8.83611 15.8101C8.7295 15.8536 8.61535 15.8757 8.50019 15.875Z" fill="white" />
+                            </svg>
+                        </div>
+                        <template v-for="i in questions.length">
+                            <div class="page" v-bind:class="{'active': page == i, 'answered': IsQuestionAnswered(i)}" v-on:click="selectQuestion(i)">{{i}}</div>
+                        </template>
+                        <div class="page" v-on:click="selectQuestion(page+1)" v-bind:class="{'disabled': page == questions.length}">
+                            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1.74983 15.3125C1.6429 15.3131 1.5369 15.2926 1.4379 15.2522C1.33891 15.2118 1.24887 15.1522 1.17295 15.0769C1.0968 15.0013 1.03635 14.9115 0.995104 14.8125C0.953855 14.7135 0.932617 14.6073 0.932617 14.5C0.932617 14.3927 0.953855 14.2865 0.995104 14.1875C1.03635 14.0885 1.0968 13.9987 1.17295 13.9231L7.1042 8L1.17295 2.07687C1.01996 1.92388 0.934004 1.71637 0.934004 1.5C0.934004 1.39286 0.955106 1.28678 0.996105 1.1878C1.0371 1.08882 1.0972 0.998879 1.17295 0.923123C1.24871 0.847367 1.33865 0.787274 1.43763 0.746275C1.53661 0.705276 1.64269 0.684174 1.74983 0.684174C1.9662 0.684174 2.17371 0.770126 2.3267 0.923123L8.8267 7.42312C8.90286 7.49866 8.9633 7.58852 9.00455 7.68753C9.0458 7.78654 9.06704 7.89274 9.06704 8C9.06704 8.10726 9.0458 8.21346 9.00455 8.31247C8.9633 8.41148 8.90286 8.50134 8.8267 8.57687L2.3267 15.0769C2.25078 15.1522 2.16074 15.2118 2.06175 15.2522C1.96276 15.2926 1.85676 15.3131 1.74983 15.3125Z" fill="white" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">Завершить тестирование</button></div>
             </div>
-            <div class="answer-list">
-                Ответы:
-                <div v-for="answer in selectedQwestion.Answers" class="row">
-                    <label v-if="selectedQwestion.TypeAnswerId == 2" class="option-container">
-                        <input type="checkbox" class=" checkbox" value="true" v-model="answer.IsAnswered" v-on:change="changeCheck()" />
-                        <span class="checkmark"></span>
-                    </label>
-                    <label v-if="selectedQwestion.TypeAnswerId == 1" class="option-rb-container">
-                        <input type="radio" class=" checkbox" v-bind:value="answer.Id" name="answer" v-model="selectedQwestion.answer" v-on:change="changeRadio(answer.Id)" />
-                        <span class="checkmark"></span>
-                    </label>
-                    
-                    @*<div v-if="selectedQwestion.TypeAnswerId == 1"> 
-                    <input type="radio" class="option-input radio" name="answer"  v-model="selectedQwestion.answer" v-on:change="changeRadio(answer.Id)" /></div>*@
-                    <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" style="max-width: 1024px; margin-bottom: 15px" />
+            <div class="panel-right" v-bind:class="{'opened': IsTipOpened}" id="panel-right">
+                <div class="control-btn" v-on:mousedown="startResize">
+                    <svg width="30" height="14" viewBox="0 0 30 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M29.7306 6.28533L24.1803 0.71907C23.8129 0.350698 23.2168 0.350698 22.8494 0.71907C22.482 1.08739 22.497 1.72002 22.497 2.32824V5.13997H7.50113V2.32824C7.50113 1.72002 7.51613 1.08739 7.14873 0.71907C6.78134 0.350698 6.18523 0.350698 5.81784 0.71907L0.267504 6.28533C0.0716276 6.48214 -0.0118015 6.74272 0.00133541 6.99953C-0.0118015 7.25727 0.0716276 7.5178 0.267504 7.71466L5.81877 13.2809C6.18616 13.6493 6.78227 13.6493 7.14967 13.2809C7.51706 12.9126 7.50206 12.0691 7.50206 11.7008V8.88904H22.4979V11.7008C22.4979 12.309 22.4829 12.9126 22.8503 13.2809C23.2176 13.6492 23.8138 13.6493 24.1812 13.2809L29.7325 7.71461C29.9284 7.5178 30.0118 7.25722 29.9987 6.99948C30.0099 6.74267 29.9265 6.48209 29.7306 6.28533Z" fill="white" />
+                    </svg>
+                </div>
+                <div class="tip-wrapper">
+                    <div class="top-panel">
+                        <span class="close-btn" v-on:click="openTip()"><i class="fa fa-times"></i></span>
+                    </div>
+                    <img height="400" />
                     <br />
-                    <br />
+                    <img height="400" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div id="video-wrapper">
+        <video id="video1" autoplay="autoplay" muted></video>
+    </div>
+    <div class="modal fade" id="finish-game" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title">Подтверждение</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Вы действительно хотите завершить тестирование?
+                    <div v-if="showCountLeft()">
+                        <br />
+                        Вы не ответили на {{showCountLeft()}}.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="finishTest()">Завершить</button>
                 </div>
             </div>
-            <nav aria-label="Вопросы">
-                <ul class="pagination pagination-sm">
-                    <li class="page-item" v-on:click="selectQwestion(page-1)" v-bind:class="{'disabled': page == 1}">
-                        <a class="page-link"><span class="far fa-chevron-double-left"></span></a>
-                    </li>
-                    <template v-for="i in qwestions.length">
-                        <li class="page-item" v-bind:class="{'active': page == i}" v-on:click="selectQwestion(i)"><a class="page-link" v-bind:class="{'answered': IsQwestionAnswered(i)}">{{i}}</a></li>
-                    </template>
-                    <li class="page-item" v-on:click="selectQwestion(page+1)" v-bind:class="{'disabled': page == qwestions.length}">
-                        <a class="page-link"><span class="far fa-chevron-double-right"></span></a>
-                    </li>
-                </ul>
-            </nav>
         </div>
     </div>
 </div>

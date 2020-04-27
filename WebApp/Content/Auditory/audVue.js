@@ -4,10 +4,13 @@
         computerList: [],
         maxX: 0,
         maxY: 0,
+        maxContent: 0,
         selected: -1,
         selectedComp: {},
+        isForSwap: false,
         auditory: 0,
         auditoryName: '',
+        currentProfile: -1,
         NeedPin: false,
         fastModel: {
             count: 0,
@@ -21,6 +24,7 @@
             let self = this;
             let str = window.location.href;
             let newId = Number.parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+            self.getPlaceByConfig();
             $.ajax({
                 url: "/auditory/GetAuditoryInfo?Id=" + newId,
                 type: "POST",
@@ -31,6 +35,7 @@
                     self.auditoryName = auditory.Name;
                     self.NeedPin = auditory.NeedPin;
                     self.computerList = auditory.ComputerList;
+                    self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
 
                     //let sizeX = Math.ceil(self.computerList.length / 6);
                     //let counter = 1;
@@ -55,6 +60,9 @@
                     self.initAud();
                 }
             });
+            $('#renameModal').on('shown.bs.modal', function () {
+                $('#rename-input').trigger('focus');
+            });
         },
         initAud: function () {
             let self = this;
@@ -63,7 +71,18 @@
         },
         select: function (Id) {
             let self = this;
+            event.stopPropagation();
+            console.log(self.isForSwap);
+            if (self.isForSwap) {
+                self.isForSwap = false;
+                self.selectForSwap(Id);
+                return;
+            }
             let comp = self.computerList.find(a => a.Id === Id);
+            if (comp.Name == "") {
+                self.maxContent++;
+                comp.Name = self.maxContent + '';
+            }
             if (comp.Id != self.selected) {
                 self.selected = comp.Id;
                 self.selectedComp = copyObj(comp);
@@ -72,6 +91,22 @@
                 self.selected = -1;
                 self.selectedComp = {};
             }
+            $(document).on('click', self.unselect);
+        },
+        unselect: function () {
+            app.selected = -1;
+            app.selectedComp = {};
+            $(document).off('click', app.unselect);
+        },
+        stopP: function () {
+            event.stopPropagation();
+            $('#renameModal').modal('show');
+        },
+        setSwapFlag() {
+            let self = this;
+            event.stopPropagation();
+            self.isForSwap = !self.isForSwap;
+            console.log(self.isForSwap);
         },
         selectForSwap: function (Id) {
             let self = this;
@@ -162,6 +197,8 @@
                 item.Name = '';
             }
             else item.Deleted = !item.Deleted;
+            self.maxContent = 0;
+            self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
             self.selected = -1;
             self.selectedComp = {};
 
@@ -187,11 +224,14 @@
             return items;
         },
         isSelected: function (item) {
+            let self = this;
             return {
                 'selected': item.Id == this.selected,
                 'new': item.IsNew && item.Name.trim() != "",
                 'deleted': item.Deleted,
-                'hasPin': item.PIN && item.PIN != 0
+                'hasPin': item.PIN && item.PIN != 0,
+                'empty': item.Name.trim() == "",
+                'current': self.currentProfile == item.PlaceProfileId
             };
         },
         addRow: function () {
@@ -212,7 +252,15 @@
         rename: function () {
             let self = this;
             let item = self.computerList.find(a => a.Id == self.selectedComp.Id);
+            let existedItem = self.computerList.find(a => a.Name == self.selectedComp.Name);
+            if (existedItem && existedItem.Id != self.selectedComp.Id) {
+
+                $('.toast').toast('show');
+                return;
+            }
             item.Name = self.selectedComp.Name;
+            self.maxContent = 0;
+            self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
             self.selected = -1;
             self.selectedComp = {};
         },
@@ -233,6 +281,7 @@
         },
         setIpConfig: function () {
             let self = this;
+            event.stopPropagation();
             let str = CryptoJS.AES.encrypt("place-" + self.selected, "Secret Passphrase");
             localStorage['placeConfig'] = str.toString();
             let obj = { Id: self.selectedComp.PlaceProfileId, PlaceConfig: str.toString(), PlaceId: self.selected };
@@ -248,10 +297,25 @@
             });
 
         },
+        getPlaceByConfig: function () {
+            if (!localStorage['placeConfig']) return;
+            let self = this;
+            $.ajax({
+                url: "/auditory/GetProfileByPlaceConfig?placeConfig=" + encodeURIComponent(localStorage['placeConfig']),
+                type: "POST",
+                async: false,
+                success: function (id) {
+                    self.currentProfile = id;
+                }
+            })
+        },
         resetIpConfig: function () {
             let self = this;
+            event.stopPropagation();
             if (self.selectedComp.IsNeedPlaceConfig) return;
-            localStorage.removeItem('placeConfig');
+            if (self.selectedComp.PlaceProfileId == self.currentProfile) {
+                localStorage.removeItem('placeConfig');
+            }
             let obj = { Id: self.selectedComp.PlaceProfileId, PlaceConfig: null, PlaceId: self.selectedComp.Id };
             $.ajax({
                 url: "/auditory/UpdatePlaceConfig",

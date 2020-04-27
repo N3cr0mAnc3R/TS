@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using WebApp.Models;
 using WebApp.Models;
 
 namespace WebApp.Controllers
@@ -15,6 +17,10 @@ namespace WebApp.Controllers
             return View();
         }
         public ActionResult Index(int Id)
+        {
+            return View();
+        }
+        public ActionResult Moderate(int Id)
         {
             return View();
         }
@@ -76,6 +82,11 @@ namespace WebApp.Controllers
         {
             AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
             return Json(true);
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetProfileByPlaceConfig(string placeConfig)
+        {
+            return Json(await AuditoryManager.GetProfileByPlaceConfig(placeConfig, CurrentUser.Id));
         }
 
         [HttpPost]

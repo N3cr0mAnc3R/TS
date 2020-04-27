@@ -18,6 +18,7 @@
             <Button Width="150" Height="30" Click="Button_Click">Начать</Button>
             <Button Width="150" Height="30" Click="Button_Click1">Остановить</Button>
             <Button Width="150" Height="30" Click="Button_Click2">Скачать все</Button>
+            <TextBox Name="Id1" Width="100"></TextBox>
             <CheckBox x:Name="IsQwestion" Checked="IsQwestion_Checked">Вопросы</CheckBox>
             <CheckBox x:Name="IsStraightCh" Checked="IsStraight_Checked" IsChecked="True">В прямом порядке</CheckBox>
             <CheckBox Checked="IsNorm_Checked" IsChecked="True">Юрин</CheckBox>

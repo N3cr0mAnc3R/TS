@@ -46,6 +46,7 @@
 body {
   /*padding-top: 50px;*/
   padding-bottom: 20px;
+  overflow-x: hidden;
 }
 /* Set padding to keep content from hitting the edges */
 .body-content {
@@ -77,27 +78,84 @@ textarea {
   display: flex;
   justify-content: space-between;
 }
-.navbar-system .container .base-nav {
+.navbar-system .container .base-nav,
+.navbar-system .container .nav-item {
   display: flex;
 }
-.navbar-system .container .base-nav .navbar-toggler {
+.navbar-system .container .base-nav .navbar-toggler,
+.navbar-system .container .nav-item .navbar-toggler {
   color: rgba(0, 0, 0, 0.5);
   border-color: rgba(0, 0, 0, 0.1);
 }
 @media (min-width: 992px) {
-  .navbar-system .container .base-nav .navbar-toggler {
+  .navbar-system .container .base-nav .navbar-toggler,
+  .navbar-system .container .nav-item .navbar-toggler {
     display: none;
   }
-  .navbar-system .container .base-nav .navbar-collapse1 {
+  .navbar-system .container .base-nav .navbar-collapse1,
+  .navbar-system .container .nav-item .navbar-collapse1 {
     display: flex;
+    margin-left: 15px;
   }
 }
-.navbar-system .container .base-nav a {
+.navbar-system .container .base-nav a,
+.navbar-system .container .nav-item a {
   font-family: Montserrat;
   font-style: normal;
   color: #565C72;
   font-weight: 600;
 }
-.navbar-system .container .base-nav a:hover {
+.navbar-system .container .base-nav a:hover,
+.navbar-system .container .nav-item a:hover {
   color: inherit;
+}
+body {
+  background: #fafafa !important;
+}
+body footer {
+  position: fixed;
+  bottom: 0;
+  height: 75px;
+  width: 100%;
+  left: 0;
+  background: #565c72;
+  color: #fff;
+  line-height: 75px;
+  color: #A6ACBC;
+  font-size: 20px;
+}
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Variables */
+.loader-wrapper {
+  margin: auto;
+  display: flex;
+  height: 350px;
+  /* Loading Icon */
+}
+.loader-wrapper .loading {
+  width: 100px;
+  height: 100px;
+  margin: auto;
+}
+.loader-wrapper .loading__ring {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+}
+.loader-wrapper .loading__ring:first-child {
+  transform: skew(30deg, 20deg);
+}
+.loader-wrapper .loading__ring:last-child {
+  transform: skew(-30deg, -20deg) scale(-1, 1);
+}
+.loader-wrapper .loading__ring:last-child svg {
+  animation-delay: -0.5s;
+}
+.loader-wrapper .loading__ring svg {
+  animation: rotate 1s linear infinite;
+  fill: rgba(0, 0, 0, 0.2);
 }

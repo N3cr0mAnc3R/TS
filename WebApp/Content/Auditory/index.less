@@ -1,6 +1,10 @@
 ﻿.auditory {
     display: flex;
     margin-bottom: 40px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     .btn-gray {
         width: 135px;
@@ -118,7 +122,8 @@
 
                         &.restore {
                             background: #565c72;
-                            svg{
+
+                            svg {
                                 left: 3px;
                             }
                         }
@@ -131,10 +136,6 @@
                         }
                     }
 
-                    &:hover {
-                        color: #ddd;
-                        /*background-color: #ddd;*/
-                    }
 
                     &.selected {
                         box-shadow: -3px 4px 4px #6e6e6e;
@@ -156,6 +157,26 @@
                         border-top-color: #28a745;
                     }
 
+                    &.current:before {
+                        content: "";
+                        display: block;
+                        position: absolute;
+                        top: 0;
+                        width: 16px;
+                        height: 16px;
+                        border: 8px solid transparent;
+                        border-left: 8px solid #000;
+                        border-top: 8px solid #000;
+                        border-left-color: #565c72;
+                        border-top-color: #565c72;
+                    }
+
+                    &:hover {
+                        .configured ~ .delete {
+                            display: none;
+                        }
+                    }
+
                     &.deleted:before {
                         content: "";
                         display: block;
@@ -169,6 +190,24 @@
                         border-left-color: red;
                         border-top-color: red;
                     }
+
+                    &.empty {
+                        // background: #fff;
+                        background-color: inherit;
+                        background-repeat: no-repeat;
+                        background-position: center;
+
+
+                        &:hover {
+                            border: 1px solid #ddd;
+                            background-image: url(AddBtn.svg);
+
+                            .delete {
+                                display: none;
+                            }
+                        }
+                    }
+                    /*background-color: #ddd;*/
                 }
             }
         }
@@ -224,7 +263,7 @@
     @w-1: 230px;
 
     .auditory-header {
-        margin-top: 30px;
+        margin-top: 70px;
         font-family: Montserrat;
         font-style: normal;
         font-weight: 600;
@@ -246,14 +285,14 @@
             margin-top: 40px;
             box-shadow: #a2a2a2 0px 3px 4px;
             width: @w-1;
-            height: 310px;
+            height: 330px;
             border-top: none;
-
 
             .video {
                 outline: 1px solid #000;
                 width: @w-1;
                 height: 180px;
+                margin-bottom: 15px;
             }
 
             .title {
@@ -287,6 +326,44 @@
 
                 svg {
                     margin: auto;
+                }
+            }
+
+            &:hover {
+                .delete {
+                    display: block;
+
+                    &:hover {
+                        transition: transform ease 0.4s;
+                        transform: scale(1.2);
+                    }
+                }
+            }
+
+            .delete {
+                cursor: pointer;
+                display: none;
+                position: relative;
+                background: red;
+                width: 22px;
+                height: 22px;
+                border-radius: 11px;
+                left: 219px;
+                top: -365px;
+
+                &.restore {
+                    background: #565c72;
+
+                    svg {
+                        left: 3px;
+                    }
+                }
+
+
+                svg {
+                    position: absolute;
+                    left: 6px;
+                    top: 5px;
                 }
             }
         }

@@ -21,6 +21,19 @@ namespace Cropper
             }
             return output;
         }
+        public static string CropImageWithFix(string input)
+        {
+            string output = "";
+            try
+            {
+                output = Convert.ToBase64String(FinishImage(input));
+            }
+            catch(Exception e)
+            {
+                output = UnpackException(e);
+            }
+            return output;
+        }
         public static string CropImage(string input, int Width)
         {
             string output = "";
@@ -49,6 +62,48 @@ namespace Cropper
                 result += UnpackException(exc.InnerException);
             }
             return result;
+        }
+        private static byte[] FinishImage(string input)
+        {
+            byte[] src = Convert.FromBase64String(input);
+            using (var stream = new MemoryStream())
+            {
+                stream.Write(src, 0, src.Length);
+
+                using (Bitmap bmp = new Bitmap(stream))
+                {
+                    LockBitmap bmp1 = new LockBitmap(bmp);
+                    bmp1.LockBits();
+                    int left = 0, top = -1, bottom = 0, right = 0;
+                    int step = bmp1.Depth == 32 ? 4 : bmp1.Depth == 24 ? 3 : 1;
+                    for (int i = 0; i < bmp.Width; i++)
+                    {
+                        for (int j = 0; j < bmp.Height; j++)
+                        {
+                            if (bmp1.GetPixel(i, j).R < 250)
+                            {
+                                top = ((top == -1 || top > j) && j != 0) ? j : top;
+                                left = (left == 0 || left > i) ? i : left;
+                                bottom = (bottom == 0 || bottom < j) ? j : bottom;
+                                right = (right == 0 || right < i) ? i : right;
+                            }
+                        }
+                    }
+                    //right = 1877;
+                    right = 2175;
+                    //Костыль
+                    //top = 56;
+                    Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(left, top, right - left, bottom - top), bmp.PixelFormat);
+
+                    byte[] bytes;
+                    using (var stream1 = new MemoryStream())
+                    {
+                        cropBmp.Save(stream1, System.Drawing.Imaging.ImageFormat.Png);
+                        bytes = stream1.ToArray();
+                    }
+                    return bytes;
+                }
+            }
         }
         private static byte[] ConvertImage(string input)
         {

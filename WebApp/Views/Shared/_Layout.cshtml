@@ -12,6 +12,7 @@
     <script src="~/Content/f-awesome.js"></script>
     <link href="~/Content/font-awesome.css" rel="stylesheet" />
     <script src="~/Content/vue.js"></script>
+    <script src="~/Content/loader.js"></script>
 </head>
 <body>
     <nav @*class="navbar navbar-expand-lg navbar-light bg-light"*@ class="navbar-system">
@@ -23,11 +24,14 @@
                 </button>
 
                 <div class="collapse navbar-collapse1" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <li class="nav-item active">
-                            <a class="nav-link" href="/auditory/list">Список аудиторий <span class="sr-only">(current)</span></a>
-                        </li>
-                    </ul>
+                    @if (Request.IsAuthenticated)
+                    {
+                        <ul class="navbar-nav mr-auto">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/auditory/list">Список аудиторий <span class="sr-only">(current)</span></a>
+                            </li>
+                        </ul>
+                    }
                 </div>
             </div>
             <div class="nav-item">
@@ -47,7 +51,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <div class="container">Все права защищены</div>
         </footer>
     </div>
 
@@ -64,7 +68,6 @@
                             if (window.location.pathname == '/user/waiting' || window.location.pathname == '/account/login') {
                                 flag = false;
                             }
-                            console.log(flag);
                             if (flag) {
                                 window.open('/user/waiting', '_self');
                             }

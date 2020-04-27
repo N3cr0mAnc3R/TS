@@ -47,7 +47,7 @@ namespace Parser
 
         }
         int finished;
-        int Id1 = 0;
+       // int Id1 = 0;
 
         private void Bck_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -72,7 +72,7 @@ namespace Parser
         {
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = "exec Qwestion_GetBlob " + Id1;
+            cmd.CommandText = "exec Debug_Qwestion_GetBlob " + Id1.Text;
             conn.Open();
             using (var reader = cmd.ExecuteReader())
             {

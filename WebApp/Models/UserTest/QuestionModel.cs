@@ -5,11 +5,11 @@ using System.Web;
 
 namespace WebApp.Models.UserTest
 {
-    public class QwestionModel
+    public class QuestionModel
     {
         public int Id { get; set; }
         public int TypeAnswerId { get; set; }
-        public string QwestionImage { get; set; }
+        public string QuestionImage { get; set; }
         public int Rank { get; set; }
         public IEnumerable<AnswerModel> Answers { get; set; }
     }

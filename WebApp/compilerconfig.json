@@ -10,5 +10,9 @@
   {
     "outputFile": "Content/site.css",
     "inputFile": "Content/site.less"
+  },
+  {
+    "outputFile": "Content/Auditory/moderate.css",
+    "inputFile": "Content/Auditory/moderate.less"
   }
 ]
