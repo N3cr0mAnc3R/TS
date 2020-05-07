@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Web;
+using WebApp.Models.Common;
 
 namespace WebApp.Models
 {
-    public class TestComputer
+    public class TestComputer: IndexItem
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
         public Bitmap Stream{ get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
@@ -22,5 +24,6 @@ namespace WebApp.Models
         public bool IsNeedPlaceConfig { get; set; }
         public int PlaceProfileId { get; set; }
         public int PIN { get; set; }
+        public int TestingProfileId { get; set; }
     }
 }

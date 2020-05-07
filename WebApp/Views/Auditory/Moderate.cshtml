@@ -1,7 +1,86 @@
-﻿<link href="~/Content/Auditory/moderate.css" rel="stylesheet" />
+﻿<script src="~/Content/f-awesome.js"></script>
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+<link href="~/Content/Auditory/moderate.css" rel="stylesheet" />
 
 <div id="main-window">
-    <video id="video"  autoplay="autoplay"></video>
-    <button v-on:click="stop()">Стоп</button>
+    <div class="container auditory row">
+        <div class="auditory-header">
+            Аудитория {{auditoryName}}
+        </div>
+        <div class="container computer-list">
+            <div class="place-table">
+                <div v-for="i in maxX+1" class="place-row row">
+                    <div v-for="item in filterComps(i-1)" class="col">
+                        <div class="place-item" :title="item.Name">
+                            <div class="video-wrapper"><video autoplay></video></div>
+                            <div class="info-wrapper">
+                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">{{item.LastName}} {{item.FirstName}} {{item.MiddleName}}</div></div>
+                                <div class="control"><button class="chat-open" v-on:click="select(item.TestingProfileId)"><i class="fa fa-keyboard"></i></button><button class="open-full" v-on:click="openFull(item)"><i class="fa fa-search-plus"></i></button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+        </div>
+    </div>
+
+    <div id="full-chat-wrapper" v-bind:class="{'opened': isChatOpened}">
+        <div class="chat-panel">
+            <button v-on:click="toggleTypeChat()"><span v-if="currentChat && currentChat.IsChatVOpened"><i class="fa fa-video"></i></span><span v-if="currentChat && currentChat.IsChatMOpened"><i class="fa fa-keyboard"></i></span></button>
+            <span v-on:click="toggleChat()" class="close-btn"><i class="fa fa-times"></i></span>
+        </div>
+        <div class="video-chat-wrapper" v-if="currentChat && currentChat.IsChatVOpened">
+            <div v-for="participant in currentChat.participants">
+                <div id="video-wrapper">
+                    @*<video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>*@
+                </div>
+            </div>
+        </div>
+        <div class="text-chat-wrapper" v-if="currentChat && currentChat.IsChatMOpened">
+            <ul class="chat-wrapper">
+                <li v-for="message in currentChat.messages" class="chat-message-wrapper" v-bind:class="{'sender': !message.IsSender}">
+                    <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
+                    <br />
+                </li>
+            </ul>
+            <div class="send-message-wrapper">
+                <div class="message-input"><textarea v-model="currentChat.Message"></textarea><button v-on:click="sendMessage"><span class="text">Отправить </span><span class="fa fa-send"></span></button></div>
+            </div>
+            <div class="participant-list-wrapper" v-if="currentChat.isChatVOpened">
+                <div class="participant-wrapper" v-for="participant in currentChat.participants">
+                    <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="full-wrapper" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" v-if="currentUser">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="title">{{currentUser.Name}} - {{currentUser.LastName}} {{currentUser.FirstName}} {{currentUser.MiddleName}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <video id="full-video" autoplay></video>
+                    <div v-if="currentUser.errors.length > 0">Выдано {{currentUser.errors.length}} предупреждений <span class="tip" data-placement="right" :title="tipError()" data-toggle="tooltip"><i class="fa fa-question-circle"></i></span></div>
+                    <div v-if="shownError">
+                    <select v-model="currentError"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
+                    <button v-on:click="sendError" class="save-error">Сохранить</button>
+                    </div>
+                    <button class="add-error" v-on:click="showError()">Сообщить о нарушении</button>
+                    
+                    <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">Приостановить тестирование</div><div v-if="currentUser.IsPause">Возобновить тестирование</div></button>
+                    <button class="finish-test" v-on:click="finishTest()">Завершить тестирование</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script src="~/Content/Auditory/moderate.js"></script>

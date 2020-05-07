@@ -14,9 +14,11 @@
         opacity: 0;
     }
 }
+
 #main-window {
     margin-bottom: 75px;
 }
+
 .input-pin {
     width: 1024px;
     height: 1024px;
@@ -40,8 +42,8 @@
     }
 }
 
-.test-info{
-    display:flex;
+.test-info {
+    display: flex;
 }
 
 #video {
@@ -52,6 +54,7 @@
     top: 400px;
     left: 50px;
 }
+
 #video1 {
     position: absolute;
     width: 320px;
@@ -60,6 +63,7 @@
     top: 700px;
     left: 50px;
 }
+
 #video2 {
     position: absolute;
     width: 320px;
@@ -68,6 +72,7 @@
     top: 700px;
     left: 400px;
 }
+
 .not-test {
     margin: auto;
     margin-top: 100px;
@@ -102,7 +107,12 @@
             padding-right: 35px;
             cursor: pointer;
             line-height: 60px;
-            height: 60px;
+
+            .test-name {
+                width: 80%;
+            }
+
+            height: auto;
 
 
             &:nth-child(even) {
@@ -122,6 +132,8 @@
                     width: 35px;
                     height: 35px;
                     padding: 4px;
+                    margin-bottom: auto;
+                    margin-top: auto;
 
                     i {
                         font-size: 25px;
@@ -185,7 +197,7 @@
     padding: 30px 30px 50px 70px;
     border-top: none;
     border: 1px solid #ddd;
-    background:#fff;
+    background: #fff;
 
     .question-wrapper {
         img {
@@ -199,6 +211,7 @@
         .answer-wrapper {
             display: flex;
             margin-bottom: 20px;
+
 
             .option-container {
                 display: block;
@@ -334,6 +347,16 @@
                             display: block;
                         }
                     }
+                }
+            }
+
+            .textarea-wrapper {
+                width: 1024px;
+
+                textarea {
+                    resize: none;
+                    max-width: initial;
+                    height: 200px;
                 }
             }
         }
@@ -487,3 +510,179 @@
     }
 }
 
+
+.open-chat-wrapper {
+    position: fixed;
+    right: 20px;
+    bottom: 75px;
+
+    button {
+        width: 130px;
+        height: 31px;
+        color: #fff;
+        border: none;
+        font-family: Montserrat;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 33px;
+        margin: auto;
+        background: #A6ACBC;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 3px;
+        border-top-left-radius: 26px;
+        border-top-right-radius: 26px;
+
+        &:hover {
+            background: rgba(86, 92, 114, 0.8);
+        }
+    }
+}
+
+#full-chat-wrapper {
+    display: none;
+    position: fixed;
+    right: 20px;
+    bottom: 100px;
+    width: 300px;
+    height: 600px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+
+    &.opened {
+        display: block;
+    }
+
+    .chat-panel {
+        position: relative;
+        width: 100%;
+        height: 40px;
+        border-bottom: 1px solid #ddd;
+
+        button {
+            span {
+            }
+        }
+
+        .close-btn{
+            cursor: pointer;
+        }
+    }
+
+    .video-chat-wrapper {
+        .video-wrapper {
+            video {
+            }
+        }
+    }
+
+    .text-chat-wrapper {
+        border-bottom: 1px solid #ddd;
+        height: 560px;
+
+        .chat-wrapper {
+            height: 450px;
+            padding-left: 0;
+            overflow: auto;
+
+            .chat-message-wrapper {
+                border: 1px solid #ddd;
+                margin: 5px;
+                padding: 7px;
+                border-top-left-radius: 10px;
+                border-top-right-radius: 10px;
+                border-bottom-left-radius: 0;
+                border-bottom-right-radius: 10px;
+                max-width: 230px;
+                word-break: break-word;
+                float: left;
+                display: flex;
+                clear: both;
+
+                &.sender {
+                    border-bottom-right-radius: 0;
+                    border-bottom-left-radius: 10px;
+                    float: right;
+
+                    .chat-message {
+                        text-align: end;
+                    }
+                }
+
+                .chat-message {
+                    font-family: Montserrat;
+                    font-style: normal;
+
+                    .message-text {
+                        font-size: 16px;
+                        line-height: 20px;
+                    }
+
+                    .message-date {
+                        font-size: 10px;
+                        float: right;
+                    }
+                }
+            }
+        }
+
+        .send-message-wrapper {
+            position: relative;
+            height: 100px;
+            bottom: 0;
+
+            .message-input {
+                width: 299px;
+                display: block;
+                padding: 5px;
+
+                textarea {
+                    width: 322px;
+                    height: 65px;
+                    margin: 3px 5px 0 5px;
+                    resize: none;
+                }
+
+
+                button {
+                    width: 299px;
+                    height: auto;
+                    display: block;
+                    margin: -5px;
+                    border: none;
+                    background: #A6ACBC;
+                    /*box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+                    border-radius: 3px;*/
+                    span {
+                        &.text {
+                            font-family: Montserrat;
+                            font-style: normal;
+                            font-weight: 600;
+                            font-size: 16px;
+                            line-height: 33px;
+                        }
+
+                        &.fa {
+                        }
+                    }
+                }
+            }
+        }
+
+        .participant-list-wrapper {
+            .participant-wrapper {
+                .avatar {
+                }
+
+                .participant-name {
+                }
+
+                .micro-toggle {
+                }
+
+                .video-toggle {
+                }
+            }
+        }
+    }
+}

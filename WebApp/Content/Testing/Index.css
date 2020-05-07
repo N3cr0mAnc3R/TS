@@ -93,7 +93,10 @@
   padding-right: 35px;
   cursor: pointer;
   line-height: 60px;
-  height: 60px;
+  height: auto;
+}
+.not-test .test-list .test-wrapper .test-name {
+  width: 80%;
 }
 .not-test .test-list .test-wrapper:nth-child(even) {
   background: #fafafa;
@@ -110,6 +113,8 @@
   width: 35px;
   height: 35px;
   padding: 4px;
+  margin-bottom: auto;
+  margin-top: auto;
 }
 .not-test .test-list .test-wrapper .test-item .test-icon i {
   font-size: 25px;
@@ -282,6 +287,14 @@
 .panel-center .answer-list .answer-wrapper .option-rb-container input:checked ~ .checkmark:after {
   display: block;
 }
+.panel-center .answer-list .answer-wrapper .textarea-wrapper {
+  width: 1024px;
+}
+.panel-center .answer-list .answer-wrapper .textarea-wrapper textarea {
+  resize: none;
+  max-width: initial;
+  height: 200px;
+}
 .panel-center .tip {
   font-family: Montserrat;
   font-style: normal;
@@ -409,4 +422,127 @@
   margin-top: 2px;
   font-size: 29px;
   font-weight: 100;
+}
+.open-chat-wrapper {
+  position: fixed;
+  right: 20px;
+  bottom: 75px;
+}
+.open-chat-wrapper button {
+  width: 130px;
+  height: 31px;
+  color: #fff;
+  border: none;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+  margin: auto;
+  background: #A6ACBC;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+}
+.open-chat-wrapper button:hover {
+  background: rgba(86, 92, 114, 0.8);
+}
+#full-chat-wrapper {
+  display: none;
+  position: fixed;
+  right: 20px;
+  bottom: 100px;
+  width: 300px;
+  height: 600px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+#full-chat-wrapper.opened {
+  display: block;
+}
+#full-chat-wrapper .chat-panel {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  border-bottom: 1px solid #ddd;
+}
+#full-chat-wrapper .chat-panel .close-btn {
+  cursor: pointer;
+}
+#full-chat-wrapper .text-chat-wrapper {
+  border-bottom: 1px solid #ddd;
+  height: 560px;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper {
+  height: 450px;
+  padding-left: 0;
+  overflow: auto;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper {
+  border: 1px solid #ddd;
+  margin: 5px;
+  padding: 7px;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 10px;
+  max-width: 230px;
+  word-break: break-word;
+  float: left;
+  display: flex;
+  clear: both;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 10px;
+  float: right;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender .chat-message {
+  text-align: end;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper .chat-message {
+  font-family: Montserrat;
+  font-style: normal;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper .chat-message .message-text {
+  font-size: 16px;
+  line-height: 20px;
+}
+#full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper .chat-message .message-date {
+  font-size: 10px;
+  float: right;
+}
+#full-chat-wrapper .text-chat-wrapper .send-message-wrapper {
+  position: relative;
+  height: 100px;
+  bottom: 0;
+}
+#full-chat-wrapper .text-chat-wrapper .send-message-wrapper .message-input {
+  width: 299px;
+  display: block;
+  padding: 5px;
+}
+#full-chat-wrapper .text-chat-wrapper .send-message-wrapper .message-input textarea {
+  width: 322px;
+  height: 65px;
+  margin: 3px 5px 0 5px;
+  resize: none;
+}
+#full-chat-wrapper .text-chat-wrapper .send-message-wrapper .message-input button {
+  width: 299px;
+  height: auto;
+  display: block;
+  margin: -5px;
+  border: none;
+  background: #A6ACBC;
+  /*box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+                    border-radius: 3px;*/
+}
+#full-chat-wrapper .text-chat-wrapper .send-message-wrapper .message-input button span.text {
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
 }

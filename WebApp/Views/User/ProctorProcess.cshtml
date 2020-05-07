@@ -1,0 +1,15 @@
+﻿<div id="main-window">
+    <div>{{room.Name}}</div>
+    <div v-for="user in room.ComputerList">
+        <div>{{user.FIO}}</div>
+    </div>
+    <div class="main-chat">
+        <div v-for="message in messages">
+            {{message}}
+        </div>
+        <div><input type="text" v-model="textMsg" /> <button v-on:click="sendMsg()">Отправить</button></div>
+    </div>
+</div>
+
+<script src="~/Content/proctor.js"></script>
+<link href="~/Content/proctor.css" rel="stylesheet" />

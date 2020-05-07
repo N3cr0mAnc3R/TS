@@ -1,0 +1,12 @@
+﻿<div id="main-window">
+    <div class="uff" v-if="list">
+        <div v-for="room1 of list">
+            <div>{{room1.Name}}</div>
+            <button v-on:click="openRoom(room1.Id)">Открыть</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Content/proctor.js"></script>
+<link href="~/Content/proctor.css" rel="stylesheet" />

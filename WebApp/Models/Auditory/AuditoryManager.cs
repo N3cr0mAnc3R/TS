@@ -35,6 +35,18 @@ namespace WebApp.Models
             }
             return aud;
         }
+        public Auditory GetAuditoryByIdForModerate(Guid userUID, int auditoriumId)
+        {
+            Auditory aud = new Auditory();
+            using (var cnt = Concrete.OpenConnection())
+            {
+                aud = cnt.Query<Auditory>(sql: "[dbo].[Administrator_AuditoriumGet]", new { userUID, auditoriumId }, commandType: CommandType.StoredProcedure).FirstOrDefault();
+
+                aud.ComputerList = cnt.Query<TestComputer>(sql: "[dbo].[Administrator_PlacesHasProfileGet]", new { userUID, auditoriumId }, commandType: CommandType.StoredProcedure);
+
+            }
+            return aud;
+        }
         public void UpdatePlaces(Auditory auditory, Guid userUID)
         {
             using (var cnt = Concrete.OpenConnection())

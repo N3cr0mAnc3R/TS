@@ -23,7 +23,8 @@ namespace WebApp.Models
             {
                 try
                 {
-                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig }, commandType: CommandType.StoredProcedure);
+                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGe" +
+                        "t]", new { placeConfig }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -66,25 +67,26 @@ namespace WebApp.Models
                 return cnt.Query<TestingPackage>(sql: "[dbo].[UserPlace_TestingPackagesGet]", new { testingProfileId }, commandType: CommandType.StoredProcedure);
             }
         }
-        public void StopTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID)
+        public int ToggleTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID, string localization)
         {
             using (var cnt = Concrete.OpenConnection())
             {
                 cnt.Execute(sql: "[dbo].[Administrator_TestingProfilesTimeControlsSave]", new { testingProfileId, reasonForStoppingId, userUID }, commandType: CommandType.StoredProcedure);
+                return cnt.Query<int>("UserPlace_TestingTimeRemainingGet", new { testingProfileId, localization, userUID }, commandType: CommandType.StoredProcedure).FirstOrDefault();
             }
         }
         public async Task StartTest(int testingProfileId, Guid userUID)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                cnt.Execute(sql: "[dbo].[UserPlace_TestingStart]", new { testingProfileId, userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingStart]", new { testingProfileId, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task FinishTest(int testingProfileId, Guid userUID)
+        public async Task FinishTest(int testingProfileId, Guid? userUID)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                cnt.Execute(sql: "[dbo].[UserPlace_TestingEnd]", new { testingProfileId, userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingEnd]", new { testingProfileId, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
         public IEnumerable<TestingPackage> CheckPIN(int pin)
@@ -151,14 +153,15 @@ namespace WebApp.Models
                         FileStreamResult filestreamResult = (await conn.QueryAsync<FileStreamResult>("UserPlace_SaveStream",
                                             new
                                             {
-                                                ContentType = model.File.ContentType,
+                                                ContentType = model.CameraFile.ContentType,
                                                 PlaceConfig = model.Id,
                                                 UserId = guid,
                                                 extension = ".webm",
+                                                type = 1,
                                                 model.baseFile
                                             }, trans, commandType: CommandType.StoredProcedure)).FirstOrDefault();
 
-                        Stream str = model.File.InputStream;
+                        Stream str = model.CameraFile.InputStream;
                         using (SqlFileStream sqlFilestream = new SqlFileStream(filestreamResult.FileStreamPath, filestreamResult.FileStreamContext, FileAccess.Write, FileOptions.SequentialScan, 0))
                         {
                             await str.CopyToAsync(sqlFilestream, 2000);
@@ -248,12 +251,47 @@ namespace WebApp.Models
                 return cnt.Query<AnswerModel>(sql: "[dbo].[UserPlace_AnswerImageGet]", new { answerId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<Violation>> GetUserErrors(int TestingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<Violation>(sql: "[dbo].[Administrator_ViolationStatisticGet]", new { TestingProfileId, userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<IndexItem>> GetErrorTypes(string Localization, Guid? UserUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<IndexItem>(sql: "[dbo].[Administrator_ViolationTypesGet]", new { Localization, UserUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<Violation>> SetUserErrors(int TestingProfileId, int ViolationTypeId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<Violation>(sql: "[dbo].[Administrator_ViolationWithStatisticsSave]", new { TestingProfileId, userUID, ViolationTypeId }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public void UpdateQuestionAnswer(IEnumerable<QuestionAnswer> testingLogs)
         {
             using (var cnt = Concrete.OpenConnection())
             {
                 var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer });
                 cnt.Execute(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
+            }
+        }
+        public IEnumerable<ChatMessage> GetChatMessages(int testingProfileId)
+        {
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return cnt.Query<ChatMessage>(sql: "[dbo].[Administrator_ChatRoomTestingProfileIdGet]", new { testingProfileId }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public void SendMessage(ChatMessage message)
+        {
+            using (var cnt = Concrete.OpenConnection())
+            {
+                cnt.Execute(sql: "[dbo].[Administrator_ChatRoomSave]", new { message.TestingProfileId, message.ParentId, message.UserIdFrom, message.UserIdTo, message.Message, message.Date }, commandType: CommandType.StoredProcedure);
             }
         }
     }

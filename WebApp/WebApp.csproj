@@ -14,7 +14,7 @@
     <RootNamespace>WebApp</RootNamespace>
     <AssemblyName>WebApp</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -153,6 +153,13 @@
     <Content Include="Content\jQuery-webcam-master\jscam_canvas_only.swf" />
     <Content Include="Content\jQuery-webcam-master\src\jscam.xml" />
     <Content Include="Content\loader.js" />
+    <Content Include="Content\proctor.css">
+      <DependentUpon>proctor.less</DependentUpon>
+    </Content>
+    <Content Include="Content\proctor.js" />
+    <Content Include="Content\proctor.min.css">
+      <DependentUpon>proctor.css</DependentUpon>
+    </Content>
     <Content Include="Content\site.css">
       <DependentUpon>site.less</DependentUpon>
     </Content>
@@ -165,6 +172,7 @@
     <Content Include="Content\Testing\Index.min.css">
       <DependentUpon>Index.css</DependentUpon>
     </Content>
+    <Content Include="Content\Testing\pretest.js" />
     <Content Include="Content\Testing\test.js" />
     <Content Include="Content\vue.js" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -172,6 +180,7 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Content\Auditory\index.less" />
+    <Content Include="ChatHandler.ashx" />
     <None Include="compilerconfig.json" />
     <None Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -189,6 +198,7 @@
     <Content Include="Content\jQuery-webcam-master\src\jscam.as" />
     <Content Include="Content\jQuery-webcam-master\webcam.jquery.json" />
     <Content Include="Content\Auditory\moderate.less" />
+    <Content Include="Content\proctor.less" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />
@@ -200,6 +210,9 @@
   <ItemGroup>
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.cs" />
+    <Compile Include="ChatHandler.ashx.cs">
+      <DependentUpon>ChatHandler.ashx</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AuditoryController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
@@ -215,20 +228,30 @@
     <Compile Include="Models\Auditory\PlaceConfigModel.cs" />
     <Compile Include="Models\Auditory\SavePictureModel.cs" />
     <Compile Include="Models\Auditory\TestComputer.cs" />
+    <Compile Include="Models\Common\ChatMessage.cs" />
     <Compile Include="Models\Common\FileStreamDownload.cs" />
     <Compile Include="Models\Common\FileStreamResult.cs" />
+    <Compile Include="Models\Common\IndexItem.cs" />
     <Compile Include="Models\Common\MvcResultSqlFileStream.cs" />
     <Compile Include="Models\DB\Concrete.cs" />
     <Compile Include="Models\DB\Extender.cs" />
     <Compile Include="Models\DB\Manager.cs" />
     <Compile Include="Models\DB\StructuredDynamicParameters.cs" />
+    <Compile Include="Models\Proctoring\ProctorManager.cs" />
+    <Compile Include="Models\Proctoring\ProctorRoom.cs" />
+    <Compile Include="Models\Proctoring\ProctorUser.cs" />
+    <Compile Include="Models\Proctoring\TestUser.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
     <Compile Include="Models\UserTest\QuestionAnswer.cs" />
     <Compile Include="Models\UserTest\QuestionModel.cs" />
     <Compile Include="Models\UserTest\TestingModel.cs" />
     <Compile Include="Models\UserTest\TestingPackage.cs" />
     <Compile Include="Models\UserTest\TestManager.cs" />
+    <Compile Include="Models\UserTest\Violation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="StreamHandler.ashx.cs">
+      <DependentUpon>StreamHandler.ashx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\web.config" />
@@ -247,6 +270,10 @@
     <Content Include="Views\User\Waiting.cshtml" />
     <Content Include="Views\User\TestList.cshtml" />
     <Content Include="Views\Auditory\Moderate.cshtml" />
+    <Content Include="Views\User\Process.cshtml" />
+    <Content Include="Views\User\ProctorProcessList.cshtml" />
+    <Content Include="Views\User\ProctorProcess.cshtml" />
+    <Content Include="StreamHandler.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -279,7 +306,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>12435</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:40508/</IISUrl>
+          <IISUrl>http://localhost</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -30,6 +30,11 @@ namespace WebApp.Controllers
             return Json(AuditoryManager.GetAuditoryById(CurrentUser.Id, Id));
         }
         [HttpPost]
+        public JsonResult GetAuditoryInfoForModerate(int Id)
+        {
+            return Json(AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id));
+        }
+        [HttpPost]
         public JsonResult GetAuditoryList()
         {
             return Json(AuditoryManager.GetAuditoryList(CurrentUser.Id));

@@ -69,13 +69,16 @@
                                 flag = false;
                             }
                             if (flag) {
-                                window.open('/user/waiting', '_self');
+                                //window.open('/user/waiting', '_self');
                             }
                         }
                         if (window.location.pathname == '/user/waiting' || window.location.pathname == '/account/login') {
                             return;
                         }
-                        window.open('/user/waiting', '_self');
+                        if (window.location.pathname == '/') {
+                            window.open('/user/waiting', '_self');
+                        }
+                        //window.open('/user/waiting', '_self');
                     }
                 }
             });
