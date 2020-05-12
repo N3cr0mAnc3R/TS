@@ -18,8 +18,13 @@ namespace WebApp.Controllers
     {
         public static SavePictureModel connection;
         public static Dictionary<int, Timer> timers;
-
+        public enum Language
+        {
+            RU = 1,
+            EN = 2
+        }
         public static List<ProctorRoom> rooms;
+
 
         // GET: User
         #region Представления
@@ -73,17 +78,34 @@ namespace WebApp.Controllers
             return View();
         }
 
+        [HttpPost]
+        public JsonResult GetLocalization()
+        {
+            //1 - ru, 2 - en
+            if(Session["Localization"] == null)
+            {
+                Session["Localization"] = Language.RU;
+            }
+            return Json(new { Localization = (int)Session["Localization"]});
+        }
+        [HttpPost]
+        public JsonResult SetLocalization(Language Type)
+        {
+            Session["Localization"] = Type;
+            return Json(new { Type = Session["Localization"].ToString() });
+        }
+
         #endregion
 
         #region Подготовка
         public JsonResult CheckPIN(int pin)
         {
-            return Json(TestManager.CheckPIN(pin));
+            return Json(TestManager.CheckPIN(pin, Session["Localization"].ToString()));
         }
         public JsonResult GetTests(string PlaceConfig)
         {
-            List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig);
-            tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig));
+            List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString());
+            tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString()));
             return Json(tests);
         }
         #endregion
@@ -91,26 +113,26 @@ namespace WebApp.Controllers
         public async Task FinishTest(int Id)
         {
             //ToDo Раскомментить 
-            await TestManager.FinishTest(Id, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null);
         }
         public async Task<JsonResult> StartTest(int Id, string localization = null)
         {
             //ToDo Раскомментить 
             //await TestManager.StartTest(Id, CurrentUser.Id);
-            var Answered = TestManager.GetActiveTestAnswers(Id);
-            return Json(new { Packages = TestManager.GetTestPackageById(Id), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
+            var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
+            return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
         }
         public JsonResult GetTestPackageById(int Id)
         {
-            return Json(TestManager.GetTestPackageById(Id));
+            return Json(TestManager.GetTestPackageById(Id, Session["Localization"].ToString()));
         }
         public JsonResult GetTestQuestionsById(int Id)
         {
-            return Json(TestManager.GetTestQuestionsById(Id));
+            return Json(TestManager.GetTestQuestionsById(Id, Session["Localization"].ToString()));
         }
         public JsonResult GetTestAnswersById(int Id)
         {
-            return Json(TestManager.GetTestAnswersById(Id));
+            return Json(TestManager.GetTestAnswersById(Id, Session["Localization"].ToString()));
         }
         public void UpdateQuestionAnswer(IEnumerable<QuestionAnswer> answer)
         {
@@ -118,27 +140,27 @@ namespace WebApp.Controllers
         }
         public JsonResult GetQuestionImage(int Id)
         {
-            QuestionModel model = TestManager.GetQuestionImage(Id).First();
+            QuestionModel model = TestManager.GetQuestionImage(Id, Session["Localization"].ToString()).First();
             model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
             return Json(model);
         }
         public JsonResult GetAnswerImage(int Id)
         {
-            AnswerModel model = TestManager.GetAnswerImage(Id).First();
+            AnswerModel model = TestManager.GetAnswerImage(Id, Session["Localization"].ToString()).First();
             model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
             return Json(model);
         }
-        public async Task<JsonResult> GetErrorTypes(string Localization = null)
+        public async Task<JsonResult> GetErrorTypes()
         {
-            return Json(await TestManager.GetErrorTypes(Localization, (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.GetErrorTypes(Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
         }
         public async Task<JsonResult> SetUserErrors(int Id, int Type)
         {
-            return Json(await TestManager.SetUserErrors(Id, Type, (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.SetUserErrors(Id, Type, Session["Localization"].ToString(),(CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
         }
         public async Task<JsonResult> GetUserErrors(int Id)
         {
-            return Json(await TestManager.GetUserErrors(Id,(CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.GetUserErrors(Id, Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
         }
         public void PauseTest(int Id, string Localization)
         {
@@ -155,7 +177,7 @@ namespace WebApp.Controllers
         {
 
             ProctorRoom room = new ProctorRoom();
-            room.Users = ProctorManager.GetProctorUsers(Id, (CurrentUser == null ? CurrentUser.Id : (Guid?)null), null);
+            room.Users = ProctorManager.GetProctorUsers(Id, (CurrentUser == null ? CurrentUser.Id : (Guid?)null), Session["Localization"].ToString());
             foreach (var item in room.Users)
             {
                 if (room.ComputerList == null) room.ComputerList = new List<TestUser>();
@@ -216,7 +238,8 @@ namespace WebApp.Controllers
                     model.ScreenFile = Request.Files.Get(1);
                 }
             }
-            await TestManager.FileUploadAsync(model, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FileUploadAsync(model, 1, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FileUploadAsync(model, 2, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -268,7 +291,7 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetChatMessages(int Id)
         {
-            return Json(TestManager.GetChatMessages(Id));
+            return Json(TestManager.GetChatMessages(Id, Session["Localization"].ToString()));
         }
         #endregion
         protected TestManager TestManager
@@ -297,11 +320,11 @@ namespace WebApp.Controllers
         //    FileStreamDownload dwnl = TestManager.FileDownload(Id, ((CurrentUser == null)? (Guid?)null: CurrentUser.Id));
         //    return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         //}
-        [HttpGet]
-        public ActionResult DownloadVideoFile(int Id)
-        {
-            FileStreamDownload dwnl = TestManager.FileDownload(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
-            return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
-        }
+        //[HttpGet]
+        //public ActionResult DownloadVideoFile(int Id)
+        //{
+        //    FileStreamDownload dwnl = TestManager.FileDownload(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+        //    return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
+        //}
     }
 }

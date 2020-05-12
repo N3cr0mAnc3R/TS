@@ -388,6 +388,11 @@ const app = new Vue({
             let self = this;
             self.shownError = !self.shownError;
         },
+        download: function (type) {
+            let self = this;
+            console.log(self.currentUser.TestingProfileId, type);
+            window.open('/auditory/DownloadVideoFile?Id=' + self.currentUser.TestingProfileId + '&Type=' + type, '_blank');
+        },
         sendError: function () {
             let self = this;
             $.ajax({
@@ -399,6 +404,12 @@ const app = new Vue({
                     self.shownError = !self.shownError;
                 }
             });
+        },
+        getErrorCount: function () {
+            let self = this;
+            let counter = 0;
+            self.currentUser.errors.forEach(a => counter += a.ViolationCount);
+            return counter;
         },
         togglePause: function () {
             let self = this;

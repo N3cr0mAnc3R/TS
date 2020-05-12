@@ -16,7 +16,8 @@
         loadTestObject: {
             loading: null,
             loaded: null
-        }
+        },
+        localization: 1
     },
     methods: {
         init: function () {
@@ -84,13 +85,20 @@
             if (!self.tests) return false;
             self.activeTests = self.tests.filter(a => a.TestingStatusId === 2);
             return self.tests.find(a => a.TestingStatusId === 2);
+        },
+        switchLocal: function (id) {
+            let self = this;
+            switch (id) {
+                case 1: return self.localization == 1 ? "Вам доступны следующие тесты для прохождения" : "The following tests are available";
+                case 2: return self.localization == 1 ? "Вы не завершили следующие тесты": "Not completed:";
+            }
         }
     },
     //После полной загрузки скрипта инициализируем
     mounted() {
         //$('#video-wrapper').draggable();
         this.init();
-        $(window).on('focus')
+        $(window).on('focus');
     },
     watch: {
         PIN: function (val, oldval) {

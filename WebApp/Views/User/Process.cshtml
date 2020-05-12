@@ -4,7 +4,7 @@
 <div id="main-window">
     <div class="test-process">
         <div class="main-wrapper">
-            <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer">Осталось: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()"><i class="fa fa-question"></i></span></div></div>
+            <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
                 <div v-loader="loadObject">
                     <div class="question-wrapper" v-if="selectedQuestion.QuestionImage">
@@ -29,9 +29,10 @@
                     </div>
                 </div>
                 <div class="tip">
-                    <span v-if="selectedQuestion.TypeAnswerId == 2">* Выберите несколько ответов</span>
-                    <span v-if="selectedQuestion.TypeAnswerId == 1">* Выберите один ответ</span>
-                    <span v-if="selectedQuestion.TypeAnswerId == 3">* Выберите файл для загрузки (если требуется) и впишите ответ в поле</span>
+                    <span v-if="selectedQuestion.TypeAnswerId == 2">
+                        * {{switchLocal(2)}}</span>
+                    <span v-if="selectedQuestion.TypeAnswerId == 1">* {{switchLocal(3)}}</span>
+                    <span v-if="selectedQuestion.TypeAnswerId == 3">* {{switchLocal(4)}}</span>
                 </div>
                 <div class="question-pagination">
                     <div class="page" v-on:click="selectQuestion(page-1)" v-bind:class="{'disabled': page == 1}">
@@ -40,7 +41,8 @@
                         </svg>
                     </div>
                     <template v-for="i in questions.length">
-                        <div class="page" v-bind:class="{'active': page == i, 'answered': IsQuestionAnswered(i)}" v-on:click="selectQuestion(i)">{{i}}</div>
+                        <div class="page" v-bind:class="{'active': page == i, 'answered': IsQuestionAnswered(i)}" v-on:click="selectQuestion(i)">{{i}}
+</div>
                     </template>
                     <div class="page" v-on:click="selectQuestion(page+1)" v-bind:class="{'disabled': page == questions.length}">
                         <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -49,7 +51,7 @@
                     </div>
                 </div>
             </div>
-            <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">Завершить тестирование</button></div>
+            <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">{{switchLocal(5)}}</button></div>
         </div>
         <div class="panel-right" v-bind:class="{'opened': IsTipOpened}" id="panel-right">
             <div class="control-btn" v-on:mousedown="startResize">
@@ -68,9 +70,18 @@
 
         </div>
     </div>
-    <div class="open-chat-wrapper"> <button v-on:click="toggleChat()">Открыть чат</button></div>
-    <video id="video1" autoplay="autoplay" muted></video>
-    <video id="video2" autoplay="autoplay" muted></video>
+    <div class="open-chat-wrapper"> <button v-on:click="toggleChat()">{{switchLocal(7)}}</button></div>
+    <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}">
+        <div class="control"><span v-if="!shownVideos" v-on:click="shownVideos = true"><i class="fa fa-video-camera"></i></span><span v-on:click="shownVideos = !shownVideos"><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-plus' : !shownVideos }"></i></span></div>
+        <div class="video">
+            <div class="camera-wrapper">
+                <video id="video1" autoplay="autoplay" muted></video>
+            </div>
+            <div class="screen-wrapper">
+                <video id="video2" autoplay="autoplay" muted></video>
+            </div>
+        </div>
+    </div>
     <div id="full-chat-wrapper" v-bind:class="{'opened': chat.IsOpened}">
         <div class="chat-panel">
             <button v-on:click="toggleTypeChat()"><span v-if="chat.IsChatMOpened"><i class="fa fa-video"></i></span><span v-if="chat.IsChatVOpened"><i class="fa fa-keyboard"></i></span></button>

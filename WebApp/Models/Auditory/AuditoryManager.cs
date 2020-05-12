@@ -76,7 +76,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstAsync<int>(sql: "[dbo].[Administrator_PlaceProfilePlaceConfigGET]", new { placeConfig, guid }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<int>(sql: "[dbo].[Administrator_PlaceProfilePlaceConfigGET]", new { placeConfig, guid }, commandType: CommandType.StoredProcedure);
             }
         }
         public void UpdatePlaceConfig(PlaceConfigModel config, Guid userUID)

@@ -85,7 +85,7 @@
 
                             .user-name {
                                 line-height: 10px;
-                                font-weight: 100;
+                                font-weight: 600;
                                 font-size: 8px;
                             }
                         }
@@ -282,11 +282,29 @@
 #full-wrapper {
     .modal-dialog {
         max-width: 1056px;
+
+        .tip {
+            cursor: pointer;
+        }
+
+        .modal-body {
+            .select-error {
+                display: flex;
+                margin-bottom: 20px;
+                select{
+                    margin-right: 30px;
+                }
+            }
+
+            button {
+                height: 44px;
+                color: #fff;
+                background: #565c72;
+                border: none;
+            }
+        }
     }
 
-    .tip {
-        cursor: pointer;
-    }
 
     video {
         width: 1024px;

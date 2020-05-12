@@ -77,7 +77,7 @@
 }
 .auditory .computer-list .place-table .place-row .place-item .info-wrapper .place-info .user-name {
   line-height: 10px;
-  font-weight: 100;
+  font-weight: 600;
   font-size: 8px;
 }
 .auditory .computer-list .place-table .place-row .place-item .info-wrapper .control {
@@ -207,8 +207,21 @@
 #full-wrapper .modal-dialog {
   max-width: 1056px;
 }
-#full-wrapper .tip {
+#full-wrapper .modal-dialog .tip {
   cursor: pointer;
+}
+#full-wrapper .modal-dialog .modal-body .select-error {
+  display: flex;
+  margin-bottom: 20px;
+}
+#full-wrapper .modal-dialog .modal-body .select-error select {
+  margin-right: 30px;
+}
+#full-wrapper .modal-dialog .modal-body button {
+  height: 44px;
+  color: #fff;
+  background: #565c72;
+  border: none;
 }
 #full-wrapper video {
   width: 1024px;

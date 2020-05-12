@@ -26,7 +26,7 @@
                     {{user}},
                     <br />
                     <br />
-                    Вам доступны следующие тесты для прохождения:
+                    {{switchLocal(1)}}:
                 </div>
                 <div class="test-list">
                     <div v-for="test in tests" class="test-wrapper">
@@ -45,7 +45,7 @@
                     {{user}},
                     <br />
                     <br />
-                    Вы не завершили следующие тесты:
+                    {{switchLocal(2)}}:
                 </div>
                 <div class="test-list">
                     <div v-for="test in activeTests" class="test-wrapper">
@@ -59,8 +59,8 @@
                     </div>
                 </div>
             </template>
-            <div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>
-            <div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>
+            @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
+            @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
         </div>
     </div>
    

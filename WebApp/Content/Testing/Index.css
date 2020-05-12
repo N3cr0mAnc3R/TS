@@ -45,21 +45,64 @@
   top: 400px;
   left: 50px;
 }
-#video1 {
+.videos-wrapper {
   position: absolute;
-  width: 320px;
-  height: 240px;
-  border: 1px solid #ddd;
+  width: 680px;
+  height: 260px;
   top: 700px;
   left: 50px;
-}
-#video2 {
-  position: absolute;
-  width: 320px;
-  height: 240px;
+  background-color: #fff;
   border: 1px solid #ddd;
-  top: 700px;
-  left: 400px;
+}
+.videos-wrapper.collapsed {
+  right: 170px;
+  bottom: 75px;
+  top: unset;
+  left: unset;
+  width: 130px;
+  position: fixed;
+  height: 31px;
+  cursor: pointer;
+  color: #fff;
+  border: none;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+  margin: auto;
+  background: #A6ACBC;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+}
+.videos-wrapper.collapsed .video {
+  display: none;
+}
+.videos-wrapper .video {
+  display: flex;
+  padding: 0 5px;
+}
+.videos-wrapper .video .camera-wrapper {
+  margin-right: 30px;
+}
+.videos-wrapper .video .camera-wrapper #video1 {
+  width: 320px;
+  height: 230px;
+  border: 1px solid #ddd;
+}
+.videos-wrapper .video .screen-wrapper #video2 {
+  width: 320px;
+  height: 230px;
+  border: 1px solid #ddd;
+}
+.videos-wrapper .control {
+  text-align: end;
+}
+.videos-wrapper .control span {
+  cursor: pointer;
+  margin-right: 11px;
 }
 .not-test {
   margin: auto;

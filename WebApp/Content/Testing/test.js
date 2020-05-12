@@ -42,7 +42,8 @@
         },
         chatSocket: null,
         videoSocket: null,
-        loadedSocket: false
+        loadedSocket: false,
+        shownVideos: true
     },
     methods: {
         init: function () {
@@ -75,7 +76,7 @@
                         //    ]
                         //});
                         //stream.getTracks().forEach(track => self.pc1.addTrack(track, stream));
-                        console.log(stream);
+                        //console.log(stream);
                         // const offer = self.pc1.createOffer(self.offerOptions);
                         //self.pc1.createOffer(function (offer) {
                         //    self.pc1.setLocalDescription(offer, function () {
@@ -153,30 +154,32 @@
                                 let candidate = event.candidate;
                                 if (candidate) {
                                     //self.videoSocket.send(JSON.stringify({ candidate: candidate.candidate, address: candidate.address, component: candidate.component, foundation: candidate.foundation, port: candidate.port, priority: candidate.priority, Type: candidate.type, TestingProfileId: self.testingProfileId, IsSource: true, sdpMid: candidate.sdpMid, sdpMLineIndex: candidate.sdpMLineIndex  }));
-                                    console.log(candidate);
-                                    self.videoSocket.send(JSON.stringify({
-                                        IsSource: true,
-                                        TestingProfileId: self.testingProfileId,
-                                        candidate: candidate
-                                    }));
+                                    // console.log(candidate);
+                                    if (self.videoSocket.readyState == 1) {
+                                        self.videoSocket.send(JSON.stringify({
+                                            IsSource: true,
+                                            TestingProfileId: self.testingProfileId,
+                                            candidate: candidate
+                                        }));
+                                    }
                                 }
                             };
                             self.pc1.onicecandidatestatechange = function (event) {
                                 // let candidate = event.candidate;
                                 // if (candidate) {
                                 //self.videoSocket.send(JSON.stringify({ candidate: candidate.candidate, address: candidate.address, component: candidate.component, foundation: candidate.foundation, port: candidate.port, priority: candidate.priority, Type: candidate.type, TestingProfileId: self.testingProfileId  }));
-                                console.log(event);
+                                // console.log(event);
                                 // }
                             };
                             const offer = self.pc1.createOffer(function (offer) {
-                                console.log(offer);
+                                // console.log(offer);
                                 self.videoSocket.send(JSON.stringify({
                                     Sdp: offer.sdp,
                                     Type: offer.type,
                                     TestingProfileId: self.testingProfileId//localStorage['placeConfig']
                                 }));
                                 self.pc1.setLocalDescription(offer, function () {
-                                    console.log(offer);
+                                    //    console.log(offer);
                                     //console.log(offer2);
                                 });
                             }, function () { });
@@ -194,14 +197,14 @@
                         };
                         self.videoSocket.onmessage = function (msg) {
                             let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                            console.log(message);
+                            //  console.log(message);
                             if (message.Type == 'answer') {
-                                console.log(message);
+                                //    console.log(message);
                                 let remoteDescription = new RTCSessionDescription({ sdp: message.Sdp, type: 'answer' });
                                 self.pc1.setRemoteDescription(remoteDescription);
                             }
                             else if (message.Type != 'offer') {
-                                console.log(message);
+                                //     console.log(message);
                                 if (!message.IsSource)
                                     self.pc1.addIceCandidate(message.candidate);
                             }
@@ -221,77 +224,82 @@
         },
         startTest: function (id) {
             let self = this;
-            $.when($.ajax({
-                url: "/user/StartTest?Id=" + id,
-                type: "POST",
-                async: true
-            }), $.ajax({
-                url: "/user/GetTestquestionsById?Id=" + id,
-                type: "POST",
-                async: true
-            }), $.ajax({
-                url: "/user/GetTestAnswersById?Id=" + id,
-                type: "POST",
-                async: true
-            })).then(function (resp1, resp2, resp3) {
-                //Получаем пакеты вопросов, ответов и то, как их разместить
-                self.questions = resp2[0];
+            try {
+                $.when($.ajax({
+                    url: "/user/StartTest?Id=" + id,
+                    type: "POST",
+                    async: true
+                }), $.ajax({
+                    url: "/user/GetTestquestionsById?Id=" + id,
+                    type: "POST",
+                    async: true
+                }), $.ajax({
+                    url: "/user/GetTestAnswersById?Id=" + id,
+                    type: "POST",
+                    async: true
+                })).then(function (resp1, resp2, resp3) {
+                    //Получаем пакеты вопросов, ответов и то, как их разместить
+                    self.questions = resp2[0];
 
-                //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
-                resp3[0].map(a => { a.IsAnswered = false; a.TestingPackage = resp1[0].Packages.find(b => b.AnswerId == a.Id) });
-                self.answers = resp3[0];
-                self.timeStart = new Date(resp1[0].Date);
-                self.startTimer(self.timeStart);
-                if (resp1[0].Answered && resp1[0].Answered.length > 0) {
-                    self.questions.forEach(a => {
-                        resp1[0].Answered.forEach(b => {
-                            if (a.Id == b.Id) {
-                                if (a.TypeAnswerId == 1) {
-                                    if (b.UserAnswer) {
-                                        a.answer = b.AnswerId;
+                    //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
+                    resp3[0].map(a => { a.IsAnswered = false; a.TestingPackage = resp1[0].Packages.find(b => b.AnswerId == a.Id) });
+                    self.answers = resp3[0];
+                    self.timeStart = new Date(resp1[0].Date);
+                    self.startTimer(self.timeStart);
+                    if (resp1[0].Answered && resp1[0].Answered.length > 0) {
+                        self.questions.forEach(a => {
+                            resp1[0].Answered.forEach(b => {
+                                if (a.Id == b.Id) {
+                                    if (a.TypeAnswerId == 1) {
+                                        if (b.UserAnswer) {
+                                            a.answer = b.AnswerId;
+                                            a.answered = true;
+                                        }
+                                    }
+                                    else if (a.TypeAnswerId == 2) {
+                                        if (b.UserAnswer) {
+                                            self.answers.find(c => c.Id == b.AnswerId).IsAnswered = true;
+                                            a.answered = true;
+                                        }
+                                    }
+                                    else if (a.TypeAnswerId == 3) {
                                         a.answered = true;
+                                        a.answer = b.UserAnswer;
                                     }
                                 }
-                                else if (a.TypeAnswerId == 2) {
-                                    if (b.UserAnswer) {
-                                        self.answers.find(c => c.Id == b.AnswerId).IsAnswered = true;
-                                        a.answered = true;
-                                    }
-                                }
-                                else if (a.TypeAnswerId == 3) {
-                                    a.answered = true;
-                                    a.answer = b.UserAnswer;
-                                }
-                            }
+                            })
                         })
-                    })
-                }
-                //Маппим ответы для вопросов, добавляем флаги загрузки, изменения и ответа в принципе
-                self.questions.map(a => { a.Answers = self.answers.filter(b => b.QuestionId == a.Id); a.IsLoaded = false; a.changed = false; a.answered = a.answered ? a.answered : false; });
-                //Сортируем вопросы в нужном порядке
-                self.questions.sort((a, b) => a.Rank - b.Rank);
-                //Сортируем ответы
-                self.questions.forEach(a => a.Answers.sort((b, c) => b.Sort - c.Sort));
-                //Текущий вопрос выбираем первый
-                self.selectQuestion(1);
-                //Флаг, что началася тест
-                self.testInProcess = true;
-                self.startCheckConnection(id);
-            });
+                    }
+                    //Маппим ответы для вопросов, добавляем флаги загрузки, изменения и ответа в принципе
+                    self.questions.map(a => { a.Answers = self.answers.filter(b => b.QuestionId == a.Id); a.IsLoaded = false; a.changed = false; a.answered = a.answered ? a.answered : false; });
+                    //Сортируем вопросы в нужном порядке
+                    self.questions.sort((a, b) => a.Rank - b.Rank);
+                    //Сортируем ответы
+                    self.questions.forEach(a => a.Answers.sort((b, c) => b.Sort - c.Sort));
+                    //Текущий вопрос выбираем первый
+                    self.selectQuestion(1);
+                    //Флаг, что началася тест
+                    self.testInProcess = true;
+                    self.startCheckConnection(id);
+                }, function (err) { alert(self.switchLocal(6)); });
+            }
+            catch (exc) {
+                console.log(exc);
+            }
         },
         recordingCamera: function (event) {
             //console.log(event);
             //if (event.data && event.data.size > 0) {
-                app.recordedCamera.push(event.data);
-              //  if (app.videoSocket && app.loadedSocket) {
-              //      console.log(JSON.stringify(event.data));
-                    //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
-             //   }
-                //if (app.socket)
-                //   app.socket.send(event.data);
+            app.recordedCamera.push(event.data);
+            //  if (app.videoSocket && app.loadedSocket) {
+            //      console.log(JSON.stringify(event.data));
+            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
+            //   }
+            //if (app.socket)
+            //   app.socket.send(event.data);
             //    let bffer = new Blob(app.recordedCamera, { type: 'video/webm' });
-             //   $('#video2')[0].src = URL.createObjectURL(bffer);
-           // }
+            //   $('#video2')[0].src = URL.createObjectURL(bffer);
+            // }
             //console.log(event.data);
             //console.log(app.stream.id, app.stream.);
             //let formData = new FormData();
@@ -309,14 +317,14 @@
             //console.log(event);
             if (event.data && event.data.size > 0) {
                 app.recordedScreen.push(event.data);
-               // if (app.videoSocket && app.loadedSocket) {
-                    //console.log(JSON.stringify(event.data));
-                    //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
+                // if (app.videoSocket && app.loadedSocket) {
+                //console.log(JSON.stringify(event.data));
+                //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
                 //}
                 //if (app.socket)
                 //   app.socket.send(event.data);
                 //let bffer = new Blob(app.recordedScreen, { type: 'video/webm' });
-               // $('#video2')[0].src = URL.createObjectURL(bffer);
+                // $('#video2')[0].src = URL.createObjectURL(bffer);
             }
             //console.log(event.data);
             //console.log(app.stream.id, app.stream.);
@@ -569,7 +577,7 @@
             // obj.src = src;
             //obj.srcObject = self.buffer;
             //location.reload();
-            console.log(self.selectedTest);
+            //console.log(self.selectedTest);
             $.ajax({
                 url: "/user/HasConnection",
                 type: "POST",
@@ -593,9 +601,13 @@
                 self.screenRecorder = new MediaRecorder(Str);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
                 self.screenRecorder.start(10);
-                console.log(Str);
+                //   console.log(Str);
             })
-                .catch(err => { console.error("Error:" + err); return null; });
+                .catch(err => {
+                    console.error("Error:" + err);
+                    alert("Обновите страницу и разрешите запись экрана!");
+                    return null;
+                });
         },
         download: function () {
             $.ajax({
@@ -656,7 +668,7 @@
             $(document).on('mousemove', function () { self.resizing(self); });
             self.tipPosition.width = $('#panel-right').width();
             self.tipPosition.start = $(document).width();// - $('#panel-right').width();
-            console.log(self.tipPosition);
+            //  console.log(self.tipPosition);
         },
         resizing: function (self) {
             $(document).on('mouseup', function () { self.stopResizing(self); });
@@ -700,6 +712,18 @@
         },
         getDateFormat: function (date) {
             return date.toLocaleTimeString();
+        },
+        switchLocal: function (id) {
+            let self = this;
+            switch (id) {
+                case 1: return self.localization == 1 ? "Осталось" : "Left";
+                case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
+                case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
+                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select the file to download (if necessary) and enter the answer in the field";
+                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
+                case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
+            }
         }
     },
     mounted() {

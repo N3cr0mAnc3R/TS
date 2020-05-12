@@ -124,6 +124,27 @@ body footer {
   color: #A6ACBC;
   font-size: 20px;
 }
+body .localizationo-wrapper {
+  display: flex;
+  position: absolute;
+  top: 95px;
+  right: 60px;
+  width: 50px;
+  border: 1px solid #a6acbc;
+  border-radius: 3px;
+}
+body .localizationo-wrapper .localization-item {
+  position: relative;
+  background-color: #a6acbc;
+  width: 25px;
+  padding: 3px;
+  cursor: pointer;
+  padding-top: 0;
+}
+body .localizationo-wrapper .localization-item.active {
+  display: block;
+  box-shadow: inset #565c72 0px 1px 4px;
+}
 @keyframes rotate {
   to {
     transform: rotate(360deg);

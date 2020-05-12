@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
-using WebApp.Models;
+using WebApp.Models.Common;
 
 namespace WebApp.Controllers
 {
@@ -23,6 +23,11 @@ namespace WebApp.Controllers
         public ActionResult Moderate(int Id)
         {
             return View();
+        }
+        public ActionResult DownloadVideoFile(int Id, int Type)
+        {
+            FileStreamDownload dwnl = TestManager.FileDownload(Id, Type, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+            return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         }
         [HttpPost]
         public JsonResult GetAuditoryInfo(int Id)
@@ -105,6 +110,14 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<AuditoryManager>();
+
+            }
+        }
+        protected TestManager TestManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<TestManager>();
 
             }
         }

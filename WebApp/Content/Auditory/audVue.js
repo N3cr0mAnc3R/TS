@@ -17,7 +17,8 @@
             position: 1
         },
         needPin: false,
-        IsRebuild: false
+        IsRebuild: false,
+        localizaion: 1
     },
     methods: {
         init: function () {
@@ -225,13 +226,14 @@
         },
         isSelected: function (item) {
             let self = this;
+            console.log(self.currentProfile, item.PlaceProfileId);
             return {
                 'selected': item.Id == this.selected,
                 'new': item.IsNew && item.Name.trim() != "",
                 'deleted': item.Deleted,
                 'hasPin': item.PIN && item.PIN != 0,
                 'empty': item.Name.trim() == "",
-                'current': self.currentProfile == item.PlaceProfileId
+                'current': self.currentProfile == item.PlaceProfileId && item.PlaceProfileId != 0
             };
         },
         addRow: function () {

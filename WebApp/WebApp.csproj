@@ -199,6 +199,7 @@
     <Content Include="Content\jQuery-webcam-master\webcam.jquery.json" />
     <Content Include="Content\Auditory\moderate.less" />
     <Content Include="Content\proctor.less" />
+    <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <None Include="Scripts\jquery-3.4.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.4.1.js" />
     <Content Include="Scripts\jquery-3.4.1.min.js" />

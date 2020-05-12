@@ -14,7 +14,7 @@
                         <div class="place-item" :title="item.Name">
                             <div class="video-wrapper"><video autoplay></video></div>
                             <div class="info-wrapper">
-                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">{{item.LastName}} {{item.FirstName}} {{item.MiddleName}}</div></div>
+                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
                                 <div class="control"><button class="chat-open" v-on:click="select(item.TestingProfileId)"><i class="fa fa-keyboard"></i></button><button class="open-full" v-on:click="openFull(item)"><i class="fa fa-search-plus"></i></button></div>
                             </div>
                         </div>
@@ -66,15 +66,17 @@
                 </div>
                 <div class="modal-body">
                     <video id="full-video" autoplay></video>
-                    <div v-if="currentUser.errors.length > 0">Выдано {{currentUser.errors.length}} предупреждений <span class="tip" data-placement="right" :title="tipError()" data-toggle="tooltip"><i class="fa fa-question-circle"></i></span></div>
-                    <div v-if="shownError">
-                    <select v-model="currentError"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
+                    <div v-if="currentUser.errors.length > 0">Выдано {{getErrorCount()}} предупреждений <span class="tip" data-placement="right" :title="tipError()" data-toggle="tooltip"><i class="fa fa-question-circle"></i></span></div>
+                    <div v-if="shownError" class="select-error">
+                    <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
                     <button v-on:click="sendError" class="save-error">Сохранить</button>
                     </div>
                     <button class="add-error" v-on:click="showError()">Сообщить о нарушении</button>
                     
                     <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">Приостановить тестирование</div><div v-if="currentUser.IsPause">Возобновить тестирование</div></button>
                     <button class="finish-test" v-on:click="finishTest()">Завершить тестирование</button>
+                    <button class="finish-test" v-on:click="download(1)">Скачать 1</button>
+                    <button class="finish-test" v-on:click="download(2)">Скачать 2</button>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
