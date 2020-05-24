@@ -45,9 +45,9 @@
                 self.getRoom(newId);
 
                 if (typeof (WebSocket) !== 'undefined') {
-                    self.socket = new WebSocket("ws://localhost/WebApp/ChatHandler.ashx");
+                    self.socket = new WebSocket("wss://localhost/WebApp/ChatHandler.ashx");
                 } else {
-                    self.socket = new MozWebSocket("ws://localhost/WebApp/ChatHandler.ashx");
+                    self.socket = new MozWebSocket("wss://localhost/WebApp/ChatHandler.ashx");
                 }
                 console.log(self.socket);
                 self.socket.onmessage = function (msg) {

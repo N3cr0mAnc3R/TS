@@ -1,69 +1,84 @@
 ﻿
 @{
-    ViewBag.Title = "Waiting";
+    ViewBag.Title = "Режим ожидания";
 }
 
 
 <link href="~/Content/Testing/Index.css" rel="stylesheet" />
 <script src="~/Content/f-awesome.js"></script>
 <div id="main-window">
-    <div v-if="!hasPlaceConfig">
-        <div class="input-pin">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <span class="input-group-text" id="basic-addon1"><i class="fa fa-key"></i></span>
+    @if (ViewBag.PlaceInfo != null)
+    {
+        <span>{{checkAuth(@ViewBag.PlaceInfo.PlaceId, @ViewBag.PlaceInfo.Id)}}</span>
+    }
+    else
+    {
+        <span>{{checkAuth(null,null)}}</span>
+    }
+    @if (!Request.IsAuthenticated)
+    {
+        <div>
+            <div v-if="!hasPlaceConfig" class="container">
+                <div class="main-window">
+                    <div class="input-pin">
+                        <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN">
+                    </div>
                 </div>
-                <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN" aria-describedby="basic-addon1">
             </div>
-            @*<div class="center"><i class="fa fa-key"></i><input type="number" maxlength="4" v-model="PIN" /></div>*@
-        </div>
-    </div>
-    <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
-        <div class="not-test">
-            <div v-if="tests && tests.length == 0" class="waiting">Режим ожидания</div>
-            <template v-if="!hasActiveTest()">
-                <div v-if="tests && tests.length != 0" class="user-info">
-                    {{user}},
-                    <br />
-                    <br />
-                    {{switchLocal(1)}}:
-                </div>
-                <div class="test-list">
-                    <div v-for="test in tests" class="test-wrapper">
-                        @*- {{test.TestingDate}}*@
-                        <div class="test-item" v-on:click="startTest(test.Id)">
-                            <span class="test-name">{{test.DisciplineName}}</span>
-                            <span class="test-icon">
-                                <i class="far fa-play-circle"></i>
-                            </span>
+            <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
+                <div class="not-test">
+                    <div v-if="tests && tests.length == 0" class="waiting">Режим ожидания</div>
+                    <template v-if="!hasActiveTest()">
+                        <div v-if="tests && tests.length != 0" class="user-info">
+                            {{user}},
+                            <br />
+                            <br />
+                            {{switchLocal(1)}}:
                         </div>
-                    </div>
-                </div>
-            </template>
-            <template v-if="hasActiveTest()">
-                <div v-if="tests && tests.length != 0" class="user-info">
-                    {{user}},
-                    <br />
-                    <br />
-                    {{switchLocal(2)}}:
-                </div>
-                <div class="test-list">
-                    <div v-for="test in activeTests" class="test-wrapper">
-                        @*- {{test.TestingDate}}*@
-                        <div class="test-item" v-on:click="startTest(test.Id)">
-                            <span class="test-name">{{test.DisciplineName}}</span>
-                            <span class="test-icon">
-                                <i class="far fa-play-circle"></i>
-                            </span>
+                        <div class="test-list">
+                            <div v-for="test in tests" class="test-wrapper">
+                                @*- {{test.TestingDate}}*@
+                                <div class="test-item" v-on:click="startTest(test.Id)">
+                                    <span class="test-name">{{test.DisciplineName}}</span>
+                                    <span class="test-icon">
+                                        <i class="far fa-play-circle"></i>
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    </template>
+                    <template v-if="hasActiveTest()">
+                        <div v-if="tests && tests.length != 0" class="user-info">
+                            {{user}},
+                            <br />
+                            <br />
+                            {{switchLocal(2)}}:
+                        </div>
+                        <div class="test-list">
+                            <div v-for="test in activeTests" class="test-wrapper">
+                                @*- {{test.TestingDate}}*@
+                                <div class="test-item" v-on:click="startTest(test.Id)">
+                                    <span class="test-name">{{test.DisciplineName}}</span>
+                                    <span class="test-icon">
+                                        <i class="far fa-play-circle"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
+                    @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
                 </div>
-            </template>
-            @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
-            @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
+            </div>
         </div>
-    </div>
-   
+    }
+    else
+    {
+        <div>
+            Пожалуйста, ожидайте, в данный момент все места заняты или тесты не назначены
+        </div>
+    }
 </div>
+
 <script src="~/Content/aes.js"></script>
 <script src="~/Content/Testing/pretest.js"></script>

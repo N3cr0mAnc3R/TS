@@ -72,6 +72,20 @@ namespace WebApp.Models
 
             }
         }
+        public async Task<IEnumerable<PlaceConfigModel>> GetAuditoryCompsWithoutPin(int AuditoryId, Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<PlaceConfigModel>(sql: "[dbo].[Administrator_PlaceProfilesEmptyPinGet]", new { auditoriumId = AuditoryId, userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task ResetPins(int AuditoryId, Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfilesEmptyPinSet]", new { auditoriumId = AuditoryId, userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<int> GetProfileByPlaceConfig(string placeConfig, Guid guid)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -101,6 +115,14 @@ namespace WebApp.Models
                         Error = e.Message
                     };
                 }
+            }
+        }
+        public async Task<PlaceConfigModel> GetFreePlaces(Guid? userUID)
+        {
+            using (var cnt =await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID }, commandType: CommandType.StoredProcedure);
+
             }
         }
         public void UpdatePlaceConfig(int placeId, Guid userUID, string placeConfig)

@@ -97,6 +97,18 @@ textarea {
     display: flex;
     margin-left: 15px;
   }
+  .navbar-system .container .base-nav .navbar-collapse1 ul,
+  .navbar-system .container .nav-item .navbar-collapse1 ul {
+    flex-direction: row;
+  }
+  .navbar-system .container .base-nav .navbar-collapse1 ul li,
+  .navbar-system .container .nav-item .navbar-collapse1 ul li {
+    padding: 0 5px;
+  }
+  .navbar-system .container .base-nav .navbar-collapse1 ul li:not(:first-child),
+  .navbar-system .container .nav-item .navbar-collapse1 ul li:not(:first-child) {
+    border-left: 1px solid #ddd;
+  }
 }
 .navbar-system .container .base-nav a,
 .navbar-system .container .nav-item a {
@@ -124,7 +136,7 @@ body footer {
   color: #A6ACBC;
   font-size: 20px;
 }
-body .localizationo-wrapper {
+body .localization-wrapper {
   display: flex;
   position: absolute;
   top: 95px;
@@ -132,17 +144,20 @@ body .localizationo-wrapper {
   width: 50px;
   border: 1px solid #a6acbc;
   border-radius: 3px;
+  z-index: 4;
 }
-body .localizationo-wrapper .localization-item {
+body .localization-wrapper .localization-item {
   position: relative;
   background-color: #a6acbc;
   width: 25px;
   padding: 3px;
   cursor: pointer;
   padding-top: 0;
+  color: #fff;
 }
-body .localizationo-wrapper .localization-item.active {
+body .localization-wrapper .localization-item.active {
   display: block;
+  color: #000;
   box-shadow: inset #565c72 0px 1px 4px;
 }
 @keyframes rotate {

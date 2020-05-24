@@ -13,5 +13,8 @@ namespace WebApp.Models.UserTest
         public int TestingTime { get; set; }
         public string UserAnswer { get; set; }
         public int AnswerId { get; set; }
+        public int Sort { get; set; }
+        public int TypeAnswerId { get; set; }
+        public int TestingResultId { get; set; }
     }
 }

@@ -18,13 +18,15 @@
         },
         needPin: false,
         IsRebuild: false,
-        localizaion: 1
+        localizaion: 1,
+        intervalPin: null
     },
     methods: {
         init: function () {
             let self = this;
+
             let str = window.location.href;
-            let newId = Number.parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+            let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.getPlaceByConfig();
             $.ajax({
                 url: "/auditory/GetAuditoryInfo?Id=" + newId,
@@ -36,7 +38,9 @@
                     self.auditoryName = auditory.Name;
                     self.NeedPin = auditory.NeedPin;
                     self.computerList = auditory.ComputerList;
-                    self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+                    self.computerList.map(function (a) { self.maxContent = Math.max(self.maxContent, +a.Name); });
+
+                    //self.startFindPin();
 
                     //let sizeX = Math.ceil(self.computerList.length / 6);
                     //let counter = 1;
@@ -61,14 +65,49 @@
                     self.initAud();
                 }
             });
+            $.ajax({
+                url: "/auditory/ResetPins?Id=" + newId,
+                type: "POST",
+                async: false
+            });
             $('#renameModal').on('shown.bs.modal', function () {
                 $('#rename-input').trigger('focus');
             });
         },
+        startFindPin: function () {
+            let self = this;
+            self.intervalPin = setInterval(function () {
+                $.ajax({
+                    url: "/auditory/GetAuditoryCompsWithoutPin?Id=" + self.auditory,
+                    type: "POST",
+                    async: false,
+                    success: function (compIds) {
+                        if (compIds.length != self.computerList.filter(function (item) { return item.Name != "" }).length) {
+                            self.computerList.forEach(function (comp) {
+                                let found = compIds.filter(function (id) {
+                                    return id.PlaceId == comp.Id;
+                                })[0];
+                                if (found) {
+                                    comp.PIN = null;
+                                    comp.IsNeedPlaceConfig = false;
+                                }
+                            });
+                        }
+                        else {
+                            clearInterval(self.intervalPin);
+                        }
+
+                        //if (compIds) {
+                        //    clearInterval(self.intervalPin);
+                        //}
+                    }
+                });
+            }, 1000);
+        },
         initAud: function () {
             let self = this;
             self.maxX = 0, self.maxY = 0;
-            self.computerList.forEach(a => { self.maxX = Math.max(self.maxX, a.PositionX); self.maxY = Math.max(self.maxY, a.PositionY); });
+            self.computerList.forEach(function (a) { self.maxX = Math.max(self.maxX, a.PositionX); self.maxY = Math.max(self.maxY, a.PositionY); });
         },
         select: function (Id) {
             let self = this;
@@ -79,7 +118,7 @@
                 self.selectForSwap(Id);
                 return;
             }
-            let comp = self.computerList.find(a => a.Id === Id);
+            let comp = self.computerList.filter(function (a) { return a.Id === Id; })[0];
             if (comp.Name == "") {
                 self.maxContent++;
                 comp.Name = self.maxContent + '';
@@ -103,7 +142,7 @@
             event.stopPropagation();
             $('#renameModal').modal('show');
         },
-        setSwapFlag() {
+        setSwapFlag: function() {
             let self = this;
             event.stopPropagation();
             self.isForSwap = !self.isForSwap;
@@ -111,7 +150,7 @@
         },
         selectForSwap: function (Id) {
             let self = this;
-            let comp = this.computerList.find(a => a.Id === Id);
+            let comp = this.computerList.filter(function (a) { return a.Id === Id; })[0];
             if (self.selected === -1) {
                 self.selected = Id;
                 self.selectedComp = copyObj(comp);
@@ -124,7 +163,7 @@
                 let from = [-1, -1], to = [-1, -1];
                 let arr1 = this.computerList;
 
-                let findedF = arr1.find(a => a.Id === self.selected);
+                let findedF = arr1.filter(function (a) { return a.Id === self.selected; })[0];
                 from = [findedF.PositionX, findedF.PositionY];
                 to = [comp.PositionX, comp.PositionY];
                 findedF.PositionX = to[0];
@@ -137,7 +176,7 @@
             }
 
         },
-        buildAuditory() {
+        buildAuditory: function() {
             let self = this;
             let items = [];
             self.computerList = [];
@@ -193,27 +232,27 @@
         deletePlace: function (id) {
             let self = this;
             event.stopPropagation();
-            let item = self.computerList.find(a => a.Id == id);
+            let item = self.computerList.filter(function (a) { return a.Id == id; })[0];
             if (item.IsNew) {
                 item.Name = '';
             }
             else item.Deleted = !item.Deleted;
             self.maxContent = 0;
-            self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+            self.computerList.map(function (a) { self.maxContent = Math.max(self.maxContent, +a.Name) });
             self.selected = -1;
             self.selectedComp = {};
 
         },
         filterComps: function (position) {
             let self = this;
-            let items = self.computerList.filter((item) => item.PositionX == position);
+            let items = self.computerList.filter(function (item) { return item.PositionX == position });
             if (items.length < self.maxY + 1) {
                 let maxId = 0;
-                self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
+                self.computerList.forEach(function (a) { maxId = a.Id > maxId ? a.Id : maxId });
                 maxId++;
                 let length = self.maxY + 1 - items.length;
                 for (let i = 0; i < length; i++) {
-                    items.sort((a, b) => a.PositionY - b.PositionY);
+                    items.sort(function (a, b) { a.PositionY - b.PositionY });
                     //if (items.length == 0) console.log(position);
                     let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items), IsNeedPlaceConfig: true };
                     items.push(newObj);
@@ -221,12 +260,11 @@
                     maxId++;
                 }
             }
-            items.sort((a, b) => a.PositionY - b.PositionY);
+            items.sort(function (a, b) { a.PositionY - b.PositionY });
             return items;
         },
         isSelected: function (item) {
             let self = this;
-            console.log(self.currentProfile, item.PlaceProfileId);
             return {
                 'selected': item.Id == this.selected,
                 'new': item.IsNew && item.Name.trim() != "",
@@ -240,7 +278,7 @@
             let items = [];
             let maxId = 0;
             let self = this;
-            self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
+            self.computerList.forEach(function (a) { maxId = a.Id > maxId ? a.Id : maxId });
             maxId++;
             console.log(maxId);
             for (let i = 0; i < this.maxY; i++) {
@@ -253,16 +291,16 @@
         },
         rename: function () {
             let self = this;
-            let item = self.computerList.find(a => a.Id == self.selectedComp.Id);
-            let existedItem = self.computerList.find(a => a.Name == self.selectedComp.Name);
+            let item = self.computerList.filter(function (a) { return a.Id == self.selectedComp.Id; })[0];
+            let existedItem = self.computerList.filter(function (a) { return a.Name == self.selectedComp.Name; })[0];
             if (existedItem && existedItem.Id != self.selectedComp.Id) {
 
-                $('.toast').toast('show');
+                $('#toast-exist').toast('show');
                 return;
             }
             item.Name = self.selectedComp.Name;
             self.maxContent = 0;
-            self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+            self.computerList.map(function (a) { self.maxContent = Math.max(self.maxContent, +a.Name) });
             self.selected = -1;
             self.selectedComp = {};
         },
@@ -271,7 +309,7 @@
             let self = this;
             if (self.maxY == 5) return;
             let maxId = 0;
-            self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
+            self.computerList.forEach(function (a) { maxId = a.Id > maxId ? a.Id : maxId });
             maxId++;
             for (let i = 0; i < self.maxX; i++) {
                 let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: i, PositionY: self.maxY + 1, IsNeedPlaceConfig: true };
@@ -293,8 +331,9 @@
                 async: false,
                 data: obj, 
                 success: function () {
-                    self.computerList.find(a => a.Id == self.selected).IsNeedPlaceConfig = false;
+                    self.computerList.filter(function (a) { return a.Id == self.selected;})[0].IsNeedPlaceConfig = false;
                     self.selectedComp.IsNeedPlaceConfig = false;
+                    self.currentProfile = self.selectedComp.PlaceProfileId;
                 }
             });
 
@@ -317,6 +356,7 @@
             if (self.selectedComp.IsNeedPlaceConfig) return;
             if (self.selectedComp.PlaceProfileId == self.currentProfile) {
                 localStorage.removeItem('placeConfig');
+                self.currentProfile = -1;
             }
             let obj = { Id: self.selectedComp.PlaceProfileId, PlaceConfig: null, PlaceId: self.selectedComp.Id };
             $.ajax({
@@ -325,7 +365,7 @@
                 async: false,
                 data: obj,
                 success: function () {
-                    self.computerList.find(a => a.Id == self.selected).IsNeedPlaceConfig = true;
+                    self.computerList.filter(function (a) { return a.Id == self.selected; })[0].IsNeedPlaceConfig = true;
                     self.selectedComp.IsNeedPlaceConfig = true;
                 }
             });
@@ -341,19 +381,23 @@
                 }
             });
             let auditory = { Id: self.auditory, ComputerList: items };
+           
+
             $.ajax({
                 url: "/auditory/GenerateConfiguration",
                 type: "POST",
                 async: false,
                 data: auditory ,
                 success: function (auditoryWithPins) {
-                    self.computerList.forEach(a => {
+                    self.computerList.forEach(function(a){
                         a.IsNeedPlaceConfig = true;
-                        if(!a.IsNew)
-                        a.PIN = auditoryWithPins.ComputerList.find(b => b.Id == a.Id).PIN;
+                        if (!a.IsNew)
+                            a.PIN = auditoryWithPins.ComputerList.filter(function (b) { return b.Id == a.Id; })[0].PIN;
                     })
                 }
             });
+            self.startFindPin();
+
         },
         saveChanges: function () {
             let self = this;
@@ -403,7 +447,7 @@
     },
 
     //После полной загрузки скрипта инициализируем
-    mounted() {
+    mounted: function() {
 
         // this.objForLoading.loading = true;
         //this.objForLoading.loaded = false;

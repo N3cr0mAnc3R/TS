@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
@@ -38,17 +39,34 @@ namespace WebApp.Controllers
 
         [HttpPost]
         [AllowAnonymous]
-        public ActionResult Login(LoginModel model)
+        public async Task<ActionResult> Login(LoginModel model)
         {
             if (ModelState.IsValid)
             {
                 ApplicationUser user = AccountManager.GetUser(model.Login, model.Password);
                 if (user.Id == Guid.Empty)
-                    throw new Exception("Неверный логин или пароль");
+                {
+                    ModelState.AddModelError("", "Неверный логин или пароль");
+                    return View(model);
+                }
 
                 SignInManager.SignIn(user, false, false);
 
-                return RedirectToAction("list", "auditory");
+
+                List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+                if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4}))
+                {
+                    return RedirectToAction("list", "verification");
+                }
+                else if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
+                {
+                    return RedirectToAction("list", "auditory");
+                }
+                else
+                {
+                    ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces(user.Id);
+                    return RedirectToAction("waiting", "user");
+                }
             }
             else
             {
@@ -63,6 +81,13 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<AccountManager>();
+            }
+        }
+        protected AuditoryManager AuditoryManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<AuditoryManager>();
             }
         }
     }

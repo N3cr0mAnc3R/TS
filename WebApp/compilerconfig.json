@@ -18,5 +18,9 @@
   {
     "outputFile": "Content/site.css",
     "inputFile": "Content/site.less"
+  },
+  {
+    "outputFile": "Content/Proctoring/index.css",
+    "inputFile": "Content/Proctoring/index.less"
   }
 ]

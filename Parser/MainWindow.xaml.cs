@@ -29,7 +29,7 @@ namespace Parser
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = "select sum(total) from (select count(1) as total from qwestions nolock where qwestionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
+            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
 
             conn.Open();
             using (var reader = cmd.ExecuteReader())
@@ -72,7 +72,7 @@ namespace Parser
         {
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = "exec Debug_Qwestion_GetBlob " + Id1.Text;
+            cmd.CommandText = "exec Debug_Question_GetBlob " + Id1.Text;
             conn.Open();
             using (var reader = cmd.ExecuteReader())
             {
@@ -80,8 +80,8 @@ namespace Parser
                 while (reader.Read())
                 {
                     //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["QUESTION1"]);
-                    //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["qwestion"]);
-                    File.WriteAllBytes("D:\\test4" + i + ".doc", (byte[])reader["qwestion"]);
+                    //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
+                    File.WriteAllBytes("D:\\test4" + i + ".doc", (byte[])reader["question"]);
                     i++;
                 }
             }
@@ -118,7 +118,7 @@ namespace Parser
 
                     SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                     SqlCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "select sum(total) from (select count(1) as total from qwestions nolock where qwestionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
+                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
                     conn.Open();
                     int count = 0;
                     using (var reader = cmd.ExecuteReader())
@@ -151,11 +151,11 @@ namespace Parser
                 bck.ReportProgress(0);
                 SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                 SqlCommand cmd = conn.CreateCommand();
-                //cmd.CommandText = "select top 1 KOD_TEST, QWESTION1 from tests where QWESTIONIMG is null";
+                //cmd.CommandText = "select top 1 KOD_TEST, Question1 from tests where QuestionIMG is null";
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, qwestion from [Qwestions] where [qwestionImage] is null" + (IsStraight? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where [questionImage] is null" + (IsStraight? "" : " order by ID desc");
                 }
                 else
                 {
@@ -173,7 +173,7 @@ namespace Parser
                         Id = (int)reader["ID"];
                         if (IsChecked)
                         {
-                            File.WriteAllBytes("D:\\test4.doc", (byte[])reader["qwestion"]);
+                            File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
 
                         }
                         else
@@ -181,8 +181,8 @@ namespace Parser
                             File.WriteAllBytes("D:\\test4.doc", (byte[])reader["answer"]);
                         }
                         //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["QUESTION1"]);
-                        //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["qwestion"]);
-                        //Id1 =(int)reader["qwestionId"];
+                        //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
+                        //Id1 =(int)reader["questionId"];
                     }
                 }
                 bck.ReportProgress(Id);
@@ -256,15 +256,15 @@ namespace Parser
                         string img = Convert.ToBase64String(bytes);
                         if (IsChecked)
                         {
-                            cmd1.CommandText = "update Qwestions set qwestionImage = '" + img + "'  where ID = " + Id;
+                            cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
                         }
                         else
                         {
                             cmd1.CommandText = "update Answers set answerImage = '" + img + "'  where ID = " + Id;
                         }
-                        //cmd1.CommandText = "update tests set QWESTIONIMG = '" + img + "'  where KOD_TEST = " + Id;
+                        //cmd1.CommandText = "update tests set QuestionIMG = '" + img + "'  where KOD_TEST = " + Id;
                         //cmd1.CommandText = "update testans set ANSWERIMG = '" + img + "'  where KOD_ANS = " + Id;
-                        //cmd1.CommandText = "update Qwestions set qwestionImage = '" + img + "'  where ID = " + Id;
+                        //cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
                         cmd1.ExecuteScalar();
                         bck.ReportProgress(99);
                     }

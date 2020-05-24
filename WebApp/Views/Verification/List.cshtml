@@ -1,0 +1,28 @@
+﻿<link href="~/Content/Proctoring/index.css" rel="stylesheet" />
+@{
+    ViewBag.Title = "Список абитуриентов";
+}
+
+<div id="main-window" class="proctoring-window">
+    <div v-if="profiles.length > 1">
+        <div v-if="currentProfile < 0">
+            <span class="context-info"> Выберите, пожалуйста, дисциплину для проверки:</span>
+            <select v-model="profileForSelect" class="form-control">
+                <option v-for="profile in profiles" v:bind:value="profile.Id">{{profile.Name}}</option>
+            </select>
+            <button v-on:click="SaveProfile()">Выбрать</button>
+        </div>
+    </div>
+    <div v-if="currentProfile > 0" class="container">
+        <div class="context-info">Выберите студента для проверки:</div>
+
+        <div class="student-list-wrapper container">
+            <div class="student-list">
+                <div v-for="student in students" class="student-wrapper">
+                    <div v-on:click="selectStudent(student.TestingProfileId)">Абитуриент-{{student.UserId}}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Content/Proctoring/list.js"></script>

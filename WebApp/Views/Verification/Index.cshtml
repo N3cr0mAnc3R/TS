@@ -1,0 +1,164 @@
+﻿<link href="~/Content/Proctoring/index.css" rel="stylesheet" />
+<script src="~/Content/f-awesome.js"></script>
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+
+@{
+    ViewBag.Title = "Проверка вступительных испытаний";
+}
+
+<div id="main-window">
+    <div v-if="HasCase" class="container">
+        <div class="summary-student">
+            @*{{switchLocal(1)}}*@<span>Студент </span><span><i class="fa fa-angle-right"></i></span><span>Русский язык </span>
+        </div>
+        <div v-if="!shownSummary" class="verify-wrapper">
+            <div v-loader="loadObject">
+                <div class="question-wrapper" v-if="selectedQuestion.QuestionImage">
+                    <img v-bind:src="'data:image/png;base64, ' + selectedQuestion.QuestionImage" />
+                </div>
+                <div class="answer-list">
+                    <div class="answer-wrapper" v-for="answer in selectedQuestion.Answers">
+                        <label v-if="selectedQuestion.TypeAnswerId == 2" class="option-container" v-bind:class="getHeight(answer.Id)">
+                            <input type="checkbox" class="checkbox" value="true" v-model="answer.IsAnswered" v-on:change="changeCheck()" />
+                            <span class="checkmark"></span>
+                            <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
+                        </label>
+                        <label v-if="selectedQuestion.TypeAnswerId == 1" class="option-rb-container" v-bind:class="getHeight(answer.Id)">
+                            <input type="radio" class=" checkbox" v-bind:value="answer.Id" name="answer" v-model="selectedQuestion.answer" v-on:change="changeRadio(answer.Id)" />
+                            <span class="checkmark"></span>
+                            <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
+                        </label>
+                        <div v-if="selectedQuestion.TypeAnswerId == 3" class="textarea-wrapper">
+                            <div>
+                                {{answer.UserAnswer}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-bottom">
+                <div class="rating-info-wrapper">
+                    <div class="span">{{switchLocal(2)}}</div>
+                    <input type="number" v-bind:max="selectedQuestion.maxScore" min="0" class="form-control" v-model="currentAnswerVote" />
+                    <button v-on:click="saveAnswer()">{{switchLocal(10)}}</button>
+                </div>
+                <div class="user-list-wrapper">
+                    <div class="span">{{switchLocal(4)}}</div>
+
+                    <div class="user-list" v-if="!shownSummary">
+                        <div class="user-wrapper" v-for="member in members">
+                            <div class="top">
+                                <span class="user-name">{{member.fio}}</span> <br /> <span class="user-role"> ({{member.UserRolesName}})</span>
+                            </div>
+                            <div class="score-wrapper">{{getUserScore(member.Id)}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="question-pagination">
+                <div class="page" v-on:click="selectQuestion(page-1)" v-bind:class="{'disabled': page == 1 || shownSummary}">
+                    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M8.50019 15.875C8.38504 15.8757 8.27088 15.8536 8.16427 15.8101C8.05766 15.7665 7.9607 15.7024 7.87894 15.6213L0.878941 8.62126C0.796928 8.53992 0.731834 8.44314 0.687411 8.33651C0.642988 8.22989 0.620117 8.11552 0.620117 8.00001C0.620117 7.8845 0.642988 7.77013 0.687411 7.6635C0.731834 7.55688 0.796928 7.4601 0.878941 7.37876L7.87894 0.37876C8.04371 0.213994 8.26718 0.121429 8.50019 0.121429C8.7332 0.121429 8.95667 0.213994 9.12144 0.37876C9.28621 0.543525 9.37877 0.766996 9.37877 1.00001C9.37877 1.23302 9.28621 1.45649 9.12144 1.62126L2.73394 8.00001L9.12144 14.3788C9.20345 14.4601 9.26855 14.5569 9.31297 14.6635C9.35739 14.7701 9.38026 14.8845 9.38026 15C9.38026 15.1155 9.35739 15.2299 9.31297 15.3365C9.26855 15.4431 9.20345 15.5399 9.12144 15.6213C9.03968 15.7024 8.94272 15.7665 8.83611 15.8101C8.7295 15.8536 8.61535 15.8757 8.50019 15.875Z" fill="white" />
+                    </svg>
+                </div>
+                <template v-for="i in questions.length">
+                    <div class="page" v-bind:class="{'active': page == i}" v-on:click="selectQuestion(i)">
+                        {{i}}
+                    </div>
+                </template>
+                <div class="page" v-on:click="selectQuestion(page+1)" v-bind:class="{'disabled': page == questions.length || shownSummary}">
+                    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1.74983 15.3125C1.6429 15.3131 1.5369 15.2926 1.4379 15.2522C1.33891 15.2118 1.24887 15.1522 1.17295 15.0769C1.0968 15.0013 1.03635 14.9115 0.995104 14.8125C0.953855 14.7135 0.932617 14.6073 0.932617 14.5C0.932617 14.3927 0.953855 14.2865 0.995104 14.1875C1.03635 14.0885 1.0968 13.9987 1.17295 13.9231L7.1042 8L1.17295 2.07687C1.01996 1.92388 0.934004 1.71637 0.934004 1.5C0.934004 1.39286 0.955106 1.28678 0.996105 1.1878C1.0371 1.08882 1.0972 0.998879 1.17295 0.923123C1.24871 0.847367 1.33865 0.787274 1.43763 0.746275C1.53661 0.705276 1.64269 0.684174 1.74983 0.684174C1.9662 0.684174 2.17371 0.770126 2.3267 0.923123L8.8267 7.42312C8.90286 7.49866 8.9633 7.58852 9.00455 7.68753C9.0458 7.78654 9.06704 7.89274 9.06704 8C9.06704 8.10726 9.0458 8.21346 9.00455 8.31247C8.9633 8.41148 8.90286 8.50134 8.8267 8.57687L2.3267 15.0769C2.25078 15.1522 2.16074 15.2118 2.06175 15.2522C1.96276 15.2926 1.85676 15.3131 1.74983 15.3125Z" fill="white" />
+                    </svg>
+                </div>
+                <div class="page page-last" v-bind:class="{'active':shownSummary }" v-on:click="showTotal()">
+                    {{switchLocal(5)}}
+                </div>
+
+            </div>
+        </div>
+        <div v-if="shownSummary" class="summary-wrapper">
+            <table class="table-bordered table text-center">
+                <thead>
+                    <tr><td rowspan="2">№ вопроса</td><td v-bind:colspan="members.length" class="text-center">Оценки членов комиссии</td></tr>
+                    <tr><td v-for="member in members">{{member.fio}}</td></tr>
+                </thead>
+                <tbody>
+                    <tr v-for="i in questions.length">
+                        <td>{{switchLocal(7)}} {{i}}</td>
+                        <td v-for="member in members">{{getUserScore(member.Id, getQuestionById(i))}}</td>
+                    </tr>
+                    <tr>
+                        <td>Итоговые баллы:</td>
+                        <td v-for="member in members">{{getUserSummary(member.Id)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="rating-info-wrapper">
+                <div>
+                    {{switchLocal(8)}} {{getUsersSummary()}}
+                </div>
+                <div v-if="currentMarkVoteDate">{{switchLocal(9)}}{{currentMarkVoteDate}}</div>
+                <input type="number" v-bind:max="maxScore" min="0" class="form-control" v-model="currentMarkVote" />
+
+                <button v-on:click="saveTotal()">{{switchLocal(10)}}</button>
+            </div>
+        </div>
+
+        <div class="user-video-list-wrapper">
+            <div class="control"><span><i class="fa fa-expand"></i></span></div>
+            <div class="user-video-list" v-if="!shownSummary">
+                <div class="user-wrapper" v-for="member in members">
+                    @*<span class="user-name">{{member.fio}}</span>*@ @*<span class="user-role"> ({{member.UserRolesName}})</span>*@
+                    <div class="video-wrapper">
+                        <video></video>
+                    </div>
+                    @*<div class="score-wrapper">{{getUserScore(member.Id)}}</div>*@
+                </div>
+            </div>
+        </div>
+
+        <div v-if="isChatOpened">
+            <div class="full-chat-wrapper">
+                <div class="left-panel">
+                    <div v-for="member in members" class="user-wrapper" v-on:click="openChat(member.Id)">
+                        <div class="messages-count">
+                            {{getUnreadMessagesCount(member.UserUid)}}
+                        </div>
+                        <div>
+                            <div class="user-name">{{getShortFio(member.fio)}}</div>
+                            <div class="user-status">Online</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="main-panel">
+                    <div class="user-list-wrapper">
+                        <div v-for="member in openedMembers" class="user-name" v-bind:class="{'active': isCurrentChat(member.Id)}" v-on:click="openOChat(member.Id)">
+                            <div>{{getShortFio(member.fio)}}</div>
+                            <div class="fa-wrapper" v-on:click="closeChat(member.Id)"><i class="fa fa-times"></i></div>
+                        </div>
+                        <div class="user-name" v-bind:class="{'active': isFullChatOpened}" v-on:click="openOChat(-1)">
+                            <div>Общий чат</div>
+                        </div>
+                    </div>
+                    <div class="message-list-wrapper">
+                        <div class="message-wrapper" v-for="message in filteredMessages" v-bind:id="'message-' + message.Id" v-bind:class="{'me': IsUserMe(message.UserIdFrom)}">
+                            <div class="message-date">{{getDateFormat(message.Date)}}</div>
+                            <div class="message-text">{{message.Message}}</div>
+                            <div v-on:click="setParentMessage(message.Id)" class="message-control"><i class="fa fa-angle-down"></i></div>
+                        </div>
+                    </div>
+                    <div class="parent-msg" v-if="currentMsgParent"><div>{{findParentMessage()}}</div><div v-on:click="resetParentMessage()"><i class="fa fa-times"></i></div></div>
+                    <div class="answer-wrapper">
+                        <textarea v-model="messageText"></textarea>
+                    </div>
+                    <div class="btn-wrapper"><button v-on:click="sendMessage()">Отправить</button></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div v-if="!HasCase">{{switchLocal(11)}}</div>
+</div>
+<script src="~/Content/Proctoring/index.js"></script>

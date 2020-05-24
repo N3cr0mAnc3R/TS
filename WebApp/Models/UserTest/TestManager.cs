@@ -1,5 +1,5 @@
-﻿using Dapper;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Dapper;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -266,6 +266,28 @@ namespace WebApp.Models
             using (var cnt = Concrete.OpenConnection())
             {
                 return cnt.Query<ChatMessage>(sql: "[dbo].[Administrator_ChatRoomTestingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<SourceMaterial>> GetSourceMaterials(int testingProfileId, string Localization, Guid? userUid)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                var result =  await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { testingProfileId, Localization, userUid }, commandType: CommandType.StoredProcedure);
+
+                foreach (var item in result)
+                {
+                    item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { structureDisciplineId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
+                    item.Image = Convert.ToBase64String(item.SourceMaterialImage);
+                }
+
+                return result;
+            }
+        }
+        public async Task<bool> GetSecurity(int testingProfileId, Guid? userUID, string PlaceConfig = null )
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<bool>(sql: "[dbo].[Administrator_TestingProfileCanGet]", new { testingProfileId, userUID, PlaceConfig }, commandType: CommandType.StoredProcedure);
             }
         }
         public void SendMessage(ChatMessage message)

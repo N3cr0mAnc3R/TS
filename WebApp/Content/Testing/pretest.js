@@ -17,25 +17,30 @@
             loading: null,
             loaded: null
         },
-        localization: 1
+        localization: 1,
+        socket: null
     },
     methods: {
         init: function () {
             let self = this;
             //Загрузка доступных тестов 
             self.findTestInterval = setInterval(function () {
+                console.log('start');
                 $.ajax({
                     type: 'POST',
                     dataType: 'json',
                     url: '/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     success: function (d) {
+                        console.log(d);
                         if (d.Error) {
                             localStorage.removeItem('placeConfig');
                             clearInterval(self.findTestInterval);
                             self.hasPlaceConfig = false;
                             return;
                         }
-                        if (d.length == 0) return;
+                        if (d.length == 0) {
+                            return;
+                        }
                         //Отобразить дату в корректном формате
                         //d.forEach(a => {
                         //    var date = new Date(Number(a.TestingDate.substr(a.TestingDate.indexOf('(') + 1, a.TestingDate.indexOf(')') - a.TestingDate.indexOf('(') - 1)));
@@ -55,10 +60,14 @@
                             clearInterval(self.findTestInterval);
                             self.findTestInterval = null;
                         }
+                    },
+                    error: function (e) {
+                        console.log(e);
+
                     }
                 });
             }, 1000);
-           
+            console.log('endinit');
             if (localStorage['placeConfig']) {
                 setInterval(self.findTestInterval);
                 self.hasPlaceConfig = true;
@@ -69,33 +78,57 @@
                 self.findTestInterval = null;
             }
         },
+        checkAuth: function (placeId, PlaceProfile) {
+            console.log(localStorage['placeConfig']);
+            if (localStorage['placeConfig']) {
+                console.log();
+            } else {
+                this.createPlaceConfig(placeId, PlaceProfile);
+            }
+        },
         //Запуск теста
         startTest: function (id) {
             let self = this;
             //// webcam.capture();
             //self.loadTestObject.loading = true;
             //self.loadTestObject.loaded = false;
-           // self.selectedTest = self.tests.find(a => a.Id == id);
+            // self.selectedTest = self.tests.find(a => a.Id == id);
 
             window.open("/user/process?Id=" + id, '_self');
-            
+
         },
         hasActiveTest: function () {
             let self = this;
             if (!self.tests) return false;
-            self.activeTests = self.tests.filter(a => a.TestingStatusId === 2);
-            return self.tests.find(a => a.TestingStatusId === 2);
+            self.activeTests = self.tests.filter(function (a) { return a.TestingStatusId === 2; });
+            return self.tests.filter(function (a) { return a.TestingStatusId === 2; })[0];
         },
         switchLocal: function (id) {
             let self = this;
             switch (id) {
                 case 1: return self.localization == 1 ? "Вам доступны следующие тесты для прохождения" : "The following tests are available";
-                case 2: return self.localization == 1 ? "Вы не завершили следующие тесты": "Not completed:";
+                case 2: return self.localization == 1 ? "Вы не завершили следующие тесты" : "Not completed:";
             }
+        },
+        createPlaceConfig: function (placeId, PlaceProfile) {
+            if (placeId == 0 || PlaceProfile == 0) return;
+            let str = CryptoJS.AES.encrypt("place-" + placeId, "Secret Passphrase");
+            localStorage['placeConfig'] = str.toString();
+            let obj = { Id: PlaceProfile, PlaceConfig: str.toString(), PlaceId: placeId };
+            console.log(obj);
+            $.ajax({
+                url: "/auditory/UpdatePlaceConfig",
+                type: "POST",
+                async: false,
+                data: { model: obj },
+                success: function () {
+                    location.reload();
+                }
+            });
         }
     },
     //После полной загрузки скрипта инициализируем
-    mounted() {
+    mounted: function () {
         //$('#video-wrapper').draggable();
         this.init();
         $(window).on('focus');
@@ -112,20 +145,7 @@
                             self.PIN = null;
                             return;
                         }
-                        let str = CryptoJS.AES.encrypt("place-" + data.Id, "Secret Passphrase");
-                        console.log(data);
-                        localStorage['placeConfig'] = str.toString();
-                        let obj = { Id: data.PlaceProfileId, PlaceConfig: str.toString(), PlaceId: data.Id };
-                        console.log(obj);
-                        $.ajax({
-                            url: "/auditory/UpdatePlaceConfig",
-                            type: "POST",
-                            async: false,
-                            data: { model: obj },
-                            success: function () {
-                                location.reload();
-                            }
-                        });
+                        self.createPlaceConfig(data.Id, data.PlaceProfileId);
                     }
                 })
         }//,

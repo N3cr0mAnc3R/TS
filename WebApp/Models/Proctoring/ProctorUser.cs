@@ -15,5 +15,8 @@ namespace WebApp.Models.Proctoring
         public int UserRoleId { get; set; }
         public string DisciplineName { get; set; }
         public bool IsOnline { get; set; }
+        public string fio { get; set; }
+        public string UserRolesName { get; set; }
+
     }
 }

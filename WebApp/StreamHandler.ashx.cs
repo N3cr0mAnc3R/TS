@@ -104,42 +104,53 @@ namespace WebApp
                             }
                         }
                     }
+                    else
+                    {
+
+                        List<WebSocket> disposedClients = new List<WebSocket>();
+                        //Передаём сообщение всем клиентам
+                        foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
+                        {
+
+                            // WebSocket client = client1;
+
+                            try
+                            {
+                                if (client.State == WebSocketState.Open)
+                                {
+                                    await client.SendAsync(new ArraySegment<byte>(mainbuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                                }
+                            }
+
+                            catch (ObjectDisposedException)
+                            {
+                                Locker.EnterWriteLock();
+                                try
+                                {
+                                    //Clients.Remove
+                                    List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                    //cls.Remove(client);
+                                    disposedClients.Add(client);
+                                    //Clients.Remove
+                                    // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
+                                    //i--;
+                                }
+                                finally
+                                {
+                                    Locker.ExitWriteLock();
+                                }
+                            }
+                        }
+                        for (int i = 0; i < disposedClients.Count; i++)
+                        {
+                            List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                            cls.Remove(cls[i]);
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
 
-                }
-                if (!jsonparsed.ForCreate)
-                {
-                    //Передаём сообщение всем клиентам
-                    foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
-                    {
-
-                        // WebSocket client = client1;
-
-                        try
-                        {
-                            if (client.State == WebSocketState.Open)
-                            {
-                                await client.SendAsync(new ArraySegment<byte>(mainbuffer), WebSocketMessageType.Text, true, CancellationToken.None);
-                            }
-                        }
-
-                        catch (ObjectDisposedException)
-                        {
-                            Locker.EnterWriteLock();
-                            try
-                            {
-                                //Clients.Remove
-                                // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
-                                //i--;
-                            }
-                            finally
-                            {
-                                Locker.ExitWriteLock();
-                            }
-                        }
-                    }
                 }
             }
         }

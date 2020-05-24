@@ -28,8 +28,9 @@ namespace WebApp.Controllers
 
         // GET: User
         #region Представления
-        public ActionResult Waiting()
+        public async Task<ActionResult> Waiting()
         {
+            ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id);
             return View();
         }
 
@@ -37,56 +38,58 @@ namespace WebApp.Controllers
         {
             return View();
         }
-        public ActionResult Process(int Id)
+        public async Task<ActionResult> Process(int Id)
         {
-            //ProctorRoom room = new ProctorRoom();
-            //room.Users = ProctorManager.GetProctorUsers((CurrentUser == null ? CurrentUser.Id : (Guid?)null), null, Id);
-            //foreach (var item in room.Users)
-            //{
-            //    if (room.ComputerList == null) room.ComputerList = new List<TestUser>();
-            //    room.ComputerList.Add(new TestUser() { Discipline = item.DisciplineName, FIO = item.LastName + " " + item.FirstName + " " + item.MiddleName, IsOnline = item.IsOnline, TestingProfileId = Id });
-            //}
-            return View();
-        }
-        public ActionResult ProctorProcessList()
-        {
-            if(rooms == null)
+            if (Request.IsAuthenticated)
             {
-                //rooms = new List<ProctorRoom>()
-                //{
-                //    new ProctorRoom(){ Id = 1, Name = "Комната 1", ComputerList = new List<TestUser>(){
-                //        new TestUser() { Id = 1, FIO = "Иванов Иван", Discipline = "Русский язык", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 67, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Петров Иван", Discipline = "Математика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 68, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Сидоров Иван", Discipline = "Математика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 69, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Иванян Иван", Discipline = "Русский язык", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 70, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Петрян Иван", Discipline = "Информатика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 71, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Сидорян Иван", Discipline = "Русский язык", IsOnline= false, IsReady = false, Specialty = "Дизайн", TestingProfileId = 72, TimeLeft = 1800 }  } },
-                //    new ProctorRoom(){ Id = 2, Name = "Комната 2", ComputerList = new List<TestUser>(){
-                //        new TestUser() { Id = 1, FIO = "Иванов Иван2", Discipline = "Русский язык", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 67, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Петров Иван2", Discipline = "Математика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 68, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Сидоров Иван2", Discipline = "Математика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 69, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Иванян Иван2", Discipline = "Русский язык", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 70, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Петрян Иван2", Discipline = "Информатика", IsOnline= true, IsReady = false, Specialty = "Дизайн", TestingProfileId = 71, TimeLeft = 1800 },
-                //        new TestUser() { Id = 1, FIO = "Сидорян Иван2", Discipline = "Русский язык", IsOnline= false, IsReady = false, Specialty = "Дизайн", TestingProfileId = 72, TimeLeft = 1800 }  } }
-                //};
-                rooms = new List<ProctorRoom>() { new ProctorRoom() { Id = 67, Name = "Комната 1" } };
+                bool HasAccess = await TestManager.GetSecurity(Id, CurrentUser.Id);
+                if (!HasAccess)
+                {
+                    return Redirect("user/waiting");
+                }
             }
+            //TestManager.GetSecurity(Id, )
             return View();
         }
-        public ActionResult ProctorProcess(int Id)
+        public async Task<JsonResult> GetSecurity(int Id, string PlaceConfig)
         {
-            return View();
+            bool HasAccess = await TestManager.GetSecurity(Id, (Guid?)null, PlaceConfig);
+            return Json(new { HasAccess});
+        }
+        public async Task<ActionResult> ProctorProcessList()
+        {
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[5] { 1, 2, 3, 4, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
+        }
+        public async Task<ActionResult> ProctorProcess(int Id)
+        {
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[5] { 1, 2, 3, 4, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
 
         [HttpPost]
         public JsonResult GetLocalization()
         {
             //1 - ru, 2 - en
-            if(Session["Localization"] == null)
+            if (Session["Localization"] == null)
             {
                 Session["Localization"] = Language.RU;
             }
-            return Json(new { Localization = (int)Session["Localization"]});
+            return Json(new { Localization = (int)Session["Localization"] });
         }
         [HttpPost]
         public JsonResult SetLocalization(Language Type)
@@ -104,9 +107,16 @@ namespace WebApp.Controllers
         }
         public JsonResult GetTests(string PlaceConfig)
         {
-            List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString());
-            tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString()));
-            return Json(tests);
+            try
+            {
+                List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString());
+                tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString()));
+                return Json(tests);
+            }
+            catch (Exception e)
+            {
+                return Json(new { Error = e.Message });
+            }
         }
         #endregion
         #region Тестирование
@@ -125,6 +135,10 @@ namespace WebApp.Controllers
         public JsonResult GetTestPackageById(int Id)
         {
             return Json(TestManager.GetTestPackageById(Id, Session["Localization"].ToString()));
+        }
+        public async Task<JsonResult> GetSourceMaterials(int Id)
+        {
+            return Json(await TestManager.GetSourceMaterials(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null));
         }
         public JsonResult GetTestQuestionsById(int Id)
         {
@@ -156,7 +170,7 @@ namespace WebApp.Controllers
         }
         public async Task<JsonResult> SetUserErrors(int Id, int Type)
         {
-            return Json(await TestManager.SetUserErrors(Id, Type, Session["Localization"].ToString(),(CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.SetUserErrors(Id, Type, Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
         }
         public async Task<JsonResult> GetUserErrors(int Id)
         {
@@ -173,11 +187,11 @@ namespace WebApp.Controllers
             return Json(rooms);
         }
         [HttpPost]
-        public JsonResult GetProctorRoom(int Id)
+        public async Task<JsonResult> GetProctorRoom(int Id)
         {
 
             ProctorRoom room = new ProctorRoom();
-            room.Users = ProctorManager.GetProctorUsers(Id, (CurrentUser == null ? CurrentUser.Id : (Guid?)null), Session["Localization"].ToString());
+            room.Users = await ProctorManager.GetProctorUsers(Id, (CurrentUser == null ? CurrentUser.Id : (Guid?)null), Session["Localization"].ToString());
             foreach (var item in room.Users)
             {
                 if (room.ComputerList == null) room.ComputerList = new List<TestUser>();
@@ -299,6 +313,13 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<TestManager>();
+            }
+        }
+        protected AuditoryManager AuditoryManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<AuditoryManager>();
             }
         }
         protected ProctorManager ProctorManager

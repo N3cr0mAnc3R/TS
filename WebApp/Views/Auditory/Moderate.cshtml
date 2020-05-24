@@ -2,6 +2,10 @@
 <link href="~/Content/font-awesome.css" rel="stylesheet" />
 <link href="~/Content/Auditory/moderate.css" rel="stylesheet" />
 
+@{
+    ViewBag.Title = "Администрирование аудитории";
+}
+
 <div id="main-window">
     <div class="container auditory row">
         <div class="auditory-header">
@@ -12,7 +16,10 @@
                 <div v-for="i in maxX+1" class="place-row row">
                     <div v-for="item in filterComps(i-1)" class="col">
                         <div class="place-item" :title="item.Name">
-                            <div class="video-wrapper"><video autoplay></video></div>
+                            <div class="video-wrapper">
+                                <video autoplay v-bind:id="'video-' + item.TestingProfileId"></video>
+                                <img v-bind:id="'img-' + item.TestingProfileId" />
+                            </div>
                             <div class="info-wrapper">
                                 <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
                                 <div class="control"><button class="chat-open" v-on:click="select(item.TestingProfileId)"><i class="fa fa-keyboard"></i></button><button class="open-full" v-on:click="openFull(item)"><i class="fa fa-search-plus"></i></button></div>
@@ -65,14 +72,14 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <video id="full-video" autoplay></video>
+                    <video id="full-video" autoplay muted></video>
                     <div v-if="currentUser.errors.length > 0">Выдано {{getErrorCount()}} предупреждений <span class="tip" data-placement="right" :title="tipError()" data-toggle="tooltip"><i class="fa fa-question-circle"></i></span></div>
                     <div v-if="shownError" class="select-error">
-                    <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
-                    <button v-on:click="sendError" class="save-error">Сохранить</button>
+                        <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
+                        <button v-on:click="sendError" class="save-error">Сохранить</button>
                     </div>
                     <button class="add-error" v-on:click="showError()">Сообщить о нарушении</button>
-                    
+
                     <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">Приостановить тестирование</div><div v-if="currentUser.IsPause">Возобновить тестирование</div></button>
                     <button class="finish-test" v-on:click="finishTest()">Завершить тестирование</button>
                     <button class="finish-test" v-on:click="download(1)">Скачать 1</button>

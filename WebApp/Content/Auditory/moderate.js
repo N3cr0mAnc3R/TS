@@ -22,69 +22,16 @@ const app = new Vue({
         currentUser: null,
         errorTypes: [],
         shownError: false,
-        currentError: 0
+        currentError: 0,
+        gotICE: false
 
 
     },
     methods: {
         init: function () {
             let self = this;
-            //self.interval = setInterval(function () {
-            //    $.ajax({
-            //        url: '/user/getoffer?Id=' + 81,
-            //        method: 'post',
-            //        success: function (data) {
-            //            self.pc2Local = new RTCPeerConnection();
-            //            self.pc2Local.onaddstream = function (obj) {
-            //                console.log(obj);
-            //                self.video3[0].srcObject = obj.stream;
-            //            }
-            //            console.log(data);
-            //            var offer = data;//getOfferFromFriend();
-            //            navigator.getUserMedia({ video: true }, function (stream) {
-            //                //self.pc2Local.onaddstream = e => { self.video3[0].srcObject = e.stream; console.log(self.video3[0].srcObject); }
-            //                    self.pc2Local.addStream(stream);
+            window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
 
-            //                self.pc2Local.setRemoteDescription(new RTCSessionDescription(offer), function () {
-            //                    console.log(offer);
-            //                    self.pc2Local.createAnswer(function (answer) {
-            //                        console.log(answer);
-            //                        self.pc2Local.setLocalDescription(answer, function () {
-            //                            $.ajax({
-            //                                url: '/user/SaveAnswer',
-            //                                type: 'POST',
-            //                                data: {
-            //                                    Id: localStorage['placeConfig'],
-            //                                    Answer: JSON.stringify(answer)
-            //                                }
-            //                                //  processData: false
-            //                            });
-            //                                // send the answer to a server to be forwarded back to the caller (you)
-            //                            }, function () { });
-            //                        }, function () { });
-            //                    }, function () { });
-            //                }, function () { });
-
-            //            //self.pc2Local.onicecandidate = function (e) {
-            //            //    console.log(e);
-            //            //    // candidate exists in e.candidate
-            //            //    if (!e.candidate) return;
-            //            //    send("icecandidate", JSON.stringify(e.candidate));
-            //            //};
-            //            //console.log(self.pc2Remote);
-
-
-            //            //let buffer = new Blob(data, { type: 'video/webm' });
-            //            //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
-            //            //let src = URL.createObjectURL(buffer);
-            //            //let obj = $('#video')[0];
-            //            //obj.src = src;
-            //            //self.img = src;
-            //        }
-            //    });
-
-            ////}, 200);
-            //self.video3 = $('#video');
 
             //GetAuditoryInfo
             let str = window.location.href;
@@ -138,85 +85,51 @@ const app = new Vue({
             self.computerList.forEach(a => {
                 self.maxX = Math.max(self.maxX, a.PositionX);
                 self.maxY = Math.max(self.maxY, a.PositionY);
-                let socket = null;
-                let socket1 = null;
-                console.log(a);
+                self.initSocket(1, a);
+                self.initSocket(2, a);
+            });
+        },
+        initSocket: function (type, a) {
+            let self = this;
+            let socket = null;
+            let STUN = {
+                urls: 'stun:stun.l.google.com:19302'
+            };
+
+            let TURN = {
+                urls: 'turn:turn.bistri.com:80',
+                credential: 'homeo',
+                username: 'homeo'
+            };
+
+            let iceServers = {
+                iceServers: [STUN, TURN]
+            };
+            let DtlsSrtpKeyAgreement = {
+                DtlsSrtpKeyAgreement: true
+            };
+
+            let optional = {
+                optional: [DtlsSrtpKeyAgreement]
+            };
+            if (type === 1) {
+                //if (typeof (WebSocket) !== 'undefined') {
+                //    socket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+                //}
+                //else {
+                //    socket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+                //}
                 if (typeof (WebSocket) !== 'undefined') {
-                    socket = new WebSocket("ws://localhost/WebApp/ChatHandler.ashx");
-                    socket1 = new WebSocket("ws://localhost/WebApp/StreamHandler.ashx");
-                    self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
-                    self.videoSockets.push({ id: a.TestingProfileId, socket: socket1 });
-                } else {
-                    socket = new MozWebSocket("ws://localhost/WebApp/ChatHandler.ashx");
-                    self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
-                    socket1 = new MozWebSocket("ws://localhost/WebApp/StreamHandler.ashx");
-                    self.videoSockets.push({ id: a.TestingProfileId, socket: socket1 });
+                    socket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
                 }
+                else {
+                    socket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+                }
+                self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
                 self.chats.push(self.initChat(a.TestingProfileId));
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     self.getMessages(a.TestingProfileId);
-                }
-
-                let STUN = {
-                    urls: 'stun:stun.l.google.com:19302'
-                };
-
-                let TURN = {
-                    urls: 'turn:turn.bistri.com:80',
-                    credential: 'homeo',
-                    username: 'homeo'
-                };
-
-                let iceServers = {
-                    iceServers: [STUN, TURN]
-                };
-                let DtlsSrtpKeyAgreement = {
-                    DtlsSrtpKeyAgreement: true
-                };
-
-                let optional = {
-                    optional: [DtlsSrtpKeyAgreement]
-                };
-
-                socket1.onopen = function () {
-                    socket1.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
-                    self.pc2 = new RTCPeerConnection(iceServers, optional);
-                    self.pc2.onicecandidate = function (event) {
-                        var candidate = event.candidate;
-                        if (candidate) {
-                            //let socket = self.videoSockets.find(a => a.id == offerSDP.TestingProfileId).socket;
-                            console.log(candidate);
-                            //self.pc2.addIceCandidate(candidate);
-                            //socket1.send(JSON.stringify({ candidate: candidate.candidate, address: candidate.address, component: candidate.component, foundation: candidate.foundation, port: candidate.port, priority: candidate.priority, Type: candidate.type, TestingProfileId: a.TestingProfileId, IsSource: false, sdpMid: candidate.sdpMid, sdpMLineIndex: candidate.sdpMLineIndex }));
-                            console.log(a);
-                            console.log(JSON.stringify({
-                                IsSource: false,
-                                TestingProfileId: a.TestingProfileId,
-                                candidate: candidate
-                            }));
-                            socket1.send(JSON.stringify({
-                                IsSource: false,
-                                TestingProfileId: a.TestingProfileId,
-                                candidate: candidate
-                            }));
-                        }
-                    };
-                    self.pc2.onicecandidatestatechange = function (event) {
-                        // let candidate = event.candidate;
-                        // if (candidate) {
-                        //self.videoSocket.send(JSON.stringify({ candidate: candidate.candidate, address: candidate.address, component: candidate.component, foundation: candidate.foundation, port: candidate.port, priority: candidate.priority, Type: candidate.type, TestingProfileId: self.testingProfileId  }));
-                        console.log(event);
-                        // }
-                    };
-                    self.pc2.ontrack = function (stream) {
-                        console.log(stream.streams[0]);
-                        $('#video1')[0].srcObject = stream.streams[0];
-
-                    }
-
-
-                    //self.getMessages(a.TestingProfileId);
                 }
                 socket.onmessage = function (msg) {
                     console.log(msg);
@@ -225,30 +138,147 @@ const app = new Vue({
                     let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId);
                     chat.messages.push(message);
                 };
-                socket1.onmessage = function (msg) {
-                    let info = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                    console.log(info);
-                    if (info.Type == 'offer') {
-                        let remoteDescription = new RTCSessionDescription({ sdp: info.Sdp, type: 'offer' });
-                        self.pc2.setRemoteDescription(remoteDescription, function () { }, function () { });
-                        const answer = self.pc2.createAnswer(
-                            function (answer) {
-                                console.log(answer);
-                                socket1.send(JSON.stringify({ TestingProfileId: info.TestingProfileId, Type: answer.type, Sdp: answer.sdp }));
-                                self.pc2.setLocalDescription(answer, function () { }, function () { });
-                            }, function () { });
+            }
+            else {
+                //if (typeof (WebSocket) !== 'undefined') {
+                //    socket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                //}
+                //else {
+                //    socket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                //}
+                if (typeof (WebSocket) !== 'undefined') {
+                socket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                 }
+                 else {
+                socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                 }
+                self.videoSockets.push({ id: a.TestingProfileId, socket: socket });
+                socket.onopen = function () {
+                    socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
+                    let configuration = { sdpSemantics: "unified-plan" };
+                    self.pc2 = new RTCPeerConnection(configuration);
+                    console.log('Created local peer connection object pc2', new Date().getSeconds(), new Date().getMilliseconds());
+
+                    self.pc2.addEventListener('icecandidate', function (e) {
+                        self.onIceCandidate(self.pc2, e, socket, a.TestingProfileId);
+                    })
+                    self.pc2.addEventListener('iceconnectionstatechange', function (e) {
+                        self.onIceStateChange(self.pc2, e);
+                    })
+                    self.pc2.addEventListener('track', self.gotRemoteStream);
+                }
+                socket.onmessage = function (msg) {
+                    console.log(msg);
+                    let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+
+                    if (message.IsSender) {
+                        if (message.candidate && message.candidate != '{}') {
+                            let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                            console.log(candidate);
+                            self.pc2.addIceCandidate(candidate);
+                        }
+                        else if (message.offer) {
+                            //console.log(message.offer);
+
+                            let CreateDescriptionPromise = new Promise(function (resolve) {
+                                console.log('Created setRemoteDescription start', new Date().getSeconds(), new Date().getMilliseconds());
+                                resolve(self.pc2.setRemoteDescription(JSON.parse(message.offer)));
+                            })
+                            let answer;
+                            CreateDescriptionPromise.then(function (ev) {
+                                console.log('Created setRemoteDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                                let CreateAnswerPromise = new Promise(function (resolve) {
+                                    console.log('Created createAnswer start', new Date().getSeconds(), new Date().getMilliseconds());
+
+                                    resolve(self.pc2.createAnswer());
+                                })
+                                CreateAnswerPromise.then(function (ans) {
+                                    console.log('Created createAnswer finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                                    answer = ans;
+                                    console.log(answer);
+                                    let CreatelocalPromise = new Promise(function (resolve) {
+                                        console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
+
+                                        resolve(self.pc2.setLocalDescription(answer));
+                                    })
+                                    CreatelocalPromise.then(function (res) {
+                                        console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                                        let obj1 = {};
+                                        for (let i in answer) {
+                                            if (typeof answer[i] != 'function')
+                                                obj1[i] = answer[i];
+                                        }
+                                        let obj = {
+                                            answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId
+                                        };
+                                        if (socket && socket.readyState == 1) {
+                                            socket.send(JSON.stringify(obj));
+                                        }
+                                    })
+                                })
+                            })
+
+                        }
                     }
-                    else {
-                        console.log(info);
-                        if (info.IsSource)
-                            self.pc2.addIceCandidate(info.candidate);
+                    console.log(message);
+
+                    if (message.Stream) {
+                        $('#img-' + message.TestingProfileId)[0].src = message.Stream;
+                        console.log(a);
                     }
-                    console.log(info);
                 };
-                socket.onclose = function (event) {
-                    alert('Мы потеряли её. Пожалуйста, обновите страницу');
-                };
-            });
+            }
+            socket.onclose = function (event) {
+                self.initSocket(type, a);
+            };
+        },
+        onIceCandidate: function (pc, e, socket, tpid) {
+            let obj1 = {};
+            for (let i in e.candidate) {
+                if (typeof e.candidate[i] != 'function')
+                    obj1[i] = e.candidate[i];
+            }
+            let obj = {
+                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid
+            };
+            console.log(e.candidate);
+            if (socket && socket.readyState == 1) {
+                console.log('send');
+                socket.send(JSON.stringify(obj));
+            }
+            else {
+                app.onIceCandidate(pc, e, socket);
+            }
+        },
+        onIceStateChange: function (pc, e) {
+
+        },
+        gotRemoteStream: function (e) {
+            $('#video-44')[0].srcObject = e.streams[0];
+        },
+
+        b64toBlob: function (b64Data, contentType = '', sliceSize = 512) {
+            // console.log(b64Data.substr(b64Data.indexOf('base64') + 7));
+            let byteCharacters = atob(b64Data.substr(b64Data.indexOf('base64') + 7));
+            let byteArrays = [];
+
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                let byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                let byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+
+            let blob = new Blob(byteArrays, { type: contentType });
+            return blob;
         },
         createAnswer: function (offerSDP) {
             let self = this;
@@ -364,7 +394,7 @@ const app = new Vue({
             self.currentUser = user;
             self.getErrors();
             $('#full-wrapper').modal('toggle');
-                //console.log(user);
+            //console.log(user);
         },
         getErrors: function () {
             let self = this;

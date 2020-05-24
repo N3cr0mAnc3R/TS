@@ -1,6 +1,10 @@
 ﻿<script src="~/Content/f-awesome.js"></script>
 <link href="~/Content/font-awesome.css" rel="stylesheet" />
 <link href="~/Content/Testing/Index.css" rel="stylesheet" />
+@{
+    ViewBag.Title = "Тестирование";
+}
+
 <div id="main-window">
     <div class="test-process">
         <div class="main-wrapper">
@@ -30,7 +34,8 @@
                 </div>
                 <div class="tip">
                     <span v-if="selectedQuestion.TypeAnswerId == 2">
-                        * {{switchLocal(2)}}</span>
+                        * {{switchLocal(2)}}
+                    </span>
                     <span v-if="selectedQuestion.TypeAnswerId == 1">* {{switchLocal(3)}}</span>
                     <span v-if="selectedQuestion.TypeAnswerId == 3">* {{switchLocal(4)}}</span>
                 </div>
@@ -41,8 +46,9 @@
                         </svg>
                     </div>
                     <template v-for="i in questions.length">
-                        <div class="page" v-bind:class="{'active': page == i, 'answered': IsQuestionAnswered(i)}" v-on:click="selectQuestion(i)">{{i}}
-</div>
+                        <div class="page" v-bind:class="{'active': page == i, 'answered': IsQuestionAnswered(i)}" v-on:click="selectQuestion(i)">
+                            {{i}}
+                        </div>
                     </template>
                     <div class="page" v-on:click="selectQuestion(page+1)" v-bind:class="{'disabled': page == questions.length}">
                         <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -63,76 +69,78 @@
                 <div class="top-panel">
                     <span class="close-btn" v-on:click="openTip()"><i class="fa fa-times"></i></span>
                 </div>
-                <img height="400" />
-                <br />
-                <img height="400" />
-            </div>
-
-        </div>
-    </div>
-    <div class="open-chat-wrapper"> <button v-on:click="toggleChat()">{{switchLocal(7)}}</button></div>
-    <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}">
-        <div class="control"><span v-if="!shownVideos" v-on:click="shownVideos = true"><i class="fa fa-video-camera"></i></span><span v-on:click="shownVideos = !shownVideos"><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-plus' : !shownVideos }"></i></span></div>
-        <div class="video">
-            <div class="camera-wrapper">
-                <video id="video1" autoplay="autoplay" muted></video>
-            </div>
-            <div class="screen-wrapper">
-                <video id="video2" autoplay="autoplay" muted></video>
-            </div>
-        </div>
-    </div>
-    <div id="full-chat-wrapper" v-bind:class="{'opened': chat.IsOpened}">
-        <div class="chat-panel">
-            <button v-on:click="toggleTypeChat()"><span v-if="chat.IsChatMOpened"><i class="fa fa-video"></i></span><span v-if="chat.IsChatVOpened"><i class="fa fa-keyboard"></i></span></button>
-            <span v-on:click="toggleChat()" class="close-btn"><i class="fa fa-times"></i></span>
-        </div>
-        <div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
-            <div v-for="participant in chat.participants">
-                <div id="video-wrapper">
-                    @*<video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>*@
-                </div>
-            </div>
-        </div>
-        <div class="text-chat-wrapper" v-if="chat.IsChatMOpened">
-            <ul class="chat-wrapper">
-                <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': message.IsSender}">
-                    <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
+                <div v-for="tip in sourceMaterials">
+                    <img height="400" v-bind:src="tip.Image" />
                     <br />
-                </li>
-            </ul>
-            <div class="send-message-wrapper">
-                <div class="message-input"><textarea v-model="chat.Message"></textarea><button v-on:click="sendMessage"><span class="text">Отправить </span><span class="fa fa-send"></span></button></div>
+                </div>
+
             </div>
-            <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
-                <div class="participant-wrapper" v-for="participant in chat.participants">
-                    <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+        </div>
+        <div class="open-chat-wrapper"> <button v-on:click="toggleChat()">{{switchLocal(7)}}</button></div>
+        <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}">
+            <div class="control"><span v-if="!shownVideos" v-on:click="shownVideos = true"><i class="fa fa-video-camera"></i></span><span v-on:click="shownVideos = !shownVideos"><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-plus' : !shownVideos }"></i></span></div>
+            <div class="video">
+                <div class="camera-wrapper">
+                    <video id="video1" autoplay="autoplay" muted></video>
+                </div>
+                <div class="screen-wrapper">
+                    <video id="video2" autoplay="autoplay" muted></video>
                 </div>
             </div>
         </div>
-    </div>
-    <div class="modal fade" id="finish-game" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="title">Подтверждение</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    Вы действительно хотите завершить тестирование?
-                    <div v-if="showCountLeft()">
-                        <br />
-                        Вы не ответили на {{showCountLeft()}}.
+        <div id="full-chat-wrapper" v-bind:class="{'opened': chat.IsOpened}">
+            <div class="chat-panel">
+                <button v-on:click="toggleTypeChat()"><span v-if="chat.IsChatMOpened"><i class="fa fa-video"></i></span><span v-if="chat.IsChatVOpened"><i class="fa fa-keyboard"></i></span></button>
+                <span v-on:click="toggleChat()" class="close-btn"><i class="fa fa-times"></i></span>
+            </div>
+            <div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
+                <div v-for="participant in chat.participants">
+                    <div id="video-wrapper">
+                        @*<video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>*@
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                    <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="finishTest()">Завершить</button>
+            </div>
+            <div class="text-chat-wrapper" v-if="chat.IsChatMOpened">
+                <ul class="chat-wrapper">
+                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': message.IsSender}">
+                        <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
+                        <br />
+                    </li>
+                </ul>
+                <div class="send-message-wrapper">
+                    <div class="message-input"><textarea v-model="chat.Message"></textarea><button v-on:click="sendMessage"><span class="text">Отправить </span><span class="fa fa-send"></span></button></div>
+                </div>
+                <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
+                    <div class="participant-wrapper" v-for="participant in chat.participants">
+                        <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                    </div>
                 </div>
             </div>
         </div>
+        <div class="modal fade" id="finish-game" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="title">Подтверждение</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Вы действительно хотите завершить тестирование?
+                        <div v-if="showCountLeft()">
+                            <br />
+                            Вы не ответили на {{showCountLeft()}}.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="finishTest()">Завершить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <img id="photo" />
     </div>
 </div>
 

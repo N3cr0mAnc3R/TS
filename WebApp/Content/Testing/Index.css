@@ -16,6 +16,24 @@
 #main-window {
   margin-bottom: 75px;
 }
+.main-window {
+  border: 1px solid #ddd;
+  padding: 40px;
+  box-shadow: #a2a2a2 0px 3px 4px;
+  border-top: none;
+  background-color: #fff;
+  height: 400px;
+  width: 700px;
+  margin: auto;
+  margin-top: 80px;
+}
+.main-window input {
+  width: 100%;
+  min-width: 600px;
+}
+.main-window input::placeholder {
+  text-align: center;
+}
 .input-pin {
   width: 1024px;
   height: 1024px;
@@ -416,6 +434,7 @@
   background: #C4C4C4;
   box-shadow: -2px 0px 4px rgba(0, 0, 0, 0.5);
   transition: right 0.5s ease;
+  z-index: 5;
 }
 .panel-right.opened {
   right: 0;

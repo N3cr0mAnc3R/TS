@@ -7,6 +7,7 @@ namespace WebApp.Models.Common
 {
     public class ChatMessage
     {
+        public int Id { get; set; }
         public string Message { get; set; }
         public DateTime Date { get; set; }
         public bool IsSender { get; set; }

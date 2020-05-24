@@ -6,23 +6,52 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
+using WebApp.Models.Account;
 using WebApp.Models.Common;
 
 namespace WebApp.Controllers
 {
     public class AuditoryController : BaseController
     {
-        public ActionResult List()
+        public async Task<ActionResult> List()
         {
-            return View();
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
+            {
+                return View();
+            }
+            else if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4 }))
+            {
+                return Redirect("/Verification/List");
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
-        public ActionResult Index(int Id)
+        public async Task<ActionResult> Index(int Id)
         {
-            return View();
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
-        public ActionResult Moderate(int Id)
+        public async Task<ActionResult> Moderate(int Id)
         {
-            return View();
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
         public ActionResult DownloadVideoFile(int Id, int Type)
         {
@@ -30,22 +59,22 @@ namespace WebApp.Controllers
             return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         }
         [HttpPost]
-        public JsonResult GetAuditoryInfo(int Id)
+        public async Task<JsonResult> GetAuditoryInfo(int Id)
         {
             return Json(AuditoryManager.GetAuditoryById(CurrentUser.Id, Id));
         }
         [HttpPost]
-        public JsonResult GetAuditoryInfoForModerate(int Id)
+        public async Task<JsonResult> GetAuditoryInfoForModerate(int Id)
         {
             return Json(AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id));
         }
         [HttpPost]
-        public JsonResult GetAuditoryList()
+        public async Task<JsonResult> GetAuditoryList()
         {
             return Json(AuditoryManager.GetAuditoryList(CurrentUser.Id));
         }
         [HttpPost]
-        public JsonResult UpdateAuditoryInfo(Auditory auditory)
+        public async Task<JsonResult> UpdateAuditoryInfo(Auditory auditory)
         {
             try
             {
@@ -56,13 +85,13 @@ namespace WebApp.Controllers
                 }
                 return Json(new { Error = "Ошибка соединения" });
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 return Json(new { Error = e.Message });
             }
         }
         [HttpPost]
-        public JsonResult GenerateConfiguration(Auditory auditory)
+        public async Task<JsonResult> GenerateConfiguration(Auditory auditory)
         {
             if (auditory != null)
             {
@@ -80,6 +109,16 @@ namespace WebApp.Controllers
             }
             return Json(auditory);
         }
+        [HttpPost]
+        public async Task<JsonResult> GetAuditoryCompsWithoutPin(int Id)
+        {
+            return Json(await AuditoryManager.GetAuditoryCompsWithoutPin(Id, CurrentUser.Id));
+        }
+        [HttpPost]
+        public async Task ResetPins(int Id)
+        {
+            await AuditoryManager.ResetPins(Id, CurrentUser.Id);
+        }
         bool IsPinBusy(int pin, List<TestComputer> computers)
         {
             bool result = false;
@@ -88,7 +127,7 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult UpdatePlaceConfig(PlaceConfigModel model)
+        public async Task<JsonResult> UpdatePlaceConfig(PlaceConfigModel model)
         {
             AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
             return Json(true);
@@ -100,7 +139,7 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetPlaceConfig(int pin)
+        public async Task<JsonResult> GetPlaceConfig(int pin)
         {
             return Json(AuditoryManager.GetPlaceConfig(pin, CurrentUser.Id));
         }
