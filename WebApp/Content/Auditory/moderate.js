@@ -23,7 +23,8 @@ const app = new Vue({
         errorTypes: [],
         shownError: false,
         currentError: 0,
-        gotICE: false
+        gotICE: false,
+        me: {}
 
 
     },
@@ -58,6 +59,15 @@ const app = new Vue({
                     self.errorTypes = errorTypes;
                 }
             });
+
+            $.ajax({
+                url: "/auditory/GetCurrentUser",
+                type: "POST",
+                async: false,
+                success: function (user) {
+                    self.me = user;
+                }
+            });
         },
         filterComps: function (position) {
             let self = this;
@@ -90,6 +100,7 @@ const app = new Vue({
             });
         },
         initSocket: function (type, a) {
+            if (a.TestingProfileId == 0) return;
             let self = this;
             let socket = null;
             let STUN = {
@@ -133,9 +144,15 @@ const app = new Vue({
                 }
                 socket.onmessage = function (msg) {
                     console.log(msg);
-                    let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                    message.Date = new Date(message.Date);
-                    let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId);
+                    let message;
+                    if (msg.data.indexOf("\0") != -1) {
+                        message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                    }
+                    else {
+                        message = JSON.parse(msg.data);
+                    }
+                    message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+                    let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
                     chat.messages.push(message);
                 };
             }
@@ -151,7 +168,7 @@ const app = new Vue({
                  }
                  else {
                 socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                 }
+                // }
                 self.videoSockets.push({ id: a.TestingProfileId, socket: socket });
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
@@ -252,6 +269,10 @@ const app = new Vue({
             else {
                 app.onIceCandidate(pc, e, socket);
             }
+        },
+        isMe: function (message) {
+            let self = this;
+            return self.me.Id == message.UserIdFrom;
         },
         onIceStateChange: function (pc, e) {
 
@@ -502,6 +523,20 @@ const app = new Vue({
             let socket = self.chatSockets.find(a => a.id == self.testingProfileId).socket;
             socket.send(JSON.stringify({ Message: self.currentChat.Message, Date: new Date(), IsSender: false, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.currentChat.Message = "";
+        },
+        switchLocal: function (id) {
+            let self = this;
+            switch (id) {
+                case 1: return self.localization == 1 ? "Аудитория" : "Auditory";
+                case 2: return self.localization == 1 ? "Выдано" + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
+                case 3: return self.localization == 1 ? "Сохранить" : "Save";
+                case 4: return self.localization == 1 ? "Сообщить о нарушении" : "Issue a warning";
+                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 6: return self.localization == 1 ? "Приостановить тестирование" : "Pause test";
+                case 7: return self.localization == 1 ? "Возобновить тестирование" : "Resume test";
+                case 8: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 9: return self.localization == 1 ? "Закрыть" : "Close";
+            }
         },
         getDateFormat: function (date) {
             return date.toLocaleTimeString();

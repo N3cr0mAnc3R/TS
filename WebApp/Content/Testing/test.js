@@ -16,6 +16,7 @@
             loading: null,
             loaded: null
         },
+        unloadedImage: "",
         buffer: {},
         intervalConnection: null,
         intervalConnectionLost: null,
@@ -46,7 +47,11 @@
         loadedSocket: false,
         shownVideos: true,
         gotICE: false,
-        sourceMaterials: []
+        sourceMaterials: [],
+        counter: 0,
+        maxTipWidth: 540,
+        unreadCount: 0,
+        currentUser: {}
     },
     methods: {
         init: function () {
@@ -61,115 +66,17 @@
             self.testingProfileId = newId;
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
-            if (!self.stream) {
-                navigator.getUserMedia(
-                    { video: true, audio: true },
-                    function (stream) {/*callback в случае удачи*/
-                        self.stream = stream;
-                        self.cameraRecorder = new MediaRecorder(stream);
-                        self.cameraRecorder.ondataavailable = self.recordingCamera;
-                        self.cameraRecorder.start(1000);
-
-                        $('#video1')[0].srcObject = stream;
-
-                        if (typeof (WebSocket) !== 'undefined') {
-                            self.chatSocket = new WebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
-                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + ":443/StreamHandler.ashx");
-                        } else {
-                            self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
-                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + ":443/StreamHandler.ashx");
-                        }
-                        //if (typeof (WebSocket) !== 'undefined') {
-                        //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //} else {
-                        //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //}
-                        self.chatSocket.onopen = function () {
-                            self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                            self.getMessages(self.testingProfileId);
-                        }
-                        self.videoSocket.onopen = function () {
-                            self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                            self.initRTCPeer();
-                        }
-
-                        self.chatSocket.onmessage = function (msg) {
-                            //self.messages.push(msg);
-                            let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                            message.Date = new Date(message.Date);
-                            console.log(message);
-                            self.chat.messages.push(message);
-                        };
-                        self.videoSocket.onmessage = function (msg) {
-                            let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
-                            if (!message.IsSender) {
-                                if (message.candidate && message.candidate != '{}') {
-                                    let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                                    console.log(candidate);
-                                    self.pc1.addIceCandidate(candidate);
-                                }
-
-                                else if (message.answer) {
-                                    let createDescPromise = new Promise(function (resolve) {
-                                        console.log('start remote');
-                                        let sdp = JSON.parse(message.answer).sdp;
-                                        console.log(sdp);
-                                        //if (sdp.search(/^a=mid.*$/gm) === -1) {
-                                        var mlines_1 = sdp.match(/^m=.*$/gm);
-                                        console.log(mlines_1);
-                                        let sdps = sdp.split(/^m=.*$/gm);
-                                        console.log(sdps);
-                                        mlines_1.forEach(function (elem, idx) {
-                                            console.log(elem, idx);
-                                            mlines_1[idx] = elem + '\na=mid:' + idx;
-                                        });
-                                        //sdp = "";
-                                        //sdp += sdps[0];
-                                        //sdp += mlines_1[1];
-                                        //sdp += sdps[2];
-                                        //sdp += mlines_1[0];
-                                        //sdp += sdps[1];
-                                        //sdps.forEach(function (elem, idx) {
-                                        //    console.log(elem, idx, mlines_1[idx]);
-                                        //    if (mlines_1[idx]) {
-                                        //        let cur = 0;
-                                        //        if (idx == 0) {
-                                        //            cur = 1;
-                                        //        }
-                                        //        else {
-                                        //            cur = 0;
-                                        //        }
-                                        //        sdps[idx] = elem + mlines_1[cur];
-                                        //    }
-                                        //});
-                                        //sdp = sdps.join('');
-                                        // description.sdp = sdp;
-                                        //}
-                                        console.log(JSON.stringify(sdp));
-                                        resolve(self.pc1.setRemoteDescription({ type: 'answer', sdp: sdp }));
-                                    })
-                                    createDescPromise.then(function (result) {
-                                        console.log('stop remote');
-                                    })
-                                    //console.log(message.answer);
-                                }
-                            }
-                            //console.log(message);
-                        }
-
-                        self.chatSocket.onclose = function (event) {
-                            // alert('Мы потеряли её. Пожалуйста, обновите страницу');
-                        };
-
-                    },
-                    function () {/*callback в случае отказа*/ });
-            }
-            else {
-                self.cameraRecorder.start(10);
-            }
+            self.initWebCam();
+            self.initChat();
+            //GetCurrentUser
+            $.ajax({
+                url: "/user/GetCurrentUser?Id=" + newId,
+                type: "POST",
+                async: false,
+                success: function (user) {
+                    self.currentUser = user;
+                }
+            });
         },
         startTest: function (id) {
             let self = this;
@@ -197,6 +104,7 @@
                     //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
                     resp3[0].map(function (a) {
                         a.IsAnswered = false;
+                        a.fileId = null;
                         a.TestingPackage = resp1[0].Packages.filter(function (b) { return b.AnswerId == a.Id; })[0];
                     });
                     self.answers = resp3[0];
@@ -221,6 +129,11 @@
                                     else if (a.TypeAnswerId == 3) {
                                         a.answered = true;
                                         a.answer = b.UserAnswer;
+                                        a.FileId = b.FileId;
+                                    }
+                                    else if (a.TypeAnswerId == 4) {
+                                        a.answered = true;
+                                        a.FileId = b.FileId;
                                     }
                                 }
                             })
@@ -366,6 +279,36 @@
             this.selectedQuestion.changed = true;
             this.selectedQuestion.answered = true;
         },
+        changeFile: function (e) {
+            let self = this;
+            let extension = e.target.files[0].name.substr(e.target.files[0].name.indexOf('.'));
+            let formaData = new FormData();
+            formaData.append('Id', self.selectedQuestion.Answers[0].TestingPackage.Id);
+            formaData.append('File', e.target.files[0]);
+            formaData.append('AnswerFileExtension', extension);
+            $.ajax({
+                type: 'POST',
+                url: '/user/SaveAnswerFile',
+                data: formaData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    //Сбрасываем флаг изменения
+                    self.selectedQuestion.changed = false;
+                    //Для подсветки решённых заданий
+                    self.selectedQuestion.answered = true;
+                    self.selectedQuestion.Answers[0].fileId = data;
+                }
+            });
+
+            //Такая же метка, как в radio, чтобы исключить повторную загрузку
+            this.selectedQuestion.changed = true;
+            this.selectedQuestion.answered = true;
+            //self.AnswerFileExtension = ;
+        },
+        downloadFile: function (id) {
+            window.open('/auditory/DownloadFile?Id=' + id, '_blank');
+        },
         IsQuestionAnswered: function (id) {
             let self = this;
             let flag = false;
@@ -389,19 +332,12 @@
                 //Изображение вопроса
                 self.loadObject.loaded = false;
                 self.loadObject.loading = true;
-                $.ajax({
-                    type: 'POST',
-                    dataType: 'json',
-                    url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id,
-                    success: function (d) {
-                        self.selectedQuestion.QuestionImage = d.QuestionImage;
-                        //После загрузки ставим метку, что загружено
-                        self.selectedQuestion.IsLoaded = true;
-                    }
-                });
-                let counter = 0;
+                self.counter = 0;
+                self.askQuestionImagePart(1);
+                console.log(1234);
                 //Изображения ответов
-                if (self.selectedQuestion.TypeAnswerId != 3) {
+                if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                    console.log(123);
                     self.selectedQuestion.Answers.forEach(function (a) {
                         $.ajax({
                             type: 'POST',
@@ -409,8 +345,9 @@
                             url: '/user/GetAnswerImage?Id=' + a.Id,
                             success: function (d) {
                                 a.AnswerImage = d.AnswerImage;
-                                counter++;
-                                if (counter == self.selectedQuestion.Answers.length) {
+                                self.counter++;
+                                console.log(self.counter);
+                                if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                     self.loadObject.loading = false;
                                     self.loadObject.loaded = true;
                                     //self.loadTestObject.loading = false;
@@ -420,11 +357,41 @@
                         });
                     });
                 }
-                else {
-                    self.loadObject.loading = false;
-                    self.loadObject.loaded = true;
-                }
             }
+        },
+        askQuestionImagePart: function (part) {
+            let self = this;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
+                success: function (d) {
+                    if (!self.unloadedImage || part == 1) {
+                        self.selectedQuestion.QuestionImage = "";
+                        self.unloadedImage = "";
+                    }
+                    if (d.QuestionImage.indexOf('flag') != -1) {
+                        self.unloadedImage += d.QuestionImage.substr(4);
+                        //self.selectedQuestion.QuestionImage += d.QuestionImage.substr(4);
+                        self.askQuestionImagePart(part + 1);
+                    }
+                    else {
+                        console.log(self.counter);
+                        self.unloadedImage += d.QuestionImage;
+                        self.selectedQuestion.QuestionImage = self.unloadedImage;
+                        //После загрузки ставим метку, что загружено
+                        self.counter++;
+                        self.selectedQuestion.IsLoaded = true;
+                        if (self.counter == self.selectedQuestion.Answers.length + 1 || self.selectedQuestion.TypeAnswerId == 3) {
+                            self.loadObject.loading = false;
+                            self.loadObject.loaded = true;
+                            console.log('loaded');
+                        }
+                        //self.selectedQuestion.QuestionImage += d.QuestionImage;
+                    }
+
+                }
+            });
         },
         getHeight: function (Id) {
             let height = $('#answer-' + Id).height();
@@ -439,14 +406,13 @@
             let self = this;
             let answers = [];
             //Запаковываем все ответы для предыдущего вопроса
-            if (self.selectedQuestion.TypeAnswerId != 3) {
+            if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                 self.selectedQuestion.Answers.forEach(function (item) {
                     answers.push({ TestingPackageId: item.TestingPackage.Id, TestingTime: 3, UserAnswer: item.IsAnswered ? "1" : null });
                 })
             }
-            else {
-                answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: self.selectedQuestion.answer });
-
+            else if (self.selectedQuestion.TypeAnswerId == 3) {
+                answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: self.selectedQuestion.answer, FileId: self.selectedQuestion.Answers[0].fileId });
             }
             $.ajax({
                 type: 'POST',
@@ -514,6 +480,118 @@
                 }
             }, 1000);
             //self.startCapture();
+        },
+        initChat: function () {
+            let self = this;
+            if (typeof (WebSocket) !== 'undefined') {
+                self.chatSocket = new WebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
+            } else {
+                self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
+            }
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+            //} else {
+            //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+            //}
+            self.chatSocket.onopen = function () {
+                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+                self.getMessages(self.testingProfileId);
+            };
+            self.chatSocket.onmessage = function (msg) {
+                //self.messages.push(msg);
+                let message;
+                if (msg.data.indexOf("\0") != -1) {
+                    message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                }
+                else {
+                    message = JSON.parse(msg.data);
+                }
+                message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+                self.chat.messages.push(message);
+                if (!self.chat.IsOpened) {
+                    self.unreadCount++;
+                }
+            };
+            self.chatSocket.onclose = function (event) {
+                self.initChat();
+                // alert('Мы потеряли её. Пожалуйста, обновите страницу');
+            };
+        },
+        isMe: function (message) {
+            let self = this;
+            return message.UserIdFrom == self.currentUser;
+        },
+        initWebCam: function () {
+            let self = this;
+            if (!self.stream) {
+                navigator.getUserMedia(
+                    { video: true, audio: true },
+                    function (stream) {/*callback в случае удачи*/
+                        self.stream = stream;
+                        self.cameraRecorder = new MediaRecorder(stream);
+                        self.cameraRecorder.ondataavailable = self.recordingCamera;
+                        self.cameraRecorder.start(1000);
+
+                        $('#video1')[0].srcObject = stream;
+
+                        if (typeof (WebSocket) !== 'undefined') {
+                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                        } else {
+                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                        }
+                        //if (typeof (WebSocket) !== 'undefined') {
+                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //} else {
+                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //}
+                        self.videoSocket.onopen = function () {
+                            self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+                            self.initRTCPeer();
+                        }
+
+                        self.videoSocket.onmessage = function (msg) {
+                            let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+
+                            if (!message.IsSender) {
+                                if (message.candidate && message.candidate != '{}') {
+                                    let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                                    console.log(candidate);
+                                    self.pc1.addIceCandidate(candidate);
+                                }
+
+                                else if (message.answer) {
+                                    let createDescPromise = new Promise(function (resolve) {
+                                        console.log('start remote');
+                                        let sdp = JSON.parse(message.answer).sdp;
+                                        console.log(sdp);
+                                        //if (sdp.search(/^a=mid.*$/gm) === -1) {
+                                        var mlines_1 = sdp.match(/^m=.*$/gm);
+                                        console.log(mlines_1);
+                                        let sdps = sdp.split(/^m=.*$/gm);
+                                        console.log(sdps);
+                                        mlines_1.forEach(function (elem, idx) {
+                                            console.log(elem, idx);
+                                            mlines_1[idx] = elem + '\na=mid:' + idx;
+                                        });
+                                        console.log(JSON.stringify(sdp));
+                                        resolve(self.pc1.setRemoteDescription({ type: 'answer', sdp: sdp }));
+                                    })
+                                    createDescPromise.then(function (result) {
+                                        console.log('stop remote');
+                                    })
+                                    //console.log(message.answer);
+                                }
+                            }
+                            //console.log(message);
+                        }
+
+
+                    },
+                    function () {/*callback в случае отказа*/ });
+            }
+            else {
+                self.cameraRecorder.start(10);
+            }
         },
         finishTest: function () {
             let self = this;
@@ -659,6 +737,7 @@
         resizing: function (self) {
             $(document).on('mouseup', function () { self.stopResizing(self); });
             $('#panel-right').width(self.tipPosition.start - event.pageX);
+            self.maxTipWidth = self.tipPosition.start - event.pageX - 20;
         },
         stopResizing: function (self) {
             self.tipPosition.width = $('#panel-right').width();
@@ -669,6 +748,9 @@
         toggleChat: function () {
             let self = this;
             self.chat.IsOpened = !self.chat.IsOpened;
+            if (self.chat.IsOpened) {
+                self.unreadCount = 0;
+            }
         },
         toggleTypeChat: function () {
             let self = this;
@@ -705,10 +787,12 @@
                 case 1: return self.localization == 1 ? "Осталось" : "Left";
                 case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
                 case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
-                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select the file to download (if necessary) and enter the answer in the field";
+                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select file to upload (if necessary) and enter the answer in the field";
                 case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
                 case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
                 case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
+                case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
+                case 9: return self.localization == 1 ? "Администратор" : "Administrator";
             }
         },
         initRTCPeer: function () {

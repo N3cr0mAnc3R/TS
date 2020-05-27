@@ -4,37 +4,34 @@
     ViewBag.Title = "Login";
 }
 
-<h2>Login</h2>
 
 
-<div class="row">
-    <div class="col-md-8">
-        <section id="loginForm">
-            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
-            {
-                <h4>Используйте локальную учетную запись для входа.</h4>
-                <hr />
-                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Login, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.TextBoxFor(m => m.Login, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Login, "", new { @class = "text-danger" })
-                    </div>
+<div class="container text-center">
+    <section class="login-wrapper">
+        @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-horizontal", role = "form" }))
+        {
+            <h4 id="nav-7"></h4>
+            <hr />
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="form-group">
+                <label class="control-label text-label" for="Login" id="nav-8"></label>
+                <div>
+                    @Html.TextBoxFor(m => m.Login, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Login, "", new { @class = "text-danger" })
                 </div>
-                <div class="form-group">
-                    @Html.LabelFor(m => m.Password, new { @class = "col-md-2 control-label" })
-                    <div class="col-md-10">
-                        @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
-                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
-                    </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label text-label" for="Password" id="nav-9"></label>
+                <div>
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
                 </div>
-                <div class="form-group">
-                    <div class="col-md-offset-2 col-md-10">
-                        <input type="submit" value="Выполнить вход" class="btn btn-default" />
-                    </div>
+            </div>
+            <div class="form-group">
+                <div class="submit-login">
+                    <button type="submit" id="nav-10" class="btn btn-default"></button>
                 </div>
-            }
-        </section>
-    </div>
+            </div>
+        }
+    </section>
 </div>

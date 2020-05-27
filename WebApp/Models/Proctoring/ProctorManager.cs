@@ -199,6 +199,13 @@ namespace WebApp.Models.Proctoring
                 );
             }
         }
+        public async Task<EnrolleeModel> GetEnrolleeInfo(int testingProfileId, Guid? userUID, string localization = null)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<EnrolleeModel>(sql: "[dbo].[Administrator_TestingProfileInfoGet]", new { testingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task SaveInfoAboutTest(Guid userUID, SaveMarkModel model, string localization = null)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())

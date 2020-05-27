@@ -11,6 +11,7 @@ using System.Web;
 using WebApp.Models.Common;
 using WebApp.Models.DB;
 using WebApp.Models.UserTest;
+using WebApp.Models.Proctoring;
 
 namespace WebApp.Models
 {
@@ -66,6 +67,13 @@ namespace WebApp.Models
                 return cnt.Query<TestingPackage>(sql: "[dbo].[UserPlace_TestingPackagesGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<Guid> GetUserInfoByTestingProfile(int testingProfileId, string Localization)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<Guid>(sql: "[dbo].[UserPlace_UserUIDTesingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public int ToggleTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID, string localization)
         {
             using (var cnt = Concrete.OpenConnection())
@@ -74,7 +82,7 @@ namespace WebApp.Models
                 return cnt.Query<int>("UserPlace_TestingTimeRemainingGet", new { testingProfileId, localization, userUID }, commandType: CommandType.StoredProcedure).FirstOrDefault();
             }
         }
-        public async Task StartTest(int testingProfileId, Guid userUID, string Localization)
+        public async Task StartTest(int testingProfileId, Guid? userUID, string Localization)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
@@ -123,6 +131,46 @@ namespace WebApp.Models
         }
 
         //todo: Перебросить в чат
+        public async Task<Guid> FileAnswerUploadAsync(SavePictureModel model, Guid? guid)
+        {
+            using (var conn = await Concrete.OpenConnectionAsync())
+            {
+                using (IDbTransaction trans = conn.BeginTransaction())
+                {
+                    try
+                    {
+                        using (var multi = await conn.QueryMultipleAsync("UserPlace_FileSave",
+                                            new
+                                            {
+                                                model.AnswerFile.ContentType,
+                                                UserId = guid,
+                                                TestingPackageId = model.Id,
+                                                extension = model.AnswerFileExtension
+                                            }, trans, commandType: CommandType.StoredProcedure))
+                        {
+                            FileStreamResult filestreamResult = multi.Read<FileStreamResult>().FirstOrDefault();
+                            Stream str = model.AnswerFile.InputStream;
+                            using (SqlFileStream sqlFilestream = new SqlFileStream(filestreamResult.FileStreamPath, filestreamResult.FileStreamContext, FileAccess.Write, FileOptions.SequentialScan, 0))
+                            {
+                                await str.CopyToAsync(sqlFilestream, 2000);
+                            }
+                            return multi.ReadFirstOrDefault<Guid>();
+                            trans.Commit();
+                        }
+                        //catch (Exception ex)
+                        //{
+                        //    return ex;
+                        //}
+                        //return JsonConvert.SerializeObject(new { name = filestreamResult.Name, success = true });
+                    }
+                    catch (Exception ex)
+                    {
+                        return Guid.Empty;
+                        // return JsonConvert.SerializeObject(new { errorMsg = ex.Message, success = false });
+                    }
+                }
+            }
+        }
         public async Task FileUploadAsync(SavePictureModel model, int Type, Guid? guid)
         {
             using (var conn = await Concrete.OpenConnectionAsync())
@@ -134,7 +182,7 @@ namespace WebApp.Models
                         FileStreamResult filestreamResult = (await conn.QueryAsync<FileStreamResult>("UserPlace_SaveStream",
                                             new
                                             {
-                                                ContentType = Type == 1? model.CameraFile.ContentType : model.ScreenFile.ContentType,
+                                                ContentType = Type == 1 ? model.CameraFile.ContentType : model.ScreenFile.ContentType,
                                                 PlaceConfig = model.Id,
                                                 UserId = guid,
                                                 extension = ".webm",
@@ -186,7 +234,40 @@ namespace WebApp.Models
                             Transaction = trans
                         };
 
-                       // filestream.Stream = stream;
+                        // filestream.Stream = stream;
+                        byte[] data = new byte[(int)stream.Length];
+                        stream.Read(data, 0, data.Length);
+                        filestream.Stream = stream;
+                        // Теперь помечаем, используемые ресурсы, т
+
+                        return filestream;
+                    }
+                }
+                catch (Exception e)
+                {
+                    return null;
+                }
+            }
+        }
+        public FileStreamDownload DownloadFileById(Guid? FileId, Guid? UserId)
+        {
+            using (var conn = Concrete.OpenConnection())
+            {
+                try
+                {
+                    using (IDbTransaction trans = conn.BeginTransaction())
+                    {
+                        //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
+                        FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+
+                        MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
+                        {
+                            Connection = conn,
+                            SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
+                            Transaction = trans
+                        };
+
+                        // filestream.Stream = stream;
                         byte[] data = new byte[(int)stream.Length];
                         stream.Read(data, 0, data.Length);
                         filestream.Stream = stream;
@@ -222,7 +303,8 @@ namespace WebApp.Models
         {
             using (var cnt = Concrete.OpenConnection())
             {
-                return cnt.Query<QuestionModel>(sql: "[dbo].[UserPlace_QuestionImageGet]", new { questionId, Localization }, commandType: CommandType.StoredProcedure);
+                var t = cnt.Query<QuestionModel>(sql: "[dbo].[UserPlace_QuestionImageGet]", new { questionId, Localization }, commandType: CommandType.StoredProcedure);
+                return t;
             }
         }
         public IEnumerable<AnswerModel> GetAnswerImage(int answerId, string Localization)
@@ -257,7 +339,7 @@ namespace WebApp.Models
         {
             using (var cnt = Concrete.OpenConnection())
             {
-                var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer, fileId = (Guid?)null });
+                var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer, fileId = a.FileId });
                 cnt.Execute(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
             }
         }
@@ -272,29 +354,29 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                var result =  await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { testingProfileId, Localization, userUid }, commandType: CommandType.StoredProcedure);
+                var result = await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { testingProfileId, Localization, userUid }, commandType: CommandType.StoredProcedure);
 
                 foreach (var item in result)
                 {
-                    item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { structureDisciplineId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
+                    item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
                     item.Image = Convert.ToBase64String(item.SourceMaterialImage);
                 }
 
                 return result;
             }
         }
-        public async Task<bool> GetSecurity(int testingProfileId, Guid? userUID, string PlaceConfig = null )
+        public async Task<bool> GetSecurity(int testingProfileId, Guid? userUID, string PlaceConfig = null)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstAsync<bool>(sql: "[dbo].[Administrator_TestingProfileCanGet]", new { testingProfileId, userUID, PlaceConfig }, commandType: CommandType.StoredProcedure);
             }
         }
-        public void SendMessage(ChatMessage message)
+        public async Task<int> SendMessage(ChatMessage message)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                cnt.Execute(sql: "[dbo].[Administrator_ChatRoomSave]", new { message.TestingProfileId, message.ParentId, message.UserIdFrom, message.UserIdTo, message.Message, message.Date }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstAsync<int>(sql: "[dbo].[Administrator_ChatRoomSave]", new { message.TestingProfileId, message.ParentId, message.UserIdFrom, message.UserIdTo, message.Message, message.Date }, commandType: CommandType.StoredProcedure);
             }
         }
     }

@@ -73,6 +73,7 @@ textarea {
   display: flex;
   padding: 16px;
   justify-content: flex-start;
+  background: #fff;
 }
 .navbar-system .container {
   display: flex;
@@ -104,10 +105,11 @@ textarea {
   .navbar-system .container .base-nav .navbar-collapse1 ul li,
   .navbar-system .container .nav-item .navbar-collapse1 ul li {
     padding: 0 5px;
+    margin-right: 10px;
   }
   .navbar-system .container .base-nav .navbar-collapse1 ul li:not(:first-child),
   .navbar-system .container .nav-item .navbar-collapse1 ul li:not(:first-child) {
-    border-left: 1px solid #ddd;
+    /*border-left: 1px solid #ddd;*/
   }
 }
 .navbar-system .container .base-nav a,
@@ -135,6 +137,10 @@ body footer {
   line-height: 75px;
   color: #A6ACBC;
   font-size: 20px;
+  z-index: 5;
+}
+body #window-without-loader {
+  display: none;
 }
 body .localization-wrapper {
   display: flex;
@@ -159,6 +165,12 @@ body .localization-wrapper .localization-item.active {
   display: block;
   color: #000;
   box-shadow: inset #565c72 0px 1px 4px;
+}
+#nav-7 {
+  color: #565C72;
+}
+a:focus {
+  outline: none;
 }
 @keyframes rotate {
   to {
@@ -194,4 +206,34 @@ body .localization-wrapper .localization-item.active {
 .loader-wrapper .loading__ring svg {
   animation: rotate 1s linear infinite;
   fill: rgba(0, 0, 0, 0.2);
+}
+.login-wrapper {
+  margin: auto;
+  width: 500px;
+  margin-top: 80px;
+}
+.login-wrapper input {
+  margin: auto;
+}
+.login-wrapper button {
+  width: 282px;
+  height: 44px;
+  color: #fff;
+  border: none;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+  margin: auto;
+  background: #A6ACBC;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+}
+.login-wrapper button:hover {
+  background: rgba(86, 92, 114, 0.8);
+}
+.login-wrapper .text-label {
+  text-align: left;
+  width: 270px;
 }

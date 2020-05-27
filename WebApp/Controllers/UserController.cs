@@ -128,7 +128,7 @@ namespace WebApp.Controllers
         public async Task<JsonResult> StartTest(int Id, string localization = null)
         {
             //ToDo Раскомментить 
-            //await TestManager.StartTest(Id, CurrentUser.Id);
+            await TestManager.StartTest(Id, CurrentUser == null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
             var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
             return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
         }
@@ -139,6 +139,11 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetSourceMaterials(int Id)
         {
             return Json(await TestManager.GetSourceMaterials(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetCurrentUser(int Id)
+        {
+            return Json(await TestManager.GetUserInfoByTestingProfile(Id, Session["Localization"].ToString()));
         }
         public JsonResult GetTestQuestionsById(int Id)
         {
@@ -152,10 +157,23 @@ namespace WebApp.Controllers
         {
             TestManager.UpdateQuestionAnswer(answer);
         }
-        public JsonResult GetQuestionImage(int Id)
+        public JsonResult GetQuestionImage(int Id, int Part = 1)
         {
             QuestionModel model = TestManager.GetQuestionImage(Id, Session["Localization"].ToString()).First();
-            model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
+            //if (Type != 3)
+           // {
+                model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
+            //}
+            int Partition = 1200000;
+            int left = model.QuestionImage.Length - (Part * Partition);
+            if(left < Partition)
+            {
+                model.QuestionImage = model.QuestionImage.Substring((Part - 1) * Partition);
+            }
+            else
+            {
+                model.QuestionImage = "flag" + model.QuestionImage.Substring((Part - 1) * Partition, Partition);
+            }
             return Json(model);
         }
         public JsonResult GetAnswerImage(int Id)
@@ -254,6 +272,15 @@ namespace WebApp.Controllers
             }
             await TestManager.FileUploadAsync(model, 1, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
             await TestManager.FileUploadAsync(model, 2, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+        }
+        [HttpPost]
+        public async Task<JsonResult> SaveAnswerFile(SavePictureModel model)
+        {
+            if (Request.Files.Count > 0)
+            {
+                model.AnswerFile = Request.Files.Get(0);
+            }
+            return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser == null ? CurrentUser.Id : (Guid?)null));
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {

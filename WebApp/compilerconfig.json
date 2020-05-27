@@ -4,10 +4,6 @@
     "inputFile": "Content/Auditory/index.less"
   },
   {
-    "outputFile": "Content/Testing/Index.css",
-    "inputFile": "Content/Testing/Index.less"
-  },
-  {
     "outputFile": "Content/Auditory/moderate.css",
     "inputFile": "Content/Auditory/moderate.less"
   },
@@ -18,6 +14,10 @@
   {
     "outputFile": "Content/site.css",
     "inputFile": "Content/site.less"
+  },
+  {
+    "outputFile": "Content/Testing/Index.css",
+    "inputFile": "Content/Testing/Index.less"
   },
   {
     "outputFile": "Content/Proctoring/index.css",

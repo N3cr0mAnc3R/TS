@@ -1,10 +1,15 @@
-﻿.auditory {
+﻿
+.auditory {
     display: flex;
     margin-bottom: 40px;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+
+    .col {
+        min-width: initial !important;
+    }
 
     .btn-gray {
         width: 135px;
@@ -21,6 +26,7 @@
         box-shadow: #a2a2a2 0px 3px 4px;
         max-width: 650px;
         border-top: none;
+        background: #eceef1;
 
         .auditory-header {
             font-family: Montserrat;
@@ -287,6 +293,7 @@
             width: @w-1;
             height: 330px;
             border-top: none;
+            background: #fff;
 
             .video {
                 outline: 1px solid #000;

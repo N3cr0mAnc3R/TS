@@ -59,19 +59,29 @@ namespace WebApp.Controllers
             return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         }
         [HttpPost]
+        public async Task<JsonResult> GetCurrentUser()
+        {
+            return Json(CurrentUser);
+        }
+        public ActionResult DownloadFile(Guid? Id)
+        {
+            FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+            return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
+        }
+        [HttpPost]
         public async Task<JsonResult> GetAuditoryInfo(int Id)
         {
-            return Json(AuditoryManager.GetAuditoryById(CurrentUser.Id, Id));
+            return Json(await AuditoryManager.GetAuditoryById(CurrentUser.Id, Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> GetAuditoryInfoForModerate(int Id)
         {
-            return Json(AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id));
+            return Json(await AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> GetAuditoryList()
         {
-            return Json(AuditoryManager.GetAuditoryList(CurrentUser.Id));
+            return Json(await AuditoryManager.GetAuditoryList(CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> UpdateAuditoryInfo(Auditory auditory)
@@ -80,8 +90,8 @@ namespace WebApp.Controllers
             {
                 if (auditory != null)
                 {
-                    AuditoryManager.UpdatePlaces(auditory, CurrentUser.Id);
-                    return Json(AuditoryManager.GetAuditoryById(CurrentUser.Id, auditory.Id));
+                    await AuditoryManager.UpdatePlaces(auditory, CurrentUser.Id);
+                    return Json(await AuditoryManager.GetAuditoryById(CurrentUser.Id, auditory.Id, Session["Localization"].ToString()));
                 }
                 return Json(new { Error = "Ошибка соединения" });
             }
@@ -105,14 +115,14 @@ namespace WebApp.Controllers
                     }
                     computer.PIN = pin;
                 }
-                AuditoryManager.UpdatePlacesConfig(auditory, CurrentUser.Id);
+                await AuditoryManager.UpdatePlacesConfig(auditory, CurrentUser.Id);
             }
             return Json(auditory);
         }
         [HttpPost]
         public async Task<JsonResult> GetAuditoryCompsWithoutPin(int Id)
         {
-            return Json(await AuditoryManager.GetAuditoryCompsWithoutPin(Id, CurrentUser.Id));
+            return Json(await AuditoryManager.GetAuditoryCompsWithoutPin(Id, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task ResetPins(int Id)
@@ -129,19 +139,19 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> UpdatePlaceConfig(PlaceConfigModel model)
         {
-            AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
+            await AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
             return Json(true);
         }
         [HttpPost]
         public async Task<JsonResult> GetProfileByPlaceConfig(string placeConfig)
         {
-            return Json(await AuditoryManager.GetProfileByPlaceConfig(placeConfig, CurrentUser.Id));
+            return Json(await AuditoryManager.GetProfileByPlaceConfig(placeConfig, CurrentUser.Id, Session["Localization"].ToString()));
         }
 
         [HttpPost]
         public async Task<JsonResult> GetPlaceConfig(int pin)
         {
-            return Json(AuditoryManager.GetPlaceConfig(pin, CurrentUser.Id));
+            return Json(await AuditoryManager.GetPlaceConfig(pin, CurrentUser.Id, Session["Localization"].ToString()));
         }
 
         protected AuditoryManager AuditoryManager

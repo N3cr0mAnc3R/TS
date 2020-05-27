@@ -79,7 +79,7 @@
             }
         },
         checkAuth: function (placeId, PlaceProfile) {
-            console.log(localStorage['placeConfig']);
+            console.log('ed');
             if (localStorage['placeConfig']) {
                 console.log();
             } else {
@@ -108,9 +108,12 @@
             switch (id) {
                 case 1: return self.localization == 1 ? "Вам доступны следующие тесты для прохождения" : "The following tests are available";
                 case 2: return self.localization == 1 ? "Вы не завершили следующие тесты" : "Not completed:";
+                case 3: return self.localization == 1 ? "Режим ожидания" : "Waiting:";
+                case 4: return self.localization == 1 ? "Пожалуйста, ожидайте. В данный момент все места заняты или тесты не назначены" : "Please, wait. Available tests will be shown below";
             }
         },
         createPlaceConfig: function (placeId, PlaceProfile) {
+            console.log(placeId, PlaceProfile);
             if (placeId == 0 || PlaceProfile == 0) return;
             let str = CryptoJS.AES.encrypt("place-" + placeId, "Secret Passphrase");
             localStorage['placeConfig'] = str.toString();
@@ -121,8 +124,11 @@
                 type: "POST",
                 async: false,
                 data: { model: obj },
-                success: function () {
+                success: function (data) {
+                    console.log(data);
+                    window.open('/account/logout');
                     location.reload();
+
                 }
             });
         }

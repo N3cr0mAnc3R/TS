@@ -90,10 +90,10 @@ namespace WebApp
                                     ChatMessage message = Json.Decode<ChatMessage>(jsonparsed.Data);
                                     message.TestingProfileId = jsonparsed.TestingProfileId;
                                     message.UserIdFrom = AccountManager.GetUser(((ClaimsIdentity)context.User.Identity).Claims.Select(a => a.Value).FirstOrDefault()).Id;
+                                    message.Id = await TestManager.SendMessage(message);
                                     var newJson = Json.Encode(message);
                                     var anotherJson = Json.Encode(new { Id = 1, Data = newJson });
                                     buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(anotherJson));
-                                    TestManager.SendMessage(message);
                                     break;
                                 }
                             default:

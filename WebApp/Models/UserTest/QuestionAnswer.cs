@@ -12,6 +12,7 @@ namespace WebApp.Models.UserTest
         public DateTime DateTime { get; set; }
         public int TestingTime { get; set; }
         public string UserAnswer { get; set; }
+        public Guid? FileId { get; set; }
         public int AnswerId { get; set; }
         public int Sort { get; set; }
         public int TypeAnswerId { get; set; }

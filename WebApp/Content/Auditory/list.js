@@ -64,6 +64,17 @@
             else {
                 $('.toast').toast('show');
             }
+        },
+        switchLocal: function (id) {
+            let self = this;
+            switch (id) {
+                case 1: return self.localization == 1 ? "Список аудиторий" : "Auditory list";
+                case 2: return self.localization == 1 ? "Сохранить" : "Save";
+                case 3: return self.localization == 1 ? "Переименовать элемент" : "Rename item";
+                case 4: return self.localization == 1 ? "Закрыть" : "Close";
+                case 5: return self.localization == 1 ? "Ошибка" : "Error";
+                case 6: return self.localization == 1 ? "Сперва сохраните изменения" : "Save changes before leaving";
+            }
         }
     },
     mounted: function () {

@@ -18,6 +18,7 @@
 #main-window {
     margin-bottom: 75px;
 }
+
 .main-window {
     border: 1px solid #ddd;
     padding: 40px;
@@ -32,7 +33,8 @@
     input {
         width: 100%;
         min-width: 600px;
-        &::placeholder{
+
+        &::placeholder {
             text-align: center;
         }
     }
@@ -76,11 +78,12 @@
 
 
 .videos-wrapper {
-    position: absolute;
+    position: fixed;
     width: 680px;
     height: 260px;
-    top: 700px;
+    //top: 700px;
     left: 50px;
+    bottom: 75px;
     background-color: #fff;
     border: 1px solid #ddd;
 
@@ -206,6 +209,7 @@
                     padding: 4px;
                     margin-bottom: auto;
                     margin-top: auto;
+                    line-height: initial;
 
                     i {
                         font-size: 25px;
@@ -222,8 +226,7 @@
     margin-left: 29px;
     display: flex;
     justify-content: space-between;
-    margin-right: -11px;
-
+    /*margin-right: -11px;*/
     .discipline-title {
         font-family: Montserrat;
         font-style: normal;
@@ -426,7 +429,7 @@
                 width: 1024px;
 
                 textarea {
-                    resize: none;
+                    resize: vertical;
                     max-width: initial;
                     height: 200px;
                 }
@@ -487,6 +490,16 @@
     }
 }
 
+.empty-list {
+    font-family: Montserrat;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 33px;
+    margin-top: 80px;
+    text-align: center;
+}
+
 .finish-game {
     display: flex;
     margin-top: 50px;
@@ -514,12 +527,10 @@
 }
 
 .panel-right {
-    right: -540px;
+    right: -550px;
     position: absolute;
     height: 100%;
-    /*display: none;*/
     width: 540px;
-    /*border-left:*/
     background: #C4C4C4;
     box-shadow: -2px 0px 4px rgba(0, 0, 0, 0.5);
     transition: right 0.5s ease;
@@ -529,13 +540,11 @@
         right: 0;
 
         .control-btn {
-            /*display: block;*/
             opacity: 1;
         }
     }
 
     .control-btn {
-        /*display: none;*/
         opacity: 0;
         transition: opacity ease 0.5s;
         position: relative;
@@ -563,15 +572,10 @@
 
             .close-btn {
                 float: right;
-                width: 30px;
-                height: 30px;
-                background: #565c72;
-                border-radius: 50%;
-                margin-top: 15px;
                 margin-right: 15px;
                 cursor: pointer;
 
-                i {
+                svf {
                     color: #fff;
                     margin-left: 6px;
                     margin-top: 2px;
@@ -580,14 +584,24 @@
                 }
             }
         }
+
+        .material-wrapper {
+            margin-left: 10px;
+
+            img {
+                margin: auto;
+                display: block;
+            }
+        }
     }
 }
 
 
 .open-chat-wrapper {
     position: fixed;
-    right: 20px;
-    bottom: 75px;
+    left: 5%;
+    bottom: 110px;
+    cursor: pointer;
 
     button {
         width: 130px;
@@ -610,18 +624,42 @@
             background: rgba(86, 92, 114, 0.8);
         }
     }
+
+    .chat-unread-wrapper {
+        position: absolute;
+        top: 0;
+        right: 0;
+        background: #FF4170;
+        width: 20px;
+        height: 20px;
+        border-radius: 10px;
+        color: #fff;
+
+        span {
+            margin-left: 5px;
+            margin-top: -3px;
+            font-size: 16px;
+            display: block;
+        }
+    }
 }
 
 #full-chat-wrapper {
     display: none;
+    width: 300px;
+    height: 500px;
+    position: fixed;
+    left: 45px;
+    bottom: 90px;
+    border: 1px solid #c4c4c4;
+    /*display: none;
     position: fixed;
     right: 20px;
     bottom: 100px;
     width: 300px;
     height: 600px;
     border: 1px solid #ddd;
-    background-color: #fff;
-
+    background-color: #fff;*/
     &.opened {
         display: block;
     }
@@ -630,15 +668,33 @@
         position: relative;
         width: 100%;
         height: 40px;
-        border-bottom: 1px solid #ddd;
+        background: #565C72;
+        padding: 3px 10px;
+        justify-content: space-between;
+        display: flex;
 
-        button {
-            span {
-            }
+        .user-info {
+            font-family: Montserrat;
+            font-style: normal;
+            font-weight: bold;
+            font-size: 21px;
+            color: #fff;
+        }
+
+        .btn-list {
+            display: flex;
+            font-size: 20px;
+            color: #fff;
+        }
+
+        .toggler-type {
+            margin-right: 5px;
+            cursor: pointer;
         }
 
         .close-btn {
             cursor: pointer;
+            color: #fff;
         }
     }
 
@@ -651,12 +707,14 @@
 
     .text-chat-wrapper {
         border-bottom: 1px solid #ddd;
-        height: 560px;
+        height: 460px;
+        background: #fff;
 
         .chat-wrapper {
-            height: 450px;
+            height: 390px;
             padding-left: 0;
-            overflow: auto;
+            overflow-x: hidden;
+            overflow-y: auto;
 
             .chat-message-wrapper {
                 border: 1px solid #ddd;
@@ -700,43 +758,29 @@
         }
 
         .send-message-wrapper {
-            position: relative;
-            height: 100px;
-            bottom: 0;
+            background: #565c72;
+            padding: 3px;
 
             .message-input {
                 width: 299px;
-                display: block;
                 padding: 5px;
+                display: flex;
 
                 textarea {
-                    width: 322px;
-                    height: 65px;
-                    margin: 3px 5px 0 5px;
+                    width: 242px;
+                    height: 40px;
                     resize: none;
                 }
 
 
                 button {
-                    width: 299px;
-                    height: auto;
-                    display: block;
-                    margin: -5px;
+                    width: 40px;
+                    height: 40px;
                     border: none;
                     background: #A6ACBC;
-                    /*box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-                    border-radius: 3px;*/
-                    span {
-                        &.text {
-                            font-family: Montserrat;
-                            font-style: normal;
-                            font-weight: 600;
-                            font-size: 16px;
-                            line-height: 33px;
-                        }
 
-                        &.fa {
-                        }
+                    span {
+                        color: #fff;
                     }
                 }
             }

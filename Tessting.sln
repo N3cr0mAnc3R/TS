@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parser", "Parser\Parser.csproj", "{FEC7EAA2-8B42-43D7-93C3-A3DE5B4C45B1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{02088972-2CE3-4810-9491-DDF6A9673D4B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cropping", "Cropper\Cropping.csproj", "{6480E47E-5542-425A-87B2-CB1C3578C3FF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApp", "WebApp\WebApp.csproj", "{1441C462-B315-4295-9972-2AD45EFBECE7}"
@@ -21,10 +19,6 @@ Global
 		{FEC7EAA2-8B42-43D7-93C3-A3DE5B4C45B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FEC7EAA2-8B42-43D7-93C3-A3DE5B4C45B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FEC7EAA2-8B42-43D7-93C3-A3DE5B4C45B1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02088972-2CE3-4810-9491-DDF6A9673D4B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02088972-2CE3-4810-9491-DDF6A9673D4B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02088972-2CE3-4810-9491-DDF6A9673D4B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02088972-2CE3-4810-9491-DDF6A9673D4B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6480E47E-5542-425A-87B2-CB1C3578C3FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6480E47E-5542-425A-87B2-CB1C3578C3FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6480E47E-5542-425A-87B2-CB1C3578C3FF}.Release|Any CPU.ActiveCfg = Release|Any CPU

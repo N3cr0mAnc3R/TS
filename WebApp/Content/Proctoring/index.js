@@ -8,10 +8,16 @@
             loading: null,
             loaded: null
         },
+        fullLoadObject: {
+            loading: true,
+            loaded: false
+        },
         page: 1,
         selectedQuestion: {},
         members: [],//Id, UserId, fio, UserRoleId, UserRoleName
         openedMembers: [],//Id, UserId, fio, UserRoleId, UserRoleName
+        notMeMembers: [],//Id, UserId, fio, UserRoleId, UserRoleName,
+        ableMembers: [],
         currentAnswerVote: 0,
         currentMarkVote: 0,
         shownSummary: false,
@@ -21,29 +27,40 @@
         socket: null,
         messageText: "",
         localization: 1,
-        isChatOpened: true,
+        isChatOpened: false,
         isFullChatOpened: true,
         messages: [],
         currentMsgParent: null,
-        filteredMessages: []
+        filteredMessages: [],
+        enrollee: {},
+        pageWidth: 0,
+        newMessages: []
     },
     methods: {
         init: function () {
             let self = this;
-
+            window.onresize = function () {
+                self.pageWidth = $('#main-window').width();
+            };
             let str = window.location.href;
             let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.TestingProfileId = newId;
+            let loadedCount = 0;
+
             $.ajax({
                 url: "/verification/IsAvailable?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (HasAccess) {
                     self.HasCase = HasAccess;
-                    console.log(HasAccess);
                     if (HasAccess) {
                         self.initQuestions(newId);
                         self.GetMembers(newId);
+                        loadedCount++;
+                        if (loadedCount == 4) {
+                            self.fullLoadObject.loaded = true;
+                            self.fullLoadObject.loading = false;
+                        }
                     }
                 }
             });
@@ -53,6 +70,24 @@
                 async: false,
                 success: function (user) {
                     self.currentUser = user;
+                    loadedCount++;
+                    if (loadedCount == 4) {
+                        self.fullLoadObject.loaded = true;
+                        self.fullLoadObject.loading = false;
+                    }
+                }
+            });
+            $.ajax({
+                url: "/verification/GetEnrolleeInfo?TestingProfileId=" + newId,
+                type: "POST",
+                async: false,
+                success: function (user) {
+                    self.enrollee = user;
+                    loadedCount++;
+                    if (loadedCount == 4) {
+                        self.fullLoadObject.loaded = true;
+                        self.fullLoadObject.loading = false;
+                    }
                 }
             });
             $.ajax({
@@ -74,13 +109,22 @@
                     self.filteredMessages = self.messages.filter(function (msg) {
                         return msg.UserIdTo == null;
                     });
+                    loadedCount++;
+                    if (loadedCount == 4) {
+                        self.fullLoadObject.loaded = true;
+                        self.fullLoadObject.loading = false;
+                    }
+                    setTimeout(function () {
+
+                        self.pageWidth = $('#main-window').width();
+                    }, 300);
                 }
             });
 
             if (typeof (WebSocket) !== 'undefined') {
                 self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             } else {
-                self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");  
+                self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             }
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
@@ -92,7 +136,6 @@
                     self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.TestingProfileId }));
                 }
                 self.socket.onmessage = function (msg) {
-                    console.log(msg);
                     let message;
                     if (msg.data.indexOf("\0") != -1) {
                         message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
@@ -102,25 +145,32 @@
                     }
                     switch (message.Id) {
                         case 1: {
-                            console.log(message.Data);
 
                             let msg = JSON.parse(message.Data);
                             msg.Readed = true;
-                           // console.log(msg.Date);
+                            // console.log(msg.Date);
                             msg.Date = new Date(Number(msg.Date.substr(msg.Date.indexOf('(') + 1, msg.Date.indexOf(')') - msg.Date.indexOf('(') - 1)));
                             //msg.Date = new Date(msg.Date);
                             //console.log(msg.Date);
                             self.messages.push(msg);
+                            self.newMessages.push(msg);
+                            let found = self.openedMembers.filter(function (member) {
+                                return member.isOpened;
+                            })[0];
+                            if (found) {
+                                self.filterMessages();
+                            }
+                            else {
+                                self.filterMessages(true);
+                            }
                             break;
                         }
                         case 2: {
-                            console.log(message.Data);
                             self.updateScoreAnswer(message.Data);
                             //message.Data; //Chat
                             break;
                         }
                         case 3: {
-                            console.log(message.Data);
                             self.updateScoreExam(message.Data);
                             //message.Data; //Chat
                             break;
@@ -133,7 +183,13 @@
             }
         },
         getDateFormat: function (date) {
-            return date.toLocaleTimeString();
+            let self = this;
+            return self.isZeroNeed(date.getHours()) + ":" + self.isZeroNeed(date.getMinutes());
+        },
+        isZeroNeed: function (value) {
+            if (value < 10)
+                return '0' + value;
+            else return value;
         },
         initQuestions: function (newId) {
             //GetInfoAboutVerification
@@ -144,7 +200,6 @@
                 type: "POST",
                 async: false,
                 success: function (questions) {
-                    console.log(questions);
                     questions.forEach(function (item) {
                         item.IsLoaded = false;
                         item.QuestionImage = null;
@@ -163,7 +218,6 @@
                 return member.isOpened;
             })[0];
             let uid = found ? found.UserUid : null;
-            console.log(self.currentMsgParent);
             let obj = JSON.stringify({ Id: 1, TestingProfileId: self.TestingProfileId, Data: JSON.stringify({ Message: self.messageText, Date: new Date(), ParentId: self.currentMsgParent, UserIdTo: uid }) });
             self.socket.send(obj);
             self.messageText = "";
@@ -171,33 +225,45 @@
         setParentMessage: function (id) {
             let self = this;
             self.currentMsgParent = id;
-            console.log(id);
-            let maxId = 0;
-            self.filteredMessages.forEach(function (msg) {
-                maxId = msg.Id > maxId ? msg.Id : maxId;
-            });
-            console.log(maxId);
-            $('#message-' + maxId)[0].scrollIntoView();
+            self.scrollToLastMessage();
             //scrollIntoView
         },
         resetParentMessage: function () {
             let self = this;
             self.currentMsgParent = null;
         },
-        findParentMessage: function () {
+        findParentMessage: function (Id) {
             let self = this;
-            let found = self.filteredMessages.filter(function (msg) {
-                return msg.Id == self.currentMsgParent;
-            })[0];
-            console.log(found);
-            return found.Message;
+            let found;
+            if (!Id) {
+                found = self.filteredMessages.filter(function (msg) {
+                    return msg.Id == self.currentMsgParent;
+                })[0];
+            }
+            else {
+                found = self.filteredMessages.filter(function (msg) {
+                    return msg.Id == Id;
+                })[0];
+            }
+            return found;
         },
         getUnreadMessagesCount: function (mId) {
             let self = this;
-            let msgs = self.messages.filter(function (msg) {
-                return msg.UserIdFrom == mId;
+            if (mId == 1) {
+                let msgs = self.newMessages.filter(function (msg) {
+                    return msg.UserIdTo == null;
+                });
+                return msgs.length;
+            }
+
+            let found = self.openedMembers.filter(function (member) {
+                return member.isOpened;
+            })[0];
+
+            let msgs = self.newMessages.filter(function (msg) {
+                return msg.UserIdFrom == mId && found.UserUid != msg.UserIdFrom;
             })
-            //console.log(msgs);
+            return msgs.length;
         },
         getShortFio: function (fio) {
             let fios = fio.split(' ');
@@ -212,7 +278,6 @@
             self.page = id;
             //Находим новый вопрос
             self.selectedQuestion = self.questions.filter(function (a) { return a.Sort == id; })[0];
-            console.log(self.selectedQuestion);
             self.currentAnswerVote = 0;
             //Если не загружали изображения, то загружаем
             if (!self.selectedQuestion.IsLoaded) {
@@ -224,7 +289,6 @@
                     dataType: 'json',
                     url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id,
                     success: function (d) {
-                        console.log(d);
                         self.selectedQuestion.QuestionImage = d.QuestionImage;
                         //После загрузки ставим метку, что загружено
                         self.selectedQuestion.IsLoaded = true;
@@ -236,7 +300,6 @@
                     dataType: 'json',
                     url: '/verification/GetMaxScore?Id=' + self.selectedQuestion.TestingResultId,
                     success: function (d) {
-                        console.log(d);
                         self.selectedQuestion.maxScore = d.MaxQuestionScore;
                         self.maxScore = d.MaxStructureDisciplineScore;
                     }
@@ -250,7 +313,6 @@
                             dataType: 'json',
                             url: '/user/GetAnswerImage?Id=' + a.Id,
                             success: function (d) {
-                                console.log(d);
                                 a.AnswerImage = d.AnswerImage;
                                 counter++;
                                 if (counter == self.selectedQuestion.Answers.length) {
@@ -293,8 +355,9 @@
                 dataType: 'json',
                 url: '/verification/GetMembers?Id=' + Id,
                 success: function (d) {
-                    console.log(d);
                     self.members = d;
+                    self.ableMembers = self.members.filter(function (member) { return member.UserRoleId != 4;  });
+                    self.notMeMembers = self.members.filter(function (member) { return member.Id != self.currentUser.Id; });
                 }
             });
         },
@@ -309,16 +372,13 @@
                     question.Scores = d;
                     let counter = self.questions.length;
                     self.questions.forEach(function (question) {
-                        console.log(question);
                         let scores = question.Scores.filter(function (score) {
                             return score.ExaminationBoardId == self.currentUser.Id;
                         })[0];
-                        console.log(scores);
                         if (scores) {
                             counter--;
                         }
                     });
-                    console.log(counter);
                     if (counter == 0) {
                         self.saveTest();
                     }
@@ -352,7 +412,6 @@
         },
         getUserSummary: function (Id) {
             let self = this;
-            console.log(Id);
             let total = 0;
             self.questions.forEach(function (question) {
                 let score = question.Scores.filter(function (a) {
@@ -368,10 +427,10 @@
             let self = this;
             let score = 0;
             let avg = 0;
-            self.members.forEach(function (member) {
+            self.ableMembers.forEach(function (member) {
                 score += self.getUserSummary(member.Id);
             });
-            avg = score / self.members.length;
+            avg = (score / self.ableMembers.length).toFixed(2);
             return avg;
         },
         saveTotal: function () {
@@ -400,7 +459,6 @@
             else {
                 question.Scores.push(info);
             }
-            console.log(question);
         },
         updateScoreExam: function (info) {
             let self = this;
@@ -420,7 +478,6 @@
                 data: { Id: self.currentUser.Id, TestingResultId: self.selectedQuestion.TestingResultId, Score: self.currentAnswerVote }
             });
             //self.GetInfoAboutAnswer(self.selectedQuestion, self.selectedQuestion.TestingResultId);
-            console.log(self.currentUser);
             if (self.socket) {
                 self.socket.send(JSON.stringify({ Id: 2, Data: { ExaminationBoardId: self.currentUser.Id, Score: self.currentAnswerVote, TestingResultId: self.selectedQuestion.TestingResultId }, TestingProfileId: self.TestingProfileId }));
             }
@@ -433,15 +490,15 @@
             //Score = self.currentMarkVote
             let self = this;
 
-            console.log(self.getUserSummary(self.currentUser.Id));
-
-
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
                 url: '/verification/SaveInfoAboutTest',
                 data: { Id: self.currentUser.Id, TestingProfileId: self.TestingProfileId, Score: self.getUserSummary(self.currentUser.Id) }
             });
+        },
+        downloadFile: function (id) {
+            window.open('/auditory/DownloadFile?Id=' + id, '_blank');
         },
         IsUserMe: function (id) {
             let self = this;
@@ -450,6 +507,20 @@
         openChatInfo: function () {
             let self = this;
             self.isChatOpened = !self.isChatOpened;
+            if (self.isChatOpened) {
+                self.scrollToLastMessage();
+            }
+        },
+        scrollToLastMessage: function () {
+            let self = this;
+            let maxId = 0;
+            self.filteredMessages.forEach(function (msg) {
+                maxId = msg.Id > maxId ? msg.Id : maxId;
+            });
+            console.log($('#message-' + maxId));
+            setTimeout(function () {
+                $('#message-' + maxId)[0].scrollIntoView();
+            }, 20);
         },
         openChat: function (Id) {
             let self = this;
@@ -477,15 +548,13 @@
         },
         openOChat: function (Id) {
             let self = this;
+            self.resetParentMessage();
             self.openedMembers.forEach(function (member) {
                 member.isOpened = false;
             })
             if (Id == -1) {
                 self.isFullChatOpened = true;
-                self.filteredMessages = self.messages.filter(function (msg) {
-                    return msg.UserIdTo == null;
-                });
-                console.log(self.filteredMessages, self.messages);
+                self.filterMessages(true);
                 return;
             }
             self.isFullChatOpened = false;
@@ -493,10 +562,23 @@
                 return member.Id == Id;
             })[0];
             found.isOpened = true;
-            self.filteredMessages = self.messages.filter(function (msg) {
-                return (msg.UserIdFrom == found.UserUid && msg.UserIdTo == self.currentUser.UserUid) || (msg.UserIdFrom == self.currentUser.UserUid && msg.UserIdTo == found.UserUid);
-            });
-            console.log(self.filteredMessages, self.messages);
+            self.filterMessages();
+        },
+        filterMessages: function (fullchat) {
+            let self = this;
+            if (!fullchat) {
+                let found = self.openedMembers.filter(function (member) {
+                    return member.isOpened;
+                })[0];
+                self.filteredMessages = self.messages.filter(function (msg) {
+                    return (msg.UserIdFrom == found.UserUid && msg.UserIdTo == self.currentUser.UserUid) || (msg.UserIdFrom == self.currentUser.UserUid && msg.UserIdTo == found.UserUid);
+                });
+            }
+            else {
+                self.filteredMessages = self.messages.filter(function (msg) {
+                    return msg.UserIdTo == null;
+                });
+            }
         },
         isCurrentChat: function (id) {
             let self = this;
@@ -515,6 +597,42 @@
             });
             self.isFullChatOpened = true;
         },
+        getChatWidth: function () {
+            let self = this;
+            let width = self.pageWidth;
+            console.log(width);
+            return width + 'px';
+        },
+        findAuthor: function (message) {
+            let self = this;
+            if (!self.currentUser || self.members.length == 0 || !message) {
+                return "";
+            }
+            let member = self.members.filter(function (member) { return member.UserUid == message.UserIdFrom; })[0];
+            if (member.Id == self.currentUser.Id) {
+                return self.switchLocal(20);
+            }
+            return self.getShortFio(member.fio);
+        },
+        getFontSize: function (initSize) {
+            let self = this;
+            let width = self.pageWidth;
+            if (width > 1400) {
+                return (initSize + 2) + 'px';
+            }
+            else if (width > 1100) {
+                return initSize + 'px';
+            }
+            else if (width > 1000) {
+                return initSize - 2 + 'px';
+            }
+            else if (width > 900) {
+                return initSize - 4 + 'px';
+            }
+            else if (width > 500) {
+                return initSize - 6 + 'px';
+            }
+        },
         switchLocal: function (id) {
             let self = this;
             switch (id) {
@@ -528,6 +646,15 @@
                 case 9: return self.localization == 1 ? "Выставлено: " : "Set: ";
                 case 10: return self.localization == 1 ? "Сохранить" : "Save";
                 case 11: return self.localization == 1 ? "Проверка не доступна" : "Verification is not available";
+                case 12: return self.localization == 1 ? "Абитуриент" : "Enrollee";
+                case 13: return self.localization == 1 ? "вопроса" : "of question";
+                case 14: return self.localization == 1 ? "Оценки членов комиссии" : "Committee's score";
+                case 15: return self.localization == 1 ? "Итоговые баллы:" : "Result score";
+                case 16: return self.localization == 1 ? "Общий чат" : "General chat";
+                case 17: return self.localization == 1 ? "Отправить" : "Send";
+                case 18: return self.localization == 1 ? "Открыть чат" : "Open chat";
+                case 19: return self.localization == 1 ? "Время на ответ:" : "Spent time for answer:";
+                case 20: return self.localization == 1 ? "Вы" : "You";
             }
         }
     },

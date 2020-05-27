@@ -219,6 +219,8 @@
   font-weight: 600;
   font-size: 18px;
   color: #565C72;
+  margin-left: auto;
+  margin-right: auto;
 }
 .proctoring-window .student-list-wrapper .student-wrapper {
   width: 100%;
@@ -275,6 +277,13 @@
   margin-top: 10px;
   height: 30px;
   width: 100%;
+  color: #fff;
+}
+.verify-wrapper .rating-info-wrapper button:hover {
+  color: #000;
+}
+.verify-wrapper .user-list-wrapper {
+  overflow-x: auto;
 }
 .verify-wrapper .user-list-wrapper .span {
   font-family: Montserrat;
@@ -291,7 +300,7 @@
 }
 .verify-wrapper .user-list-wrapper .user-list .user-wrapper {
   padding: 5px;
-  width: 200px;
+  min-width: 200px;
   height: 100px;
 }
 .verify-wrapper .user-list-wrapper .user-list .user-wrapper:not(:first-child) {
@@ -365,6 +374,10 @@
   margin-top: 10px;
   height: 30px;
   width: 100%;
+  color: #fff;
+}
+.summary-wrapper .rating-info-wrapper button:hover {
+  color: #000;
 }
 .user-video-list-wrapper {
   position: fixed;
@@ -402,16 +415,60 @@
   width: 150px;
   height: 100px;
 }
+.open-chat-button {
+  z-index: 3;
+  position: fixed;
+  bottom: 75px;
+  left: 20%;
+}
+.open-chat-button button {
+  width: 130px;
+  height: 31px;
+  color: #fff;
+  border: none;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+  margin: auto;
+  background: #A6ACBC;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+}
+.open-chat-button button:hover {
+  background: rgba(86, 92, 114, 0.8);
+}
+.open-chat-button button:focus {
+  outline: none;
+}
 .full-chat-wrapper {
+  z-index: 4;
   position: absolute;
   top: 183px;
   background: #fff;
-  width: 100%;
-  height: 100%;
+  width: 70%;
+  min-width: 700px;
+  height: 80%;
+}
+.full-chat-wrapper .control {
+  height: 30px;
+  min-width: 700px;
+}
+.full-chat-wrapper .control span {
+  float: right;
+  margin-right: -8px;
+  cursor: pointer;
+  margin-top: -13px;
+}
+.full-chat-wrapper .panel-list {
   display: flex;
+  height: 100%;
 }
 .full-chat-wrapper .left-panel {
-  width: 300px;
+  min-width: 200px;
   background: #565c72;
   color: #fff;
   padding-top: 40px;
@@ -424,8 +481,23 @@
   line-height: 20px;
   height: 40px;
   border-top: 1px solid #a6acbc;
-  padding-left: 30px;
+  padding-left: 4px;
   cursor: pointer;
+  display: flex;
+}
+.full-chat-wrapper .left-panel .user-wrapper .unread-wrapper {
+  background: #FF4170;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  color: #fff;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 5px;
+  text-align: center;
+}
+.full-chat-wrapper .left-panel .user-wrapper .unread-wrapper .unread-count {
+  font-size: 12px;
 }
 .full-chat-wrapper .left-panel .user-wrapper:last-child {
   border-bottom: 1px solid #a6acbc;
@@ -434,9 +506,9 @@
   font-size: 10px;
 }
 .full-chat-wrapper .main-panel {
-  width: 100%;
   margin-left: 50px;
   padding-top: 42px;
+  width: 76%;
 }
 .full-chat-wrapper .main-panel .user-list-wrapper {
   display: flex;
@@ -450,8 +522,7 @@
   margin-right: 2px;
   background: #CACACA;
   color: #fff;
-  padding-left: 20px;
-  justify-content: space-between;
+  padding-left: 5px;
   padding-right: 3px;
   cursor: pointer;
   line-height: 32px;
@@ -461,12 +532,28 @@
 .full-chat-wrapper .main-panel .user-list-wrapper .user-name.active {
   background: #565c72;
 }
+.full-chat-wrapper .main-panel .user-list-wrapper .user-name .unread-wrapper {
+  background: #FF4170;
+  width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  color: #fff;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 5px;
+  text-align: center;
+  display: flex;
+}
+.full-chat-wrapper .main-panel .user-list-wrapper .user-name .unread-wrapper .unread-count {
+  font-size: 12px;
+  line-height: 12px;
+  margin: auto;
+}
 .full-chat-wrapper .main-panel .message-list-wrapper {
-  width: 70%;
   border: 2px solid #ddd;
   height: 60%;
   margin-bottom: 20px;
-  min-width: 700px;
+  min-width: 440px;
   border-bottom-left-radius: 3px;
   border-bottom-right-radius: 3px;
   margin-top: -1px;
@@ -475,62 +562,127 @@
   padding-right: 50px;
 }
 .full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper {
+  float: left;
+  display: flex;
+  clear: both;
+  max-width: 400px;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper.me {
+  float: right;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper.me .message {
+  border: 1px solid #A6ACBC;
+  background: #A6ACBC;
+  order: 2;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message {
   border: 1px solid #CACACA;
   background: #CACACA;
   margin: 5px;
   padding: 7px;
-  border-radius: 3px;
-  max-width: 400px;
+  border-radius: 5px;
   word-break: break-word;
-  float: left;
-  display: flex;
-  clear: both;
   font-family: Montserrat;
   font-style: normal;
   font-weight: normal;
+  min-width: 150px;
+  cursor: pointer;
+  max-width: 375px;
 }
-.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper.me {
-  border: 1px solid #A6ACBC;
-  background: #A6ACBC;
-  float: right;
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message .message-author {
+  color: #656565;
+  font-size: 10px;
 }
-.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper.me .message-date {
-  font-size: 8px;
-  line-height: 6px;
-  float: left;
-}
-.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message-date {
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message .message-date {
   font-size: 8px;
   line-height: 6px;
   float: right;
   height: 10px;
 }
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message .parent-msg-wrapper {
+  border: 1px solid #565c72;
+  border-radius: 5px;
+  background: #f4f4f4;
+  max-height: 67px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  line-height: 12px;
+  display: block;
+  font-size: 14px;
+  padding-left: 10px;
+  max-width: 98%;
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message .parent-msg-wrapper .parent-msg {
+  margin-left: 2px;
+  border-left: 2px solid #565C72;
+  overflow: hidden;
+  line-height: 12px;
+  display: block;
+  font-size: 14px;
+  padding-left: 6px;
+  min-width: initial;
+  height: auto;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message .parent-msg-wrapper .parent-msg .message-parent-author {
+  color: #656565;
+  margin-bottom: 5px;
+  font-size: 8px;
+}
+.full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper:hover .message-control {
+  display: block;
+}
 .full-chat-wrapper .main-panel .message-list-wrapper .message-wrapper .message-control {
+  display: none;
+  margin-top: auto;
+  margin-bottom: auto;
   cursor: pointer;
 }
 .full-chat-wrapper .main-panel .parent-msg {
   display: flex;
-  justify-content: space-between;
-  width: 70%;
   min-width: 700px;
-  max-height: 50px;
+  max-height: 67px;
   overflow: hidden;
+  height: 60px;
+  margin-bottom: 8px;
+  line-height: 16px;
+  font-size: 16px;
 }
-.full-chat-wrapper .main-panel .parent-msg .fa {
+.full-chat-wrapper .main-panel .parent-msg .close-wrapper {
   cursor: pointer;
+  border-right: 2px solid #565C72;
+  padding-right: 13px;
+  margin-left: 12px;
+  margin-right: 10px;
+  display: flex;
+}
+.full-chat-wrapper .main-panel .parent-msg .close-wrapper i {
+  font-size: 21px;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: block;
+}
+.full-chat-wrapper .main-panel .parent-msg .message-parent-author {
+  color: #656565;
+  margin-bottom: 5px;
+  font-size: 13px;
+  line-height: 13px;
 }
 .full-chat-wrapper .main-panel .answer-wrapper {
-  width: 70%;
-  min-width: 700px;
   border: 2px solid #ddd;
   border-radius: 3px;
   height: 9%;
   margin-bottom: 10px;
 }
 .full-chat-wrapper .main-panel .answer-wrapper textarea {
-  resize: none;
+  resize: vertical;
   width: 100%;
   height: 100%;
+  max-width: initial;
+}
+.full-chat-wrapper .main-panel .btn-wrapper {
+  float: right;
 }
 .full-chat-wrapper .main-panel .btn-wrapper button {
   background: #1D80D6;
@@ -538,4 +690,30 @@
   box-sizing: border-box;
   border-radius: 2px;
   color: #fff;
+}
+.open-chat-wrapper {
+  position: fixed;
+  left: 5%;
+  bottom: 110px;
+  cursor: pointer;
+}
+.open-chat-wrapper button {
+  width: 130px;
+  height: 31px;
+  color: #fff;
+  border: none;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+  margin: auto;
+  background: #A6ACBC;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  border-top-left-radius: 26px;
+  border-top-right-radius: 26px;
+}
+.open-chat-wrapper button:hover {
+  background: rgba(86, 92, 114, 0.8);
 }

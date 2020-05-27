@@ -6,6 +6,9 @@
   -ms-user-select: none;
   user-select: none;
 }
+.auditory .col {
+  min-width: initial !important;
+}
 .auditory .btn-gray {
   width: 135px;
   height: 44px;
@@ -20,6 +23,7 @@
   box-shadow: #a2a2a2 0px 3px 4px;
   max-width: 650px;
   border-top: none;
+  background: #eceef1;
 }
 .auditory .computer-list .auditory-header {
   font-family: Montserrat;
@@ -235,6 +239,7 @@
   width: 230px;
   height: 330px;
   border-top: none;
+  background: #fff;
 }
 .main-window .auditory-list .auditory-wrapper .video {
   outline: 1px solid #000;

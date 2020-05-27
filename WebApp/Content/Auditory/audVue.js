@@ -251,8 +251,9 @@
                 self.computerList.forEach(function (a) { maxId = a.Id > maxId ? a.Id : maxId });
                 maxId++;
                 let length = self.maxY + 1 - items.length;
+                console.log(length);
                 for (let i = 0; i < length; i++) {
-                    items.sort(function (a, b) { a.PositionY - b.PositionY });
+                    items.sort(function (a, b) { return a.PositionY - b.PositionY });
                     //if (items.length == 0) console.log(position);
                     let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items), IsNeedPlaceConfig: true };
                     items.push(newObj);
@@ -260,7 +261,7 @@
                     maxId++;
                 }
             }
-            items.sort(function (a, b) { a.PositionY - b.PositionY });
+            items.sort(function (a, b) { return  a.PositionY - b.PositionY });
             return items;
         },
         isSelected: function (item) {

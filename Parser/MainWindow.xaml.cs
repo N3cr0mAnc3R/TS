@@ -72,7 +72,7 @@ namespace Parser
         {
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
-            cmd.CommandText = "exec Debug_Question_GetBlob " + Id1.Text;
+            cmd.CommandText = "exec Debug_Qwestion_GetBlob " + Id1.Text;
             conn.Open();
             using (var reader = cmd.ExecuteReader())
             {
@@ -155,11 +155,11 @@ namespace Parser
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, question from [Questions] where [questionImage] is null" + (IsStraight? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where [questionImage] is null and question is not null" + (IsStraight? "" : " order by ID desc");
                 }
                 else
                 {
-                    cmd.CommandText = "select top 1 ID, answer from [Answers] where [answerImage] is null" + (IsStraight ? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, answer from [Answers] where [answerImage] is null and answer is not null" + (IsStraight ? "" : " order by ID desc");
                 }
                 conn.Open();
                 string input = "D:\\test4.pdf", output = "D:\\test";
@@ -233,8 +233,11 @@ namespace Parser
                                 break;
                             }
                         }
-                        maxHeight = (int)Math.Ceiling((double)(maxHeight / bmp1.Width / 4));
-                        maxHeight += 30;
+                        maxHeight = (int)Math.Ceiling((double)(maxHeight / bmp1.Width));
+                        if (maxHeight + 30 <= bmp1.Height)
+                        {
+                            maxHeight += 30;
+                        }
                         bck.ReportProgress(79);
 
                         Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
@@ -283,6 +286,10 @@ namespace Parser
                 File.Delete("D:\\test4.doc");
                 MessageBox.Show(exc.Message);
                 //Process1(sender, e);
+            }
+            catch(Exception exc)
+            {
+                var t = 1;
             }
         }
 

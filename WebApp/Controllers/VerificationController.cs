@@ -59,6 +59,11 @@ namespace WebApp.Controllers
             return Json(await ProctorManager.GetProctorInfo(TestingProfileId, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
+        public async Task<JsonResult> GetEnrolleeInfo(int TestingProfileId)
+        {
+            return Json(await ProctorManager.GetEnrolleeInfo(TestingProfileId, CurrentUser.Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
         public async Task<JsonResult> GetMaxScore(int Id)
         {
             return Json(await ProctorManager.GetMaxScore(Id, CurrentUser.Id, Session["Localization"].ToString()));

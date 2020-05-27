@@ -175,6 +175,7 @@
       <DependentUpon>index.css</DependentUpon>
     </Content>
     <Content Include="Content\Proctoring\list.js" />
+    <Content Include="Content\reply.png" />
     <Content Include="Content\site.css">
       <DependentUpon>site.less</DependentUpon>
     </Content>
@@ -353,6 +354,7 @@
     <Compile Include="Models\Proctoring\AccessModel.cs" />
     <Compile Include="Models\Proctoring\AnonymUser.cs" />
     <Compile Include="Models\Proctoring\AnswerInfoScore.cs" />
+    <Compile Include="Models\Proctoring\EnrolleeModel.cs" />
     <Compile Include="Models\Proctoring\ProctorManager.cs" />
     <Compile Include="Models\Proctoring\ProctorRoom.cs" />
     <Compile Include="Models\Proctoring\ProctorUser.cs" />

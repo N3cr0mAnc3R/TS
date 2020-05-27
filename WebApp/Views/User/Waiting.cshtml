@@ -27,7 +27,7 @@
             </div>
             <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
                 <div class="not-test">
-                    <div v-if="tests && tests.length == 0" class="waiting">Режим ожидания</div>
+                    <div v-if="tests && tests.length == 0" class="waiting">{{switchLocal(3)}}</div>
                     <template v-if="!hasActiveTest()">
                         <div v-if="tests && tests.length != 0" class="user-info">
                             {{user}},
@@ -74,8 +74,8 @@
     }
     else
     {
-        <div>
-            Пожалуйста, ожидайте, в данный момент все места заняты или тесты не назначены
+        <div class="empty-list">
+            {{switchLocal(4)}}
         </div>
     }
 </div>
