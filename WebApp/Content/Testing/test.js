@@ -51,7 +51,8 @@
         counter: 0,
         maxTipWidth: 540,
         unreadCount: 0,
-        currentUser: {}
+        currentUser: {},
+        queue: []
     },
     methods: {
         init: function () {
@@ -180,9 +181,9 @@
 
             //reader.readAsDataURL(new Blob([event.data], { type: 'video/webm; codecs="vp8"'}));
             //reader.onloadend = function () {
-            if (app.videoSocket && app.videoSocket.readyState == 1) {
-                app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: data }));
-            }
+            //if (app.videoSocket && app.videoSocket.readyState == 1) {
+            //    app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: data }));
+            //}
             //    var base64data = reader.result;
             //    console.log(base64data);
             //}
@@ -525,25 +526,29 @@
             let self = this;
             if (!self.stream) {
                 navigator.getUserMedia(
-                    { video: true, audio: true },
+                    {
+                        video: true,
+                        //audio: true
+                    },
                     function (stream) {/*callback в случае удачи*/
                         self.stream = stream;
+                        console.log(stream);
                         self.cameraRecorder = new MediaRecorder(stream);
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(1000);
 
                         $('#video1')[0].srcObject = stream;
 
-                        if (typeof (WebSocket) !== 'undefined') {
-                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        } else {
-                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        }
                         //if (typeof (WebSocket) !== 'undefined') {
-                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
                         //} else {
-                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
                         //}
+                        if (typeof (WebSocket) !== 'undefined') {
+                            self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        } else {
+                            self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        }
                         self.videoSocket.onopen = function () {
                             self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
                             self.initRTCPeer();
@@ -556,29 +561,33 @@
                                 if (message.candidate && message.candidate != '{}') {
                                     let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                                     console.log(candidate);
-                                    self.pc1.addIceCandidate(candidate);
+                                    self.queue.push(candidate);
                                 }
 
                                 else if (message.answer) {
-                                    let createDescPromise = new Promise(function (resolve) {
-                                        console.log('start remote');
-                                        let sdp = JSON.parse(message.answer).sdp;
-                                        console.log(sdp);
-                                        //if (sdp.search(/^a=mid.*$/gm) === -1) {
-                                        var mlines_1 = sdp.match(/^m=.*$/gm);
-                                        console.log(mlines_1);
-                                        let sdps = sdp.split(/^m=.*$/gm);
-                                        console.log(sdps);
-                                        mlines_1.forEach(function (elem, idx) {
-                                            console.log(elem, idx);
-                                            mlines_1[idx] = elem + '\na=mid:' + idx;
-                                        });
-                                        console.log(JSON.stringify(sdp));
-                                        resolve(self.pc1.setRemoteDescription({ type: 'answer', sdp: sdp }));
-                                    })
-                                    createDescPromise.then(function (result) {
-                                        console.log('stop remote');
-                                    })
+                                    console.log(message.answer);
+                                    self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) { console.log(r); }, function (r) { console.log(r); })
+                                    //let createDescPromise = new Promise(function (resolve) {
+                                    //    console.log('start remote');
+                                    //    let sdp = JSON.parse(message.answer).sdp;
+                                    //    //let sdp = JSON.parse(message.answer).sdp;
+                                    //    //console.log(sdp);
+                                    //    //if (sdp.search(/^a=mid.*$/gm) === -1) {
+                                    //   // var mlines_1 = sdp.match(/^m=.*$/gm);
+                                    //    //console.log(mlines_1);
+                                    //   // let sdps = sdp.split(/^m=.*$/gm);
+                                    //  //  console.log(sdps);
+                                    //    //mlines_1.forEach(function (elem, idx) {
+                                    //    //    console.log(elem, idx);
+                                    //    //    mlines_1[idx] = elem + '\na=mid:' + idx;
+                                    //    //});
+                                    //   // console.log(JSON.stringify(sdp));
+                                    //    console.log(message.answer);
+                                    //    resolve(self.pc1.setRemoteDescription({ type: 'answer', sdp: sdp }));
+                                    //})
+                                    //createDescPromise.then(function (result) {
+                                    //    console.log('stop remote');
+                                    //})
                                     //console.log(message.answer);
                                 }
                             }
@@ -814,24 +823,13 @@
             });
 
             try {
-                let offerPromise = new Promise(function (resolve) {
-                    console.log('Created offerPromise start', new Date().getSeconds(), new Date().getMilliseconds());
-                    resolve(self.pc1.createOffer(self.offerOptions));
-                })
-                let CreateofferPromise = new Promise(function (resolve) {
-                    console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-                    resolve(self.pc1.setLocalDescription(self.offer));
-                })
-                offerPromise.then(function (data) {
-                    console.log('Created offerPromise finished', new Date().getSeconds(), new Date().getMilliseconds());
-                    console.log(data);
-                    self.offer = data;
-                    CreateofferPromise.then(function (off) {
-                        console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                self.pc1.createOffer(function (offer) {
+                    self.pc1.setLocalDescription(offer, function () {
                         let obj1 = {};
-                        for (let i in data) {
-                            if (typeof data[i] != 'function')
-                                obj1[i] = data[i];
+                        for (let i in offer) {
+                            if (typeof offer[i] != 'function')
+                                obj1[i] = offer[i];
                         }
                         let obj = {
                             offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
@@ -839,8 +837,36 @@
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
                         }
-                    });
-                })
+                    }, function () { });
+                }, function () { });
+
+                //let offerPromise = new Promise(function (resolve) {
+                //    console.log('Created offerPromise start', new Date().getSeconds(), new Date().getMilliseconds());
+                //    resolve(self.pc1.createOffer(self.offerOptions));
+                //})
+                //let CreateofferPromise = new Promise(function (resolve) {
+                //    console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
+                //    resolve(self.pc1.setLocalDescription(self.offer));
+                //})
+                //offerPromise.then(function (data) {
+                //    console.log('Created offerPromise finished', new Date().getSeconds(), new Date().getMilliseconds());
+                //    console.log(data);
+                //    self.offer = data;
+                //    CreateofferPromise.then(function (off) {
+                //        console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+                //        let obj1 = {};
+                //        for (let i in data) {
+                //            if (typeof data[i] != 'function')
+                //                obj1[i] = data[i];
+                //        }
+                //        let obj = {
+                //            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
+                //        };
+                //        if (app.videoSocket && app.videoSocket.readyState == 1) {
+                //            app.videoSocket.send(JSON.stringify(obj));
+                //        }
+                //    });
+                //})
             }
             catch{
                 console.log('error');

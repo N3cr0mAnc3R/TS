@@ -24,7 +24,8 @@ const app = new Vue({
         shownError: false,
         currentError: 0,
         gotICE: false,
-        me: {}
+        me: {},
+        queue: []
 
 
     },
@@ -134,7 +135,7 @@ const app = new Vue({
                     socket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
                 }
                 else {
-                    socket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+                    socket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
                 }
                 self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
                 self.chats.push(self.initChat(a.TestingProfileId));
@@ -168,7 +169,7 @@ const app = new Vue({
                  }
                  else {
                 socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                // }
+                 }
                 self.videoSockets.push({ id: a.TestingProfileId, socket: socket });
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
@@ -177,6 +178,7 @@ const app = new Vue({
                     console.log('Created local peer connection object pc2', new Date().getSeconds(), new Date().getMilliseconds());
 
                     self.pc2.addEventListener('icecandidate', function (e) {
+                        console.log('ad');
                         self.onIceCandidate(self.pc2, e, socket, a.TestingProfileId);
                     })
                     self.pc2.addEventListener('iceconnectionstatechange', function (e) {
@@ -185,66 +187,87 @@ const app = new Vue({
                     self.pc2.addEventListener('track', self.gotRemoteStream);
                 }
                 socket.onmessage = function (msg) {
-                    console.log(msg);
+                    //console.log(msg);
                     let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
 
                     if (message.IsSender) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                             console.log(candidate);
-                            self.pc2.addIceCandidate(candidate);
+                            self.queue.push(candidate);
                         }
                         else if (message.offer) {
                             //console.log(message.offer);
-
-                            let CreateDescriptionPromise = new Promise(function (resolve) {
-                                console.log('Created setRemoteDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-                                resolve(self.pc2.setRemoteDescription(JSON.parse(message.offer)));
-                            })
-                            let answer;
-                            CreateDescriptionPromise.then(function (ev) {
-                                console.log('Created setRemoteDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                                let CreateAnswerPromise = new Promise(function (resolve) {
-                                    console.log('Created createAnswer start', new Date().getSeconds(), new Date().getMilliseconds());
-
-                                    resolve(self.pc2.createAnswer());
-                                })
-                                CreateAnswerPromise.then(function (ans) {
-                                    console.log('Created createAnswer finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                                    answer = ans;
-                                    console.log(answer);
-                                    let CreatelocalPromise = new Promise(function (resolve) {
-                                        console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-
-                                        resolve(self.pc2.setLocalDescription(answer));
-                                    })
-                                    CreatelocalPromise.then(function (res) {
-                                        console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                                        let obj1 = {};
-                                        for (let i in answer) {
-                                            if (typeof answer[i] != 'function')
-                                                obj1[i] = answer[i];
-                                        }
-                                        let obj = {
-                                            answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId
-                                        };
-                                        if (socket && socket.readyState == 1) {
+                            navigator.getUserMedia({ video: true }, function (stream) {
+                                self.pc2.addStream(stream);
+                                self.pc2.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                                    self.pc2.createAnswer(function (answer) {
+                                        console.log('answer');
+                                        self.pc2.setLocalDescription(answer, function () {
+                                            let obj1 = {};
+                                            for (let i in answer) {
+                                                if (typeof answer[i] != 'function')
+                                                    obj1[i] = answer[i];
+                                            }
+                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId };
+                                            console.log(obj, JSON.stringify(obj));
                                             socket.send(JSON.stringify(obj));
-                                        }
-                                    })
-                                })
-                            })
+                                            self.queue.forEach(function (candidate) {
+                                                self.pc2.addIceCandidate(candidate);
+                                            })
+
+                                        }, function (r) { console.log(r);});
+                                    }, function (r) { console.log(r); })
+                                }, function (r) { console.log(r); })
+                            }, function (r) { console.log(r); })
+                            //let CreateDescriptionPromise = new Promise(function (resolve) {
+                            //    console.log('Created setRemoteDescription start', new Date().getSeconds(), new Date().getMilliseconds());
+                            //    resolve(self.pc2.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer))));
+                            //})
+                            //let answer;
+                            //CreateDescriptionPromise.then(function (ev) {
+                            //    console.log('Created setRemoteDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                            //    let CreateAnswerPromise = new Promise(function (resolve) {
+                            //        console.log('Created createAnswer start', new Date().getSeconds(), new Date().getMilliseconds());
+
+                            //        resolve(self.pc2.createAnswer());
+                            //    })
+                            //    CreateAnswerPromise.then(function (ans) {
+                            //        console.log('Created createAnswer finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                            //        answer = ans;
+                            //        console.log(answer);
+                            //        let CreatelocalPromise = new Promise(function (resolve) {
+                            //            console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
+
+                            //            resolve(self.pc2.setLocalDescription(answer));
+                            //        })
+                            //        CreatelocalPromise.then(function (res) {
+                            //            console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
+
+                            //            let obj1 = {};
+                            //            for (let i in answer) {
+                            //                if (typeof answer[i] != 'function')
+                            //                    obj1[i] = answer[i];
+                            //            }
+                            //            let obj = {
+                            //                answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId
+                            //            };
+                            //            if (socket && socket.readyState == 1) {
+                            //                socket.send(JSON.stringify(obj));
+                            //            }
+                            //        })
+                            //    })
+                            //})
 
                         }
                     }
-                    console.log(message);
+                    //console.log(message);
 
                     if (message.Stream) {
                         $('#img-' + message.TestingProfileId)[0].src = message.Stream;
-                        console.log(a);
+                      //  console.log(a);
                     }
                 };
             }
@@ -278,7 +301,8 @@ const app = new Vue({
 
         },
         gotRemoteStream: function (e) {
-            $('#video-44')[0].srcObject = e.streams[0];
+            console.log(e.streams);
+            $('#video-87')[0].srcObject = e.streams[0];
         },
 
         b64toBlob: function (b64Data, contentType = '', sliceSize = 512) {
@@ -300,75 +324,6 @@ const app = new Vue({
 
             let blob = new Blob(byteArrays, { type: contentType });
             return blob;
-        },
-        createAnswer: function (offerSDP) {
-            let self = this;
-            var MediaConstraints = {
-                audio: true,
-                video: true
-            };
-            navigator.webkitGetUserMedia(MediaConstraints, OnMediaSuccess, OnMediaError);
-
-            let STUN = {
-                urls: 'stun:stun.l.google.com:19302'
-            };
-
-            let TURN = {
-                urls: 'turn:turn.bistri.com:80',
-                credential: 'homeo',
-                username: 'homeo'
-            };
-
-            let iceServers = {
-                iceServers: [STUN, TURN]
-            };
-            let DtlsSrtpKeyAgreement = {
-                DtlsSrtpKeyAgreement: true
-            };
-
-            let optional = {
-                optional: [DtlsSrtpKeyAgreement]
-            };
-            function OnMediaError(error) {
-                console.error(error);
-            }
-
-            function OnMediaSuccess(mediaStream) {
-                //var peer = new [webkit | moz]RTCPeerConnection(iceServers, optional);
-                self.pc2 = new RTCPeerConnection(iceServers, optional)
-                self.pc2.addStream(mediaStream);
-
-                self.pc2.onaddstream = function (mediaStream) {
-                    console.log(mediaStream);
-                    $('#video1')[0].srcObject = mediaStream.stream;
-                };
-
-                self.pc2.onicecandidate = function (event) {
-                    var candidate = event.candidate;
-                    if (candidate) {
-                        let socket = self.videoSockets.find(a => a.id == offerSDP.TestingProfileId).socket;
-                        console.log(candidate);
-                        socket.send(JSON.stringify({ candidate: candidate.candidate, address: candidate.address, component: candidate.component, foundation: candidate.foundation, port: candidate.port, priority: candidate.priority, Type: candidate.type, TestingProfileId: offerSDP.TestingProfileId }));
-                    }
-                };
-                console.log(offerSDP);
-                //// remote-descriptions should be set earlier
-                //// using offer-sdp provided by the offerer
-                let remoteDescription = new RTCSessionDescription({ sdp: offerSDP.Sdp, type: 'offer' });
-                self.pc2.setRemoteDescription(remoteDescription, function () { }, function () { });
-
-                self.pc2.createAnswer(function (answerSDP) {
-                    self.pc2.setLocalDescription(answerSDP, function () { }, function () { });
-                    let socket = self.videoSockets.find(a => a.id == offerSDP.TestingProfileId).socket;
-                    console.log(answerSDP);
-                    socket.send(JSON.stringify({
-                        Sdp: answerSDP.sdp,
-                        Type: answerSDP.type,
-                        TestingProfileId: offerSDP.testingProfileId
-                    }));
-                    console.log(answerSDP);
-                }, function () { }, function () { });
-            }
         },
         initChat: function (id) {
             return {
