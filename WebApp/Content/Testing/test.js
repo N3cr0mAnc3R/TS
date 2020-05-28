@@ -100,7 +100,9 @@
                     async: true
                 })).then(function (resp1, resp2, resp3, resp4) {
                     //Получаем пакеты вопросов, ответов и то, как их разместить
-                    self.questions = resp2[0];
+                    let questions = resp2[0];
+                    questions.map(function (question) { question.answerImage = ""; });
+                    self.questions = questions;
 
                     //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
                     resp3[0].map(function (a) {
@@ -130,11 +132,17 @@
                                     else if (a.TypeAnswerId == 3) {
                                         a.answered = true;
                                         a.answer = b.UserAnswer;
-                                        a.FileId = b.FileId;
+                                        a.fileId = b.FileId;
+                                        if (a.fileId) {
+                                            self.getAnswerFile(a, a.fileId);
+                                        }
                                     }
                                     else if (a.TypeAnswerId == 4) {
                                         a.answered = true;
-                                        a.FileId = b.FileId;
+                                        a.fileId = b.FileId;
+                                        if (a.fileId) {
+                                            self.getAnswerFile(a, a.fileId);
+                                        }
                                     }
                                 }
                             })
@@ -280,9 +288,24 @@
             this.selectedQuestion.changed = true;
             this.selectedQuestion.answered = true;
         },
+        getAnswerFile: function (question, Id) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/auditory/DownloadFile?Id=' + Id,
+                success: function (data) {
+                    question.answerImage = data;
+                }
+            });
+        },
+        removeFile: function () {
+            let self = this;
+            self.selectedQuestion.Answers[0].fileId = null;
+            self.answerQuestion();
+        },
         changeFile: function (e) {
             let self = this;
-            let extension = e.target.files[0].name.substr(e.target.files[0].name.indexOf('.'));
+            let extension = e.target.files[0].name.substr(e.target.files[0].name.lastIndexOf('.'));
             let formaData = new FormData();
             formaData.append('Id', self.selectedQuestion.Answers[0].TestingPackage.Id);
             formaData.append('File', e.target.files[0]);
@@ -299,6 +322,13 @@
                     //Для подсветки решённых заданий
                     self.selectedQuestion.answered = true;
                     self.selectedQuestion.Answers[0].fileId = data;
+
+                    var reader = new FileReader();
+                    reader.onload = function () {
+                        self.selectedQuestion.answerImage = reader.result;
+                    };
+                    reader.readAsDataURL(e.target.files[0]);
+                    self.answerQuestion();
                 }
             });
 
@@ -335,10 +365,8 @@
                 self.loadObject.loading = true;
                 self.counter = 0;
                 self.askQuestionImagePart(1);
-                console.log(1234);
                 //Изображения ответов
                 if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
-                    console.log(123);
                     self.selectedQuestion.Answers.forEach(function (a) {
                         $.ajax({
                             type: 'POST',
@@ -347,7 +375,6 @@
                             success: function (d) {
                                 a.AnswerImage = d.AnswerImage;
                                 self.counter++;
-                                console.log(self.counter);
                                 if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                     self.loadObject.loading = false;
                                     self.loadObject.loaded = true;
@@ -377,16 +404,14 @@
                         self.askQuestionImagePart(part + 1);
                     }
                     else {
-                        console.log(self.counter);
                         self.unloadedImage += d.QuestionImage;
                         self.selectedQuestion.QuestionImage = self.unloadedImage;
                         //После загрузки ставим метку, что загружено
                         self.counter++;
                         self.selectedQuestion.IsLoaded = true;
-                        if (self.counter == self.selectedQuestion.Answers.length + 1 || self.selectedQuestion.TypeAnswerId == 3) {
+                        if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
-                            console.log('loaded');
                         }
                         //self.selectedQuestion.QuestionImage += d.QuestionImage;
                     }
@@ -414,6 +439,9 @@
             }
             else if (self.selectedQuestion.TypeAnswerId == 3) {
                 answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: self.selectedQuestion.answer, FileId: self.selectedQuestion.Answers[0].fileId });
+            }
+            else if (self.selectedQuestion.TypeAnswerId == 4) {
+                answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: null, FileId: self.selectedQuestion.Answers[0].fileId });
             }
             $.ajax({
                 type: 'POST',
@@ -477,7 +505,7 @@
                 self.timeLeft--;
                 if (self.timeLeft <= 0) {
                     clearInterval(self.interval);
-                    //self.finishTest();
+                    self.finishTest();
                 }
             }, 1000);
             //self.startCapture();
@@ -485,9 +513,9 @@
         initChat: function () {
             let self = this;
             if (typeof (WebSocket) !== 'undefined') {
-                self.chatSocket = new WebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
+                self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
             } else {
-                self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + ":443/ChatHandler.ashx");
+                self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
             }
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
@@ -539,16 +567,16 @@
 
                         $('#video1')[0].srcObject = stream;
 
-                        //if (typeof (WebSocket) !== 'undefined') {
-                        //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        //} else {
-                        //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        //}
                         if (typeof (WebSocket) !== 'undefined') {
-                            self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
                         } else {
-                            self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
                         }
+                        //if (typeof (WebSocket) !== 'undefined') {
+                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //} else {
+                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                        //}
                         self.videoSocket.onopen = function () {
                             self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
                             self.initRTCPeer();
@@ -637,10 +665,20 @@
                     type: "POST",
                     data: formaData,
                     contentType: false,
-                    processData: false
+                    processData: false,
+                    success: function () {
+                        $.ajax({
+                            url: "/user/FinishTest?Id=" + self.testingProfileId,
+                            type: "POST",
+                            success: function () {
+                                console.log('clos');
+                                window.open('/user/waiting', '_self');
+                            }
+                        });
+                    }
                 });
                 // }
-            }, 5000)
+            }, 2000);
 
 
             // obj.src = src;
@@ -655,13 +693,8 @@
                     NeedDispose: true
                 }
             });
-            $.ajax({
-                url: "/user/FinishTest?Id=" + self.testingProfileId,
-                type: "POST"
-            });
             clearTimeout(self.intervalConnectionLost);
             clearTimeout(self.intervalConnection);
-            //window.open('/user/waiting', '_self');
             //self.init();
         },
         startCapture: function (displayMediaOptions) {
@@ -802,6 +835,7 @@
                 case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
                 case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
                 case 9: return self.localization == 1 ? "Администратор" : "Administrator";
+                case 10: return self.localization == 1 ? "Удалить файл" : "Remove file";
             }
         },
         initRTCPeer: function () {

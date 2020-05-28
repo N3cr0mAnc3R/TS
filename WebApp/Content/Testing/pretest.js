@@ -99,6 +99,7 @@
         },
         hasActiveTest: function () {
             let self = this;
+            console.log(self.tests);
             if (!self.tests) return false;
             self.activeTests = self.tests.filter(function (a) { return a.TestingStatusId === 2; });
             return self.tests.filter(function (a) { return a.TestingStatusId === 2; })[0];

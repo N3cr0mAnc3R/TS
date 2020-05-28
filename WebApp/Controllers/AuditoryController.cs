@@ -63,10 +63,11 @@ namespace WebApp.Controllers
         {
             return Json(CurrentUser);
         }
-        public ActionResult DownloadFile(Guid? Id)
+        public JsonResult DownloadFile(Guid? Id)
         {
-            FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
-            return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
+            //FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+            //return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
+            return Json(TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)));
         }
         [HttpPost]
         public async Task<JsonResult> GetAuditoryInfo(int Id)

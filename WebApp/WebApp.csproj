@@ -351,7 +351,6 @@
     <Compile Include="Models\DB\Extender.cs" />
     <Compile Include="Models\DB\Manager.cs" />
     <Compile Include="Models\DB\StructuredDynamicParameters.cs" />
-    <Compile Include="Models\Proctoring\AccessModel.cs" />
     <Compile Include="Models\Proctoring\AnonymUser.cs" />
     <Compile Include="Models\Proctoring\AnswerInfoScore.cs" />
     <Compile Include="Models\Proctoring\EnrolleeModel.cs" />

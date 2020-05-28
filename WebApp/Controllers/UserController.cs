@@ -120,10 +120,11 @@ namespace WebApp.Controllers
         }
         #endregion
         #region Тестирование
-        public async Task FinishTest(int Id)
+        public async Task<JsonResult> FinishTest(int Id)
         {
             //ToDo Раскомментить 
             await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            return Json(true);
         }
         public async Task<JsonResult> StartTest(int Id, string localization = null)
         {
@@ -260,7 +261,7 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task SaveVideoFile(SavePictureModel model)
+        public async Task<JsonResult> SaveVideoFile(SavePictureModel model)
         {
             if (Request.Files.Count > 0)
             {
@@ -272,6 +273,7 @@ namespace WebApp.Controllers
             }
             await TestManager.FileUploadAsync(model, 1, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
             await TestManager.FileUploadAsync(model, 2, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            return Json(true);
         }
         [HttpPost]
         public async Task<JsonResult> SaveAnswerFile(SavePictureModel model)

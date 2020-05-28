@@ -33,16 +33,18 @@
                             <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
                         </label>
                         <div v-if="selectedQuestion.TypeAnswerId == 3" class="textarea-wrapper" v-bind:style="{'font-size': getFontSize(18)}">
-                            <div>
-                                {{answer.UserAnswer}}
-                            </div>
-                            <div v-if="answer.FileId">
-                                <button v-on:click="downloadFile(answer.FileId)"><i class="fa fa-file"></i></button>
+                            <div>{{answer.UserAnswer}}</div>
+                            <div v-if="selectedQuestion.FileId">
+                                <div class="image-preview-wrapper">
+                                    <img v-bind:src="'data:image/png;base64, ' + answer.answerImage" width="400" />
+                                </div>
                             </div>
                         </div>
                         <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">
-                            <div v-if="answer.FileId">
-                                <button v-on:click="downloadFile(answer.FileId)"><i class="fa fa-file"></i></button>
+                            <div v-if="selectedQuestion.FileId">
+                                <div class="image-preview-wrapper">
+                                    <img v-bind:src="'data:image/png;base64, ' + selectedQuestion.answerImage" width="400" />
+                                </div>
                             </div>
                         </div>
                     </div>

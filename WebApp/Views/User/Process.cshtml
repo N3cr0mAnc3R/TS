@@ -27,21 +27,31 @@
                                 <img v-bind:src="'data:image/png;base64, ' + answer.AnswerImage" v-bind:id="'answer-' + answer.Id" />
                             </label>
                             <div v-if="selectedQuestion.TypeAnswerId == 3" class="textarea-wrapper">
-                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control"> </textarea>
+                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false"> </textarea>
                                 <br />
-                                <div v-if="!selectedQuestion.FileId">
+                                <div v-if="!selectedQuestion.fileId">
                                     <input v-on:change="changeFile" type="file" accept="image/*, application/msword" />
                                 </div>
-                                <div v-if="selectedQuestion.FileId">
-                                    <button v-on:click="downloadFile(selectedQuestion.FileId)"><i class="fa fa-file"></i></button>
+                                <div v-if="selectedQuestion.fileId">
+                                    <div class="image-preview-wrapper">
+                                        <img v-bind:src="'data:image/jpg;base64, ' + selectedQuestion.answerImage" width="400" />
+                                    </div>
+                                    <button v-on:click="removeFile()">
+                                        {{switchLocal(10)}}
+                                    </button>
                                 </div>
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">
-                                <div v-if="!selectedQuestion.FileId">
-                                    <input v-on:change="changeFile" type="file" accept="image/*, application/msword" />
+                                <div v-if="!selectedQuestion.fileId">
+                                    <input v-on:change="changeFile" type="file" accept="image/*, application/msword" spellcheck="false" />
                                 </div>
-                                <div v-if="selectedQuestion.FileId">
-                                    <button v-on:click="downloadFile(selectedQuestion.FileId)"><i class="fa fa-file"></i></button>
+                                <div v-if="selectedQuestion.fileId">
+                                    <div class="image-preview-wrapper">
+                                        <img v-bind:src="'data:image/jpg;base64, ' + selectedQuestion.answerImage" width="400" />
+                                    </div>
+                                    <button v-on:click="removeFile()">
+                                        {{switchLocal(10)}}
+                                    </button>
                                 </div>
                             </div>
                         </div>

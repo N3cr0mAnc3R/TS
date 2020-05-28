@@ -15,69 +15,64 @@
     {
         <span>{{checkAuth(null,null)}}</span>
     }
-    @if (!Request.IsAuthenticated)
-    {
-        <div>
-            <div v-if="!hasPlaceConfig" class="container">
-                <div class="main-window">
-                    <div class="input-pin">
-                        <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN">
+    <div>
+        <div v-if="!hasPlaceConfig" class="container">
+            <div class="main-window">
+                <div class="input-pin">
+                    <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN">
+                </div>
+            </div>
+        </div>
+        <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
+            <div class="not-test">
+                <div v-if="tests && tests.length == 0" class="waiting">
+                    <div class="empty-list">
+                        {{switchLocal(4)}}
                     </div>
                 </div>
-            </div>
-            <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
-                <div class="not-test">
-                    <div v-if="tests && tests.length == 0" class="waiting">{{switchLocal(3)}}</div>
-                    <template v-if="!hasActiveTest()">
-                        <div v-if="tests && tests.length != 0" class="user-info">
-                            {{user}},
-                            <br />
-                            <br />
-                            {{switchLocal(1)}}:
-                        </div>
-                        <div class="test-list">
-                            <div v-for="test in tests" class="test-wrapper">
-                                @*- {{test.TestingDate}}*@
-                                <div class="test-item" v-on:click="startTest(test.Id)">
-                                    <span class="test-name">{{test.DisciplineName}}</span>
-                                    <span class="test-icon">
-                                        <i class="far fa-play-circle"></i>
-                                    </span>
-                                </div>
+                <template v-if="!hasActiveTest()">
+                    <div v-if="tests && tests.length != 0" class="user-info">
+                        {{user}},
+                        <br />
+                        <br />
+                        {{switchLocal(1)}}:
+                    </div>
+                    <div class="test-list">
+                        <div v-for="test in tests" class="test-wrapper">
+                            @*- {{test.TestingDate}}*@
+                            <div class="test-item" v-on:click="startTest(test.Id)">
+                                <span class="test-name">{{test.DisciplineName}}</span>
+                                <span class="test-icon">
+                                    <i class="far fa-play-circle"></i>
+                                </span>
                             </div>
                         </div>
-                    </template>
-                    <template v-if="hasActiveTest()">
-                        <div v-if="tests && tests.length != 0" class="user-info">
-                            {{user}},
-                            <br />
-                            <br />
-                            {{switchLocal(2)}}:
-                        </div>
-                        <div class="test-list">
-                            <div v-for="test in activeTests" class="test-wrapper">
-                                @*- {{test.TestingDate}}*@
-                                <div class="test-item" v-on:click="startTest(test.Id)">
-                                    <span class="test-name">{{test.DisciplineName}}</span>
-                                    <span class="test-icon">
-                                        <i class="far fa-play-circle"></i>
-                                    </span>
-                                </div>
+                    </div>
+                </template>
+                <template v-if="hasActiveTest()">
+                    <div v-if="tests && tests.length != 0" class="user-info">
+                        {{user}},
+                        <br />
+                        <br />
+                        {{switchLocal(2)}}:
+                    </div>
+                    <div class="test-list">
+                        <div v-for="test in activeTests" class="test-wrapper">
+                            @*- {{test.TestingDate}}*@
+                            <div class="test-item" v-on:click="startTest(test.Id)">
+                                <span class="test-name">{{test.DisciplineName}}</span>
+                                <span class="test-icon">
+                                    <i class="far fa-play-circle"></i>
+                                </span>
                             </div>
                         </div>
-                    </template>
-                    @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
-                    @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
-                </div>
+                    </div>
+                </template>
+                @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
+                @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
             </div>
         </div>
-    }
-    else
-    {
-        <div class="empty-list">
-            {{switchLocal(4)}}
-        </div>
-    }
+    </div>
 </div>
 
 <script src="~/Content/aes.js"></script>

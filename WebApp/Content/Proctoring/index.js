@@ -34,7 +34,9 @@
         filteredMessages: [],
         enrollee: {},
         pageWidth: 0,
-        newMessages: []
+        newMessages: [],
+        counter: 0,
+        unloadedImage: ''
     },
     methods: {
         init: function () {
@@ -53,15 +55,16 @@
                 async: false,
                 success: function (HasAccess) {
                     self.HasCase = HasAccess;
-                    if (HasAccess) {
-                        self.initQuestions(newId);
-                        self.GetMembers(newId);
-                        loadedCount++;
-                        if (loadedCount == 4) {
-                            self.fullLoadObject.loaded = true;
-                            self.fullLoadObject.loading = false;
-                        }
+                    console.log(HasAccess);
+                    //if (HasAccess) {
+                    self.initQuestions(newId);
+                    self.GetMembers(newId);
+                    loadedCount++;
+                    if (loadedCount == 4) {
+                        self.fullLoadObject.loaded = true;
+                        self.fullLoadObject.loading = false;
                     }
+                    // }
                 }
             });
             $.ajax({
@@ -121,16 +124,16 @@
                 }
             });
 
-            if (typeof (WebSocket) !== 'undefined') {
-                self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
-            } else {
-                self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
-            }
             //if (typeof (WebSocket) !== 'undefined') {
-            //    self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            //    self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             //} else {
-            //    self.socket = new MozWebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            //    self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             //}
+            if (typeof (WebSocket) !== 'undefined') {
+                self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            } else {
+                self.socket = new MozWebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            }
             if (self.socket) {
                 self.socket.onopen = function () {
                     self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.TestingProfileId }));
@@ -206,6 +209,7 @@
                         item.Answers = [{ UserAnswer: (item.UserAnswer && item.UserAnswer.trim() != "") ? item.UserAnswer : "Абитуриент не ответил" }];
                         item.Scores = [];
                         item.maxScore = 0;
+                        item.answerImage = "";
                     });
                     self.questions = questions;
                     self.selectQuestion(1);
@@ -284,6 +288,9 @@
                 //Изображение вопроса
                 self.loadObject.loaded = false;
                 self.loadObject.loading = true;
+
+                self.counter = 0;
+                self.askQuestionImagePart(1);
                 $.ajax({
                     type: 'POST',
                     dataType: 'json',
@@ -304,9 +311,8 @@
                         self.maxScore = d.MaxStructureDisciplineScore;
                     }
                 });
-                let counter = 0;
                 //Изображения ответов
-                if (self.selectedQuestion.TypeAnswerId && self.selectedQuestion.TypeAnswerId != 3) {
+                if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                     self.selectedQuestion.Answers.forEach(function (a) {
                         $.ajax({
                             type: 'POST',
@@ -314,8 +320,8 @@
                             url: '/user/GetAnswerImage?Id=' + a.Id,
                             success: function (d) {
                                 a.AnswerImage = d.AnswerImage;
-                                counter++;
-                                if (counter == self.selectedQuestion.Answers.length) {
+                                self.counter++;
+                                if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                     self.loadObject.loading = false;
                                     self.loadObject.loaded = true;
                                 }
@@ -324,10 +330,52 @@
                     });
                 }
                 else {
-                    self.loadObject.loading = false;
-                    self.loadObject.loaded = true;
+
+                    $.ajax({
+                        type: 'POST',
+                        dataType: 'json',
+                        url: '/auditory/DownloadFile?Id=' + self.selectedQuestion.FileId,
+                        success: function (data) {
+                            self.selectedQuestion.answerImage = data;
+                            self.loadObject.loading = false;
+                            self.loadObject.loaded = true;
+                        }
+                    });
                 }
             }
+        },
+        askQuestionImagePart: function (part) {
+            let self = this;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
+                success: function (d) {
+                    if (!self.unloadedImage || part == 1) {
+                        self.selectedQuestion.QuestionImage = "";
+                        self.unloadedImage = "";
+                    }
+                    if (d.QuestionImage.indexOf('flag') != -1) {
+                        self.unloadedImage += d.QuestionImage.substr(4);
+                        //self.selectedQuestion.QuestionImage += d.QuestionImage.substr(4);
+                        self.askQuestionImagePart(part + 1);
+                    }
+                    else {
+                        self.unloadedImage += d.QuestionImage;
+                        self.selectedQuestion.QuestionImage = self.unloadedImage;
+                        //После загрузки ставим метку, что загружено
+                        self.counter++;
+                        self.selectedQuestion.IsLoaded = true;
+                        if (self.counter == self.selectedQuestion.Answers.length + 1 || self.selectedQuestion.TypeAnswerId == 3) {
+                            self.loadObject.loading = false;
+                            self.loadObject.loaded = true;
+                        }
+                        console.log(self.selectedQuestion);
+                        //self.selectedQuestion.QuestionImage += d.QuestionImage;
+                    }
+
+                }
+            });
         },
         showTotal: function () {
             let self = this;
@@ -356,7 +404,7 @@
                 url: '/verification/GetMembers?Id=' + Id,
                 success: function (d) {
                     self.members = d;
-                    self.ableMembers = self.members.filter(function (member) { return member.UserRoleId != 4;  });
+                    self.ableMembers = self.members.filter(function (member) { return member.UserRoleId != 4; });
                     self.notMeMembers = self.members.filter(function (member) { return member.Id != self.currentUser.Id; });
                 }
             });
@@ -498,7 +546,8 @@
             });
         },
         downloadFile: function (id) {
-            window.open('/auditory/DownloadFile?Id=' + id, '_blank');
+            let self = this;
+            //window.open('/auditory/DownloadFile?Id=' + id, '_blank');
         },
         IsUserMe: function (id) {
             let self = this;

@@ -184,7 +184,7 @@ const app = new Vue({
                     self.pc2.addEventListener('iceconnectionstatechange', function (e) {
                         self.onIceStateChange(self.pc2, e);
                     })
-                    self.pc2.addEventListener('track', self.gotRemoteStream);
+                    self.pc2.addEventListener('track', function (e) { self.gotRemoteStream(e, a); });
                 }
                 socket.onmessage = function (msg) {
                     //console.log(msg);
@@ -300,9 +300,9 @@ const app = new Vue({
         onIceStateChange: function (pc, e) {
 
         },
-        gotRemoteStream: function (e) {
-            console.log(e.streams);
-            $('#video-87')[0].srcObject = e.streams[0];
+        gotRemoteStream: function (e, a) {
+            console.log(a);
+            $('#video-' + a.TestingProfileId)[0].srcObject = e.streams[0];
         },
 
         b64toBlob: function (b64Data, contentType = '', sliceSize = 512) {

@@ -154,8 +154,9 @@ namespace WebApp.Models
                             {
                                 await str.CopyToAsync(sqlFilestream, 2000);
                             }
-                            return multi.ReadFirstOrDefault<Guid>();
+                            Guid result = multi.ReadFirstOrDefault<Guid>();
                             trans.Commit();
+                            return result;
                         }
                         //catch (Exception ex)
                         //{
@@ -235,11 +236,11 @@ namespace WebApp.Models
                         };
 
                         // filestream.Stream = stream;
-                        byte[] data = new byte[(int)stream.Length];
-                        stream.Read(data, 0, data.Length);
+                        //byte[] data = new byte[(int)stream.Length];
+                        //       stream.Read(data, 0, data.Length);
                         filestream.Stream = stream;
                         // Теперь помечаем, используемые ресурсы, т
-
+                        //trans.Commit();
                         return filestream;
                     }
                 }
@@ -249,32 +250,35 @@ namespace WebApp.Models
                 }
             }
         }
-        public FileStreamDownload DownloadFileById(Guid? FileId, Guid? UserId)
+        public string DownloadFileById(Guid? FileId, Guid? UserId)
         {
             using (var conn = Concrete.OpenConnection())
             {
+                IDbTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    using (IDbTransaction trans = conn.BeginTransaction())
-                    {
-                        //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
-                        FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                    //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
+                    SourceMaterial filestream = conn.QueryFirstOrDefault<SourceMaterial>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
 
-                        MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
-                        {
-                            Connection = conn,
-                            SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
-                            Transaction = trans
-                        };
+                    return Convert.ToBase64String(filestream.SourceMaterialImage);
 
-                        // filestream.Stream = stream;
-                        byte[] data = new byte[(int)stream.Length];
-                        stream.Read(data, 0, data.Length);
-                        filestream.Stream = stream;
-                        // Теперь помечаем, используемые ресурсы, т
+                    //FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
-                        return filestream;
-                    }
+                    //MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
+                    //{
+                    //    Connection = conn,
+                    //    SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
+                    //    Transaction = trans
+                    //};
+
+                    //// filestream.Stream = stream;
+                    //// byte[] data = new byte[(int)stream.Length];
+                    //// stream.Read(data, 0, data.Length);
+                    //filestream.Stream = stream;
+                    //// Теперь помечаем, используемые ресурсы, т
+
+                    //return filestream;
+
                 }
                 catch (Exception e)
                 {

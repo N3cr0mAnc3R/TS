@@ -107,11 +107,12 @@ namespace WebApp.Models.Proctoring
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return (await cnt.QueryFirstOrDefaultAsync<AccessModel>(
+                var t = await cnt.QueryFirstOrDefaultAsync<bool>(
                     sql: "[dbo].[Administrator_TestingProfileCanCheckGet]",
                     new { userUID, localization, TestingProfileId },
                     commandType: CommandType.StoredProcedure
-                )).CanCheck;
+                );
+                return t;
             }
         }
         /// <summary>
