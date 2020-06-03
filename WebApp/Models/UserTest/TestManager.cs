@@ -71,7 +71,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<Guid>(sql: "[dbo].[UserPlace_UserUIDTesingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<Guid>(sql: "[dbo].[UserPlace_UserUIDTestingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public int ToggleTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID, string localization)
@@ -339,12 +339,12 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<Violation>(sql: "[dbo].[Administrator_ViolationWithStatisticsSave]", new { TestingProfileId, userUID, ViolationTypeId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public void UpdateQuestionAnswer(IEnumerable<QuestionAnswer> testingLogs)
+        public async Task UpdateQuestionAnswer(IEnumerable<QuestionAnswer> testingLogs)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer, fileId = a.FileId });
-                cnt.Execute(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
             }
         }
         public IEnumerable<ChatMessage> GetChatMessages(int testingProfileId, string Localization)

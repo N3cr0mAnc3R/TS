@@ -30,7 +30,7 @@
                                 <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false"> </textarea>
                                 <br />
                                 <div v-if="!selectedQuestion.fileId">
-                                    <input v-on:change="changeFile" type="file" accept="image/*, application/msword" />
+                                    <input v-on:change="changeFile" type="file" accept="image/*" />
                                 </div>
                                 <div v-if="selectedQuestion.fileId">
                                     <div class="image-preview-wrapper">
@@ -43,7 +43,7 @@
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">
                                 <div v-if="!selectedQuestion.fileId">
-                                    <input v-on:change="changeFile" type="file" accept="image/*, application/msword" spellcheck="false" />
+                                    <input v-on:change="changeFile" type="file" accept="image/*" />
                                 </div>
                                 <div v-if="selectedQuestion.fileId">
                                     <div class="image-preview-wrapper">
@@ -86,7 +86,7 @@
             <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">{{switchLocal(5)}}</button></div>
         </div>
         <div class="panel-right" v-bind:class="{'opened': IsTipOpened}" id="panel-right">
-            <div class="control-btn" v-on:mousedown="startResize">
+            <div class="control-btn" v-on:mousedown="startResize" v-on:touchstart="startResizeTouch">
                 <svg width="30" height="14" viewBox="0 0 30 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M29.7306 6.28533L24.1803 0.71907C23.8129 0.350698 23.2168 0.350698 22.8494 0.71907C22.482 1.08739 22.497 1.72002 22.497 2.32824V5.13997H7.50113V2.32824C7.50113 1.72002 7.51613 1.08739 7.14873 0.71907C6.78134 0.350698 6.18523 0.350698 5.81784 0.71907L0.267504 6.28533C0.0716276 6.48214 -0.0118015 6.74272 0.00133541 6.99953C-0.0118015 7.25727 0.0716276 7.5178 0.267504 7.71466L5.81877 13.2809C6.18616 13.6493 6.78227 13.6493 7.14967 13.2809C7.51706 12.9126 7.50206 12.0691 7.50206 11.7008V8.88904H22.4979V11.7008C22.4979 12.309 22.4829 12.9126 22.8503 13.2809C23.2176 13.6492 23.8138 13.6493 24.1812 13.2809L29.7325 7.71461C29.9284 7.5178 30.0118 7.25722 29.9987 6.99948C30.0099 6.74267 29.9265 6.48209 29.7306 6.28533Z" fill="white" />
                 </svg>
@@ -111,12 +111,24 @@
                     <img v-bind:style="{'width': maxTipWidth + 'px'}" v-bind:src="'data:image/png;base64, ' + tip.Image" />
                     <br />
                 </div>
+                <div class="calc-wrapper material-wrapper">
+                    <div class="calculator">
+                        <div class="result-wrapper"><div id="text-area">0</div></div>
+                        <div class="button-wrapper">
+                            <div v-for="row in calculator.rows" class="calc-row">
+                                <div v-for="col in row.columns" class="calc-col">
+                                    <div class="key" v-bind:class="'s-' + col.size" v-on:click="pushBtn(col.k)"><span>{{col.k}}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
         <div class="open-chat-wrapper">
             <div v-on:click="toggleChat()">
-                <svg width="76" height="74" viewBox="0 0 76 74" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                <svg width="50" height="50" viewBox="0 0 76 74" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <rect width="76" height="74" fill="url(#pattern0)" />
                     <defs>
                         <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">
@@ -139,7 +151,7 @@
                     <video id="video1" autoplay="autoplay" muted></video>
                 </div>
                 <div class="screen-wrapper">
-                    <video id="video2" autoplay="autoplay" muted></video>
+                    <video id="video2" autoplay="autoplay" muted v-bind:src="streamLoaded"></video>
                 </div>
             </div>
         </div>
@@ -150,41 +162,38 @@
                 </span>
                 <div class="btn-list">
                     <div v-on:click="toggleTypeChat()" class="toggler-type">
-                        <span v-if="chat.IsChatMOpened"><i class="fa fa-video"></i></span>
-                        <span v-if="chat.IsChatVOpened"><i class="fa fa-keyboard"></i></span>
                     </div>
                     <span v-on:click="toggleChat()" class="close-btn"><i class="fa fa-times"></i></span>
                 </div>
             </div>
-            <div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
+            @*<div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
                 <div v-for="participant in chat.participants">
                     <div id="video-wrapper">
-                        @*<video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>*@
-                    </div>
+                        <video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>
                 </div>
-                <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
-                    <div class="participant-wrapper" v-for="participant in chat.participants">
-                        <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                        </div>
+                        <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
+                            <div class="participant-wrapper" v-for="participant in chat.participants">
+                                <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                            </div>
+                        </div>
+                    </div>*@
+            @*<div class="text-chat-wrapper">
+                    <ul class="chat-wrapper">
+                        <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}">
+                            <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
+                            <br />
+                        </li>
+                    </ul>
+                    <div class="send-message-wrapper">
+                        <div class="message-input">
+                            <textarea v-model="chat.Message"></textarea>
+                            <button v-on:click="sendMessage">
+                                <span class="fa fa-send"></span>
+                            </button>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="text-chat-wrapper" v-if="chat.IsChatMOpened">
-                <ul class="chat-wrapper">
-                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}">
-                        <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
-                        <br />
-                    </li>
-                </ul>
-                <div class="send-message-wrapper">
-                    <div class="message-input">
-                        <textarea v-model="chat.Message"></textarea>
-                        <button v-on:click="sendMessage">
-                            @*<span class="text">Отправить </span>*@
-                            <span class="fa fa-send"></span>
-                        </button>
-                    </div>
-                </div>
-            </div>
+                </div>*@
         </div>
         <div class="modal fade" id="finish-game" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">

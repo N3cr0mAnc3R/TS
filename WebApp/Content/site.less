@@ -90,12 +90,69 @@ textarea {
         .base-nav, .nav-item {
             display: flex;
 
+            .userpic {
+                margin-top: -14px;
+
+                img {
+                    height: 71px;
+                }
+            }
+
             .navbar-toggler {
                 color: rgba(0,0,0,.5);
                 border-color: rgba(0,0,0,.1);
+                font-size: 30px;
+                line-height: 24px;
+                padding: 0;
+
+                .navbar-icon {
+                    display: inline-block;
+                    width: 1.5em;
+                    vertical-align: middle;
+                    content: "";
+                    background: no-repeat center center;
+                    background-size: 100% 100%;
+                }
+
+                &:active {
+                    outline: none;
+                }
             }
 
-            @media (min-width: 992px) {
+            @media (max-width: 576px) {
+                .navbar-collapse1 {
+                    opacity: 0;
+                    transition: all ease 0.3s;
+                    display: block;
+                    position: fixed;
+                    top: -100%;
+
+                    &.show {
+                        opacity: 1;
+                        width: 100%;
+                        position: fixed;
+                        height: 100%;
+                        background: #fff;
+                        z-index: 5;
+                        top: 80px;
+                        left: 0;
+
+                        .navbar-nav {
+                            padding: 0 20px;
+
+                            li {
+                                border-bottom: 1px solid #ddd;
+
+                                &.hidden-full {
+                                    display: flex;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            @media (min-width: 576px) {
                 .navbar-toggler {
                     display: none;
                 }
@@ -110,6 +167,10 @@ textarea {
                         li {
                             padding: 0 5px;
                             margin-right: 10px;
+
+                            &.hidden-full {
+                                display: none;
+                            }
 
                             &:not(:first-child) {
                                 /*border-left: 1px solid #ddd;*/
@@ -131,7 +192,14 @@ textarea {
                 }
             }
 
-            .navbar-collapse {
+            .navbar-brand {
+                display: inline-block;
+                padding-top: 0.3125rem;
+                padding-bottom: 0.3125rem;
+                margin-right: 1rem;
+                font-size: 1.25rem;
+                line-height: inherit;
+                white-space: nowrap;
             }
         }
     }
@@ -199,8 +267,52 @@ a:focus {
         transform: rotate(360deg);
     }
 }
+/* Variables 
+                @loader-size: 100px;
 
-/* Variables */
+                .loader-wrapper {
+                    margin: auto;
+                    display: flex;
+                    height: 350px;
+                    /* Loading Icon */
+.login-wrapper {
+    margin: auto;
+    max-width: 500px;
+    margin-top: 80px;
+
+    input {
+        margin: auto;
+    }
+
+    button {
+        width: 282px;
+        height: 44px;
+        color: #fff;
+        border: none;
+        font-family: Montserrat;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 16px;
+        line-height: 33px;
+        margin: auto;
+        background: #A6ACBC;
+        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+        border-radius: 3px;
+
+        &:hover {
+            background: rgba(86, 92, 114, 0.8);
+        }
+    }
+
+    .text-label {
+        text-align: left;
+        width: 270px;
+    }
+
+    .submit-login {
+    }
+}
+
 @loader-size: 100px;
 
 .loader-wrapper {
@@ -235,43 +347,5 @@ a:focus {
                 fill: rgba(0, 0, 0, 0.2);
             }
         }
-    }
-}
-
-.login-wrapper {
-    margin: auto;
-    width: 500px;
-    margin-top: 80px;
-
-    input {
-        margin: auto;
-    }
-
-    button {
-        width: 282px;
-        height: 44px;
-        color: #fff;
-        border: none;
-        font-family: Montserrat;
-        font-style: normal;
-        font-weight: 600;
-        font-size: 16px;
-        line-height: 33px;
-        margin: auto;
-        background: #A6ACBC;
-        box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
-        border-radius: 3px;
-
-        &:hover {
-            background: rgba(86, 92, 114, 0.8);
-        }
-    }
-
-    .text-label {
-        text-align: left;
-        width: 270px;
-    }
-
-    .submit-login {
     }
 }

@@ -124,16 +124,16 @@
                 }
             });
 
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
-            //} else {
-            //    self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
-            //}
             if (typeof (WebSocket) !== 'undefined') {
-                self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+                self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             } else {
-                self.socket = new MozWebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+                self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
             }
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            //} else {
+            //    self.socket = new MozWebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
+            //}
             if (self.socket) {
                 self.socket.onopen = function () {
                     self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.TestingProfileId }));

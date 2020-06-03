@@ -93,43 +93,49 @@ namespace WebApp
                         await TestManager.SendMessage(jsonparsed);
                         var newJson = Json.Encode(jsonparsed);
                         buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(newJson));
+                        List<WebSocket> disposedClients = new List<WebSocket>();
+                        //Передаём сообщение всем клиентам
+                        foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
+                        {
+
+                            // WebSocket client = client1;
+
+                            try
+                            {
+                                if (client.State == WebSocketState.Open)
+                                {
+                                    await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                }
+                            }
+
+                            catch (ObjectDisposedException)
+                            {
+                                Locker.EnterWriteLock();
+                                try
+                                {
+                                    List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                    //cls.Remove(client);
+                                    disposedClients.Add(client);
+                                    //Clients.Remove
+                                    // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
+                                    //i--;
+                                }
+                                finally
+                                {
+                                    Locker.ExitWriteLock();
+                                }
+                            }
+                        }
+                        for (int i = 0; i < disposedClients.Count; i++)
+                        {
+                            List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                            cls.Remove(cls[i]);
+                        }
                     }
                 }
                 catch(Exception e)
                 {
 
-                }
-                if (!jsonparsed.ForCreate)
-                {
-                    //Передаём сообщение всем клиентам
-                    foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
-                    {
-
-                        // WebSocket client = client1;
-
-                        try
-                        {
-                            if (client.State == WebSocketState.Open)
-                            {
-                                await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
-                            }
-                        }
-
-                        catch (ObjectDisposedException)
-                        {
-                            Locker.EnterWriteLock();
-                            try
-                            {
-                                //Clients.Remove
-                                // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
-                                //i--;
-                            }
-                            finally
-                            {
-                                Locker.ExitWriteLock();
-                            }
-                        }
-                    }
                 }
             }
         }

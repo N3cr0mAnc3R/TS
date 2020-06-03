@@ -13,14 +13,14 @@ namespace WebApp.Models.Account
     {
         public AccountManager(Concrete concrete) : base(concrete) { }
 
-        public ApplicationUser GetUser(string userName, string password)
+        public ApplicationUser GetUser(string userName, string localization = "ru", string password = null)
         {
             ApplicationUser user;
 
             using (var cnt = Concrete.OpenConnection())
             {
-                user = (cnt.Query<ApplicationUser>("UserPlace_Authorization", new { userName, password }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
-                user.UserName = userName;
+                user = (cnt.Query<ApplicationUser>("UserPlace_Authorization", new { userName, password, localization }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+                //user.UserName = userName;
                 //user.Id = user.Uuid.ToString();
             }
 

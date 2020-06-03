@@ -35,8 +35,6 @@
         pause: false,
         chat: {
             IsOpened: false,
-            IsChatMOpened: true,
-            IsChatVOpened: false,
             participants: [],
             messages: [],
             Message: "",
@@ -52,11 +50,33 @@
         maxTipWidth: 540,
         unreadCount: 0,
         currentUser: {},
-        queue: []
+        queue: [],
+        mediaSource: null,
+        sourceBuffer: null,
+        streamLoaded: null,
+        streamQueue: [],
+        calculator: {
+            rows: [
+                { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
+                { id: 1, columns: [{ k: 4, size: 1 }, { k: 5, size: 1 }, { k: 6, size: 1 }, { k: '/', size: 1 }, { k: '*', size: 1 }] },
+                { id: 2, columns: [{ k: 1, size: 1 }, { k: 2, size: 1 }, { k: 3, size: 1 }, { k: '+', size: 1 }, { k: '-', size: 1 }] },
+                { id: 3, columns: [{ k: 0, size: 1 }, { k: '√', size: 1 }, { k: ',', size: 1 }, { k: '=', size: 2 }] }
+            ],
+            result: 0,
+            resultText: '',
+            first: '',
+            second: '',
+            isExpr: false,
+            expr: ''
+        }
     },
     methods: {
         init: function () {
             let self = this;
+            self.mediaSource = new MediaSource();
+            self.streamLoaded = URL.createObjectURL(self.mediaSource);
+            self.mediaSource.addEventListener('sourceopen', self.sourceOpen);
+            self.mediaSource.addEventListener('sourceclose', function (e) { console.log(e); });
             self.questions = [];
             self.testInProcess = true;
             self.answers = [];
@@ -69,6 +89,10 @@
             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
             self.initWebCam();
             self.initChat();
+            setTimeout(function () {
+                self.maxTipWidth = $('#main-window').width();
+                console.log(self.maxTipWidth);
+            }, 500);
             //GetCurrentUser
             $.ajax({
                 url: "/user/GetCurrentUser?Id=" + newId,
@@ -112,7 +136,7 @@
                     });
                     self.answers = resp3[0];
                     self.timeStart = new Date(resp1[0].Date);
-                    self.startTimer(self.timeStart);
+                    self.startTimer();
                     if (resp1[0].Answered && resp1[0].Answered.length > 0) {
                         self.questions.forEach(function (a) {
                             resp1[0].Answered.forEach(function (b) {
@@ -136,12 +160,18 @@
                                         if (a.fileId) {
                                             self.getAnswerFile(a, a.fileId);
                                         }
+                                        else {
+                                            a.answered = false;
+                                        }
                                     }
                                     else if (a.TypeAnswerId == 4) {
                                         a.answered = true;
                                         a.fileId = b.FileId;
                                         if (a.fileId) {
                                             self.getAnswerFile(a, a.fileId);
+                                        }
+                                        else {
+                                            a.answered = false;
                                         }
                                     }
                                 }
@@ -177,24 +207,26 @@
             //if (event.data && event.data.size > 0) {
             app.recordedCamera.push(event.data);
             var reader = new FileReader();
-            let canvas = document.createElement('canvas');
-            var context = canvas.getContext('2d');
-            canvas.width = 200;
-            canvas.height = 150;
-            context.drawImage($('#video1')[0], 0, 0, 200, 150);
+            //let canvas = document.createElement('canvas');
+            //var context = canvas.getContext('2d');
+            //canvas.width = 200;
+            //canvas.height = 150;
+            //context.drawImage($('#video1')[0], 0, 0, 200, 150);
             //console.log(context);
-            var data = canvas.toDataURL('image/png');
+            //var data = canvas.toDataURL('image/png');
             // let photo = $('#photo')[0];
             //photo.setAttribute('src', data);
 
-            //reader.readAsDataURL(new Blob([event.data], { type: 'video/webm; codecs="vp8"'}));
-            //reader.onloadend = function () {
+            // reader.readAsDataURL(new Blob([event.data], { type: 'video/webm; codecs="vp8"' }));
+            // reader.onloadend = function () {
             //if (app.videoSocket && app.videoSocket.readyState == 1) {
-            //    app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: data }));
-            //}
+            //console.log(event.data);
+            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: JSON.stringify((event.data)) }));
+            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: reader.result }));
+            // }
             //    var base64data = reader.result;
             //    console.log(base64data);
-            //}
+            // }
             //  if (app.videoSocket && app.loadedSocket) {
             //      console.log(JSON.stringify(event.data));
             //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
@@ -301,6 +333,8 @@
         removeFile: function () {
             let self = this;
             self.selectedQuestion.Answers[0].fileId = null;
+            self.selectedQuestion.fileId = null;
+            self.selectedQuestion.answerImage = null;
             self.answerQuestion();
         },
         changeFile: function (e) {
@@ -325,8 +359,9 @@
 
                     var reader = new FileReader();
                     reader.onload = function () {
-                        self.selectedQuestion.answerImage = reader.result;
+                        self.selectedQuestion.answerImage = reader.result.substr(reader.result.indexOf(',') + 1);
                     };
+                    console.log(e.target.files[0]);
                     reader.readAsDataURL(e.target.files[0]);
                     self.answerQuestion();
                 }
@@ -412,6 +447,11 @@
                         if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
+
+                            setTimeout(function () {
+                                self.maxTipWidth = $('#main-window').width() < 500 ? $('#main-window').width() : 540;
+                                console.log(self.maxTipWidth);
+                            }, 500);
                         }
                         //self.selectedQuestion.QuestionImage += d.QuestionImage;
                     }
@@ -453,6 +493,15 @@
                     self.selectedQuestion.changed = false;
                     //Для подсветки решённых заданий
                     self.selectedQuestion.answered = true;
+                    if (self.selectedQuestion.TypeAnswerId == 3 || self.selectedQuestion.TypeAnswerId == 4) {
+                        if (!self.selectedQuestion.Answers[0].fileId) {
+                            self.selectedQuestion.answered = false;
+                        }
+                        else {
+                            self.selectedQuestion.fileId = self.selectedQuestion.Answers[0].fileId;
+                            console.log(self.selectedQuestion.fileId);
+                        }
+                    }
                 }
             });
         },
@@ -505,7 +554,7 @@
                 self.timeLeft--;
                 if (self.timeLeft <= 0) {
                     clearInterval(self.interval);
-                    self.finishTest();
+                    //self.finishTest();
                 }
             }, 1000);
             //self.startCapture();
@@ -556,7 +605,7 @@
                 navigator.getUserMedia(
                     {
                         video: true,
-                        //audio: true
+                        audio: true
                     },
                     function (stream) {/*callback в случае удачи*/
                         self.stream = stream;
@@ -567,10 +616,10 @@
 
                         $('#video1')[0].srcObject = stream;
 
-                        if (typeof (WebSocket) !== 'undefined') {
-                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                        if (typeof (websocket) !== 'undefined') {
+                            self.videosocket = new websocket("wss://" + window.location.hostname + "/streamhandler.ashx");
                         } else {
-                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                            self.videosocket = new mozwebsocket("wss://" + window.location.hostname + "/streamhandler.ashx");
                         }
                         //if (typeof (WebSocket) !== 'undefined') {
                         //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
@@ -594,7 +643,13 @@
 
                                 else if (message.answer) {
                                     console.log(message.answer);
-                                    self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) { console.log(r); }, function (r) { console.log(r); })
+                                    self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
+
+                                        self.queue.forEach(function (candidate) {
+                                            self.pc1.addIceCandidate(candidate);
+                                        })
+                                        console.log(r);
+                                    }, function (r) { console.log(r); })
                                     //let createDescPromise = new Promise(function (resolve) {
                                     //    console.log('start remote');
                                     //    let sdp = JSON.parse(message.answer).sdp;
@@ -619,6 +674,48 @@
                                     //console.log(message.answer);
                                 }
                             }
+                            else {
+                                //self.streamLoaded = message.Stream;
+                                //if (message.Stream) {
+                                //    if (!self.sourceBuffer) {
+                                //       // self.initBuffer();
+                                //        console.log('empty');
+                                //    }
+                                //    console.log(self.mediaSource.readyState);
+                                //    let reader = new FileReader();
+                                //    reader.onload = function () {
+                                //        try {
+                                //            console.log(self.sourceBuffer.updating, self.streamQueue.length > 0);
+                                //            self.sourceBuffer.appendBuffer(reader.result);
+                                //        }
+                                //        catch (e) {
+                                //            console.log(e);
+                                //        }
+                                //        //if (self.mediaSource.sourceBuffers.length == 0) {
+
+                                //        //    self.initBuffer();
+                                //        //}
+
+                                //        //if (self.sourceBuffer.updating || self.streamQueue.length > 0) {
+                                //        //    console.log(self.mediaSource.sourceBuffers.length);
+                                //        //    self.streamQueue.push(e.data);
+                                //        //} else {
+                                //        //    console.log(self.mediaSource.sourceBuffers.length);
+
+                                //        //    self.sourceBuffer.appendBuffer(reader.result);
+                                //        //}
+
+                                //    }
+                                //    reader.readAsArrayBuffer(self.b64toBlob(message.Stream));
+                                //    //self.streamLoadedQueue.push(self.b64toBlob(message.Stream));
+                                //    //self.streamLoadedQueue.push(message.Stream);
+                                //    //console.log(self.streamLoadedQueue);
+                                //    //self.b64toBlob(self.streamLoadedQueue);
+                                //    //self.streamLoaded = URL.createObjectURL(self.b64toBlob(self.streamLoadedQueue));
+                                //    //self.streamLoaded = URL.createObjectURL(self.b64toBlob(self.streamLoadedQueue));
+                                //}
+
+                            }
                             //console.log(message);
                         }
 
@@ -629,6 +726,198 @@
             else {
                 self.cameraRecorder.start(10);
             }
+        },
+        //initBuffer: function () {
+        //    let self = this;
+        //    if (self.mediaSource.readyState == 'open') {
+
+        //        self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+        //        self.sourceBuffer.addEventListener('update', function () {
+        //            if (self.streamQueue.length > 0 && !self.sourceBuffer.updating) {
+        //                self.sourceBuffer.appendBuffer(self.streamQueue.shift());
+        //            }
+        //        });
+        //    }
+        //    else {
+
+        //    }
+        //},
+        sourceOpen: function () {
+            let self = this;
+            self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
+            //self.sourceBuffer.addEventListener('update', function () {
+            //    if (self.streamQueue.length > 0 && !self.sourceBuffer.updating) {
+            //        self.sourceBuffer.appendBuffer(self.streamQueue.shift());
+            //    }
+            //});
+        },
+        b64toBlob: function (b64Data, sliceSize = 512) {
+            // console.log(b64Data.substr(b64Data.indexOf('base64') + 7));
+            //let self = this;
+            //for (let i = 0; i < data.length; i++) {
+            //    let byteCharacters = atob(data[i].substr(data[i].indexOf('base64') + 7));
+
+            //    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            //        let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+            //        let byteNumbers = new Array(slice.length);
+            //        for (let i = 0; i < slice.length; i++) {
+            //            byteNumbers[i] = slice.charCodeAt(i);
+            //        }
+
+            //        let byteArray = new Uint8Array(byteNumbers);
+            //        self.queueArray.push(byteArray);
+            //    }
+            //}
+
+            //let blob = new Blob(self.queueArray, {
+            //    type: 'video/webm'
+            //});
+
+            let byteCharacters = atob(b64Data.substr(b64Data.indexOf('base64') + 7));
+            let byteArrays = [];
+
+            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                let slice = byteCharacters.slice(offset, offset + sliceSize);
+
+                let byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+
+                let byteArray = new Uint8Array(byteNumbers);
+                byteArrays.push(byteArray);
+            }
+
+            let blob = new Blob(byteArrays, {
+                type: 'video/webm'
+            });
+            return blob;
+        },
+        pushBtn: function (char) {
+            let self = this;
+            let isFirst = self.calculator.second == '' && !self.calculator.isExpr;
+            let middle = isFirst ? self.calculator.first : self.calculator.second;
+            //if(self.calculator.first )
+            self.calculator.resultText += char;
+            if (typeof char == "number") {
+                if (self.calculator.result != 0 && !self.calculator.isExpr) {
+                    self.calculator.result = 0;
+                    self.calculator.resultText = '';
+                    self.calculator.first = '';
+                    self.calculator.second = '';
+                    self.calculator.resultText = char;
+                    middle = '';
+                }
+                if (middle != 0 && !self.calculator.isExpr) {
+                    middle += '' + char;
+                    if (isFirst) {
+                        self.calculator.first = middle;
+                    }
+                    else {
+                        self.calculator.second = middle;
+                    }
+                }
+                else if (middle == 0 && !self.calculator.isExpr) {
+                    middle = '' + char;
+                    if (isFirst) {
+                        self.calculator.first = middle;
+                    }
+                    else {
+                        self.calculator.second = middle;
+                    }
+                }
+                else {
+                    middle = '' + char;
+                    self.calculator.second = middle;
+                }
+                self.calculator.isExpr = false;
+            }
+            else {
+                if (char == ',') {
+                    if ((typeof middle == 'number' && (middle ^ 0) == middle) || (typeof middle == 'string' && middle.indexOf('.') == -1)) {
+                        middle += '.';
+                        if (isFirst) {
+                            self.calculator.first = middle;
+                        }
+                        else {
+                            self.calculator.second = middle;
+                        }
+                    }
+                    else {
+                        self.calculator.resultText = self.calculator.resultText.substr(0, self.calculator.resultText.length - 1);
+                    }
+                }
+                else if (char == '←') {
+                    if (isFirst) {
+                        self.calculator.first = ('' + self.calculator.first).substr(0, self.calculator.first.length - 1);
+                    }
+                    else {
+                        self.calculator.second = ('' + self.calculator.second).substr(0, self.calculator.second.length - 1);
+                    }
+                    if (self.calculator.isExpr) {
+                        self.calculator.isExpr = false;
+                        self.calculator.expr = '';
+                    }
+                    self.calculator.resultText = self.calculator.resultText.substr(0, self.calculator.resultText.length - 2);
+                    self.calculator.resultText = '' + self.calculator.result;
+                    //  middle = middle.substr(0, middle.length - 1);
+                }
+                else if ('+-*/'.indexOf(char) != -1) {
+                    let flag = false;
+
+                    if (self.calculator.expr != '') {
+                        self.calc();
+                        flag = true;
+                    }
+                    self.calculator.isExpr = true;
+                    self.calculator.expr = char;
+                    if (flag) {
+
+                        self.calculator.resultText += char;
+                    }
+                    //self.calculator.resultText = middle;
+                }
+                else if ('√' == char) {
+                    self.calculator.result = Math.sqrt(parseFloat((self.calculator.first + '').replace(/,/g, '.')));
+                    self.calculator.resultText = '' + self.calculator.result;
+                    self.calculator.isExpr = false;
+                    self.calculator.first = self.calculator.result;
+                    self.calculator.expr = '';
+                }
+                else if (char == 'C') {
+
+                    self.calculator.result = 0;
+                    self.calculator.resultText = '0';
+                    self.calculator.first = '';
+                    self.calculator.second = '';
+                    self.calculator.isExpr = false;
+                    self.calculator.expr = '';
+                }
+                else {
+                    self.calc();
+                }
+            }
+            $('#text-area').text(self.calculator.resultText);
+        },
+        calc: function () {
+            let self = this;
+            self.calculator.first = parseFloat((self.calculator.first + '').replace(/,/g, '.'));
+            self.calculator.second = parseFloat((self.calculator.second + '').replace(/,/g, '.'));
+
+            switch (self.calculator.expr) {
+                case '+': self.calculator.result = self.calculator.first + self.calculator.second; break;
+                case '-': self.calculator.result = self.calculator.first - self.calculator.second; break;
+                case '*': self.calculator.result = self.calculator.first * self.calculator.second; break;
+                case '/': self.calculator.result = self.calculator.first / self.calculator.second; break;
+                default: break;
+            }
+            self.calculator.result = +self.calculator.result.toFixed(6);
+            self.calculator.resultText = '' + self.calculator.result;
+            self.calculator.first = self.calculator.result;
+            self.calculator.second = '';
+            self.calculator.isExpr = false;
+            self.calculator.expr = '';
         },
         finishTest: function () {
             let self = this;
@@ -786,12 +1075,41 @@
             $(document).off('mousemove');
             $(document).off('mouseup');
         },
+        startResizeTouch: function () {
+            let self = this;
+            $(document).on('touchmove', function () { self.resizingTouch(self); });
+            self.tipPosition.width = $('#panel-right').width();
+            self.tipPosition.start = $(document).width();// - $('#panel-right').width();
+            //  console.log(self.tipPosition);
+        },
+        resizingTouch: function (self) {
+            $(document).on('touchend', function () { self.stopResizingTouch(self); });
+            $('#panel-right').width(self.tipPosition.start - event.changedTouches[0].pageX);
+            self.maxTipWidth = self.tipPosition.start - event.changedTouches[0].pageX - 20;
+        },
+        stopResizingTouch: function (self) {
+            self.tipPosition.width = $('#panel-right').width();
+            $(document).off('touchmove');
+            $(document).off('touchend');
+        },
 
         toggleChat: function () {
             let self = this;
             self.chat.IsOpened = !self.chat.IsOpened;
             if (self.chat.IsOpened) {
                 self.unreadCount = 0;
+                setTimeout(function () {
+                    $('#full-chat-wrapper')[0].scrollIntoView();
+                }, 20);
+                let maxId = 0;
+                self.chat.messages.forEach(function (msg) {
+                    maxId = msg.Id > maxId ? msg.Id : maxId;
+                });
+                if (maxId != 0) {
+                    setTimeout(function () {
+                        $('#message-' + maxId)[0].scrollIntoView();
+                    }, 20);
+                }
             }
         },
         toggleTypeChat: function () {
@@ -823,34 +1141,28 @@
         getDateFormat: function (date) {
             return date.toLocaleTimeString();
         },
-        switchLocal: function (id) {
-            let self = this;
-            switch (id) {
-                case 1: return self.localization == 1 ? "Осталось" : "Left";
-                case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
-                case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
-                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select file to upload (if necessary) and enter the answer in the field";
-                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
-                case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
-                case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
-                case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
-                case 9: return self.localization == 1 ? "Администратор" : "Administrator";
-                case 10: return self.localization == 1 ? "Удалить файл" : "Remove file";
-            }
-        },
         initRTCPeer: function () {
             let self = this;
-            let videoTracks = self.stream.getVideoTracks();
-            let audioTracks = self.stream.getAudioTracks();
-            let configuration = { sdpSemantics: "unified-plan" };
+            let TURN = {
+                url: 'turn:turn.bistri.com:80',
+                credential: 'homeo',
+                username: 'homeo'
+            };
+
+            let configuration = {
+                iceServers: [TURN]
+            };
             self.pc1 = new RTCPeerConnection(configuration);
             console.log('Created local peer connection object pc1', new Date().getSeconds(), new Date().getMilliseconds());
             self.pc1.addEventListener('icecandidate', function (e) {
                 self.onIceCandidate(self.pc1, e);
-            })
+            });
             self.pc1.addEventListener('iceconnectionstatechange', function (e) {
                 self.onIceStateChange(self.pc1, e);
-            })
+            });
+            self.pc1.addEventListener('connectionstatechange', function (event) {
+                console.log(self.pc1.connectionState);
+            });
 
             self.stream.getTracks().forEach(function (track) {
                 self.pc1.addTrack(track, self.stream);
@@ -873,34 +1185,6 @@
                         }
                     }, function () { });
                 }, function () { });
-
-                //let offerPromise = new Promise(function (resolve) {
-                //    console.log('Created offerPromise start', new Date().getSeconds(), new Date().getMilliseconds());
-                //    resolve(self.pc1.createOffer(self.offerOptions));
-                //})
-                //let CreateofferPromise = new Promise(function (resolve) {
-                //    console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-                //    resolve(self.pc1.setLocalDescription(self.offer));
-                //})
-                //offerPromise.then(function (data) {
-                //    console.log('Created offerPromise finished', new Date().getSeconds(), new Date().getMilliseconds());
-                //    console.log(data);
-                //    self.offer = data;
-                //    CreateofferPromise.then(function (off) {
-                //        console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
-                //        let obj1 = {};
-                //        for (let i in data) {
-                //            if (typeof data[i] != 'function')
-                //                obj1[i] = data[i];
-                //        }
-                //        let obj = {
-                //            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
-                //        };
-                //        if (app.videoSocket && app.videoSocket.readyState == 1) {
-                //            app.videoSocket.send(JSON.stringify(obj));
-                //        }
-                //    });
-                //})
             }
             catch{
                 console.log('error');
@@ -912,11 +1196,6 @@
                 if (typeof e.candidate[i] != 'function')
                     obj1[i] = e.candidate[i];
             }
-            //if(e.candidate)
-            //for (let i in e.candidate.__proto__) {
-            //    if (typeof e.candidate[i] != 'function')
-            //        obj1[i] = e.candidate[i];
-            //}
             console.log(e.candidate);
             let obj = {
                 candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
@@ -950,6 +1229,21 @@
             }
             else {
                 self.init();
+            }
+        },
+        switchLocal: function (id) {
+            let self = this;
+            switch (id) {
+                case 1: return self.localization == 1 ? "Осталось" : "Left";
+                case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
+                case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
+                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select file to upload (if necessary) and enter the answer in the field";
+                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
+                case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
+                case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
+                case 9: return self.localization == 1 ? "Администратор" : "Administrator";
+                case 10: return self.localization == 1 ? "Удалить файл" : "Remove file";
             }
         }
     },

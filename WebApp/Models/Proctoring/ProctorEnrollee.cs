@@ -5,7 +5,7 @@ using System.Web;
 
 namespace WebApp.Models.Proctoring
 {
-    public class TestUser
+    public class ProctorEnrollee
     {
         public int Id { get; set; }
         public string FIO { get; set; }

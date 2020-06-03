@@ -19,23 +19,43 @@
     <nav @*class="navbar navbar-expand-lg navbar-light bg-light"*@ class="navbar-system">
         <div class="container">
             <div class="base-nav">
-                <a class="navbar-brand" href="/" id="nav-1"></a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
+                <a class="navbar-brand" href="@Url.Action("waiting", "user")"><span id="nav-1" class="d-none d-lg-block"></span></a>
+                @*<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>*@
+                <button class="navbar-toggler" onclick="toggleMenu()">
+                    <span class="navbar-icon"><i class="fa fa-sliders-h"></i></span>
                 </button>
 
-                <div class="collapse navbar-collapse1" id="navbarSupportedContent">
+                <div class="navbar-collapse1" id="navbarSupportedContent">
                     @if (Request.IsAuthenticated)
                     {
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item" id="nav-url-1">
-                                <a class="nav-link" href="/auditory/list" id="nav-5"> <span class="sr-only">(current)</span></a>
+                                @*<a class="nav-link"  href="" id="nav-5"> <span class="sr-only">(current)</span></a>*@
+                                @Html.ActionLink("text", "list", "auditory", null, new { id = "nav-5", @class = "nav-link" })
                             </li>
                             <li class="nav-item" id="nav-url-2">
-                                <a class="nav-link" href="/verification/list" id="nav-6"><span class="sr-only">(current)</span></a>
+                                @*<a class="nav-link" href="/verification/list" id="nav-6"><span class="sr-only">(current)</span></a>*@
+                                @Html.ActionLink("text", "list", "verification", null, new { id = "nav-6", @class = "nav-link" })
                             </li>
+
+                            @if (!Request.IsAuthenticated)
+                            {
+                                <li class="nav-item hidden-full" id="nav-url-2">
+                                    <a class="nav-link" href="/account/login" tabindex="-1" id="nav-2"></a>
+                                </li>
+
+                            }
+                            else
+                            {
+                                <li class="nav-item hidden-full" id="nav-url-2">
+                                    <a class="nav-link" href="/account/logout" tabindex="-1" id="nav-3"></a>
+                                </li>
+                            }
                         </ul>
                     }
+
                 </div>
             </div>
             <div class="nav-item">
@@ -45,7 +65,10 @@
                 }
                 else
                 {
-                    <a class="nav-link" href="/account/logout" tabindex="-1" id="nav-3"></a>
+                    <div class="userpic d-none d-md-block">
+                        <img src="@Url.Action("userpic", "account")" alt="userpic" />
+                    </div>
+                    <a class="nav-link d-none d-md-block" href="/account/logout" tabindex="-1" id="nav-11"></a>
                 }
             </div>
         </div>
@@ -62,7 +85,7 @@
     </div>
     <div class="localization-wrapper"><div class="localization-item" id="litem-1" onclick="setLocalization(1)">Ru</div><div id="litem-2" class="localization-item" onclick="setLocalization(2)">En</div></div>
     <script>
-        var localApp = { localization: 1};
+        var localApp = { localization: 1 };
         window.onload = function () {
             $.ajax({
                 type: 'POST',
@@ -87,14 +110,21 @@
                         //}
                         //window.open('/user/waiting', '_self');
                     }
-
-                    GetLocalization();
-                    getLocation();
+                    init();
                     $('#window-without-loader').css('display', 'block');
                     $('#main-loader').css('display', 'none');
                 }
             });
 
+        }
+        function toggleMenu() {
+
+            $('#navbarSupportedContent').toggleClass('show');
+        }
+        function init() {
+            GetLocalization();
+            getLocation();
+            getCurrentUser();
         }
         function getLocation() {
             if (window.location.pathname.indexOf('auditory') != -1) {
@@ -111,8 +141,21 @@
                 dataType: 'json',
                 url: '/user/SetLocalization?Type=' + Type,
                 success: function (s) {
-                    GetLocalization();
+                    //GetLocalization();
                     location.reload();
+                }
+            });
+        }
+        function getCurrentUser() {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/account/GetCurrentUser',
+                success: function (s) {
+                    console.log(s);
+                    if (s.PictureImage) {
+                        $('#user-image').attr('src', 'data:image/png;base64, ' + s.PictureImage);
+                    }
                 }
             });
         }
@@ -158,7 +201,7 @@
             $('#nav-8').text(checking.localization == 1 ? "Логин" : "UserName");
             $('#nav-9').text(checking.localization == 1 ? "Пароль" : "Password");
             $('#nav-10').text(checking.localization == 1 ? "Выполнить вход" : "Log in");
-            // case 2: return self.localization == 1 ? "Вы не завершили следующие тесты": "Not completed:";
+            $('#nav-11').text(checking.localization == 1 ? "Выход" : "Logout");
 
         }
 

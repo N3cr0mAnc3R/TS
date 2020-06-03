@@ -295,11 +295,34 @@
             border-top: none;
             background: #fff;
 
-            .video {
+            @media(max-width:600px) {
+                margin: 10px auto;
+            }
+
+
+            .video-info-wrapper {
                 outline: 1px solid #000;
                 width: @w-1;
                 height: 180px;
                 margin-bottom: 15px;
+
+                .video-wrapper {
+                    video {
+                    }
+                }
+            }
+
+            .alter-wrapper {
+                outline: 1px solid #000;
+                width: @w-1;
+                height: 180px;
+                margin-bottom: 15px;
+                display: flex;
+                flex-flow: column;
+
+                .alter {
+                    margin: auto;
+                }
             }
 
             .title {

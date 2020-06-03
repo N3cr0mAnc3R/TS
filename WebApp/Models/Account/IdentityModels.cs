@@ -19,6 +19,22 @@ namespace WebApp.Models
         //public DateTime? Birthdate { get; set; }
         public ApplicationUser() : base() { }
 
+
+        public byte[] Picture { get; set; }
+        public string PictureImage
+        {
+            get
+            {
+                if(Picture != null)
+                return Convert.ToBase64String(Picture);
+                return null;
+            }
+        }
+        public string LastName { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+
+
         public Guid? userId;
 
         public async Task<ClaimsIdentity> GenerateUserIdentityAsync(ApplicationUserManager manager, string UserName)
@@ -28,9 +44,9 @@ namespace WebApp.Models
             claims.AddClaim(new Claim("Name", UserName));
             claims.AddClaim(new Claim("UserName", UserName));
             return claims;
-           // var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
+            // var userIdentity = await manager.CreateIdentityAsync(this, DefaultAuthenticationTypes.ApplicationCookie);
             // Здесь добавьте утверждения пользователя
-           // return userIdentity;
+            // return userIdentity;
         }
     }
 
@@ -63,8 +79,8 @@ namespace WebApp.Models
     {
         public UserClaim() : base() { }
     }
-   
-    public class ApplicationRole: IdentityRole<Guid, UserRole>
+
+    public class ApplicationRole : IdentityRole<Guid, UserRole>
     {
         public ApplicationRole() : base() { }
     }

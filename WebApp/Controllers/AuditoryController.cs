@@ -58,11 +58,6 @@ namespace WebApp.Controllers
             FileStreamDownload dwnl = TestManager.FileDownload(Id, Type, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
             return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         }
-        [HttpPost]
-        public async Task<JsonResult> GetCurrentUser()
-        {
-            return Json(CurrentUser);
-        }
         public JsonResult DownloadFile(Guid? Id)
         {
             //FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
@@ -83,6 +78,21 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetAuditoryList()
         {
             return Json(await AuditoryManager.GetAuditoryList(CurrentUser.Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetAuditoryStatistic(int Id)
+        {
+            return Json(await AuditoryManager.GetAuditoryStatistic(Id, CurrentUser.Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetUsersByDate(TestUserModel model)
+        {
+            return Json(await AuditoryManager.GetUsersByDate(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetStatuses()
+        {
+            return Json(await AuditoryManager.GetStatuses(CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> UpdateAuditoryInfo(Auditory auditory)
@@ -130,6 +140,11 @@ namespace WebApp.Controllers
         {
             await AuditoryManager.ResetPins(Id, CurrentUser.Id);
         }
+        [HttpPost]
+        public async Task<JsonResult> GetUserPicture(int Id)
+        {
+            return Json(Convert.ToBase64String((await AuditoryManager.GetUserPicture(Id, CurrentUser.Id)).Picture));
+        }
         bool IsPinBusy(int pin, List<TestComputer> computers)
         {
             bool result = false;
@@ -141,6 +156,12 @@ namespace WebApp.Controllers
         public async Task<JsonResult> UpdatePlaceConfig(PlaceConfigModel model)
         {
             await AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
+            return Json(true);
+        }
+        [HttpPost]
+        public async Task<JsonResult> SetUserVerified(VerifyModel model)
+        {
+            await AuditoryManager.SetUserVerified(model.Id, model.Verified, CurrentUser.Id);
             return Json(true);
         }
         [HttpPost]

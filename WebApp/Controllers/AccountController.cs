@@ -26,6 +26,8 @@ namespace WebApp.Controllers
         public JsonResult IsAuthenticated()
         {
             //SignInManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+            if (CurrentUser == null) return Json(false);
+            else
             return Json(CurrentUser.Id != Guid.Empty);
 
         }
@@ -43,7 +45,7 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                ApplicationUser user = AccountManager.GetUser(model.Login, model.Password);
+                ApplicationUser user = AccountManager.GetUser(model.Login, null, model.Password);
                 if (user.Id == Guid.Empty)
                 {
                     ModelState.AddModelError("", "Неверный логин или пароль");
@@ -74,6 +76,19 @@ namespace WebApp.Controllers
                 return View(model);
             }
 
+        }
+
+        [HttpPost]
+        public JsonResult GetCurrentUser()
+        {
+            return Json(CurrentUser);
+        }
+
+        public ActionResult UserPic()
+        {
+            var result = File(CurrentUser.Picture, "image/jpg");
+            return result;
+            return CurrentUser.Picture != null ? File(CurrentUser.Picture, "image/jpg") : (ActionResult)new HttpStatusCodeResult(404);
         }
 
         protected AccountManager AccountManager

@@ -19,7 +19,8 @@
         needPin: false,
         IsRebuild: false,
         localizaion: 1,
-        intervalPin: null
+        intervalPin: null,
+        deletedPlaces: []
     },
     methods: {
         init: function () {
@@ -142,7 +143,7 @@
             event.stopPropagation();
             $('#renameModal').modal('show');
         },
-        setSwapFlag: function() {
+        setSwapFlag: function () {
             let self = this;
             event.stopPropagation();
             self.isForSwap = !self.isForSwap;
@@ -176,10 +177,9 @@
             }
 
         },
-        buildAuditory: function() {
+        buildAuditory: function () {
             let self = this;
             let items = [];
-            self.computerList = [];
             let size = Math.ceil(this.fastModel.count / 4 + 1);
             let counter = 1;
             if (this.fastModel.position == 1) {
@@ -215,6 +215,9 @@
                     }
                 }
             }
+            console.log(self.computerList);
+            self.deletedPlaces = self.computerList;
+            console.log(self.deletedPlaces);
             self.computerList = items;
             self.initAud();
             self.IsRebuild = true;
@@ -261,17 +264,18 @@
                     maxId++;
                 }
             }
-            items.sort(function (a, b) { return  a.PositionY - b.PositionY });
+            items.sort(function (a, b) { return a.PositionY - b.PositionY });
             return items;
         },
         isSelected: function (item) {
             let self = this;
+            console.log(item.Id, item.Name);
             return {
                 'selected': item.Id == this.selected,
                 'new': item.IsNew && item.Name.trim() != "",
                 'deleted': item.Deleted,
                 'hasPin': item.PIN && item.PIN != 0,
-                'empty': item.Name.trim() == "",
+                'empty': item.Name == "" || (item.Name && item.Name.trim()) == "",
                 'current': self.currentProfile == item.PlaceProfileId && item.PlaceProfileId != 0
             };
         },
@@ -330,9 +334,9 @@
                 url: "/auditory/UpdatePlaceConfig",
                 type: "POST",
                 async: false,
-                data: obj, 
+                data: obj,
                 success: function () {
-                    self.computerList.filter(function (a) { return a.Id == self.selected;})[0].IsNeedPlaceConfig = false;
+                    self.computerList.filter(function (a) { return a.Id == self.selected; })[0].IsNeedPlaceConfig = false;
                     self.selectedComp.IsNeedPlaceConfig = false;
                     self.currentProfile = self.selectedComp.PlaceProfileId;
                 }
@@ -382,15 +386,15 @@
                 }
             });
             let auditory = { Id: self.auditory, ComputerList: items };
-           
+
 
             $.ajax({
                 url: "/auditory/GenerateConfiguration",
                 type: "POST",
                 async: false,
-                data: auditory ,
+                data: auditory,
                 success: function (auditoryWithPins) {
-                    self.computerList.forEach(function(a){
+                    self.computerList.forEach(function (a) {
                         a.IsNeedPlaceConfig = true;
                         if (!a.IsNew)
                             a.PIN = auditoryWithPins.ComputerList.filter(function (b) { return b.Id == a.Id; })[0].PIN;
@@ -408,6 +412,11 @@
                 if (!item.IsNew || item.Name.trim() !== "") {
                     items.push(newItem);
                 }
+            });
+            console.log(self.deletedPlaces);
+            self.deletedPlaces.forEach(function (item) {
+                let newItem = { Id: item.IsNew ? 0 : item.Id, Name: item.Name, PositionX: item.PositionX, PositionY: item.PositionY, Deleted: item.IsNeedPlaceConfig };
+                items.push(newItem);
             });
             console.log(items);
             let auditory = { Id: self.auditory, ComputerList: items };
@@ -448,7 +457,7 @@
     },
 
     //После полной загрузки скрипта инициализируем
-    mounted: function() {
+    mounted: function () {
 
         // this.objForLoading.loading = true;
         //this.objForLoading.loaded = false;

@@ -25,9 +25,11 @@ const app = new Vue({
         currentError: 0,
         gotICE: false,
         me: {},
-        queue: []
-
-
+        queue: [],
+        localization: 1,
+        currentStatus: -1,
+        currentDate: null,
+        statuses: []
     },
     methods: {
         init: function () {
@@ -46,10 +48,13 @@ const app = new Vue({
                     self.auditory = auditory.Id;
                     self.auditoryName = auditory.Name;
                     self.NeedPin = auditory.NeedPin;
-                    auditory.ComputerList.map(a => a.errors = []);
-                    self.computerList = auditory.ComputerList;
-                    self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
-                    self.initAud();
+                    if (auditory.ComputerList.length > 0) {
+                        console.log('map');
+                        auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
+                        self.computerList = auditory.ComputerList;
+                        self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+                        self.initAud();
+                    }
                 }
             });
             $.ajax({
@@ -60,20 +65,28 @@ const app = new Vue({
                     self.errorTypes = errorTypes;
                 }
             });
-
             $.ajax({
-                url: "/auditory/GetCurrentUser",
+                url: "/auditory/GetStatuses",
                 type: "POST",
                 async: false,
-                success: function (user) {
-                    self.me = user;
+                success: function (statuses) {
+                    self.statuses = statuses;
                 }
             });
+
+            //$.ajax({
+            //    url: "/account/GetCurrentUser",
+            //    type: "POST",
+            //    async: false,
+            //    success: function (user) {
+            //        self.me = user;
+            //    }
+            //});
         },
         filterComps: function (position) {
             let self = this;
             let items = self.computerList.filter((item) => item.PositionX == position);
-            if (items.length < self.maxY + 1) {
+            if (items.length > 0 && items.length < self.maxY + 1) {
                 let maxId = 0;
                 self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
                 maxId++;
@@ -100,30 +113,48 @@ const app = new Vue({
                 self.initSocket(2, a);
             });
         },
-        initSocket: function (type, a) {
-            if (a.TestingProfileId == 0) return;
+        initRTCPeer: function (created, socket, a) {
             let self = this;
-            let socket = null;
             let STUN = {
-                urls: 'stun:stun.l.google.com:19302'
+                urls: 'stun:stun.advfn.com:3478'
             };
-
             let TURN = {
-                urls: 'turn:turn.bistri.com:80',
+                url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
                 username: 'homeo'
             };
 
-            let iceServers = {
-                iceServers: [STUN, TURN]
-            };
-            let DtlsSrtpKeyAgreement = {
-                DtlsSrtpKeyAgreement: true
+            let configuration = {
+                iceServers: [TURN]
             };
 
-            let optional = {
-                optional: [DtlsSrtpKeyAgreement]
-            };
+            created.peer = new RTCPeerConnection(configuration);
+
+            created.peer.addEventListener('icecandidate', function (e) {
+                self.onIceCandidate(created.peer, e, socket, a.TestingProfileId);
+            })
+
+            created.peer.addEventListener('connectionstatechange', function (event) {
+                console.log(created.peer.connectionState);
+                if (created.peer.connectionState == 'connecting') {
+                    setTimeout(function () {
+                        if (created.peer.connectionState == 'connecting') {
+                            self.initRTCPeer(created, socket, a);
+                        }
+                    }, 5000);
+                }
+                if (created.peer.connectionState == 'disconnected') {
+                    self.initRTCPeer(created, socket, a);
+                }
+            });
+            created.peer.addEventListener('track', function (e) {
+                self.gotRemoteStream(e, a);
+            });
+        },
+        initSocket: function (type, a) {
+            if (a.TestingProfileId == 0) return;
+            let self = this;
+            let socket = null;
             if (type === 1) {
                 //if (typeof (WebSocket) !== 'undefined') {
                 //    socket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
@@ -170,21 +201,12 @@ const app = new Vue({
                  else {
                 socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
                  }
-                self.videoSockets.push({ id: a.TestingProfileId, socket: socket });
+                let created = { id: a.TestingProfileId, socket: socket, peer: null };
+                self.videoSockets.push(created);
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
-                    let configuration = { sdpSemantics: "unified-plan" };
-                    self.pc2 = new RTCPeerConnection(configuration);
-                    console.log('Created local peer connection object pc2', new Date().getSeconds(), new Date().getMilliseconds());
-
-                    self.pc2.addEventListener('icecandidate', function (e) {
-                        console.log('ad');
-                        self.onIceCandidate(self.pc2, e, socket, a.TestingProfileId);
-                    })
-                    self.pc2.addEventListener('iceconnectionstatechange', function (e) {
-                        self.onIceStateChange(self.pc2, e);
-                    })
-                    self.pc2.addEventListener('track', function (e) { self.gotRemoteStream(e, a); });
+                    self.initRTCPeer(created, socket, a);
+                    
                 }
                 socket.onmessage = function (msg) {
                     //console.log(msg);
@@ -193,30 +215,27 @@ const app = new Vue({
                     if (message.IsSender) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                            console.log(candidate);
                             self.queue.push(candidate);
                         }
                         else if (message.offer) {
                             //console.log(message.offer);
                             navigator.getUserMedia({ video: true }, function (stream) {
-                                self.pc2.addStream(stream);
-                                self.pc2.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
-                                    self.pc2.createAnswer(function (answer) {
-                                        console.log('answer');
-                                        self.pc2.setLocalDescription(answer, function () {
+                                created.peer.addStream(stream);
+                                created.peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                                    created.peer.createAnswer(function (answer) {
+                                        created.peer.setLocalDescription(answer, function () {
                                             let obj1 = {};
                                             for (let i in answer) {
                                                 if (typeof answer[i] != 'function')
                                                     obj1[i] = answer[i];
                                             }
                                             obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId };
-                                            console.log(obj, JSON.stringify(obj));
                                             socket.send(JSON.stringify(obj));
                                             self.queue.forEach(function (candidate) {
-                                                self.pc2.addIceCandidate(candidate);
+                                                created.peer.addIceCandidate(candidate);
                                             })
 
-                                        }, function (r) { console.log(r);});
+                                        }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); })
                                 }, function (r) { console.log(r); })
                             }, function (r) { console.log(r); })
@@ -266,8 +285,8 @@ const app = new Vue({
                     //console.log(message);
 
                     if (message.Stream) {
-                        $('#img-' + message.TestingProfileId)[0].src = message.Stream;
-                      //  console.log(a);
+                        //$('#img-' + message.TestingProfileId)[0].src = message.Stream;
+                        //  console.log(a);
                     }
                 };
             }
@@ -290,15 +309,51 @@ const app = new Vue({
                 socket.send(JSON.stringify(obj));
             }
             else {
-                app.onIceCandidate(pc, e, socket);
+                app.onIceCandidate(pc, e, socket, tpid);
             }
         },
         isMe: function (message) {
             let self = this;
             return self.me.Id == message.UserIdFrom;
         },
-        onIceStateChange: function (pc, e) {
-
+        verifyUser: function (Verified) {
+            //SetUserVerified
+            let self = this;
+            console.log(Verified);
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, verified: Verified, IsSender: false}));
+            $.ajax({
+                url: "/auditory/SetUserVerified",
+                data: {
+                    Id: self.currentUser.TestingProfileId,
+                    Verified: Verified
+                },
+                type: "POST",
+                async: false,
+                success: function (errors) {
+                    self.currentUser.errors = errors;
+                }
+            });
+        },
+        getUserList: function () {
+            //GetUsersByDate
+            let self = this;
+            if (self.currentStatus == -1 || !self.currentDate) {
+                return;
+            }
+            $.ajax({
+                url: "/auditory/GetUsersByDate",
+                data: {
+                    Id: self.auditory,
+                    StatusId: self.currentStatus,
+                    Date: self.currentDate
+                },
+                type: "POST",
+                async: false,
+                success: function (errors) {
+                    self.currentUser.errors = errors;
+                }
+            });
         },
         gotRemoteStream: function (e, a) {
             console.log(a);
@@ -369,8 +424,23 @@ const app = new Vue({
             let self = this;
             self.currentUser = user;
             self.getErrors();
+            //GetUserPicture
+            $.ajax({
+                url: "/auditory/GetUserPicture?Id=" + self.currentUser.TestingProfileId,
+                type: "POST",
+                async: false,
+                success: function (picture) {
+                    self.currentUser.Image = picture;
+                }
+            });
             $('#full-wrapper').modal('toggle');
+            setTimeout(function () {
+                $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId)[0].srcObject;
+            }, 500)
             //console.log(user);
+        },
+        openModal: function () {
+            $('#user-modal').modal('toggle');
         },
         getErrors: function () {
             let self = this;
@@ -491,6 +561,10 @@ const app = new Vue({
                 case 7: return self.localization == 1 ? "Возобновить тестирование" : "Resume test";
                 case 8: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
                 case 9: return self.localization == 1 ? "Закрыть" : "Close";
+                case 10: return self.localization == 1 ? "Открыть список" : "Open user list";
+                case 11: return self.localization == 1 ? "Список пользователей" : "User list";
+                case 12: return self.localization == 1 ? "Отклонить" : "Decline";
+                case 13: return self.localization == 1 ? "Подтвердить" : "Verify";
             }
         },
         getDateFormat: function (date) {

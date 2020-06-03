@@ -10,6 +10,6 @@ namespace WebApp.Models.Proctoring
         public int Id { get; set; }
         public string Name { get; set; }
         public IEnumerable<ProctorUser> Users { get; set; }
-        public List<TestUser> ComputerList { get; set; }
+        public List<ProctorEnrollee> ComputerList { get; set; }
     }
 }

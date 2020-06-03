@@ -50,7 +50,8 @@ namespace WebApp.Controllers
         {
             get
             {
-                return AccountManager.GetUser(((ClaimsIdentity)User.Identity).Claims.Select( a => a.Value).FirstOrDefault());
+                string Localization = (Session["Localization"] == null) ? null : Session["Localization"].ToString();
+                return AccountManager.GetUser(((ClaimsIdentity)User.Identity).Claims.Select( a => a.Value).FirstOrDefault(), Localization, null);
             }
         }
     }

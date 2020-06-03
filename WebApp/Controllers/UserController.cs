@@ -33,7 +33,11 @@ namespace WebApp.Controllers
             ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id);
             return View();
         }
-
+        [HttpPost]
+        public async Task<JsonResult> GetFreePlaces()
+        {
+            return Json(await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+        }
         public ActionResult TestList()
         {
             return View();
@@ -123,13 +127,13 @@ namespace WebApp.Controllers
         public async Task<JsonResult> FinishTest(int Id)
         {
             //ToDo Раскомментить 
-            await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             return Json(true);
         }
         public async Task<JsonResult> StartTest(int Id, string localization = null)
         {
             //ToDo Раскомментить 
-            await TestManager.StartTest(Id, CurrentUser == null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
+            await TestManager.StartTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
             var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
             return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
         }
@@ -139,7 +143,7 @@ namespace WebApp.Controllers
         }
         public async Task<JsonResult> GetSourceMaterials(int Id)
         {
-            return Json(await TestManager.GetSourceMaterials(Id, Session["Localization"].ToString(), CurrentUser == null ? CurrentUser.Id : (Guid?)null));
+            return Json(await TestManager.GetSourceMaterials(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
         [HttpPost]
         public async Task<JsonResult> GetCurrentUser(int Id)
@@ -154,9 +158,10 @@ namespace WebApp.Controllers
         {
             return Json(TestManager.GetTestAnswersById(Id, Session["Localization"].ToString()));
         }
-        public void UpdateQuestionAnswer(IEnumerable<QuestionAnswer> answer)
+        public async Task<JsonResult> UpdateQuestionAnswer(IEnumerable<QuestionAnswer> answer)
         {
-            TestManager.UpdateQuestionAnswer(answer);
+            await TestManager.UpdateQuestionAnswer(answer);
+            return Json(true);
         }
         public JsonResult GetQuestionImage(int Id, int Part = 1)
         {
@@ -185,15 +190,15 @@ namespace WebApp.Controllers
         }
         public async Task<JsonResult> GetErrorTypes()
         {
-            return Json(await TestManager.GetErrorTypes(Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.GetErrorTypes(Session["Localization"].ToString(), (CurrentUser != null ? CurrentUser.Id : (Guid?)null)));
         }
         public async Task<JsonResult> SetUserErrors(int Id, int Type)
         {
-            return Json(await TestManager.SetUserErrors(Id, Type, Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.SetUserErrors(Id, Type, Session["Localization"].ToString(), (CurrentUser != null ? CurrentUser.Id : (Guid?)null)));
         }
         public async Task<JsonResult> GetUserErrors(int Id)
         {
-            return Json(await TestManager.GetUserErrors(Id, Session["Localization"].ToString(), (CurrentUser == null ? CurrentUser.Id : (Guid?)null)));
+            return Json(await TestManager.GetUserErrors(Id, Session["Localization"].ToString(), (CurrentUser != null ? CurrentUser.Id : (Guid?)null)));
         }
         public void PauseTest(int Id, string Localization)
         {
@@ -210,11 +215,11 @@ namespace WebApp.Controllers
         {
 
             ProctorRoom room = new ProctorRoom();
-            room.Users = await ProctorManager.GetProctorUsers(Id, (CurrentUser == null ? CurrentUser.Id : (Guid?)null), Session["Localization"].ToString());
+            room.Users = await ProctorManager.GetProctorUsers(Id, (CurrentUser != null ? CurrentUser.Id : (Guid?)null), Session["Localization"].ToString());
             foreach (var item in room.Users)
             {
-                if (room.ComputerList == null) room.ComputerList = new List<TestUser>();
-                room.ComputerList.Add(new TestUser() { Discipline = item.DisciplineName, FIO = item.LastName + " " + item.FirstName + " " + item.MiddleName, IsOnline = item.IsOnline, TestingProfileId = Id });
+                if (room.ComputerList == null) room.ComputerList = new List<ProctorEnrollee>();
+                room.ComputerList.Add(new ProctorEnrollee() { Discipline = item.DisciplineName, FIO = item.LastName + " " + item.FirstName + " " + item.MiddleName, IsOnline = item.IsOnline, TestingProfileId = Id });
             }
             return Json(room);
             //return Json(rooms.Where(a => a.Id == Id).FirstOrDefault());
@@ -271,8 +276,8 @@ namespace WebApp.Controllers
                     model.ScreenFile = Request.Files.Get(1);
                 }
             }
-            await TestManager.FileUploadAsync(model, 1, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
-            await TestManager.FileUploadAsync(model, 2, CurrentUser == null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FileUploadAsync(model, 1, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
+            await TestManager.FileUploadAsync(model, 2, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             return Json(true);
         }
         [HttpPost]
@@ -282,7 +287,7 @@ namespace WebApp.Controllers
             {
                 model.AnswerFile = Request.Files.Get(0);
             }
-            return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser == null ? CurrentUser.Id : (Guid?)null));
+            return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
