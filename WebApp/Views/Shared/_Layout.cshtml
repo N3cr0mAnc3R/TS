@@ -33,11 +33,11 @@
                         <ul class="navbar-nav mr-auto">
                             <li class="nav-item" id="nav-url-1">
                                 @*<a class="nav-link"  href="" id="nav-5"> <span class="sr-only">(current)</span></a>*@
-                                @Html.ActionLink("text", "list", "auditory", null, new { id = "nav-5", @class = "nav-link" })
+                                @Html.ActionLink("Список аудиторий", "list", "auditory", null, new { id = "nav-5", @class = "nav-link" })
                             </li>
                             <li class="nav-item" id="nav-url-2">
                                 @*<a class="nav-link" href="/verification/list" id="nav-6"><span class="sr-only">(current)</span></a>*@
-                                @Html.ActionLink("text", "list", "verification", null, new { id = "nav-6", @class = "nav-link" })
+                                @Html.ActionLink("Проверка ВИ", "list", "verification", null, new { id = "nav-6", @class = "nav-link" })
                             </li>
 
                             @if (!Request.IsAuthenticated)
@@ -194,7 +194,7 @@
             $('#nav-1').text(checking.localization == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System");
             $('#nav-2').text(checking.localization == 1 ? "Вход" : "Login");
             $('#nav-3').text(checking.localization == 1 ? "Выход" : "Logout");
-            $('#nav-4').text(checking.localization == 1 ? "Все права защищены" : "All rights reserved");
+            $('#nav-4').text(checking.localization == 1 ? "Все права защищены, 2020" : "All rights reserved, 2020");
             $('#nav-5').text(checking.localization == 1 ? "Список аудиторий" : "Auditory list");
             $('#nav-6').text(checking.localization == 1 ? "Проверка ВИ" : "Verification");
             $('#nav-7').text(checking.localization == 1 ? "Используйте учетную запись eCampus для входа." : "Enter Your eCampus Login and password");

@@ -13,7 +13,7 @@ namespace WebApp.Models
         public string Ip { get; set; }
         public Bitmap Stream { get; set; }
         public bool NeedPin { get; set; }
-
+        public bool isDynamic { get; set; }
         public IEnumerable<TestComputer> ComputerList { get; set; }
 
     }

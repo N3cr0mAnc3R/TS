@@ -3,6 +3,7 @@ const app = new Vue({
     el: "#main-window",
     data: {
         img: null,
+        domain: "",
         interval: null,
         video3: null,
         pc2Local: null,
@@ -25,38 +26,36 @@ const app = new Vue({
         currentError: 0,
         gotICE: false,
         me: {},
-        queue: [],
+        queue: [{ type: 1, candidates: [] }, { type: 2, candidates: [] }],
         localization: 1,
         currentStatus: -1,
         currentDate: null,
-        statuses: []
+        statuses: [],
+        streamObjects: []
     },
     methods: {
         init: function () {
             let self = this;
             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
 
+            $.ajax({
+                url: "/account/GetDomain",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.domain = domain;
+                }
+            });
 
             //GetAuditoryInfo
             let str = window.location.href;
             let newId = Number.parseInt(str.substr(str.lastIndexOf('Id=') + 3));
-            $.ajax({
-                url: "/auditory/GetAuditoryInfoForModerate?Id=" + newId,
-                type: "POST",
-                async: false,
-                success: function (auditory) {
-                    self.auditory = auditory.Id;
-                    self.auditoryName = auditory.Name;
-                    self.NeedPin = auditory.NeedPin;
-                    if (auditory.ComputerList.length > 0) {
-                        console.log('map');
-                        auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
-                        self.computerList = auditory.ComputerList;
-                        self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
-                        self.initAud();
-                    }
-                }
-            });
+            self.getAuditories(newId, self);
+
+            setInterval(function () {
+                self.getAuditories(newId, self);
+            }, 5000);
+
             $.ajax({
                 url: "/user/GetErrorTypes",
                 type: "POST",
@@ -74,18 +73,76 @@ const app = new Vue({
                 }
             });
 
-            //$.ajax({
-            //    url: "/account/GetCurrentUser",
-            //    type: "POST",
-            //    async: false,
-            //    success: function (user) {
-            //        self.me = user;
-            //    }
-            //});
+            $.ajax({
+                url: "/account/GetCurrentUser",
+                type: "POST",
+                async: false,
+                success: function (user) {
+                    self.me = user;
+                }
+            });
+        },
+        getAuditories: function (newId, self) {
+            $.ajax({
+                url: "/auditory/GetAuditoryInfoForModerate?Id=" + newId,
+                type: "POST",
+                async: false,
+                success: function (auditory) {
+                    self.auditory = auditory.Id;
+                    self.auditoryName = auditory.Name;
+                    self.NeedPin = auditory.NeedPin;
+                    self.computerList.forEach(function (item) {
+                        let found = auditory.ComputerList.filter(function (comp) { return item.Id == comp.Id; })[0];
+                        if (!found) {
+                            self.computerList = self.computerList.filter(function (comp) { return comp.Id != item.Id; });
+                            self.videoSockets = self.videoSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
+                        }
+                    });
+                    //Смотрим то, что пришло
+                    if (auditory.ComputerList.length > 0) {
+                        auditory.ComputerList.forEach(function (item) {
+                            //Если уже есть в списке, находим
+                            let found = self.computerList.filter(function (comp) {
+                                return comp.Id == item.Id;
+                            })[0];
+                            //Если нет, то инициализируем
+                            if (!found) {
+                                item.errors = [];
+                                item.Image = "";
+                                //Сокет на вебку
+                                self.initSocket(2, item, 1);
+                                //Если подтверждён
+                                if (item.UserVerified) {
+                                    //Сокет на экран
+                                    self.initSocket(2, item, 2);
+                                }
+                                //В любом случае нужно добавить в список
+                                self.computerList.push(item);
+                                self.initSocket(1, item);
+                            }
+                            else {
+                                //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
+                                if (found.UserVerified != item.UserVerified) {
+                                    if (item.UserVerified) {
+                                        self.initSocket(2, found, 2);
+                                    }
+                                }
+                            }
+                        });
+
+                        //auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
+                        //console.log(auditory.ComputerList);
+                        //self.computerList = auditory.ComputerList;
+                        //self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+                        self.initAud();
+                    }
+                }
+            });
         },
         filterComps: function (position) {
             let self = this;
             let items = self.computerList.filter((item) => item.PositionX == position);
+
             if (items.length > 0 && items.length < self.maxY + 1) {
                 let maxId = 0;
                 self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
@@ -109,11 +166,9 @@ const app = new Vue({
             self.computerList.forEach(a => {
                 self.maxX = Math.max(self.maxX, a.PositionX);
                 self.maxY = Math.max(self.maxY, a.PositionY);
-                self.initSocket(1, a);
-                self.initSocket(2, a);
             });
         },
-        initRTCPeer: function (created, socket, a) {
+        initRTCPeer: function (created, socket, a, type) {
             let self = this;
             let STUN = {
                 urls: 'stun:stun.advfn.com:3478'
@@ -125,49 +180,58 @@ const app = new Vue({
             };
 
             let configuration = {
-                iceServers: [TURN]
+                iceServers: [STUN, TURN]
             };
+            let peer = new RTCPeerConnection(configuration);
 
-            created.peer = new RTCPeerConnection(configuration);
-
-            created.peer.addEventListener('icecandidate', function (e) {
-                self.onIceCandidate(created.peer, e, socket, a.TestingProfileId);
+            peer.addEventListener('icecandidate', function (e) {
+                self.onIceCandidate(peer, e, socket, a.TestingProfileId, type);
             })
 
-            created.peer.addEventListener('connectionstatechange', function (event) {
-                console.log(created.peer.connectionState);
-                if (created.peer.connectionState == 'connecting') {
+            peer.addEventListener('connectionstatechange', function (event) {
+                if (peer.connectionState == 'connecting') {
                     setTimeout(function () {
-                        if (created.peer.connectionState == 'connecting') {
-                            self.initRTCPeer(created, socket, a);
+                        if (peer.connectionState == 'connecting') {
+                            self.initRTCPeer(created, socket, a, type);
                         }
-                    }, 5000);
+                    }, 10000);
                 }
-                if (created.peer.connectionState == 'disconnected') {
-                    self.initRTCPeer(created, socket, a);
+                if (peer.connectionState == 'disconnected') {
+                    self.initRTCPeer(created, socket, a, type);
                 }
             });
-            created.peer.addEventListener('track', function (e) {
-                self.gotRemoteStream(e, a);
+            peer.addEventListener('track', function (e) {
+                self.gotRemoteStream(e, a, type);
             });
+            let found = created.peers.filter(function (item) { return item.type == type; })[0];
+            if (found) {
+                found.peer = peer;
+            }
+            else created.peers.push({ type: type, peer: peer });
         },
-        initSocket: function (type, a) {
+        initSocket: function (type, a, cam) {
             if (a.TestingProfileId == 0) return;
             let self = this;
             let socket = null;
             if (type === 1) {
+                if (typeof (WebSocket) !== 'undefined') {
+                    socket = new WebSocket(self.domain + "/ChatHandler.ashx");
+                }
+                else {
+                    socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
+                }
                 //if (typeof (WebSocket) !== 'undefined') {
                 //    socket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
                 //}
                 //else {
                 //    socket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
                 //}
-                if (typeof (WebSocket) !== 'undefined') {
-                    socket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-                }
-                else {
-                    socket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-                }
+                //if (typeof (WebSocket) !== 'undefined') {
+                //    socket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+                //}
+                //else {
+                //    socket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+                //}
                 self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
                 self.chats.push(self.initChat(a.TestingProfileId));
                 socket.onopen = function () {
@@ -175,7 +239,6 @@ const app = new Vue({
                     self.getMessages(a.TestingProfileId);
                 }
                 socket.onmessage = function (msg) {
-                    console.log(msg);
                     let message;
                     if (msg.data.indexOf("\0") != -1) {
                         message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
@@ -189,139 +252,106 @@ const app = new Vue({
                 };
             }
             else {
+                if (typeof (WebSocket) !== 'undefined') {
+                    socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                }
+                else {
+                    socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                }
                 //if (typeof (WebSocket) !== 'undefined') {
                 //    socket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
                 //}
                 //else {
                 //    socket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
                 //}
-                if (typeof (WebSocket) !== 'undefined') {
-                socket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                 }
-                 else {
-                socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                 }
-                let created = { id: a.TestingProfileId, socket: socket, peer: null };
+                //if (typeof (WebSocket) !== 'undefined') {
+                //    socket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                //}
+                //else {
+                //    socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                //}
+                let created = { id: a.TestingProfileId, socket: socket, peers: [] };
                 self.videoSockets.push(created);
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
-                    self.initRTCPeer(created, socket, a);
-                    
-                }
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false }));
+                    self.initRTCPeer(created, socket, a, cam);
+                    //self.initRTCPeer(created, socket, a, 2);
+
+                };
                 socket.onmessage = function (msg) {
                     //console.log(msg);
                     let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
                     if (message.IsSender) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                            self.queue.push(candidate);
+                            let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                            queue.candidates.push(candidate);
                         }
                         else if (message.offer) {
-                            //console.log(message.offer);
                             navigator.getUserMedia({ video: true }, function (stream) {
-                                created.peer.addStream(stream);
-                                created.peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
-                                    created.peer.createAnswer(function (answer) {
-                                        created.peer.setLocalDescription(answer, function () {
+                                let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
+                                let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
+
+                                if (!peerObj) {
+                                    return;
+                                }
+                                let peer = peerObj.peer;
+                                peer.addStream(stream);
+                                peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                                    peer.createAnswer(function (answer) {
+                                        peer.setLocalDescription(answer, function () {
                                             let obj1 = {};
                                             for (let i in answer) {
                                                 if (typeof answer[i] != 'function')
                                                     obj1[i] = answer[i];
                                             }
-                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId };
+                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type };
                                             socket.send(JSON.stringify(obj));
-                                            self.queue.forEach(function (candidate) {
-                                                created.peer.addIceCandidate(candidate);
-                                            })
+                                            let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                                            queue.candidates.forEach(function (candidate) {
+                                                peer.addIceCandidate(candidate);
+                                            });
 
                                         }, function (r) { console.log(r); });
-                                    }, function (r) { console.log(r); })
-                                }, function (r) { console.log(r); })
-                            }, function (r) { console.log(r); })
-                            //let CreateDescriptionPromise = new Promise(function (resolve) {
-                            //    console.log('Created setRemoteDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-                            //    resolve(self.pc2.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer))));
-                            //})
-                            //let answer;
-                            //CreateDescriptionPromise.then(function (ev) {
-                            //    console.log('Created setRemoteDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                            //    let CreateAnswerPromise = new Promise(function (resolve) {
-                            //        console.log('Created createAnswer start', new Date().getSeconds(), new Date().getMilliseconds());
-
-                            //        resolve(self.pc2.createAnswer());
-                            //    })
-                            //    CreateAnswerPromise.then(function (ans) {
-                            //        console.log('Created createAnswer finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                            //        answer = ans;
-                            //        console.log(answer);
-                            //        let CreatelocalPromise = new Promise(function (resolve) {
-                            //            console.log('Created setLocalDescription start', new Date().getSeconds(), new Date().getMilliseconds());
-
-                            //            resolve(self.pc2.setLocalDescription(answer));
-                            //        })
-                            //        CreatelocalPromise.then(function (res) {
-                            //            console.log('Created setLocalDescription finish', new Date().getSeconds(), new Date().getMilliseconds());
-
-                            //            let obj1 = {};
-                            //            for (let i in answer) {
-                            //                if (typeof answer[i] != 'function')
-                            //                    obj1[i] = answer[i];
-                            //            }
-                            //            let obj = {
-                            //                answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId
-                            //            };
-                            //            if (socket && socket.readyState == 1) {
-                            //                socket.send(JSON.stringify(obj));
-                            //            }
-                            //        })
-                            //    })
-                            //})
-
+                                    }, function (r) { console.log(r); });
+                                }, function (r) { console.log(r); });
+                            }, function (r) { console.log(r); });
                         }
-                    }
-                    //console.log(message);
-
-                    if (message.Stream) {
-                        //$('#img-' + message.TestingProfileId)[0].src = message.Stream;
-                        //  console.log(a);
                     }
                 };
             }
             socket.onclose = function (event) {
-                self.initSocket(type, a);
+                console.log('Соединение закрыто');
+                self.initSocket(type, a, cam);
             };
         },
-        onIceCandidate: function (pc, e, socket, tpid) {
+        onIceCandidate: function (pc, e, socket, tpid, type) {
             let obj1 = {};
             for (let i in e.candidate) {
                 if (typeof e.candidate[i] != 'function')
                     obj1[i] = e.candidate[i];
             }
             let obj = {
-                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid
+                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid, type: type
             };
-            console.log(e.candidate);
             if (socket && socket.readyState == 1) {
-                console.log('send');
                 socket.send(JSON.stringify(obj));
             }
             else {
-                app.onIceCandidate(pc, e, socket, tpid);
+                app.onIceCandidate(pc, e, socket, tpid, type);
             }
         },
         isMe: function (message) {
             let self = this;
+            console.log(self.me.Id, message);
             return self.me.Id == message.UserIdFrom;
         },
         verifyUser: function (Verified) {
             //SetUserVerified
             let self = this;
-            console.log(Verified);
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId })[0];
-            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, verified: Verified, IsSender: false}));
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, verified: Verified, IsSender: false }));
             $.ajax({
                 url: "/auditory/SetUserVerified",
                 data: {
@@ -355,9 +385,16 @@ const app = new Vue({
                 }
             });
         },
-        gotRemoteStream: function (e, a) {
-            console.log(a);
-            $('#video-' + a.TestingProfileId)[0].srcObject = e.streams[0];
+        gotRemoteStream: function (e, a, type) {
+            let self = this;
+            let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type;  })[0];
+            if (!found) {
+                self.streamObjects.push({ Id: a.TestingProfileId, stream: e.streams[0], type: type });
+            }
+            else {
+                found.stream = e.streams[0];
+            }
+            $('#video-' + a.TestingProfileId + '-' + type)[0].srcObject = e.streams[0];
         },
 
         b64toBlob: function (b64Data, contentType = '', sliceSize = 512) {
@@ -411,18 +448,22 @@ const app = new Vue({
         },
         stop: function () {
             let self = this;
-            console.log('stop');
             clearInterval(self.interval);
         },
         select: function (id) {
             let self = this;
-            console.log(id);
             self.testingProfileId = id;
             self.toggleChat(id);
         },
         openFull: function (user) {
             let self = this;
-            self.currentUser = user;
+            if (user) {
+                self.currentUser = user;
+            }
+            else {
+                let found = self.computerList.filter(function (item) { return item.TestingProfileId == self.currentChat.testingProfileId; })[0];
+                self.currentUser = found;
+            }
             self.getErrors();
             //GetUserPicture
             $.ajax({
@@ -435,7 +476,8 @@ const app = new Vue({
             });
             $('#full-wrapper').modal('toggle');
             setTimeout(function () {
-                $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId)[0].srcObject;
+                $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-1')[0].srcObject;
+                $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
             }, 500)
             //console.log(user);
         },
@@ -444,7 +486,6 @@ const app = new Vue({
         },
         getErrors: function () {
             let self = this;
-            console.log(self.currentUser);
             $.ajax({
                 url: "/user/GetUserErrors?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
@@ -466,7 +507,6 @@ const app = new Vue({
         },
         download: function (type) {
             let self = this;
-            console.log(self.currentUser.TestingProfileId, type);
             window.open('/auditory/DownloadVideoFile?Id=' + self.currentUser.TestingProfileId + '&Type=' + type, '_blank');
         },
         sendError: function () {
@@ -508,8 +548,19 @@ const app = new Vue({
                 }
             });
         },
+        reconnect: function () {
+            let self = this;
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false }));
 
-
+            setTimeout(function () {
+                let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
+                $('#full-video-camera')[0].srcObject = found[0].stream;
+                if (found[1])
+                $('#full-video-screen')[0].srcObject = found[1].stream;
+               // $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
+            }, 2000);
+        },
         toggleChat: function (id) {
             let self = this;
             let flagClose = false;
@@ -520,6 +571,21 @@ const app = new Vue({
             self.currentChat = founded;
             if (!flagClose)
                 self.isChatOpened = !self.isChatOpened;
+        },
+        resetPlace: function () {
+            let self = this;
+            let obj = { Id: self.currentUser.PlaceProfileId, PlaceConfig: null, PlaceId: self.currentUser.Id };
+            $.ajax({
+                url: "/auditory/UpdatePlaceConfig",
+                type: "POST",
+                async: false,
+                data: obj,
+                success: function () {
+                    let found = self.videoSockets.filter(function (item) { return item.id == self.currentUser.TestingProfileId; })[0];
+                    found.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: self.currentUser.TestingProfileId, resetRequest: true }));
+                    console.log(self.videoSockets, self.currentUser.TestingProfileId);
+                }
+            });
         },
         toggleTypeChat: function () {
             let self = this;
@@ -543,8 +609,18 @@ const app = new Vue({
                 }
             });
         },
+        subscribeEnter: function () {
+            let self = this;
+            $(document).on('keyup', function () { self.beforeSend(self); });
+        },
+        beforeSend: function (self) {
+            if (event.keyCode == 13 && !event.shiftKey) {
+                self.sendMessage();
+            }
+        },
         sendMessage: function () {
             let self = this;
+            if (self.currentChat.Message == "" || self.currentChat.Message.trim() == "") return;
             let socket = self.chatSockets.find(a => a.id == self.testingProfileId).socket;
             socket.send(JSON.stringify({ Message: self.currentChat.Message, Date: new Date(), IsSender: false, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.currentChat.Message = "";
@@ -556,15 +632,16 @@ const app = new Vue({
                 case 2: return self.localization == 1 ? "Выдано" + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
                 case 3: return self.localization == 1 ? "Сохранить" : "Save";
                 case 4: return self.localization == 1 ? "Сообщить о нарушении" : "Issue a warning";
-                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
-                case 6: return self.localization == 1 ? "Приостановить тестирование" : "Pause test";
-                case 7: return self.localization == 1 ? "Возобновить тестирование" : "Resume test";
-                case 8: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";
+                case 6: return self.localization == 1 ? "Приостановить вступительное испытание" : "Pause test";
+                case 7: return self.localization == 1 ? "Возобновить вступительное испытание" : "Resume test";
+                case 8: return self.localization == 1 ? "Сбросить место" : "Reset place";
                 case 9: return self.localization == 1 ? "Закрыть" : "Close";
                 case 10: return self.localization == 1 ? "Открыть список" : "Open user list";
                 case 11: return self.localization == 1 ? "Список пользователей" : "User list";
                 case 12: return self.localization == 1 ? "Отклонить" : "Decline";
                 case 13: return self.localization == 1 ? "Подтвердить" : "Verify";
+                case 14: return self.localization == 1 ? "Переподключиться" : "Reconnect";
             }
         },
         getDateFormat: function (date) {

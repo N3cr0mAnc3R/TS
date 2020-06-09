@@ -69,6 +69,16 @@
                         video {
                             width: 180px;
                             height: 130px;
+                            position: absolute;
+                            left: 15px;
+                        }
+
+                        .video-camera {
+                            z-index: 2;
+                        }
+
+                        .video-screen {
+                            z-index: 1;
                         }
                     }
 
@@ -190,8 +200,8 @@
         height: 40px;
         background: #565C72;
         padding: 3px 10px;
-        justify-content: space-between;
-        display: flex;
+        color: #fff;
+        text-align: end;
 
         .user-info {
             font-family: Montserrat;
@@ -231,7 +241,7 @@
             overflow-y: auto;
 
             .chat-message-wrapper {
-                border: 1px solid #ddd;
+                background: #cacaca;
                 margin: 5px;
                 padding: 7px;
                 border-top-left-radius: 10px;
@@ -247,6 +257,7 @@
                 &.sender {
                     border-bottom-right-radius: 0;
                     border-bottom-left-radius: 10px;
+                    background: #a6acbc;
                     float: right;
 
                     .chat-message {
@@ -341,12 +352,14 @@ button {
                 color: #fff;
                 background: #565c72;
                 border: none;
+                margin-bottom: 10px;
             }
         }
     }
 
     .video-list-wrapper {
         display: flex;
+        margin-bottom: 10px;
 
         .videos-wrapper {
             display: flex;
@@ -356,11 +369,13 @@ button {
             #full-video-camera {
                 width: 576px;
                 height: 384px;
+                margin-bottom: 10px;
             }
 
             #full-video-screen {
                 width: 576px;
                 height: 384px;
+                margin-bottom: 10px;
             }
         }
 

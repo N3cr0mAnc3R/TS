@@ -84,6 +84,21 @@ namespace WebApp.Controllers
             return Json(CurrentUser);
         }
 
+#if DEBUG
+        [HttpPost]
+        public JsonResult GetDomain()
+        {
+            return Json("ws://localhost");
+        }
+#else
+        [HttpPost]
+        public JsonResult GetDomain()
+        {
+            return Json("wss://de.ncfu.ru");
+        }
+#endif
+
+
         public ActionResult UserPic()
         {
             var result = File(CurrentUser.Picture, "image/jpg");

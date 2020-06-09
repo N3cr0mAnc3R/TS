@@ -2,6 +2,7 @@
     el: "#main-window",
     data: {
         computerList: [],
+        domain:"",
         maxX: 0,
         maxY: 0,
         maxContent: 0,
@@ -26,6 +27,14 @@
         init: function () {
             let self = this;
 
+            $.ajax({
+                url: "/account/GetDomain",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.domain = domain;
+                }
+            });
             let str = window.location.href;
             let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.getPlaceByConfig();

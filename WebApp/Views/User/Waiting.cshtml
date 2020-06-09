@@ -46,10 +46,8 @@
                 </div>
                 <template v-if="activeTests.length == 0">
                     <div v-if="tests && tests.length != 0" class="user-info">
-                        <span class="user-name">{{user}}</span>,
-                        <br />
-                        <br />
-                        {{switchLocal(1)}}:
+                        <div class="user-name">{{user}},</div>
+                        <div class="user-either">{{switchLocal(1)}}:</div>
                     </div>
                     <div class="test-list">
                         <div v-for="test in tests" class="test-wrapper">
@@ -86,21 +84,21 @@
                 @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
             </div>
 
-            <div class="disabled-info" v-if="!verified">
-                Перед началом тестирования необходимо подтвердить, что Вы - абитуриент. Разрешите использование камеры на устройстве и нажмите на кнопку ниже. В случае успеха Вам будет доступен список тестов.
-
+            <div class="disabled-info" v-if="!verified" v-loader="loadTestObject">
+                {{switchLocal(6)}}
                 <br />
 
 
                 <div class="pre-video-wrapper">
                     <div class="video">
                         <div class="camera-wrapper">
-                            <video id="video1" autoplay muted></video>
+                            <video id="video1" autoplay muted playsinline poster="~/Content/novideo.png">
+                            </video>
                         </div>
                     </div>
                 </div>
 
-                <button v-on:click="tryVerify" class="btn-verify">Подтвердить</button>
+                <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
             </div>
 
             <div class="open-chat-wrapper">
@@ -132,7 +130,7 @@
                 </div>
                 <div class="text-chat-wrapper">
                     <ul class="chat-wrapper">
-                        <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}">
+                        <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id" >
                             <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
                             <br />
                         </li>

@@ -3,6 +3,7 @@
     data: {
         hasPlaceConfig: false,
         tests: null,
+        domain: "",
         activeTests: [],
         user: '',
         //packages: [],
@@ -32,11 +33,20 @@
         verified: false,
         pc1: null,
         stream: null,
-        queue: []
+        queue: [],
+        enabled: false
     },
     methods: {
         init: function () {
             let self = this;
+            $.ajax({
+                url: "/account/GetDomain",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.domain = domain;
+                }
+            });
             //Загрузка доступных тестов 
             self.findTestInterval = setInterval(function () {
                 $.ajax({
@@ -49,6 +59,7 @@
                             localStorage.removeItem('placeConfig');
                             clearInterval(self.findTestInterval);
                             self.hasPlaceConfig = false;
+                            location.reload();
                             return;
                         }
                         if (d.length == 0) {
@@ -65,6 +76,7 @@
                             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
                             self.initWebCam();
+                            self.initChat();
                             //self.initRTCPeer();
                         }
                         else {
@@ -114,6 +126,47 @@
                 });
             }, 5000);
         },
+        initChat: function () {
+            let self = this;
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+            //} else {
+            //    self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+            //}
+            if (typeof (WebSocket) !== 'undefined') {
+                self.chatSocket = new WebSocket(self.domain + "/ChatHandler.ashx");
+            } else {
+                self.chatSocket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
+            }
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+            //} else {
+            //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
+            //}
+            self.chatSocket.onopen = function () {
+                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.tests[0].Id }));
+                self.getMessages(self.tests[0].Id);
+            };
+            self.chatSocket.onmessage = function (msg) {
+                //self.messages.push(msg);
+                let message;
+                if (msg.data.indexOf("\0") != -1) {
+                    message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                }
+                else {
+                    message = JSON.parse(msg.data);
+                }
+                message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+                self.chat.messages.push(message);
+                if (!self.chat.IsOpened) {
+                    self.unreadCount++;
+                }
+            };
+            self.chatSocket.onclose = function (event) {
+                self.initChat();
+                // alert('Мы потеряли её. Пожалуйста, обновите страницу');
+            };
+        },
         checkAuth: function (placeId, PlaceProfile) {
             if (localStorage['placeConfig']) {
                 console.log();
@@ -148,58 +201,86 @@
         },
         initWebCam: function () {
             let self = this;
-            if (!self.stream) {
-                navigator.getUserMedia(
-                    {
-                        video: true,
-                        audio: true
-                    },
-                    function (stream) {/*callback в случае удачи*/
-                        self.stream = stream;
+            navigator.permissions.query({ name: 'camera' })
+                .then((permissionObj) => {
+                    console.log(permissionObj.state);
+                })
+                .catch((error) => {
+                    console.log('Got error :', error);
+                });
+            //if (!self.stream) {
+            navigator.mediaDevices.getUserMedia(
+                {
+                    video: true,
+                    audio: true
+                }).then(function (stream) {/*callback в случае удачи*/
+                    self.stream = stream;
+                    self.enabled = true;
+                    $('#video1')[0].srcObject = stream;
 
-                        $('#video1')[0].srcObject = stream;
+                    //if (typeof (WebSocket) !== 'undefined') {
+                    //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                    //} else {
+                    //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
+                    //}
+                    //if (typeof (WebSocket) !== 'undefined') {
+                    //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                    //} else {
+                    //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+                    //}
+                    if (typeof (WebSocket) !== 'undefined') {
+                        self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                    } else {
+                        self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                    }
+                    self.videoSocket.onopen = function () {
+                        console.log('Соединение открыто');
+                        self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.tests[0].Id }));
+                        self.initRTCPeer();
+                    };
 
-                        if (typeof (WebSocket) !== 'undefined') {
-                            self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        } else {
-                            self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                        }
-                        //if (typeof (WebSocket) !== 'undefined') {
-                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //} else {
-                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //}
-                        self.videoSocket.onopen = function () {
-                            self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.tests[0].Id }));
-                            self.initRTCPeer();
-                        };
+                    self.videoSocket.onmessage = function (msg) {
+                        let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
 
-                        self.videoSocket.onmessage = function (msg) {
-                            let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
-                            if (!message.IsSender) {
-                                if (message.candidate && message.candidate != '{}') {
-                                    let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                                    self.queue.push(candidate);
-                                }
-
-                                else if (message.answer) {
-                                    self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
-
-                                        self.queue.forEach(function (candidate) {
-                                            self.pc1.addIceCandidate(candidate);
-                                        })
-                                    }, function (r) { console.log(r); })
-                                }
-                                else if (message.verified != undefined) {
-                                    console.log(message.verified);
-                                    self.verified = message.verified;
-                                }
+                        if (!message.IsSender) {
+                            if (message.candidate && message.candidate != '{}') {
+                                let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                                self.queue.push(candidate);
                             }
-                        };
-                    },
-                    function () {/*callback в случае отказа*/ });
-            }
+
+                            else if (message.answer) {
+                                self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
+
+                                    self.queue.forEach(function (candidate) {
+                                        self.pc1.addIceCandidate(candidate);
+                                    })
+                                }, function (r) { console.log(r); })
+                            }
+                            else if (message.verified != undefined) {
+                                console.log(message.verified);
+                                self.verified = message.verified;
+                            }
+                            else if (message.requestOffer) {
+                                self.initRTCPeer();
+                            }
+                            else if (message.resetRequest) {
+                                localStorage.removeItem('placeConfig');
+                                window.open('/account/logout', '_self');
+                                //location.reload();
+                            }
+                        }
+                    };
+                    self.videoSocket.onclose = function () {
+                        console.log('Соединение сброшено');
+                        self.initWebCam();
+                    };
+                }).catch(
+                    function (er) {/*callback в случае отказа*/
+                        alert(self.switchLocal(8));
+                    self.enabled = false;
+                        console.log(er);
+                    });
+            //}
         },
         getMessages: function (newId) {
             let self = this;
@@ -225,9 +306,20 @@
         },
         tryVerify: function () {
             console.log(123);
+            let self = this;
+            self.loadTestObject.loading = true;
+            self.loadTestObject.loaded = false;
+            setTimeout(function () {
+                self.loadTestObject.loading = false;
+                self.loadTestObject.loaded = true;
+                self.verified = true;
+            }, 1000);
         },
         initRTCPeer: function () {
             let self = this;
+            let STUN = {
+                urls: 'stun:stun.advfn.com:3478'
+            };
             let TURN = {
                 url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
@@ -235,7 +327,7 @@
             };
 
             let configuration = {
-                iceServers: [TURN]
+                iceServers: [STUN, TURN]
             };
             self.pc1 = new RTCPeerConnection(configuration);
             self.pc1.addEventListener('icecandidate', function (e) {
@@ -247,9 +339,10 @@
                 if (self.pc1.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (self.pc1.connectionState == 'connecting') {
+                            self.pc1.close();
                             self.initRTCPeer();
                         }
-                    }, 5000)
+                    }, 10000)
                 }
                 if (self.pc1.connectionState == 'disconnected') {
                     self.initRTCPeer();
@@ -268,7 +361,7 @@
                                 obj1[i] = offer[i];
                         }
                         let obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id
+                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
@@ -287,7 +380,7 @@
                     obj1[i] = e.candidate[i];
             }
             let obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id
+                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
                 //app.gotICE = true;
@@ -297,12 +390,19 @@
         switchLocal: function (id) {
             let self = this;
             switch (id) {
-                case 1: return self.localization == 1 ? "Вам доступны следующие тесты для прохождения" : "The following tests are available";
-                case 2: return self.localization == 1 ? "Вы не завершили следующие тесты" : "Not completed";
+                case 1: return self.localization == 1 ? "Вам доступны следующие вступительные испытания для прохождения" : "The following tests are available";
+                case 2: return self.localization == 1 ? "Вы не завершили следующие вступительные испытания" : "Not completed";
                 case 3: return self.localization == 1 ? "Режим ожидания" : "Waiting";
                 case 4: return self.localization == 1 ? "Пожалуйста, ожидайте. В данный момент все места заняты, либо Вы авторизовались ранее на другом устройстве" : "Please, wait. Available tests will be shown below";
                 case 5: return self.localization == 1 ? "Администратор" : "Administrator";
+                case 6: return self.localization == 1 ? "Перед началом вступительного испытания необходимо пройти процедуру идентификации личности." : "Before start, You must verify Your identity.";
+                case 7: return self.localization == 1 ? "Подтвердить" : "Verify";
+                case 8: return self.localization == 1 ? "Камера не найдена. Прохождение тестирования невозможно" : "Camera not found. Testing is not available";
             }
+        },
+        isMe: function (message) {
+            let self = this;
+            return message.UserIdFrom == self.currentUser;
         },
         createPlaceConfig: function (placeId, PlaceProfile) {
             let self = this;

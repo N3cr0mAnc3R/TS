@@ -129,6 +129,10 @@
 }
 .not-test .user-info .user-name {
   text-transform: capitalize;
+  line-height: 60px;
+}
+.not-test .user-info .user-either {
+  line-height: 20px;
 }
 .not-test .test-list {
   background: #fff;
@@ -323,6 +327,7 @@
   display: flex;
   margin-top: 50px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 .panel-center .question-pagination .page {
   width: 30px;
@@ -336,6 +341,7 @@
   margin-right: 5px;
   background: #A6ACBC;
   cursor: pointer;
+  margin-bottom: 10px;
 }
 .panel-center .question-pagination .page.active {
   background: rgba(86, 92, 114, 0.8);
@@ -358,7 +364,7 @@
   opacity: 0.7;
 }
 .open-chat-wrapper {
-  position: fixed;
+  position: absolute;
   left: 5%;
   top: 90px;
   cursor: pointer;
@@ -401,7 +407,7 @@
 }
 .panel-right {
   right: -100%;
-  position: absolute;
+  position: fixed;
   height: 100%;
   width: 100%;
   background: #C4C4C4;
@@ -459,6 +465,9 @@
   display: block;
 }
 @media (min-width: 576px) {
+  .not-test {
+    width: fit-content;
+  }
   .not-test .user-info {
     /*line-height: 60px;*/
   }
@@ -562,7 +571,7 @@
 }
 .finish-game .btn-gray {
   width: 282px;
-  height: 44px;
+  /*height: 44px;*/
   color: #fff;
   border: none;
   font-family: Montserrat;
@@ -597,6 +606,9 @@
   border: none;
   margin-top: 40px;
 }
+.disabled-info .btn-verify.disabled {
+  opacity: 0.7;
+}
 .pre-video-wrapper video {
   width: 320px;
   height: 230px;
@@ -608,15 +620,8 @@
   position: fixed;
   left: 45px;
   bottom: 90px;
+  background: #fff;
   border: 1px solid #c4c4c4;
-  /*display: none;
-    position: fixed;
-    right: 20px;
-    bottom: 100px;
-    width: 300px;
-    height: 600px;
-    border: 1px solid #ddd;
-    background-color: #fff;*/
 }
 #full-chat-wrapper.opened {
   display: block;
@@ -662,7 +667,7 @@
   overflow-y: auto;
 }
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper {
-  border: 1px solid #ddd;
+  background: #cacaca;
   margin: 5px;
   padding: 7px;
   border-top-left-radius: 10px;
@@ -678,6 +683,7 @@
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 10px;
+  background: #a6acbc;
   float: right;
 }
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender .chat-message {

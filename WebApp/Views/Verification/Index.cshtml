@@ -145,9 +145,9 @@
             <div class="control"><span><i class="fa fa-expand"></i></span></div>
             <div class="user-video-list" v-if="!shownSummary">
                 <div class="user-wrapper" v-for="member in members">
-                    @*<span class="user-name">{{member.fio}}</span>*@ @*<span class="user-role"> ({{member.UserRolesName}})</span>*@
+                    @*<span class="user-name">{{member.fio}}</span>*@ @*<span cСообlass="user-role"> ({{member.UserRolesName}})</span>*@
                     <div class="video-wrapper">
-                        <video></video>
+                        <video v-bind:id="'video' + member.Id" autoplay muted></video>
                     </div>
                     @*<div class="score-wrapper">{{getUserScore(member.Id)}}</div>*@
                 </div>

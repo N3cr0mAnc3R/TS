@@ -16,7 +16,6 @@ namespace WebApp.Controllers
 {
     public class UserController : BaseController
     {
-        public static SavePictureModel connection;
         public static Dictionary<int, Timer> timers;
         public enum Language
         {
@@ -137,6 +136,10 @@ namespace WebApp.Controllers
             var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
             return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
         }
+        public async Task<JsonResult> GetInfoAboutTest(int Id)
+        {
+            return Json(await TestManager.GetInfoAboutTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString()));
+        }
         public JsonResult GetTestPackageById(int Id)
         {
             return Json(TestManager.GetTestPackageById(Id, Session["Localization"].ToString()));
@@ -244,7 +247,7 @@ namespace WebApp.Controllers
                 }
                 else
                 {
-                    var timer = new Timer(30000);
+                    var timer = new Timer(60000);
                     timer.Enabled = true;
                     timer.Elapsed += Timer_Elapsed;
                     timer.Start();
@@ -297,49 +300,9 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public async Task SaveOffer(Offer model)
-        {
-            if (connection == null) { connection = new SavePictureModel(); };
-            connection.Offer = model;
-            //await TestManager.FileUploadAsync(model, CurrentUser == null? CurrentUser.Id: (Guid?)null);
-        }
-        [HttpPost]
-        public async Task SaveIcecandidate(SavePictureModel model)
-        {
-            connection.Icecandidate = model.Icecandidate;
-            //await TestManager.FileUploadAsync(model, CurrentUser == null? CurrentUser.Id: (Guid?)null);
-        }
-        [HttpPost]
-        public async Task<JsonResult> GetOffer(string Id)
-        {
-            // Response.ContentType = "application/octet-stream";
-            //var file = TestManager.GetImage(Id);
-            return Json(new { sdp = connection.Offer.Sdp, type = connection.Offer.Type });
-        }
-        [HttpPost]
-        public async Task SaveAnswer(SavePictureModel model)
-        {
-            connection.Answer = model.Answer;
-            //await TestManager.FileUploadAsync(model, CurrentUser == null? CurrentUser.Id: (Guid?)null);
-        }
-        [HttpPost]
-        public async Task<JsonResult> GetAnswer(string Id)
-        {
-            // Response.ContentType = "application/octet-stream";
-            //var file = TestManager.GetImage(Id);
-            return Json(connection);
-        }
-        [HttpPost]
-        public async Task<JsonResult> GetIcecandidate(string Id)
-        {
-            // Response.ContentType = "application/octet-stream";
-            //var file = TestManager.GetImage(Id);
-            return Json(connection);
-        }
-        [HttpPost]
         public async Task<JsonResult> GetChatMessages(int Id)
         {
-            return Json(TestManager.GetChatMessages(Id, Session["Localization"].ToString()));
+            return Json(await TestManager.GetChatMessages(Id, Session["Localization"].ToString()));
         }
         #endregion
         protected TestManager TestManager

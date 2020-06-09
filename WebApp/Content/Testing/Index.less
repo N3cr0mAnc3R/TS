@@ -155,6 +155,12 @@
 
         .user-name {
             text-transform: capitalize;
+            line-height:60px;
+
+        }
+
+        .user-either{
+            line-height:20px;
         }
     }
 
@@ -402,6 +408,7 @@
         display: flex;
         margin-top: 50px;
         justify-content: center;
+        flex-wrap: wrap;
 
         .page {
             width: 30px;
@@ -415,6 +422,7 @@
             margin-right: 5px;
             background: #A6ACBC;
             cursor: pointer;
+            margin-bottom: 10px;
 
             &.active {
                 background: rgba(86, 92, 114, 0.8);
@@ -444,7 +452,7 @@
 
 
 .open-chat-wrapper {
-    position: fixed;
+    position: absolute;
     left: 5%;
     top: 90px;
     cursor: pointer;
@@ -492,7 +500,7 @@
 
 .panel-right {
     right: -100%;
-    position: absolute;
+    position: fixed;
     height: 100%;
     width: 100%;
     background: #C4C4C4;
@@ -563,6 +571,7 @@
 @media(min-width: 576px) {
 
     .not-test {
+        width: fit-content;
         .user-info {
             /*line-height: 60px;*/
         }
@@ -743,7 +752,7 @@
 
     .btn-gray {
         width: 282px;
-        height: 44px;
+        /*height: 44px;*/
         color: #fff;
         border: none;
         font-family: Montserrat;
@@ -780,6 +789,10 @@
         background: #565c72;
         border: none;
         margin-top: 40px;
+
+        &.disabled{
+            opacity: 0.7;
+        }
     }
 }
 
@@ -797,15 +810,9 @@
     position: fixed;
     left: 45px;
     bottom: 90px;
+    background: #fff;
     border: 1px solid #c4c4c4;
-    /*display: none;
-    position: fixed;
-    right: 20px;
-    bottom: 100px;
-    width: 300px;
-    height: 600px;
-    border: 1px solid #ddd;
-    background-color: #fff;*/
+
     &.opened {
         display: block;
     }
@@ -863,7 +870,7 @@
             overflow-y: auto;
 
             .chat-message-wrapper {
-                border: 1px solid #ddd;
+                background: #cacaca;
                 margin: 5px;
                 padding: 7px;
                 border-top-left-radius: 10px;
@@ -879,6 +886,7 @@
                 &.sender {
                     border-bottom-right-radius: 0;
                     border-bottom-left-radius: 10px;
+                    background: #a6acbc;
                     float: right;
 
                     .chat-message {

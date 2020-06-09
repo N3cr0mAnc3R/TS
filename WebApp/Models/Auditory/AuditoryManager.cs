@@ -126,7 +126,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == ""? (string)null: config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<dynamic> GetPlaceConfig(int pin, Guid userUID, string localization = "")

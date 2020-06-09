@@ -11,5 +11,6 @@ namespace WebApp.Models.UserTest
         public string Name { get; set; }
         public byte[]  SourceMaterialImage { get; set; }
         public string Image { get; set; }
+        public bool IsCalc { get; set; }
     }
 }

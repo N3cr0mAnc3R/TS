@@ -90,7 +90,8 @@ namespace WebApp
                         {
                             jsonparsed.UserIdFrom = AccountManager.GetUser(((ClaimsIdentity)context.User.Identity).Claims.Select(a => a.Value).FirstOrDefault()).Id;
                         }
-                        await TestManager.SendMessage(jsonparsed);
+
+                        jsonparsed.Id = await TestManager.SendMessage(jsonparsed);
                         var newJson = Json.Encode(jsonparsed);
                         buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(newJson));
                         List<WebSocket> disposedClients = new List<WebSocket>();

@@ -17,7 +17,8 @@
                     <div v-for="item in filterComps(i-1)" class="col">
                         <div class="place-item" :title="item.Name">
                             <div class="video-wrapper">
-                                <video autoplay v-bind:id="'video-' + item.TestingProfileId" muted></video>
+                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" muted class="video-camera"></video>
+                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-2'" muted class="video-screen"></video>
                                 @*<img v-bind:id="'img-' + item.TestingProfileId" />*@
                             </div>
                             <div class="info-wrapper">
@@ -48,17 +49,18 @@
 
     <div id="full-chat-wrapper" v-bind:class="{'opened': isChatOpened}">
         <div class="chat-panel">
+            <span v-on:click="openFull()" class="toggler-type"><i class="fa fa-video-camera"></i></span>
             <span v-on:click="toggleChat()" class="close-btn"><i class="fa fa-times"></i></span>
         </div>
         <div class="text-chat-wrapper" v-if="currentChat && currentChat.IsChatMOpened">
             <ul class="chat-wrapper">
-                <li v-for="message in currentChat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}">
+                <li v-for="message in currentChat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id" >
                     <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
                     <br />
                 </li>
             </ul>
             <div class="send-message-wrapper">
-                <div class="message-input"><textarea v-model="currentChat.Message"></textarea><button v-on:click="sendMessage"><span class="text"></span><span class="fa fa-send"></span></button></div>
+                <div class="message-input"><textarea v-model="currentChat.Message" v-on:focus="subscribeEnter"></textarea><button v-on:click="sendMessage"><span class="text"></span><span class="fa fa-send"></span></button></div>
             </div>
             <div class="participant-list-wrapper" v-if="currentChat.isChatVOpened">
                 <div class="participant-wrapper" v-for="participant in currentChat.participants">
@@ -103,7 +105,7 @@
                     <div class="video-list-wrapper">
                         <div class="videos-wrapper">
                             <video id="full-video-camera" autoplay muted controls></video>
-                            <video id="full-video-screen" autoplay muted></video>
+                            <video id="full-video-screen" autoplay muted controls></video>
                         </div>
                         <div class="photo-wrapper">
                             <img id="full-video-photo" v-bind:src="'data:image/png;base64, ' + currentUser.Image" />
@@ -122,13 +124,15 @@
                     <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">{{switchLocal(5)}}</div><div v-if="currentUser.IsPause">{{switchLocal(6)}}</div></button>
                     <button class="verify-user" v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
                     <button class="verify-user" v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
-                    <button class="finish-test" v-on:click="finishTest()">{{switchLocal(7)}}</button>
+                    <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(7)}}</button>
+                    <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
+                    <button class="reconnect" v-on:click="reconnect()">{{switchLocal(14)}}</button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
         <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(8)}}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(5)}}</button>
                 </div>
             </div>
         </div>

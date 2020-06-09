@@ -52,15 +52,38 @@ namespace WebApp
             // Слушаем его
             while (true)
             {
-                var buffer = new ArraySegment<byte>(new byte[1024]);
+
+                int bufferSize = 1000;
+                var buffer = new byte[bufferSize];
+                var offset = 0;
+                var free = buffer.Length;
+                while (true)
+                {
+                    var result1 = await socket.ReceiveAsync(new ArraySegment<byte>(buffer, offset, free), CancellationToken.None);
+                    offset += result1.Count;
+                    free -= result1.Count;
+                    if (result1.EndOfMessage) break;
+
+                    if (free == 0)
+                    {
+                        // No free space
+                        // Resize the outgoing buffer
+                        var newSize = buffer.Length + bufferSize;
+
+                        var newBuffer = new byte[newSize];
+                        Array.Copy(buffer, 0, newBuffer, 0, offset);
+                        buffer = newBuffer;
+                        free = buffer.Length - offset;
+                    }
+                }
 
                 // Ожидаем данные от него
-                var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                //var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
                 ProctorSocketModel jsonparsed = new ProctorSocketModel();
                 try
                 {
 
-                    string cathing = System.Text.Encoding.UTF8.GetString(buffer.Array);
+                    string cathing = System.Text.Encoding.UTF8.GetString(buffer);
                     int nStrtP = cathing.IndexOf("\0");
                     if (nStrtP != -1) //вхождение нулевого символ найденj
                     {
@@ -93,7 +116,7 @@ namespace WebApp
                                     message.Id = await TestManager.SendMessage(message);
                                     var newJson = Json.Encode(message);
                                     var anotherJson = Json.Encode(new { Id = 1, Data = newJson });
-                                    buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(anotherJson));
+                                    buffer = System.Text.Encoding.UTF8.GetBytes(anotherJson);
                                     break;
                                 }
                             default:
@@ -115,7 +138,7 @@ namespace WebApp
                             {
                                 if (client.State == WebSocketState.Open)
                                 {
-                                    await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                    await client.SendAsync(new ArraySegment<byte>(buffer), WebSocketMessageType.Text, true, CancellationToken.None);
                                 }
                             }
 
@@ -147,7 +170,7 @@ namespace WebApp
                 }
                 catch (Exception e)
                 {
-
+                    var t = 1;
                 }
             }
         }

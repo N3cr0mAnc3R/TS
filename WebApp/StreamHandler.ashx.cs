@@ -31,21 +31,21 @@ namespace WebApp
             // Получаем сокет клиента из контекста запроса
             var socket = context.WebSocket;
 
-            // Добавляем его в список клиентов
-            Locker.EnterWriteLock();
-            try
-            {
-                //ToDo change
-                //if (!Clients.ContainsKey(1)) Clients.Add(1, socket);
-            }
-            catch (Exception e)
-            {
+            //// Добавляем его в список клиентов
+            //Locker.EnterWriteLock();
+            //try
+            //{
+            //    //ToDo change
+            //    //if (!Clients.ContainsKey(1)) Clients.Add(1, socket);
+            //}
+            //catch (Exception e)
+            //{
 
-            }
-            finally
-            {
-                Locker.ExitWriteLock();
-            }
+            //}
+            //finally
+            //{
+            //    Locker.ExitWriteLock();
+            //}
 
             // Слушаем его
             while (true)

@@ -347,11 +347,11 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
             }
         }
-        public IEnumerable<ChatMessage> GetChatMessages(int testingProfileId, string Localization)
+        public async Task<IEnumerable<ChatMessage>> GetChatMessages(int testingProfileId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return cnt.Query<ChatMessage>(sql: "[dbo].[Administrator_ChatRoomTestingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<ChatMessage>(sql: "[dbo].[Administrator_ChatRoomTestingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<IEnumerable<SourceMaterial>> GetSourceMaterials(int testingProfileId, string Localization, Guid? userUid)
@@ -362,8 +362,11 @@ namespace WebApp.Models
 
                 foreach (var item in result)
                 {
-                    item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
-                    item.Image = Convert.ToBase64String(item.SourceMaterialImage);
+                    if (!item.IsCalc)
+                    {
+                        item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
+                        item.Image = Convert.ToBase64String(item.SourceMaterialImage);
+                    }
                 }
 
                 return result;
@@ -374,6 +377,13 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstAsync<bool>(sql: "[dbo].[Administrator_TestingProfileCanGet]", new { testingProfileId, userUID, PlaceConfig }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<TestComputer> GetInfoAboutTest(int testingProfileId, Guid? userUID, string Localization)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<TestComputer>(sql: "[dbo].[Administrator_TestingProfileInfoGet]", new { testingProfileId, userUID, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<int> SendMessage(ChatMessage message)

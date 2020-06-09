@@ -2,6 +2,7 @@
     el: "#main-window",
     data: {
         testingProfileId: 0,
+        domain: "",
         testInProcess: false,
         selectedTest: {},
         questions: [],
@@ -25,12 +26,14 @@
         cameraRecorder: null,
         screenRecorder: null,
         pc1: {},
+        peers: [],
         offerOptions: {
             offerToReceiveAudio: 1,
             offerToReceiveVideo: 1
         },
         offer: null,
-        stream: null,
+        cameraStream: null,
+        screenStream: null,
         lostConnection: false,
         pause: false,
         chat: {
@@ -50,11 +53,12 @@
         maxTipWidth: 540,
         unreadCount: 0,
         currentUser: {},
-        queue: [],
+        queue: [{ type: 1, candidates: [] }, { type: 2, candidates: [] }],
         mediaSource: null,
         sourceBuffer: null,
         streamLoaded: null,
         streamQueue: [],
+        needCalc: false,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -73,6 +77,14 @@
     methods: {
         init: function () {
             let self = this;
+            $.ajax({
+                url: "/account/GetDomain",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.domain = domain;
+                }
+            });
             self.mediaSource = new MediaSource();
             self.streamLoaded = URL.createObjectURL(self.mediaSource);
             self.mediaSource.addEventListener('sourceopen', self.sourceOpen);
@@ -87,7 +99,9 @@
             self.testingProfileId = newId;
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
             window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
+            self.initVideoSocket();
             self.initWebCam();
+            self.startCapture({ video: { cursor: 'always' }, audio: true});
             self.initChat();
             setTimeout(function () {
                 self.maxTipWidth = $('#main-window').width();
@@ -100,6 +114,7 @@
                 async: false,
                 success: function (user) {
                     self.currentUser = user;
+                    console.log(user);
                 }
             });
         },
@@ -195,106 +210,27 @@
                     self.testInProcess = true;
                     console.log(resp4);
                     self.sourceMaterials = resp4[0];
+                    self.sourceMaterials.forEach(function (material) {
+                        self.needCalc = material.isCalc || self.needCalc;
+                    })
                     self.startCheckConnection(id);
-                }, function (err) { alert(self.switchLocal(6)); });
+                }, function (err) {
+                    //alert(self.switchLocal(6));
+                });
             }
             catch (exc) {
                 console.log(exc);
             }
         },
         recordingCamera: function (event) {
-            //console.log(event);
-            //if (event.data && event.data.size > 0) {
             app.recordedCamera.push(event.data);
             var reader = new FileReader();
-            //let canvas = document.createElement('canvas');
-            //var context = canvas.getContext('2d');
-            //canvas.width = 200;
-            //canvas.height = 150;
-            //context.drawImage($('#video1')[0], 0, 0, 200, 150);
-            //console.log(context);
-            //var data = canvas.toDataURL('image/png');
-            // let photo = $('#photo')[0];
-            //photo.setAttribute('src', data);
-
-            // reader.readAsDataURL(new Blob([event.data], { type: 'video/webm; codecs="vp8"' }));
-            // reader.onloadend = function () {
-            //if (app.videoSocket && app.videoSocket.readyState == 1) {
-            //console.log(event.data);
-            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: JSON.stringify((event.data)) }));
-            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: reader.result }));
-            // }
-            //    var base64data = reader.result;
-            //    console.log(base64data);
-            // }
-            //  if (app.videoSocket && app.loadedSocket) {
-            //      console.log(JSON.stringify(event.data));
-            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
-            //   }
-            //if (app.socket)
-            //   app.socket.send(event.data);
-            //    let bffer = new Blob(app.recordedCamera, { type: 'video/webm' });
-            //   $('#video2')[0].src = URL.createObjectURL(bffer);
-            // }
-            //console.log(event.data);
-            //console.log(app.stream.id, app.stream.);
-            //let formData = new FormData();
-            //formData.append('Id', localStorage['placeConfig']);
-            //formData.append('File', event.data);
-            ////$.ajax({
-            //    url: '/user/save',
-            //    type: 'POST',
-            //    contentType: false,//'application/octet-stream',
-            //    data: formData,
-            //    processData: false
-            //});
         },
         recordingScreen: function (event) {
             //console.log(event);
             if (event.data && event.data.size > 0) {
                 app.recordedScreen.push(event.data);
-                // if (app.videoSocket && app.loadedSocket) {
-                //console.log(JSON.stringify(event.data));
-                //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, Stream: event.data }));
-                //}
-                //if (app.socket)
-                //   app.socket.send(event.data);
-                //let bffer = new Blob(app.recordedScreen, { type: 'video/webm' });
-                // $('#video2')[0].src = URL.createObjectURL(bffer);
             }
-            //console.log(event.data);
-            //console.log(app.stream.id, app.stream.);
-            //let formData = new FormData();
-            //formData.append('Id', localStorage['placeConfig']);
-            //formData.append('File', event.data);
-            ////$.ajax({
-            //    url: '/user/save',
-            //    type: 'POST',
-            //    contentType: false,//'application/octet-stream',
-            //    data: formData,
-            //    processData: false
-            //});
-        },
-        getRemoteAnswer: function () {
-            let self = this;
-            $.ajax({
-                url: '/user/GetAnswer?Id=' + localStorage['placeConfig'],
-                type: 'POST',
-                //data: {
-                //    Id: localStorage['placeConfig']
-                //},
-                success: function (offer) {
-                    console.log(self.pc1);
-                    if (offer.Answer) {
-                        self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(offer.Answer)), function () { }, function () { });
-                        flag = false;
-                    }
-                    else {
-                        self.getAnswer();
-                    }
-                }
-                //  processData: false
-            });
         },
         //Когда меняются значения, нужно сформировать нормально пакеты
         changeRadio: function (id) {
@@ -557,14 +493,18 @@
                     //self.finishTest();
                 }
             }, 1000);
-            //self.startCapture();
         },
         initChat: function () {
             let self = this;
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+            //} else {
+            //    self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+            //}
             if (typeof (WebSocket) !== 'undefined') {
-                self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+                self.chatSocket = new WebSocket(self.domain + "/ChatHandler.ashx");
             } else {
-                self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
+                self.chatSocket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
             }
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
@@ -586,162 +526,141 @@
                 }
                 message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                 self.chat.messages.push(message);
+
+                let maxId = 0;
+                self.chat.messages.forEach(function (msg) {
+                    maxId = msg.Id > maxId ? msg.Id : maxId;
+                });
+                if (maxId != 0) {
+                    setTimeout(function () {
+                        $('#message-' + maxId)[0].scrollIntoView();
+                    }, 20);
+                }
+
                 if (!self.chat.IsOpened) {
                     self.unreadCount++;
                 }
             };
             self.chatSocket.onclose = function (event) {
                 self.initChat();
+                console.log('oh-oh');
                 // alert('Мы потеряли её. Пожалуйста, обновите страницу');
             };
         },
+        subscribeEnter: function () {
+            let self = this;
+            $(document).on('keyup', function () { self.beforeSend(self); });
+        },
+        beforeSend: function (self) {
+            if (event.keyCode == 13 && !event.shiftKey) {
+                self.sendMessage();
+            }
+        },
         isMe: function (message) {
             let self = this;
-            return message.UserIdFrom == self.currentUser;
+            return message.UserIdFrom == self.currentUser || message.IsSender;
+        },
+        initVideoSocket: function () {
+            let self = this;
+
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/streamhandler.ashx");
+            //} else {
+            //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/streamhandler.ashx");
+            //}
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+            //} else {
+            //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
+            //}
+            if (typeof (WebSocket) !== 'undefined') {
+                self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
+            } else {
+                self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            self.videoSocket.onopen = function () {
+                console.log('init videosocket');
+                self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+            };
+
+            self.videoSocket.onmessage = function (msg) {
+                let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+
+                if (!message.IsSender) {
+                    console.log(message);
+                    console.log(message.type);
+                    if (message.candidate && message.candidate != '{}') {
+                        let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                        //self.queue.push(candidate);
+
+
+                        let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                        queue.candidates.push(candidate);
+                    }
+                    else if (message.requestOffer) {
+                        console.log('start request');
+                        self.initRTCPeer(1);
+                        self.initRTCPeer(2);
+                    }
+                    else if (message.answer) {
+                        let interval = setInterval(function () {
+                            console.log('start interval');
+                            let found = self.peers.filter(function (item) { return item.type == message.type; })[0];
+                            console.log('found', found);
+                            if (found) {
+                                clearInterval(interval);
+                                let peer = found.peer;
+                                console.log(message);
+                                console.log(peer);
+                                peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
+
+                                    let queue = self.queue.filter(function (item) { return item.type == message.type })[0];
+                                    queue.candidates.forEach(function (candidate) {
+                                        peer.addIceCandidate(candidate);
+                                    });
+                                    console.log(r);
+                                }, function (r) { console.log(r); });
+
+
+                            }
+                        }, 500);
+                    }
+                }
+            };
+
         },
         initWebCam: function () {
             let self = this;
-            if (!self.stream) {
-                navigator.getUserMedia(
+            let stream = self.cameraStream;
+            console.log('init webcam');
+            if (!stream) {
+                navigator.mediaDevices.getUserMedia(
                     {
-                        video: true,
+                        video: {
+                            facingMode: 'user'
+                        },
                         audio: true
                     },
-                    function (stream) {/*callback в случае удачи*/
-                        self.stream = stream;
-                        console.log(stream);
-                        self.cameraRecorder = new MediaRecorder(stream);
+                    function (videostream) {/*callback в случае удачи*/
+                        stream = videostream;
+                        self.cameraStream = videostream;
+                        console.log('init stream', self.cameraStream);
+                        self.cameraRecorder = new MediaRecorder(videostream);
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(1000);
 
-                        $('#video1')[0].srcObject = stream;
+                        self.initRTCPeer(1);
+                        $('#video1')[0].srcObject = videostream;
 
-                        if (typeof (websocket) !== 'undefined') {
-                            self.videosocket = new websocket("wss://" + window.location.hostname + "/streamhandler.ashx");
-                        } else {
-                            self.videosocket = new mozwebsocket("wss://" + window.location.hostname + "/streamhandler.ashx");
-                        }
-                        //if (typeof (WebSocket) !== 'undefined') {
-                        //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //} else {
-                        //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                        //}
-                        self.videoSocket.onopen = function () {
-                            self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                            self.initRTCPeer();
-                        }
-
-                        self.videoSocket.onmessage = function (msg) {
-                            let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
-                            if (!message.IsSender) {
-                                if (message.candidate && message.candidate != '{}') {
-                                    let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                                    console.log(candidate);
-                                    self.queue.push(candidate);
-                                }
-
-                                else if (message.answer) {
-                                    console.log(message.answer);
-                                    self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
-
-                                        self.queue.forEach(function (candidate) {
-                                            self.pc1.addIceCandidate(candidate);
-                                        })
-                                        console.log(r);
-                                    }, function (r) { console.log(r); })
-                                    //let createDescPromise = new Promise(function (resolve) {
-                                    //    console.log('start remote');
-                                    //    let sdp = JSON.parse(message.answer).sdp;
-                                    //    //let sdp = JSON.parse(message.answer).sdp;
-                                    //    //console.log(sdp);
-                                    //    //if (sdp.search(/^a=mid.*$/gm) === -1) {
-                                    //   // var mlines_1 = sdp.match(/^m=.*$/gm);
-                                    //    //console.log(mlines_1);
-                                    //   // let sdps = sdp.split(/^m=.*$/gm);
-                                    //  //  console.log(sdps);
-                                    //    //mlines_1.forEach(function (elem, idx) {
-                                    //    //    console.log(elem, idx);
-                                    //    //    mlines_1[idx] = elem + '\na=mid:' + idx;
-                                    //    //});
-                                    //   // console.log(JSON.stringify(sdp));
-                                    //    console.log(message.answer);
-                                    //    resolve(self.pc1.setRemoteDescription({ type: 'answer', sdp: sdp }));
-                                    //})
-                                    //createDescPromise.then(function (result) {
-                                    //    console.log('stop remote');
-                                    //})
-                                    //console.log(message.answer);
-                                }
-                            }
-                            else {
-                                //self.streamLoaded = message.Stream;
-                                //if (message.Stream) {
-                                //    if (!self.sourceBuffer) {
-                                //       // self.initBuffer();
-                                //        console.log('empty');
-                                //    }
-                                //    console.log(self.mediaSource.readyState);
-                                //    let reader = new FileReader();
-                                //    reader.onload = function () {
-                                //        try {
-                                //            console.log(self.sourceBuffer.updating, self.streamQueue.length > 0);
-                                //            self.sourceBuffer.appendBuffer(reader.result);
-                                //        }
-                                //        catch (e) {
-                                //            console.log(e);
-                                //        }
-                                //        //if (self.mediaSource.sourceBuffers.length == 0) {
-
-                                //        //    self.initBuffer();
-                                //        //}
-
-                                //        //if (self.sourceBuffer.updating || self.streamQueue.length > 0) {
-                                //        //    console.log(self.mediaSource.sourceBuffers.length);
-                                //        //    self.streamQueue.push(e.data);
-                                //        //} else {
-                                //        //    console.log(self.mediaSource.sourceBuffers.length);
-
-                                //        //    self.sourceBuffer.appendBuffer(reader.result);
-                                //        //}
-
-                                //    }
-                                //    reader.readAsArrayBuffer(self.b64toBlob(message.Stream));
-                                //    //self.streamLoadedQueue.push(self.b64toBlob(message.Stream));
-                                //    //self.streamLoadedQueue.push(message.Stream);
-                                //    //console.log(self.streamLoadedQueue);
-                                //    //self.b64toBlob(self.streamLoadedQueue);
-                                //    //self.streamLoaded = URL.createObjectURL(self.b64toBlob(self.streamLoadedQueue));
-                                //    //self.streamLoaded = URL.createObjectURL(self.b64toBlob(self.streamLoadedQueue));
-                                //}
-
-                            }
-                            //console.log(message);
-                        }
 
 
                     },
-                    function () {/*callback в случае отказа*/ });
+                    function (er) {/*callback в случае отказа*/ alert(er); });
             }
             else {
                 self.cameraRecorder.start(10);
             }
         },
-        //initBuffer: function () {
-        //    let self = this;
-        //    if (self.mediaSource.readyState == 'open') {
-
-        //        self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
-        //        self.sourceBuffer.addEventListener('update', function () {
-        //            if (self.streamQueue.length > 0 && !self.sourceBuffer.updating) {
-        //                self.sourceBuffer.appendBuffer(self.streamQueue.shift());
-        //            }
-        //        });
-        //    }
-        //    else {
-
-        //    }
-        //},
         sourceOpen: function () {
             let self = this;
             self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
@@ -988,11 +907,14 @@
         },
         startCapture: function (displayMediaOptions) {
             let self = this;
-            let captureStream = null;
+            //let captureStream = null;
 
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
-
+                self.screenStream = Str;
+                //let tracks = Str.getTracks();
+                //track.forE
+                self.initRTCPeer(2);
                 // self.screenRecorder = new MediaRecorder(Str);
                 //self.screenRecorder.ondataavailable = self.recordingScreen;
                 //self.screenRecorder.start(10);
@@ -1025,12 +947,15 @@
 
             self.questions.forEach(function (a) { count = a.answered ? (count - 1) : count });
             if (count > 0) {
-                let str = count + ' ';
-                let procent = count % 10;
-                if (procent == 1) { str += 'вопрос'; }
-                else if (procent < 4 && procent > 1) { str += 'вопроса'; }
-                else { str += 'вопросов'; }
-                return str;
+                if (self.localization == 1) {
+                    let str = count + ' ';
+                    let procent = count % 10;
+                    if (procent == 1) { str += 'вопрос'; }
+                    else if (procent < 4 && procent > 1) { str += 'вопроса'; }
+                    else { str += 'вопросов'; }
+                    return str;
+                }
+                else return count > 1 ? 'questions' : 'question';
             }
             else {
                 return null;
@@ -1141,7 +1066,8 @@
         getDateFormat: function (date) {
             return date.toLocaleTimeString();
         },
-        initRTCPeer: function () {
+        initRTCPeer: function (type) {
+            console.log('init rtcpeer');
             let self = this;
             let TURN = {
                 url: 'turn:turn.bistri.com:80',
@@ -1152,33 +1078,36 @@
             let configuration = {
                 iceServers: [TURN]
             };
-            self.pc1 = new RTCPeerConnection(configuration);
-            console.log('Created local peer connection object pc1', new Date().getSeconds(), new Date().getMilliseconds());
-            self.pc1.addEventListener('icecandidate', function (e) {
-                self.onIceCandidate(self.pc1, e);
+            let peer = new RTCPeerConnection(configuration);
+            peer.addEventListener('icecandidate', function (e) {
+                self.onIceCandidate(e, type);
             });
-            self.pc1.addEventListener('iceconnectionstatechange', function (e) {
-                self.onIceStateChange(self.pc1, e);
-            });
-            self.pc1.addEventListener('connectionstatechange', function (event) {
-                console.log(self.pc1.connectionState);
+            //peer.addEventListener('iceconnectionstatechange', function (e) {
+            //    self.onIceStateChange(self.pc1, e);
+            //});
+            //peer.addEventListener('connectionstatechange', function (event) {
+            //    console.log(peer.connectionState);
+            //});
+            let stream = type == 1 ? self.cameraStream : self.screenStream;
+            stream.getTracks().forEach(function (track) {
+                peer.addTrack(track, stream);
             });
 
-            self.stream.getTracks().forEach(function (track) {
-                self.pc1.addTrack(track, self.stream);
-            });
-
+            let found = self.peers.filter(function (item) { return item.type == type })[0];
+            if (found) {
+                found.peer = peer;
+            }
+            else self.peers.push({ type: type, peer: peer });
             try {
-
-                self.pc1.createOffer(function (offer) {
-                    self.pc1.setLocalDescription(offer, function () {
+                peer.createOffer(function (offer) {
+                    peer.setLocalDescription(offer, function () {
                         let obj1 = {};
                         for (let i in offer) {
                             if (typeof offer[i] != 'function')
                                 obj1[i] = offer[i];
                         }
                         let obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
+                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
@@ -1190,7 +1119,7 @@
                 console.log('error');
             }
         },
-        onIceCandidate: function (pc, e) {
+        onIceCandidate: function (e, type) {
             let obj1 = {};
             for (let i in e.candidate) {
                 if (typeof e.candidate[i] != 'function')
@@ -1198,15 +1127,12 @@
             }
             console.log(e.candidate);
             let obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId
+                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
                 app.gotICE = true;
                 app.videoSocket.send(JSON.stringify(obj));
             }
-        },
-        onIceStateChange: function (pc, e) {
-
         },
         checkSecurity: function () {
             let self = this;
@@ -1238,12 +1164,17 @@
                 case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
                 case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
                 case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select file to upload (if necessary) and enter the answer in the field";
-                case 5: return self.localization == 1 ? "Завершить тестирование" : "Finish test";
+                case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";
                 case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
                 case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
                 case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
                 case 9: return self.localization == 1 ? "Администратор" : "Administrator";
                 case 10: return self.localization == 1 ? "Удалить файл" : "Remove file";
+                case 11: return self.localization == 1 ? "Вы действительно хотите завершить тестирование" : "Are You sure, You want to finish test";
+                case 12: return self.localization == 1 ? "Подтверждение" : "Confirmation";
+                case 13: return self.localization == 1 ? "Вы не ответили на " : "Not answered: ";
+                case 14: return self.localization == 1 ? "Свернуть" : "Collapse";
+                case 15: return self.localization == 1 ? "Развернуть" : "Expand";
             }
         }
     },

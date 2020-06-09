@@ -160,6 +160,7 @@
     <Content Include="Content\jQuery-webcam-master\jscam_canvas_only.swf" />
     <Content Include="Content\jQuery-webcam-master\src\jscam.xml" />
     <Content Include="Content\loader.js" />
+    <Content Include="Content\novideo.png" />
     <Content Include="Content\proctor.css">
       <DependentUpon>proctor.less</DependentUpon>
     </Content>

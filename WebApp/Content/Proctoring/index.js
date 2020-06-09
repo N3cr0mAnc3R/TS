@@ -3,6 +3,7 @@
     data: {
         HasCase: false,
         TestingProfileId: 0,
+        domain:"",
         questions: [],//testingResultId (2179), TestingPackageId, AnswerId, Id, TypeAnswerId, Sort, UserAnswer
         loadObject: {
             loading: null,
@@ -36,11 +37,22 @@
         pageWidth: 0,
         newMessages: [],
         counter: 0,
-        unloadedImage: ''
+        unloadedImage: '',
+        videoRTCPeers: [],
+        stream: null,
+        queue: []
     },
     methods: {
         init: function () {
             let self = this;
+            $.ajax({
+                url: "/account/GetDomain",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.domain = domain;
+                }
+            });
             window.onresize = function () {
                 self.pageWidth = $('#main-window').width();
             };
@@ -72,6 +84,7 @@
                 type: "POST",
                 async: false,
                 success: function (user) {
+                    user.peer = null;
                     self.currentUser = user;
                     loadedCount++;
                     if (loadedCount == 4) {
@@ -125,10 +138,15 @@
             });
 
             if (typeof (WebSocket) !== 'undefined') {
-                self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
+                self.socket = new WebSocket(self.domain + "/ProctorHandler.ashx");
             } else {
-                self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
+                self.socket = new MozWebSocket(self.domain + "/ProctorHandler.ashx");
             }
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.socket = new WebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
+            //} else {
+            //    self.socket = new MozWebSocket("wss://" + window.location.hostname + "/ProctorHandler.ashx");
+            //}
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.socket = new WebSocket("ws://" + window.location.hostname + "/ProctorHandler.ashx");
             //} else {
@@ -137,6 +155,8 @@
             if (self.socket) {
                 self.socket.onopen = function () {
                     self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.TestingProfileId }));
+                    self.initWebCam();
+                    self.socket.send(JSON.stringify({ Id: 4, TestingProfileId: self.TestingProfileId, Data: JSON.stringify({ requestOffer: true, UserId: self.currentUser.Id }) }));
                 }
                 self.socket.onmessage = function (msg) {
                     let message;
@@ -178,11 +198,206 @@
                             //message.Data; //Chat
                             break;
                         }
+                        case 4: {
+                            //self.updateScoreExam(message.Data);
+                            //message.Data; //Chat
+                            let msg = JSON.parse(message.Data);
+                            console.log(msg, self.currentUser);
+                            if (msg.UserId != self.currentUser.Id) {
+                                console.log(message.Data);
+                                console.log(found);
+                                let found = self.members.filter(function (member) {
+                                    return member.Id == msg.UserId;
+                                })[0];
+                                self.initRTCPeer(self.currentUser, found);
+                            }
+                            else {
+                               // if (!self.currentUser.peer)
+                                 //   self.initRTCPeer(self.currentUser, found);
+                            }
+                            break;
+                        }
+                        case 5: {
+                            //self.updateScoreExam(message.Data);
+                            //message.Data; //Chat
+                            let msg = JSON.parse(message.Data);
+                            console.log(msg);
+                            if (msg.To == self.currentUser.Id) {
+                                if (msg.candidate && msg.candidate != '{}') {
+                                    let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                                    self.queue.push(candidate);
+                                }
+                                else if (msg.offer) {
+                                    navigator.getUserMedia({ video: true }, function (stream) {
+                                        console.log('start video', msg.UserId);
+                                        let found = self.members.filter(function (member) {
+                                            console.log(member);
+                                            return member.Id == msg.UserId;
+                                        })[0];
+                                        console.log('start video', found);
+                                        let interval = setInterval(function () {
+                                            if (found) {
+                                                console.log('add stream');
+                                                found.peer.addStream(stream);
+                                                clearInterval(interval);
+                                                console.log('start desc');
+                                                found.peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.offer)), function () {
+                                                    found.peer.createAnswer(function (answer) {
+                                                        found.peer.setLocalDescription(answer, function () {
+                                                            let obj1 = {};
+                                                            for (let i in answer) {
+                                                                if (typeof answer[i] != 'function')
+                                                                    obj1[i] = answer[i];
+                                                            }
+                                                            obj = {
+                                                                Data: { answer: JSON.stringify(obj1), To: msg.UserId, UserId: self.currentUser.Id }, TestingProfileId: self.TestingProfileId, Id: 5
+                                                            };//UserId: app.currentUser.Id, UserIdTo: to.Id
+                                                            socket.send(JSON.stringify(obj));
+                                                            self.queue.forEach(function (candidate) {
+                                                                found.peer.addIceCandidate(candidate);
+                                                            });
+
+                                                        }, function (r) { console.log(r); });
+                                                    }, function (r) { console.log(r); });
+                                                }, function (r) { console.log(r); });
+                                            }
+                                        }, 1000)
+                                    }, function (r) { console.log(r); });
+
+                                }
+                                else if (msg.answer) {
+                                    let found = self.members.filter(function (member) {
+                                        return member.Id == msg.UserId;
+                                    });
+                                    found.peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(msg.answer)), function (r) {
+
+                                        self.queue.forEach(function (candidate) {
+                                            found.peer.addIceCandidate(candidate);
+                                        });
+                                    }, function (r) { console.log(r); });
+                                }
+                            }
+
+
+                            break;
+                        }
                     }
                 };
                 self.socket.onclose = function (event) {
                     console.log('close');
+                };
+            }
+        },
+        initRTCPeer: function (created, to) {
+            let self = this;
+            console.log('init', created, to);
+            let STUN = {
+                urls: 'stun:stun.advfn.com:3478'
+            };
+            let TURN = {
+                url: 'turn:turn.bistri.com:80',
+                credential: 'homeo',
+                username: 'homeo'
+            };
+
+            let configuration = {
+                iceServers: [STUN, TURN]
+            };
+            console.log(created);
+            to.peer = new RTCPeerConnection(configuration);
+
+            to.peer.addEventListener('icecandidate', function (e) {
+                self.onIceCandidate(e, to);
+            });
+
+            to.peer.addEventListener('connectionstatechange', function (event) {
+                console.log(to.peer.connectionState);
+                if (to.peer.connectionState == 'connecting') {
+                    setTimeout(function () {
+                        if (to.peer.connectionState == 'connecting') {
+                            self.initRTCPeer(to, to);
+                        }
+                    }, 10000);
                 }
+                if (to.peer.connectionState == 'disconnected') {
+                    self.initRTCPeer(to, to);
+                }
+            });
+            console.log('start');
+            to.peer.addEventListener('track', function (e) {
+                self.gotRemoteStream(e);
+            });
+
+            let interval = setInterval(function () {
+                if (self.stream) {
+                    self.stream.getTracks().forEach(function (track) {
+                        to.peer.addTrack(track, self.stream);
+                    });
+                    clearInterval(interval);
+                }
+            }, 500)
+
+            try {
+                to.peer.createOffer(function (offer) {
+                    to.peer.setLocalDescription(offer, function () {
+                        let obj1 = {};
+                        for (let i in offer) {
+                            if (typeof offer[i] != 'function')
+                                obj1[i] = offer[i];
+                        }
+                        console.log(to, self.currentUser);
+                        let obj = {
+                            offer: JSON.stringify(obj1), TestingProfileId: self.TestingProfileId, To: to.Id, UserId: self.currentUser.Id
+                        };
+                        if (self.socket && self.socket.readyState == 1) {
+                            self.socket.send(JSON.stringify({ Id: 5, TestingProfileId: self.TestingProfileId, Data: JSON.stringify(obj) }));
+                        }
+                    }, function () { });
+                }, function () { });
+            }
+            catch{
+                console.log('error');
+            }
+        },
+        initWebCam: function () {
+            let self = this;
+            if (!self.stream) {
+                setTimeout(function () {
+                    navigator.getUserMedia(
+                        {
+                            video: true,
+                            audio: true
+                        },
+                        function (stream) {/*callback в случае удачи*/
+                            self.stream = stream;
+                            console.log('stream', stream);
+                            // self.initRTCPeer(created, to);
+                            $('#video' + self.currentUser.Id)[0].srcObject = stream;
+
+                        },
+                        function () {/*callback в случае отказа*/ });
+                }, 500)
+            }
+        },
+        gotRemoteStream: function (e) {
+            console.log(e);
+        },
+        onIceCandidate: function (e, to) {
+            let obj1 = {};
+            for (let i in e.candidate) {
+                if (typeof e.candidate[i] != 'function')
+                    obj1[i] = e.candidate[i];
+            }
+            let obj = {
+                candidate: JSON.stringify(obj1), TestingProfileId: app.TestingProfileId, UserId: app.currentUser.Id, UserIdTo: to.Id
+            };
+            //console.log(e.candidate);
+            if (app.socket && app.socket.readyState == 1) {
+                // console.log('send');
+                app.socket.send(JSON.stringify({ Id: 5, TestingProfileId: app.TestingProfileId, Data: JSON.stringify(obj) }));
+            }
+            else {
+                app.onIceCandidate(e, to);
             }
         },
         getDateFormat: function (date) {
@@ -403,9 +618,25 @@
                 dataType: 'json',
                 url: '/verification/GetMembers?Id=' + Id,
                 success: function (d) {
+                    d.map(function (item) {
+                        item.peer = null;
+                    });
                     self.members = d;
                     self.ableMembers = self.members.filter(function (member) { return member.UserRoleId != 4; });
                     self.notMeMembers = self.members.filter(function (member) { return member.Id != self.currentUser.Id; });
+
+                    self.notMeMembers.forEach(function (member) {
+                        if (self.socket && self.socket.readyState == 1) {
+                            // self.initRTCPeer(member);
+                        } else {
+                            let interval = setInterval(function () {
+                                if (self.socket && self.socket.readyState == 1) {
+                                    clearInterval(interval);
+                                    //self.initRTCPeer(member);
+                                }
+                            }, 1000);
+                        }
+                    });
                 }
             });
         },

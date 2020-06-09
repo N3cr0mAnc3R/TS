@@ -63,6 +63,14 @@
 .auditory .computer-list .place-table .place-row .place-item .video-wrapper video {
   width: 180px;
   height: 130px;
+  position: absolute;
+  left: 15px;
+}
+.auditory .computer-list .place-table .place-row .place-item .video-wrapper .video-camera {
+  z-index: 2;
+}
+.auditory .computer-list .place-table .place-row .place-item .video-wrapper .video-screen {
+  z-index: 1;
 }
 .auditory .computer-list .place-table .place-row .place-item .info-wrapper {
   width: 180px;
@@ -161,8 +169,8 @@
   height: 40px;
   background: #565C72;
   padding: 3px 10px;
-  justify-content: space-between;
-  display: flex;
+  color: #fff;
+  text-align: end;
 }
 #full-chat-wrapper .chat-panel .user-info {
   font-family: Montserrat;
@@ -196,7 +204,7 @@
   overflow-y: auto;
 }
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper {
-  border: 1px solid #ddd;
+  background: #cacaca;
   margin: 5px;
   padding: 7px;
   border-top-left-radius: 10px;
@@ -212,6 +220,7 @@
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender {
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 10px;
+  background: #a6acbc;
   float: right;
 }
 #full-chat-wrapper .text-chat-wrapper .chat-wrapper .chat-message-wrapper.sender .chat-message {
@@ -287,9 +296,11 @@ button:focus {
   color: #fff;
   background: #565c72;
   border: none;
+  margin-bottom: 10px;
 }
 #full-wrapper .video-list-wrapper {
   display: flex;
+  margin-bottom: 10px;
 }
 #full-wrapper .video-list-wrapper .videos-wrapper {
   display: flex;
@@ -299,10 +310,12 @@ button:focus {
 #full-wrapper .video-list-wrapper .videos-wrapper #full-video-camera {
   width: 576px;
   height: 384px;
+  margin-bottom: 10px;
 }
 #full-wrapper .video-list-wrapper .videos-wrapper #full-video-screen {
   width: 576px;
   height: 384px;
+  margin-bottom: 10px;
 }
 #full-wrapper .video-list-wrapper .photo-wrapper {
   margin-left: 30px;

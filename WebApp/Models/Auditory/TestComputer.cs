@@ -16,14 +16,23 @@ namespace WebApp.Models
         public int PositionX { get; set; }
         public int PositionY { get; set; }
         public bool IsUsed { get; set; }
+        public bool Deleted { get; set; }
+        public bool IsNeedPlaceConfig { get; set; }
+        public bool UserVerified { get; set; }
+        public int PlaceProfileId { get; set; }
+        public int PIN { get; set; }
+        public int TestingProfileId { get; set; }
+
+
+
+
         public bool IsCameraControl { get; set; }
         public bool IsRecordOnStart { get; set; }
         public bool IsRecordOnViolation { get; set; }
         public bool IsRecordOnWarning { get; set; }
-        public bool Deleted { get; set; }
-        public bool IsNeedPlaceConfig { get; set; }
-        public int PlaceProfileId { get; set; }
-        public int PIN { get; set; }
-        public int TestingProfileId { get; set; }
+        public int TimeRecording { get; set; }
+        public bool IsForTesting { get; set; }
+        public int TimeAlarm { get; set; }
+        public int TestingTimeRemaining { get; set; }
     }
 }
