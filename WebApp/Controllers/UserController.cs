@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNet.Identity.Owin;
+﻿using Accord.Imaging;
+using Accord.Imaging.Filters;
+using Accord.Vision.Detection;
+using Accord.Vision.Detection.Cascades;
+using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -14,6 +18,7 @@ using WebApp.Models.Common;
 using WebApp.Models.DB;
 using WebApp.Models.Proctoring;
 using WebApp.Models.UserTest;
+using Image = System.Drawing.Image;
 
 namespace WebApp.Controllers
 {
@@ -124,18 +129,73 @@ namespace WebApp.Controllers
                 return Json(new { Error = e.Message });
             }
         }
-        public JsonResult TryVerify()
+        public class ForRecogn
         {
-            var file = Request.Files.Get(0);
-            Image img = Image.FromStream(file.InputStream, true, true);
+            public string Image { get; set; }
+            public int Id { get; set; }
+        }
+        public async Task<JsonResult> TryVerify(ForRecogn model)
+        {
+            // var file = Request.Files.Get(0);
+            Image img, second;
             using (var ms = new MemoryStream())
             {
-                img.Save(ms, ImageFormat.Jpeg);
-                var _bufImage = ms.ToArray();
+                byte[] bytes = Convert.FromBase64String(model.Image);
+                ms.Write(bytes, 0, bytes.Length);
+                img = Image.FromStream(ms);
             }
-            HaarObjectDetector
+            Bitmap image = ConvertToFormat(img, PixelFormat.Format24bppRgb);
+            using (var ms = new MemoryStream())
+            {
+                byte[] bytes = ((await AuditoryManager.GetUserPicture(model.Id, null, Session["Localization"].ToString())).Picture);
+                ms.Write(bytes, 0, bytes.Length);
+                second = Image.FromStream(ms);
+            }
+            Bitmap image1 = ConvertToFormat(second, PixelFormat.Format24bppRgb);
+            HaarObjectDetector faceDetector = new HaarObjectDetector(new FaceHaarCascade(), minSize: 25, searchMode: ObjectDetectorSearchMode.NoOverlap);
+            RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
+            facesMarker.Rectangles = faceDetector.ProcessFrame(image);
+            if(facesMarker.Rectangles.Count() == 0)
+            {
+                //1 - не найдено лицо
+                return Json(new { Error = 1 });
+            }
 
-            return Json(true);
+            image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
+
+            facesMarker.Rectangles = faceDetector.ProcessFrame(image1);
+            image1 = image1.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
+
+            //string result = "";
+            //using (var ms = new MemoryStream())
+            //{
+            //    image.Save(ms, ImageFormat.Png);
+            //    result = Convert.ToBase64String(ms.ToArray());
+            //}
+
+            //return Json(result);
+
+            return Json(Compare(image1, image, 0.8, 0.6f));
+            //return Json(Compare(ConvertToFormat(second, PixelFormat.Format24bppRgb), ConvertToFormat(img, PixelFormat.Format24bppRgb), 0.8, 0.6f));
+        }
+        public static Bitmap ConvertToFormat(Image image, PixelFormat format)
+        {
+            Bitmap copy = new Bitmap(image.Width, image.Height, format);
+            using (Graphics gr = Graphics.FromImage(copy))
+            {
+                gr.DrawImage(image, new Rectangle(0, 0, copy.Width, copy.Height));
+            }
+            return copy;
+        }
+        public static bool Compare(Bitmap image1, Bitmap image2, double comparisionLevel, float threshold)
+        {
+            var a = new ExhaustiveTemplateMatching(threshold);
+            var b = a.ProcessImage(image1, image2)[0];
+            var c = b.Similarity >= comparisionLevel;
+            return c;
+            //return new ExhaustiveTemplateMatching(threshold)
+            //   .ProcessImage(To24bppRgbFormat(image1), To24bppRgbFormat(image2))[0]
+            //  .Similarity >= comparisionLevel;
         }
         #endregion
         #region Тестирование

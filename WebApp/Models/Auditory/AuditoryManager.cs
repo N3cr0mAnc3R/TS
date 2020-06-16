@@ -101,7 +101,7 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[Administrator_TestingProfileUserVerifiedSet]", new { testingProfileId, userVerified,  userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<TestUser> GetUserPicture(int testingProfileId, Guid userUID, string localization = "")
+        public async Task<TestUser> GetUserPicture(int testingProfileId, Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {

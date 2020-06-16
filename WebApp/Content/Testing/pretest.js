@@ -29,6 +29,7 @@
             Message: "",
             testingProfileId: 0
         },
+        recognized: "",
         unreadCount: 0,
         verified: false,
         pc1: null,
@@ -271,7 +272,7 @@
                 }).catch(
                     function (er) {/*callback в случае отказа*/
                         alert(self.switchLocal(8));
-                    self.enabled = false;
+                        self.enabled = false;
                         console.log(er);
                     });
             //}
@@ -299,25 +300,49 @@
             return date.toLocaleTimeString();
         },
         tryVerify: function () {
-            console.log(123);
             var self = this;
             self.loadTestObject.loading = true;
             self.loadTestObject.loaded = false;
-            //$.ajax({
-            //    url: "/user/verify?Id=" + newId,
-            //    type: "POST",
-            //    async: false,
-            //    success: function (messageList) {
-            //        var messages = messageList;
-            //        messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
-            //        self.chat.messages = messages;
-            //    }
-            //})
-            setTimeout(function () {
-                self.loadTestObject.loading = false;
-                self.loadTestObject.loaded = true;
-                self.verified = true;
-            }, 1000);
+            var formData = new FormData();
+            var canvas = $('#canvas')[0];
+            var context = canvas.getContext('2d');
+            canvas.width = 320;
+            canvas.height = 230;
+            context.drawImage($('#video1')[0], 0, 0, 320, 230);
+
+            var data = canvas.toDataURL('image/png');
+
+            $.ajax({
+                url: "/user/TryVerify",
+                type: "POST",
+                async: false,
+                data: { Image: data.substr(22), Id: self.tests[0].Id },
+                success: function (res) {
+                    if (res.Error == 1) {
+                        self.tryVerify();
+                    }
+                    else {
+                        if (!res) {
+                            self.tryVerify();
+                        }
+                        else {
+                            self.verified = true;
+                            self.loadTestObject.loading = false;
+                            self.loadTestObject.loaded = true;
+
+                        }
+                    }
+                    console.log(res);
+                    //else self.recognized = 'data:image/png;base64,' + res;
+                    self.loadTestObject.loading = false;
+                    self.loadTestObject.loaded = true;
+                }
+            })
+            //setTimeout(function () {
+            //    self.loadTestObject.loading = false;
+            //    self.loadTestObject.loaded = true;
+            //    self.verified = true;
+            //}, 1000);
         },
         initRTCPeer: function () {
             var self = this;
@@ -373,7 +398,7 @@
                     }, function () { });
                 }, function () { });
             }
-            catch (e){
+            catch (e) {
                 console.log('error');
             }
         },

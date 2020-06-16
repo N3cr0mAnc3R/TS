@@ -96,7 +96,8 @@
                         </div>
                     </div>
                 </div>
-
+                <img v-bind:src="recognized" />
+                <canvas id="canvas"></canvas>
                 <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
             </div>
 
