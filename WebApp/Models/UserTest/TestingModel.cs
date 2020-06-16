@@ -9,6 +9,7 @@ namespace WebApp.Models.UserTest
     {
         public int Id { get; set; }
         public int TestingStatusId { get; set; }
+        public bool NeedShowScore { get; set; }
         public bool IsForTesting { get; set; }
         public DateTime TestingDate { get; set; }
         public Guid userUID { get; set; }

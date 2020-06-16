@@ -66,21 +66,32 @@ textarea {
   color: rgba(0, 0, 0, 0.7);
 }
 .navbar-system {
+  -webkit-box-shadow: #a2a2a2 0px 3px 4px;
   box-shadow: #a2a2a2 0px 3px 4px;
   height: 75px;
   line-height: 30px;
   font-size: 16px;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   padding: 16px;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
   justify-content: flex-start;
   background: #fff;
 }
 .navbar-system .container {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
   justify-content: space-between;
 }
 .navbar-system .container .base-nav,
 .navbar-system .container .nav-item {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
 }
 .navbar-system .container .base-nav .userpic,
@@ -116,6 +127,8 @@ textarea {
   .navbar-system .container .base-nav .navbar-collapse1,
   .navbar-system .container .nav-item .navbar-collapse1 {
     opacity: 0;
+    -webkit-transition: all ease 0.3s;
+    -o-transition: all ease 0.3s;
     transition: all ease 0.3s;
     display: block;
     position: fixed;
@@ -142,6 +155,8 @@ textarea {
   }
   .navbar-system .container .base-nav .navbar-collapse1.show .navbar-nav li.hidden-full,
   .navbar-system .container .nav-item .navbar-collapse1.show .navbar-nav li.hidden-full {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
   }
 }
@@ -152,11 +167,19 @@ textarea {
   }
   .navbar-system .container .base-nav .navbar-collapse1,
   .navbar-system .container .nav-item .navbar-collapse1 {
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     margin-left: 15px;
   }
   .navbar-system .container .base-nav .navbar-collapse1 ul,
   .navbar-system .container .nav-item .navbar-collapse1 ul {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: horizontal;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: row;
     flex-direction: row;
   }
   .navbar-system .container .base-nav .navbar-collapse1 ul li,
@@ -214,6 +237,8 @@ body #window-without-loader {
   display: none;
 }
 body .localization-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   position: absolute;
   top: 95px;
@@ -235,6 +260,7 @@ body .localization-wrapper .localization-item {
 body .localization-wrapper .localization-item.active {
   display: block;
   color: #000;
+  -webkit-box-shadow: inset #565c72 0px 1px 4px;
   box-shadow: inset #565c72 0px 1px 4px;
 }
 #nav-7 {
@@ -245,6 +271,8 @@ a:focus {
 }
 @keyframes rotate {
   to {
+    -webkit-transform: rotate(360deg);
+    -ms-transform: rotate(360deg);
     transform: rotate(360deg);
   }
 }
@@ -276,6 +304,7 @@ a:focus {
   line-height: 33px;
   margin: auto;
   background: #A6ACBC;
+  -webkit-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
   border-radius: 3px;
 }
@@ -288,6 +317,8 @@ a:focus {
 }
 .loader-wrapper {
   margin: auto;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   height: 350px;
   /* Loading Icon */
@@ -303,15 +334,21 @@ a:focus {
   height: 100px;
 }
 .loader-wrapper .loading__ring:first-child {
+  -webkit-transform: skew(30deg, 20deg);
+  -ms-transform: skew(30deg, 20deg);
   transform: skew(30deg, 20deg);
 }
 .loader-wrapper .loading__ring:last-child {
+  -webkit-transform: skew(-30deg, -20deg) scale(-1, 1);
+  -ms-transform: skew(-30deg, -20deg) scale(-1, 1);
   transform: skew(-30deg, -20deg) scale(-1, 1);
 }
 .loader-wrapper .loading__ring:last-child svg {
+  -webkit-animation-delay: -0.5s;
   animation-delay: -0.5s;
 }
 .loader-wrapper .loading__ring svg {
+  -webkit-animation: rotate 1s linear infinite;
   animation: rotate 1s linear infinite;
   fill: rgba(0, 0, 0, 0.2);
 }

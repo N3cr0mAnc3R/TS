@@ -87,7 +87,8 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetUsersByDate(TestUserModel model)
         {
-            return Json(await AuditoryManager.GetUsersByDate(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
+            if(model.Id != 0) return Json(await AuditoryManager.GetUsersByDateAud(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
+            return Json(await AuditoryManager.GetUsersByDate(model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> GetStatuses()
@@ -167,13 +168,13 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetProfileByPlaceConfig(string placeConfig)
         {
-            return Json(await AuditoryManager.GetProfileByPlaceConfig(placeConfig, CurrentUser.Id, Session["Localization"].ToString()));
+            return Json(await AuditoryManager.GetProfileByPlaceConfig(placeConfig, (CurrentUser == null) ? (Guid?)null : CurrentUser.Id, Session["Localization"].ToString()));
         }
 
         [HttpPost]
         public async Task<JsonResult> GetPlaceConfig(int pin)
         {
-            return Json(await AuditoryManager.GetPlaceConfig(pin, CurrentUser.Id, Session["Localization"].ToString()));
+            return Json(await AuditoryManager.GetPlaceConfig(pin, (CurrentUser == null) ? (Guid?)null : CurrentUser.Id, Session["Localization"].ToString()));
         }
 
         protected AuditoryManager AuditoryManager

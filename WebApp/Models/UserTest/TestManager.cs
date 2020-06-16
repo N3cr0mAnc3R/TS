@@ -223,26 +223,27 @@ namespace WebApp.Models
             {
                 try
                 {
-                    using (IDbTransaction trans = conn.BeginTransaction())
-                    {
+                    IDbTransaction trans = conn.BeginTransaction();
+
                         //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
-                        FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_GetStream", new { testProfileId, UserId, Type }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                    FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_GetStream", new { testProfileId, UserId, Type }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
-                        MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
-                        {
-                            Connection = conn,
-                            SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
-                            Transaction = trans
-                        };
+                    MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
+                    {
+                        Connection = conn,
+                        SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
+                        Transaction = trans
+                    };
 
-                        // filestream.Stream = stream;
-                        //byte[] data = new byte[(int)stream.Length];
-                        //       stream.Read(data, 0, data.Length);
-                        filestream.Stream = stream;
-                        // Теперь помечаем, используемые ресурсы, т
-                        //trans.Commit();
-                        return filestream;
-                    }
+                    // filestream.Stream = stream;
+                    //byte[] data = new byte[(int)stream.Length];
+                    //       stream.Read(data, 0, data.Length);
+                    filestream.Stream = stream;
+                    // Теперь помечаем, используемые ресурсы, т
+                    //trans.Commit();
+                    trans = null;
+                    return filestream;
+
                 }
                 catch (Exception e)
                 {
@@ -384,6 +385,13 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstAsync<TestComputer>(sql: "[dbo].[Administrator_TestingProfileInfoGet]", new { testingProfileId, userUID, Localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<int> GetScore(int testingProfileId, Guid? userUID, string Localization)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<int>(sql: "[dbo].[scoreOfUserTesting]", new { testingProfileId }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<int> SendMessage(ChatMessage message)

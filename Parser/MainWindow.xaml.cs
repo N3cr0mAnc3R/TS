@@ -29,7 +29,7 @@ namespace Parser
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
+            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null and question is not null union all select count(1) as total from Answers nolock where answerImage is null and answer is not null) as t";
 
             conn.Open();
             using (var reader = cmd.ExecuteReader())
@@ -118,7 +118,7 @@ namespace Parser
 
                     SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                     SqlCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null union all select count(1) as total from Answers nolock where answerImage is null) as t";
+                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null and question is not null union all select count(1) as total from Answers nolock where answerImage is null and answer is not null) as t";
                     conn.Open();
                     int count = 0;
                     using (var reader = cmd.ExecuteReader())

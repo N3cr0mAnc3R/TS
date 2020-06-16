@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
@@ -57,7 +60,7 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetSecurity(int Id, string PlaceConfig)
         {
             bool HasAccess = await TestManager.GetSecurity(Id, (Guid?)null, PlaceConfig);
-            return Json(new { HasAccess});
+            return Json(new { HasAccess });
         }
         public async Task<ActionResult> ProctorProcessList()
         {
@@ -121,6 +124,19 @@ namespace WebApp.Controllers
                 return Json(new { Error = e.Message });
             }
         }
+        public JsonResult TryVerify()
+        {
+            var file = Request.Files.Get(0);
+            Image img = Image.FromStream(file.InputStream, true, true);
+            using (var ms = new MemoryStream())
+            {
+                img.Save(ms, ImageFormat.Jpeg);
+                var _bufImage = ms.ToArray();
+            }
+            HaarObjectDetector
+
+            return Json(true);
+        }
         #endregion
         #region Тестирование
         public async Task<JsonResult> FinishTest(int Id)
@@ -139,6 +155,10 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetInfoAboutTest(int Id)
         {
             return Json(await TestManager.GetInfoAboutTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString()));
+        }
+        public async Task<JsonResult> GetScore(int Id)
+        {
+            return Json(await TestManager.GetScore(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString()));
         }
         public JsonResult GetTestPackageById(int Id)
         {
@@ -170,12 +190,12 @@ namespace WebApp.Controllers
         {
             QuestionModel model = TestManager.GetQuestionImage(Id, Session["Localization"].ToString()).First();
             //if (Type != 3)
-           // {
-                model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
+            // {
+            model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
             //}
             int Partition = 1200000;
             int left = model.QuestionImage.Length - (Part * Partition);
-            if(left < Partition)
+            if (left < Partition)
             {
                 model.QuestionImage = model.QuestionImage.Substring((Part - 1) * Partition);
             }

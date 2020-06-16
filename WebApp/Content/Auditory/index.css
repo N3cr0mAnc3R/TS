@@ -1,4 +1,6 @@
 ﻿.auditory {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   margin-bottom: 40px;
   -webkit-user-select: none;
@@ -20,6 +22,7 @@
   border: 1px solid #ddd;
   margin-top: 80px;
   padding: 40px;
+  -webkit-box-shadow: #a2a2a2 0px 3px 4px;
   box-shadow: #a2a2a2 0px 3px 4px;
   max-width: 650px;
   border-top: none;
@@ -94,7 +97,13 @@
   display: block;
 }
 .auditory .computer-list .place-table .place-row .place-item:hover .delete:hover {
+  -webkit-transition: -webkit-transform ease 0.4s;
+  transition: -webkit-transform ease 0.4s;
+  -o-transition: transform ease 0.4s;
   transition: transform ease 0.4s;
+  transition: transform ease 0.4s, -webkit-transform ease 0.4s;
+  -webkit-transform: scale(1.2);
+  -ms-transform: scale(1.2);
   transform: scale(1.2);
 }
 .auditory .computer-list .place-table .place-row .place-item .delete {
@@ -119,9 +128,9 @@
   top: 5px;
 }
 .auditory .computer-list .place-table .place-row .place-item.selected {
+  -webkit-box-shadow: -3px 4px 4px #6e6e6e;
   box-shadow: -3px 4px 4px #6e6e6e;
   color: #565c72;
-  /*outline: 1px solid #ff0000;*/
 }
 .auditory .computer-list .place-table .place-row .place-item.new:before {
   content: "";
@@ -184,11 +193,14 @@
   font-size: 16px;
   line-height: 33px;
   margin-left: 232px;
+  -webkit-box-shadow: #c6c6c6 1px 3px 2px;
   box-shadow: #c6c6c6 1px 3px 2px;
 }
 .auditory .control {
   margin-top: 80px;
   width: 225px;
+  height: -webkit-max-content;
+  height: -moz-max-content;
   height: max-content;
   background: #565c72;
   padding: 0;
@@ -228,13 +240,17 @@
   margin-bottom: 40px;
 }
 .main-window .auditory-list {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -ms-flex-wrap: wrap;
   flex-wrap: wrap;
   font-family: Montserrat;
 }
 .main-window .auditory-list .auditory-wrapper {
   margin-right: 37px;
   margin-top: 40px;
+  -webkit-box-shadow: #a2a2a2 0px 3px 4px;
   box-shadow: #a2a2a2 0px 3px 4px;
   width: 230px;
   height: 330px;
@@ -257,7 +273,12 @@
   width: 230px;
   height: 180px;
   margin-bottom: 15px;
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-flow: column;
   flex-flow: column;
 }
 .main-window .auditory-list .auditory-wrapper .alter-wrapper .alter {
@@ -274,6 +295,8 @@
   height: 160px;
 }
 .main-window .auditory-list .auditory-wrapper .control .button-list {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   padding: 5px 40px;
 }
@@ -285,6 +308,8 @@
   border: none;
 }
 .main-window .auditory-list .auditory-wrapper .add-btn-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
   display: flex;
   height: 100%;
 }
@@ -295,7 +320,13 @@
   display: block;
 }
 .main-window .auditory-list .auditory-wrapper:hover .delete:hover {
+  -webkit-transition: -webkit-transform ease 0.4s;
+  transition: -webkit-transform ease 0.4s;
+  -o-transition: transform ease 0.4s;
   transition: transform ease 0.4s;
+  transition: transform ease 0.4s, -webkit-transform ease 0.4s;
+  -webkit-transform: scale(1.2);
+  -ms-transform: scale(1.2);
   transform: scale(1.2);
 }
 .main-window .auditory-list .auditory-wrapper .delete {
@@ -332,6 +363,7 @@
   font-size: 16px;
   line-height: 33px;
   margin: 80px 0 95px 45%;
+  -webkit-box-shadow: #c6c6c6 1px 3px 2px;
   box-shadow: #c6c6c6 1px 3px 2px;
 }
 .toast {

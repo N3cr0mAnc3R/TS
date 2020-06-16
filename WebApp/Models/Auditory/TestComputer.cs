@@ -33,6 +33,8 @@ namespace WebApp.Models
         public int TimeRecording { get; set; }
         public bool IsForTesting { get; set; }
         public int TimeAlarm { get; set; }
+        public bool NeedShowScore { get; set; }
+        public int TestingTime { get; set; }
         public int TestingTimeRemaining { get; set; }
     }
 }

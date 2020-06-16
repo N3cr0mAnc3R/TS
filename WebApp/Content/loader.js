@@ -6,7 +6,7 @@ Vue.directive('loader', {
         var $loader;
         //Добавляем вручную для него класс, чтобы спрятать
         element.addClass('loading-controller');
-        let collection = element.attr('parent');
+        var collection = element.attr('parent');
         if (collection) {
             vnode.context.$watch(collection, function (object) {
                 vnode.context[element.attr('parent')].forEach(function (item) {

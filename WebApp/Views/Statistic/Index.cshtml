@@ -1,0 +1,42 @@
+﻿<link href="~/Content/Statistic/index.css" rel="stylesheet" />
+<div id="main-window">
+    <div class="panel-list">
+        <div class="panel-wrapper" v-on:click="loadPeople">
+            <div class="panel">Выгрузить людей</div>
+        </div>
+        <div class="panel-wrapper" v-on:click="showTable">
+            <div class="panel">Просмотреть результаты</div>
+        </div>
+    </div>
+
+    <div v-if="shownTable" class="full-table-wrapper">
+        <div class="filter-name">ФИО</div>
+        <input type="text" class="form-control" v-model="filterFIO" />
+        <div class="filter-name">Дата</div>
+        <input type="date" class="form-control" v-model="currentDate" v-on:change="getUsers()" />
+        <div class="filter-name">Оценка</div>
+        <div class="filter-name">Статус</div>
+        <select class="form-control" v-model="currentStatus" v-on:change="getUsers"> <option v-for="item of statuses" v-bind:value="item.Id">{{item.Name}}</option></select>
+
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <td>ФИО</td>
+                    <td>Дата</td>
+                    <td>Оценка</td>
+                    <td>Статус</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="user in users">
+                    <td>{{user.LastName}} {{user.FirstName}} {{user.MiddleName}}</td>
+                    <td>{{user.Date}}</td>
+                    <td>{{user.Score}}</td>
+                    <td>{{findStatus(currentStatus)}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="~/Content/Statistic/index.js"></script>

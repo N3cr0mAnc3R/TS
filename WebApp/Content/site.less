@@ -74,20 +74,31 @@ textarea {
 
 
 .navbar-system {
+    -webkit-box-shadow: #a2a2a2 0px 3px 4px;
     box-shadow: #a2a2a2 0px 3px 4px;
     height: 75px;
     line-height: 30px;
     font-size: 16px;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     padding: 16px;
+    -webkit-box-pack: start;
+    -ms-flex-pack: start;
     justify-content: flex-start;
     background: #fff;
 
     .container {
+        display: -webkit-box;
+        display: -ms-flexbox;
         display: flex;
+        -webkit-box-pack: justify;
+        -ms-flex-pack: justify;
         justify-content: space-between;
 
         .base-nav, .nav-item {
+            display: -webkit-box;
+            display: -ms-flexbox;
             display: flex;
 
             .userpic {
@@ -122,6 +133,8 @@ textarea {
             @media (max-width: 576px) {
                 .navbar-collapse1 {
                     opacity: 0;
+                    -webkit-transition: all ease 0.3s;
+                    -o-transition: all ease 0.3s;
                     transition: all ease 0.3s;
                     display: block;
                     position: fixed;
@@ -144,6 +157,8 @@ textarea {
                                 border-bottom: 1px solid #ddd;
 
                                 &.hidden-full {
+                                    display: -webkit-box;
+                                    display: -ms-flexbox;
                                     display: flex;
                                 }
                             }
@@ -158,10 +173,18 @@ textarea {
                 }
 
                 .navbar-collapse1 {
+                    display: -webkit-box;
+                    display: -ms-flexbox;
                     display: flex;
                     margin-left: 15px;
 
                     ul {
+                        display: -webkit-box;
+                        display: -ms-flexbox;
+                        display: flex;
+                        -webkit-box-orient: horizontal;
+                        -webkit-box-direction: normal;
+                        -ms-flex-direction: row;
                         flex-direction: row;
 
                         li {
@@ -227,6 +250,8 @@ body {
     }
 
     .localization-wrapper {
+        display: -webkit-box;
+        display: -ms-flexbox;
         display: flex;
         position: absolute;
         top: 95px;
@@ -248,6 +273,7 @@ body {
             &.active {
                 display: block;
                 color: #000;
+                -webkit-box-shadow: inset #565c72 0px 1px 4px;
                 box-shadow: inset #565c72 0px 1px 4px;
             }
         }
@@ -264,6 +290,8 @@ a:focus {
 
 @keyframes rotate {
     to {
+        -webkit-transform: rotate(360deg);
+        -ms-transform: rotate(360deg);
         transform: rotate(360deg);
     }
 }
@@ -296,6 +324,7 @@ a:focus {
         line-height: 33px;
         margin: auto;
         background: #A6ACBC;
+        -webkit-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
         border-radius: 3px;
 
@@ -317,6 +346,8 @@ a:focus {
 
 .loader-wrapper {
     margin: auto;
+    display: -webkit-box;
+    display: -ms-flexbox;
     display: flex;
     height: 350px;
     /* Loading Icon */
@@ -331,18 +362,24 @@ a:focus {
             height: @loader-size;
 
             &:first-child {
+                -webkit-transform: skew(30deg,20deg);
+                -ms-transform: skew(30deg,20deg);
                 transform: skew(30deg,20deg);
             }
 
             &:last-child {
+                -webkit-transform: skew(-30deg,-20deg) scale(-1, 1);
+                -ms-transform: skew(-30deg,-20deg) scale(-1, 1);
                 transform: skew(-30deg,-20deg) scale(-1, 1);
 
                 svg {
+                    -webkit-animation-delay: -0.5s;
                     animation-delay: -0.5s;
                 }
             }
 
             svg {
+                -webkit-animation: rotate 1s linear infinite;
                 animation: rotate 1s linear infinite;
                 fill: rgba(0, 0, 0, 0.2);
             }

@@ -38,7 +38,7 @@
     },
     methods: {
         init: function () {
-            let self = this;
+            var self = this;
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",
@@ -73,8 +73,9 @@
                         //Запись и отображение доступных тестов
                         if (!self.tests) {
                             self.tests = d;
-                            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-                            window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
+                            //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+                            //console.log(window.URL);
+                            //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
                             self.initWebCam();
                             self.initChat();
                             //self.initRTCPeer();
@@ -110,7 +111,7 @@
             }
         },
         startPlaceConfigInterval: function () {
-            let self = this;
+            var self = this;
             self.findPlaceInterval = setInterval(function () {
                 //GetFreePlaces
                 $.ajax({
@@ -127,7 +128,7 @@
             }, 5000);
         },
         initChat: function () {
-            let self = this;
+            var self = this;
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
             //} else {
@@ -149,7 +150,7 @@
             };
             self.chatSocket.onmessage = function (msg) {
                 //self.messages.push(msg);
-                let message;
+                var message;
                 if (msg.data.indexOf("\0") != -1) {
                     message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
                 }
@@ -176,19 +177,19 @@
         },
         //Запуск теста
         startTest: function (id) {
-            let self = this;
+            var self = this;
             window.open("/user/process?Id=" + id, '_self');
 
         },
         toggleChat: function () {
-            let self = this;
+            var self = this;
             self.chat.IsOpened = !self.chat.IsOpened;
             if (self.chat.IsOpened) {
                 self.unreadCount = 0;
                 setTimeout(function () {
                     $('#full-chat-wrapper')[0].scrollIntoView();
                 }, 20);
-                let maxId = 0;
+                var maxId = 0;
                 self.chat.messages.forEach(function (msg) {
                     maxId = msg.Id > maxId ? msg.Id : maxId;
                 });
@@ -200,14 +201,7 @@
             }
         },
         initWebCam: function () {
-            let self = this;
-            navigator.permissions.query({ name: 'camera' })
-                .then((permissionObj) => {
-                    console.log(permissionObj.state);
-                })
-                .catch((error) => {
-                    console.log('Got error :', error);
-                });
+            var self = this;
             //if (!self.stream) {
             navigator.mediaDevices.getUserMedia(
                 {
@@ -240,11 +234,11 @@
                     };
 
                     self.videoSocket.onmessage = function (msg) {
-                        let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                        var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
 
                         if (!message.IsSender) {
                             if (message.candidate && message.candidate != '{}') {
-                                let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                                var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                                 self.queue.push(candidate);
                             }
 
@@ -283,21 +277,21 @@
             //}
         },
         getMessages: function (newId) {
-            let self = this;
+            var self = this;
             //GetChatMessages
             $.ajax({
                 url: "/user/GetChatMessages?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (messageList) {
-                    let messages = messageList;
+                    var messages = messageList;
                     messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
                     self.chat.messages = messages;
                 }
             });
         },
         sendMessage: function () {
-            let self = this;
+            var self = this;
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.tests[0].Id, ParentId: null }));
             self.chat.Message = "";
         },
@@ -306,9 +300,19 @@
         },
         tryVerify: function () {
             console.log(123);
-            let self = this;
+            var self = this;
             self.loadTestObject.loading = true;
             self.loadTestObject.loaded = false;
+            //$.ajax({
+            //    url: "/user/verify?Id=" + newId,
+            //    type: "POST",
+            //    async: false,
+            //    success: function (messageList) {
+            //        var messages = messageList;
+            //        messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
+            //        self.chat.messages = messages;
+            //    }
+            //})
             setTimeout(function () {
                 self.loadTestObject.loading = false;
                 self.loadTestObject.loaded = true;
@@ -316,17 +320,17 @@
             }, 1000);
         },
         initRTCPeer: function () {
-            let self = this;
-            let STUN = {
+            var self = this;
+            var STUN = {
                 urls: 'stun:stun.advfn.com:3478'
             };
-            let TURN = {
+            var TURN = {
                 url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
                 username: 'homeo'
             };
 
-            let configuration = {
+            var configuration = {
                 iceServers: [STUN, TURN]
             };
             self.pc1 = new RTCPeerConnection(configuration);
@@ -355,12 +359,12 @@
             try {
                 self.pc1.createOffer(function (offer) {
                     self.pc1.setLocalDescription(offer, function () {
-                        let obj1 = {};
-                        for (let i in offer) {
+                        var obj1 = {};
+                        for (var i in offer) {
                             if (typeof offer[i] != 'function')
                                 obj1[i] = offer[i];
                         }
-                        let obj = {
+                        var obj = {
                             offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
@@ -369,17 +373,17 @@
                     }, function () { });
                 }, function () { });
             }
-            catch{
+            catch (e){
                 console.log('error');
             }
         },
         onIceCandidate: function (e) {
-            let obj1 = {};
-            for (let i in e.candidate) {
+            var obj1 = {};
+            for (var i in e.candidate) {
                 if (typeof e.candidate[i] != 'function')
                     obj1[i] = e.candidate[i];
             }
-            let obj = {
+            var obj = {
                 candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
@@ -388,7 +392,7 @@
             }
         },
         switchLocal: function (id) {
-            let self = this;
+            var self = this;
             switch (id) {
                 case 1: return self.localization == 1 ? "Вам доступны следующие вступительные испытания для прохождения" : "The following tests are available";
                 case 2: return self.localization == 1 ? "Вы не завершили следующие вступительные испытания" : "Not completed";
@@ -401,15 +405,15 @@
             }
         },
         isMe: function (message) {
-            let self = this;
+            var self = this;
             return message.UserIdFrom == self.currentUser;
         },
         createPlaceConfig: function (placeId, PlaceProfile) {
-            let self = this;
+            var self = this;
             if (placeId == 0 || PlaceProfile == 0) return;
-            let str = CryptoJS.AES.encrypt("place-" + placeId, "Secret Passphrase");
+            var str = CryptoJS.AES.encrypt("place-" + placeId, "Secret Passphrase");
             localStorage['placeConfig'] = str.toString();
-            let obj = { Id: PlaceProfile, PlaceConfig: str.toString(), PlaceId: placeId };
+            var obj = { Id: PlaceProfile, PlaceConfig: str.toString(), PlaceId: placeId };
             console.log(obj);
             $.ajax({
                 url: "/auditory/UpdatePlaceConfig",
@@ -434,7 +438,7 @@
     },
     watch: {
         PIN: function (val, oldval) {
-            let self = this;
+            var self = this;
             if (self.PIN > 999)
                 $.ajax({
                     url: '/auditory/GetPlaceConfig?pin=' + self.PIN,
@@ -449,7 +453,7 @@
                 })
         },
         tests: function (val, oldval) {
-            let self = this;
+            var self = this;
             self.activeTests = val.filter(function (a) { return a.TestingStatusId === 2; });
         }
 

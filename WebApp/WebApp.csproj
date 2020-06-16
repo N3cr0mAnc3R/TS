@@ -46,6 +46,30 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Accord, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.3.8.2-alpha\lib\net45\Accord.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Imaging, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Imaging.3.8.2-alpha\lib\net45\Accord.Imaging.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.MachineLearning, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.MachineLearning.3.8.2-alpha\lib\net45\Accord.MachineLearning.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Math, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Math.3.8.2-alpha\lib\net45\Accord.Math.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Math.Core, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Math.3.8.2-alpha\lib\net45\Accord.Math.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Statistics, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Statistics.3.8.2-alpha\lib\net45\Accord.Statistics.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Video, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Video.3.8.2-alpha\lib\net45\Accord.Video.dll</HintPath>
+    </Reference>
+    <Reference Include="Accord.Vision, Version=3.8.2.0, Culture=neutral, PublicKeyToken=fa1a88e29555ccf7, processorArchitecture=MSIL">
+      <HintPath>..\packages\Accord.Vision.3.8.2-alpha\lib\net45\Accord.Vision.dll</HintPath>
+    </Reference>
     <Reference Include="Dapper, Version=1.50.2.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.1.50.2\lib\net45\Dapper.dll</HintPath>
     </Reference>
@@ -154,11 +178,6 @@
     <Content Include="Content\bootstrap.min.css" />
     <Content Include="Content\f-awesome.js" />
     <Content Include="Content\font-awesome.css" />
-    <Content Include="Content\jQuery-webcam-master\jquery.webcam.js" />
-    <Content Include="Content\jQuery-webcam-master\jquery.webcam.min.js" />
-    <Content Include="Content\jQuery-webcam-master\jscam.swf" />
-    <Content Include="Content\jQuery-webcam-master\jscam_canvas_only.swf" />
-    <Content Include="Content\jQuery-webcam-master\src\jscam.xml" />
     <Content Include="Content\loader.js" />
     <Content Include="Content\novideo.png" />
     <Content Include="Content\proctor.css">
@@ -183,6 +202,13 @@
     <Content Include="Content\site.min.css">
       <DependentUpon>site.css</DependentUpon>
     </Content>
+    <Content Include="Content\Statistic\index.css">
+      <DependentUpon>index.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Statistic\index.js" />
+    <Content Include="Content\Statistic\index.min.css">
+      <DependentUpon>index.css</DependentUpon>
+    </Content>
     <Content Include="Content\Testing\Index.css">
       <DependentUpon>Index.less</DependentUpon>
     </Content>
@@ -206,13 +232,6 @@
     <Content Include="fonts\FontAwesome.otf" />
     <Content Include="Content\Testing\Index.less" />
     <Content Include="Content\site.less" />
-    <Content Include="Content\jQuery-webcam-master\bower.json" />
-    <Content Include="Content\jQuery-webcam-master\Makefile" />
-    <Content Include="Content\jQuery-webcam-master\README.md" />
-    <Content Include="Content\jQuery-webcam-master\src\BitString.as" />
-    <Content Include="Content\jQuery-webcam-master\src\JPGEncoder.as" />
-    <Content Include="Content\jQuery-webcam-master\src\jscam.as" />
-    <Content Include="Content\jQuery-webcam-master\webcam.jquery.json" />
     <Content Include="Content\Auditory\moderate.less" />
     <Content Include="Content\proctor.less" />
     <Content Include="Content\Proctoring\index.less" />
@@ -223,6 +242,7 @@
     <Content Include="Content\bootstrap-reboot.css.map" />
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Content\Statistic\index.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -329,6 +349,7 @@
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\AuditoryController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\StatisticController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VerificationController.cs" />
     <Compile Include="Global.asax.cs">
@@ -411,6 +432,7 @@
     <Content Include="Scripts\popper-utils.js.map" />
     <Content Include="Scripts\jquery-3.5.1.slim.min.map" />
     <Content Include="Scripts\jquery-3.5.1.min.map" />
+    <Content Include="Views\Statistic\Index.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -465,7 +487,9 @@
       <ErrorText>Данный проект ссылается на пакеты NuGet, отсутствующие на этом компьютере. Используйте восстановление пакетов NuGet, чтобы скачать их.  Дополнительную информацию см. по адресу: http://go.microsoft.com/fwlink/?LinkID=322105. Отсутствует следующий файл: {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\Accord.3.8.2-alpha\build\Accord.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Accord.3.8.2-alpha\build\Accord.targets'))" />
   </Target>
+  <Import Project="..\packages\Accord.3.8.2-alpha\build\Accord.targets" Condition="Exists('..\packages\Accord.3.8.2-alpha\build\Accord.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

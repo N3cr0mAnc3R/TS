@@ -3,7 +3,6 @@
     data: {
         testingProfileId: 0,
         domain: "",
-        testInProcess: false,
         selectedTest: {},
         questions: [],
         answers: [],
@@ -11,13 +10,18 @@
         selectedQuestion: {},
         timeStart: null,
         timeLeft: 0,
+        timeAlarm: 0,
         IsTipOpened: false,
         tipPosition: {},
+        needShowScore: false,
+        score: 0,
+        timeRecording: -1,
+        testingTime: 0,
         loadObject: {
             loading: null,
             loaded: null
         },
-        unloadedImage: "",
+        unloadedImage: "", //Если вопрос много весит, то загружаем по кусочкам
         buffer: {},
         intervalConnection: null,
         intervalConnectionLost: null,
@@ -25,16 +29,13 @@
         recordedScreen: [],
         cameraRecorder: null,
         screenRecorder: null,
-        pc1: {},
         peers: [],
-        offerOptions: {
-            offerToReceiveAudio: 1,
-            offerToReceiveVideo: 1
-        },
         offer: null,
+        confirmed: false,
         cameraStream: null,
         screenStream: null,
         lostConnection: false,
+        finishScreen: false,
         pause: false,
         chat: {
             IsOpened: false,
@@ -76,7 +77,7 @@
     },
     methods: {
         init: function () {
-            let self = this;
+            var self = this;
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",
@@ -90,18 +91,17 @@
             self.mediaSource.addEventListener('sourceopen', self.sourceOpen);
             self.mediaSource.addEventListener('sourceclose', function (e) { console.log(e); });
             self.questions = [];
-            self.testInProcess = true;
             self.answers = [];
             self.selectedQuestion = {};
-            let str = window.location.href;
-            let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+            var str = window.location.href;
+            var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.startTest(newId);
             self.testingProfileId = newId;
-            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-            window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
+            //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+            //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
             self.initVideoSocket();
             self.initWebCam();
-            self.startCapture({ video: { cursor: 'always' }, audio: true});
+            self.startCapture({ video: { cursor: 'always' }, audio: true });
             self.initChat();
             setTimeout(function () {
                 self.maxTipWidth = $('#main-window').width();
@@ -117,9 +117,24 @@
                     console.log(user);
                 }
             });
+            $.ajax({
+                url: "/user/GetInfoAboutTest?Id=" + newId,
+                type: "POST",
+                async: false,
+                success: function (info) {
+                    console.log(info);
+                    if (info.TestingTimeRemaining <= 0) {
+                        window.open('/user/waiting','_self');
+                    }
+                    self.timeAlarm = info.TimeAlarm;
+                    self.needShowScore = info.NeedShowScore;
+                    self.timeRecording = info.TimeRecording;
+                    self.testingTime = info.TestingTime;
+                }
+            });
         },
         startTest: function (id) {
-            let self = this;
+            var self = this;
             try {
                 $.when($.ajax({
                     url: "/user/StartTest?Id=" + id,
@@ -139,7 +154,7 @@
                     async: true
                 })).then(function (resp1, resp2, resp3, resp4) {
                     //Получаем пакеты вопросов, ответов и то, как их разместить
-                    let questions = resp2[0];
+                    var questions = resp2[0];
                     questions.map(function (question) { question.answerImage = ""; });
                     self.questions = questions;
 
@@ -206,8 +221,6 @@
                     self.questions.forEach(function (a) { a.Answers.sort(function (b, c) { b.Sort - c.Sort; }); });
                     //Текущий вопрос выбираем первый
                     self.selectQuestion(1);
-                    //Флаг, что началася тест
-                    self.testInProcess = true;
                     console.log(resp4);
                     self.sourceMaterials = resp4[0];
                     self.sourceMaterials.forEach(function (material) {
@@ -224,17 +237,17 @@
         },
         recordingCamera: function (event) {
             app.recordedCamera.push(event.data);
-            var reader = new FileReader();
+            // var reader = new FileReader();
         },
         recordingScreen: function (event) {
             //console.log(event);
-            if (event.data && event.data.size > 0) {
-                app.recordedScreen.push(event.data);
-            }
+            // if (event.data && event.data.size > 0) {
+            app.recordedScreen.push(event.data);
+            //}
         },
         //Когда меняются значения, нужно сформировать нормально пакеты
         changeRadio: function (id) {
-            let self = this;
+            var self = this;
             //Если радио, то выбранному ставим в true, остальные сбрасываем
             self.selectedQuestion.Answers.forEach(function (a) { a.IsAnswered = a.Id == id ? !a.IsAnswered : false; });
             //Ставим метку, что ответ менялся, чтобы не загружать по 100500 раз после каждого выбора вопроса
@@ -245,9 +258,9 @@
         changeCheck: function () {
             //Такая же метка, как в radio, чтобы исключить повторную загрузку
             this.selectedQuestion.changed = true;
-            let self = this;
+            var self = this;
 
-            let flag = false;
+            var flag = false;
             this.selectedQuestion.Answers.forEach(function (a) { flag = a.IsAnswered || flag });
             self.selectedQuestion.answered = flag;
         },
@@ -267,16 +280,16 @@
             });
         },
         removeFile: function () {
-            let self = this;
+            var self = this;
             self.selectedQuestion.Answers[0].fileId = null;
             self.selectedQuestion.fileId = null;
             self.selectedQuestion.answerImage = null;
             self.answerQuestion();
         },
         changeFile: function (e) {
-            let self = this;
-            let extension = e.target.files[0].name.substr(e.target.files[0].name.lastIndexOf('.'));
-            let formaData = new FormData();
+            var self = this;
+            var extension = e.target.files[0].name.substr(e.target.files[0].name.lastIndexOf('.'));
+            var formaData = new FormData();
             formaData.append('Id', self.selectedQuestion.Answers[0].TestingPackage.Id);
             formaData.append('File', e.target.files[0]);
             formaData.append('AnswerFileExtension', extension);
@@ -312,13 +325,13 @@
             window.open('/auditory/DownloadFile?Id=' + id, '_blank');
         },
         IsQuestionAnswered: function (id) {
-            let self = this;
-            let flag = false;
+            var self = this;
+            var flag = false;
             self.questions.forEach(function (a) { flag = (a.Rank === id && a.answered) || flag });
             return flag;
         },
         selectQuestion: function (id) {
-            let self = this;
+            var self = this;
             //Если выбран несуществующий номер (кто-то нажал на назад на первом вопросе), то ничего не делать
             if (id == 0 || id == self.questions.length + 1) return;
             //Текущий вопрос для подсветки
@@ -359,7 +372,7 @@
             }
         },
         askQuestionImagePart: function (part) {
-            let self = this;
+            var self = this;
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
@@ -396,7 +409,7 @@
             });
         },
         getHeight: function (Id) {
-            let height = $('#answer-' + Id).height();
+            var height = $('#answer-' + Id).height();
             if (height > 30 && height < 70) {
                 return 'double';
             }
@@ -405,8 +418,8 @@
             }
         },
         answerQuestion: function () {
-            let self = this;
-            let answers = [];
+            var self = this;
+            var answers = [];
             //Запаковываем все ответы для предыдущего вопроса
             if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                 self.selectedQuestion.Answers.forEach(function (item) {
@@ -442,7 +455,7 @@
             });
         },
         startCheckConnection: function (id) {
-            let self = this;
+            var self = this;
             self.intervalConnection = setInterval(
                 function () {
                     $.ajax({
@@ -476,7 +489,7 @@
                                 self.intervalConnectionLost = setTimeout(function () {
                                     clearTimeout(self.intervalConnectionLost);
                                     self.lostConnection = true;
-                                }, 30000);
+                                }, 60000);
                             }
                         },
                         async: true
@@ -484,18 +497,58 @@
                 }, 5000);
         },
         startTimer: function () {
-            let self = this;
+            var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.interval = setInterval(function () {
                 self.timeLeft--;
                 if (self.timeLeft <= 0) {
                     clearInterval(self.interval);
-                    //self.finishTest();
+                    self.finishScreen = true;
+
+                    clearInterval(self.intervalConnection);
+                    self.finishTest();
+                }
+                if (self.testingTime - self.timeLeft >= self.timeRecording) {
+                    setTimeout(function () {
+                    self.cameraRecorder.ondataavailable = null;
+                    self.screenRecorder.ondataavailable = null;
+                        self.finishRecord();
+                    }, 2000);
+
                 }
             }, 1000);
         },
+        finishRecord: function () {
+            var self = this;
+            console.log('stop recording');
+            if (self.cameraRecorder) self.cameraRecorder.stop();
+            if (self.screenRecorder) self.screenRecorder.stop();
+            console.log(self.recordedCamera);
+            console.log(self.recordedScreen);
+            self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
+            self.bufferScreen = new Blob(self.recordedScreen, { type: 'video/webm' });
+            var formaData = new FormData();
+
+            formaData.append('Id', self.testingProfileId);
+            formaData.append('File', self.bufferCamera);
+            formaData.append('File1', self.bufferScreen);
+
+            $.ajax({
+                url: "/user/SaveVideoFile",
+                type: "POST",
+                data: formaData,
+                contentType: false,
+                processData: false,
+                success: function () {
+                }
+            });
+        },
+        needAlarm: function () {
+            var self = this;
+            return self.timeLeft <= self.timeAlarm;
+        },
         initChat: function () {
-            let self = this;
+            var self = this;
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
             //} else {
@@ -517,7 +570,7 @@
             };
             self.chatSocket.onmessage = function (msg) {
                 //self.messages.push(msg);
-                let message;
+                var message;
                 if (msg.data.indexOf("\0") != -1) {
                     message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
                 }
@@ -527,7 +580,7 @@
                 message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                 self.chat.messages.push(message);
 
-                let maxId = 0;
+                var maxId = 0;
                 self.chat.messages.forEach(function (msg) {
                     maxId = msg.Id > maxId ? msg.Id : maxId;
                 });
@@ -548,7 +601,7 @@
             };
         },
         subscribeEnter: function () {
-            let self = this;
+            var self = this;
             $(document).on('keyup', function () { self.beforeSend(self); });
         },
         beforeSend: function (self) {
@@ -557,11 +610,11 @@
             }
         },
         isMe: function (message) {
-            let self = this;
+            var self = this;
             return message.UserIdFrom == self.currentUser || message.IsSender;
         },
         initVideoSocket: function () {
-            let self = this;
+            var self = this;
 
             //if (typeof (WebSocket) !== 'undefined') {
             //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/streamhandler.ashx");
@@ -584,17 +637,17 @@
             };
 
             self.videoSocket.onmessage = function (msg) {
-                let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
 
                 if (!message.IsSender) {
                     console.log(message);
                     console.log(message.type);
                     if (message.candidate && message.candidate != '{}') {
-                        let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                        var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                         //self.queue.push(candidate);
 
 
-                        let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                        var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
                         queue.candidates.push(candidate);
                     }
                     else if (message.requestOffer) {
@@ -603,18 +656,18 @@
                         self.initRTCPeer(2);
                     }
                     else if (message.answer) {
-                        let interval = setInterval(function () {
+                        var interval = setInterval(function () {
                             console.log('start interval');
-                            let found = self.peers.filter(function (item) { return item.type == message.type; })[0];
+                            var found = self.peers.filter(function (item) { return item.type == message.type; })[0];
                             console.log('found', found);
                             if (found) {
                                 clearInterval(interval);
-                                let peer = found.peer;
+                                var peer = found.peer;
                                 console.log(message);
                                 console.log(peer);
                                 peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
 
-                                    let queue = self.queue.filter(function (item) { return item.type == message.type })[0];
+                                    var queue = self.queue.filter(function (item) { return item.type == message.type })[0];
                                     queue.candidates.forEach(function (candidate) {
                                         peer.addIceCandidate(candidate);
                                     });
@@ -630,8 +683,8 @@
 
         },
         initWebCam: function () {
-            let self = this;
-            let stream = self.cameraStream;
+            var self = this;
+            var stream = self.cameraStream;
             console.log('init webcam');
             if (!stream) {
                 navigator.mediaDevices.getUserMedia(
@@ -640,8 +693,7 @@
                             facingMode: 'user'
                         },
                         audio: true
-                    },
-                    function (videostream) {/*callback в случае удачи*/
+                    }).then(function (videostream) {/*callback в случае удачи*/
                         stream = videostream;
                         self.cameraStream = videostream;
                         console.log('init stream', self.cameraStream);
@@ -654,15 +706,15 @@
 
 
 
-                    },
-                    function (er) {/*callback в случае отказа*/ alert(er); });
+                    }).catch(
+                        function (er) {/*callback в случае отказа*/ alert(er); });
             }
             else {
                 self.cameraRecorder.start(10);
             }
         },
         sourceOpen: function () {
-            let self = this;
+            var self = this;
             self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
             //self.sourceBuffer.addEventListener('update', function () {
             //    if (self.streamQueue.length > 0 && !self.sourceBuffer.updating) {
@@ -672,51 +724,51 @@
         },
         b64toBlob: function (b64Data, sliceSize = 512) {
             // console.log(b64Data.substr(b64Data.indexOf('base64') + 7));
-            //let self = this;
-            //for (let i = 0; i < data.length; i++) {
-            //    let byteCharacters = atob(data[i].substr(data[i].indexOf('base64') + 7));
+            //var self = this;
+            //for (var i = 0; i < data.length; i++) {
+            //    var byteCharacters = atob(data[i].substr(data[i].indexOf('base64') + 7));
 
-            //    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-            //        let slice = byteCharacters.slice(offset, offset + sliceSize);
+            //    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            //        var slice = byteCharacters.slice(offset, offset + sliceSize);
 
-            //        let byteNumbers = new Array(slice.length);
-            //        for (let i = 0; i < slice.length; i++) {
+            //        var byteNumbers = new Array(slice.length);
+            //        for (var i = 0; i < slice.length; i++) {
             //            byteNumbers[i] = slice.charCodeAt(i);
             //        }
 
-            //        let byteArray = new Uint8Array(byteNumbers);
+            //        var byteArray = new Uint8Array(byteNumbers);
             //        self.queueArray.push(byteArray);
             //    }
             //}
 
-            //let blob = new Blob(self.queueArray, {
+            //var blob = new Blob(self.queueArray, {
             //    type: 'video/webm'
             //});
 
-            let byteCharacters = atob(b64Data.substr(b64Data.indexOf('base64') + 7));
-            let byteArrays = [];
+            var byteCharacters = atob(b64Data.substr(b64Data.indexOf('base64') + 7));
+            var byteArrays = [];
 
-            for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
-                let slice = byteCharacters.slice(offset, offset + sliceSize);
+            for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+                var slice = byteCharacters.slice(offset, offset + sliceSize);
 
-                let byteNumbers = new Array(slice.length);
-                for (let i = 0; i < slice.length; i++) {
+                var byteNumbers = new Array(slice.length);
+                for (var i = 0; i < slice.length; i++) {
                     byteNumbers[i] = slice.charCodeAt(i);
                 }
 
-                let byteArray = new Uint8Array(byteNumbers);
+                var byteArray = new Uint8Array(byteNumbers);
                 byteArrays.push(byteArray);
             }
 
-            let blob = new Blob(byteArrays, {
+            var blob = new Blob(byteArrays, {
                 type: 'video/webm'
             });
             return blob;
         },
         pushBtn: function (char) {
-            let self = this;
-            let isFirst = self.calculator.second == '' && !self.calculator.isExpr;
-            let middle = isFirst ? self.calculator.first : self.calculator.second;
+            var self = this;
+            var isFirst = self.calculator.second == '' && !self.calculator.isExpr;
+            var middle = isFirst ? self.calculator.first : self.calculator.second;
             //if(self.calculator.first )
             self.calculator.resultText += char;
             if (typeof char == "number") {
@@ -783,7 +835,7 @@
                     //  middle = middle.substr(0, middle.length - 1);
                 }
                 else if ('+-*/'.indexOf(char) != -1) {
-                    let flag = false;
+                    var flag = false;
 
                     if (self.calculator.expr != '') {
                         self.calc();
@@ -820,7 +872,7 @@
             $('#text-area').text(self.calculator.resultText);
         },
         calc: function () {
-            let self = this;
+            var self = this;
             self.calculator.first = parseFloat((self.calculator.first + '').replace(/,/g, '.'));
             self.calculator.second = parseFloat((self.calculator.second + '').replace(/,/g, '.'));
 
@@ -839,52 +891,40 @@
             self.calculator.expr = '';
         },
         finishTest: function () {
-            let self = this;
+            var self = this;
             self.answerQuestion();
-            if (self.cameraRecorder) self.cameraRecorder.stop();
-            //let obj = $('#video2')[0];
-            self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
-            self.bufferScreen = new Blob(self.recordedScreen, { type: 'video/webm' });
-            //let src = URL.createObjectURL(self.bufferCamera);
-            //let src1 = URL.createObjectURL(self.bufferScreen);
-            let formaData = new FormData();
-
-            //var a = document.createElement('a');
-            //document.body.appendChild(a);
-            //a.style = 'display: none';
-            //a.href = src;
-            //a.download = 'test.webm';
-            //console.log(self.buffer);
-            //a.click();
-            //console.log(src, self.buffer);
-            formaData.append('Id', self.testingProfileId);
-            // let file = self.buffer;
-            //let file = new File([self.buffer], "name");
-            //const reader = new FileReader();
-            //reader.readAsDataURL(file);
-            formaData.append('File', self.bufferCamera);
-            formaData.append('File1', self.bufferScreen);
+            //var obj = $('#video2')[0];
+            //var src = URL.createObjectURL(self.bufferCamera);
+            //var src1 = URL.createObjectURL(self.bufferScreen);
             setTimeout(function () {
                 // reader.onload = function () {
                 //formaData.append('baseFile', reader.result);
                 //console.log(self.selectedTest.Id, file, reader.result);
+                //$.ajax({
+                //    url: "/user/SaveVideoFile",
+                //    type: "POST",
+                //    data: formaData,
+                //    contentType: false,
+                //    processData: false,
+                //    success: function () {
+
                 $.ajax({
-                    url: "/user/SaveVideoFile",
+                    url: "/user/FinishTest?Id=" + self.testingProfileId,
                     type: "POST",
-                    data: formaData,
-                    contentType: false,
-                    processData: false,
                     success: function () {
-                        $.ajax({
-                            url: "/user/FinishTest?Id=" + self.testingProfileId,
-                            type: "POST",
-                            success: function () {
-                                console.log('clos');
-                                window.open('/user/waiting', '_self');
-                            }
-                        });
                     }
                 });
+
+                $.ajax({
+                    url: "/user/GetScore?Id=" + self.testingProfileId,
+                    type: "POST",
+                    async: false,
+                    success: function (info) {
+                        self.score = info;
+                    }
+                });
+                //}
+                // });
                 // }
             }, 2000);
 
@@ -906,18 +946,22 @@
             //self.init();
         },
         startCapture: function (displayMediaOptions) {
-            let self = this;
-            //let captureStream = null;
+            var self = this;
+            //var captureStream = null;
 
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
-                //let tracks = Str.getTracks();
+                Str.oninactive = function (er) {
+                    console.log(er);
+                    self.startCapture(displayMediaOptions);
+                };
+                //var tracks = Str.getTracks();
                 //track.forE
                 self.initRTCPeer(2);
-                // self.screenRecorder = new MediaRecorder(Str);
-                //self.screenRecorder.ondataavailable = self.recordingScreen;
-                //self.screenRecorder.start(10);
+                self.screenRecorder = new MediaRecorder(Str);
+                self.screenRecorder.ondataavailable = self.recordingScreen;
+                self.screenRecorder.start(1000);
                 //   console.log(Str);
             })
                 .catch(function (err) {
@@ -942,14 +986,14 @@
             });
         },
         showCountLeft: function () {
-            let self = this;
-            let count = self.questions.length;
+            var self = this;
+            var count = self.questions.length;
 
             self.questions.forEach(function (a) { count = a.answered ? (count - 1) : count });
             if (count > 0) {
                 if (self.localization == 1) {
-                    let str = count + ' ';
-                    let procent = count % 10;
+                    var str = count + ' ';
+                    var procent = count % 10;
                     if (procent == 1) { str += 'вопрос'; }
                     else if (procent < 4 && procent > 1) { str += 'вопроса'; }
                     else { str += 'вопросов'; }
@@ -962,7 +1006,7 @@
             }
         },
         showTimeLeft: function () {
-            let self = this;
+            var self = this;
             return Math.floor(self.timeLeft / 60) + ':' + self.isZeroNeed(self.timeLeft % 60);
         },
         isZeroNeed: function (value) {
@@ -971,7 +1015,7 @@
             else return value;
         },
         openTip: function () {
-            let self = this;
+            var self = this;
             //self.tipPosition.width = $('#panel-right').width();
             //$('#panel-right').css('right', 0 - self.tipPosition.width);
             if (this.IsTipOpened) {
@@ -984,7 +1028,7 @@
             this.IsTipOpened = !this.IsTipOpened;
         },
         startResize: function () {
-            let self = this;
+            var self = this;
             $(document).on('mousemove', function () { self.resizing(self); });
             self.tipPosition.width = $('#panel-right').width();
             self.tipPosition.start = $(document).width();// - $('#panel-right').width();
@@ -1001,7 +1045,7 @@
             $(document).off('mouseup');
         },
         startResizeTouch: function () {
-            let self = this;
+            var self = this;
             $(document).on('touchmove', function () { self.resizingTouch(self); });
             self.tipPosition.width = $('#panel-right').width();
             self.tipPosition.start = $(document).width();// - $('#panel-right').width();
@@ -1019,14 +1063,14 @@
         },
 
         toggleChat: function () {
-            let self = this;
+            var self = this;
             self.chat.IsOpened = !self.chat.IsOpened;
             if (self.chat.IsOpened) {
                 self.unreadCount = 0;
                 setTimeout(function () {
                     $('#full-chat-wrapper')[0].scrollIntoView();
                 }, 20);
-                let maxId = 0;
+                var maxId = 0;
                 self.chat.messages.forEach(function (msg) {
                     maxId = msg.Id > maxId ? msg.Id : maxId;
                 });
@@ -1038,28 +1082,28 @@
             }
         },
         toggleTypeChat: function () {
-            let self = this;
+            var self = this;
             if (self.chat.IsOpened) {
                 self.chat.IsChatVOpened = !self.chat.IsChatVOpened;
                 self.chat.IsChatMOpened = !self.chat.IsChatMOpened;
             }
         },
         getMessages: function (newId) {
-            let self = this;
+            var self = this;
             //GetChatMessages
             $.ajax({
                 url: "/user/GetChatMessages?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (messageList) {
-                    let messages = messageList;
+                    var messages = messageList;
                     messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
                     self.chat.messages = messages;
                 }
             });
         },
         sendMessage: function () {
-            let self = this;
+            var self = this;
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
@@ -1068,17 +1112,17 @@
         },
         initRTCPeer: function (type) {
             console.log('init rtcpeer');
-            let self = this;
-            let TURN = {
+            var self = this;
+            var TURN = {
                 url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
                 username: 'homeo'
             };
 
-            let configuration = {
+            var configuration = {
                 iceServers: [TURN]
             };
-            let peer = new RTCPeerConnection(configuration);
+            var peer = new RTCPeerConnection(configuration);
             peer.addEventListener('icecandidate', function (e) {
                 self.onIceCandidate(e, type);
             });
@@ -1088,12 +1132,12 @@
             //peer.addEventListener('connectionstatechange', function (event) {
             //    console.log(peer.connectionState);
             //});
-            let stream = type == 1 ? self.cameraStream : self.screenStream;
+            var stream = type == 1 ? self.cameraStream : self.screenStream;
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
 
-            let found = self.peers.filter(function (item) { return item.type == type })[0];
+            var found = self.peers.filter(function (item) { return item.type == type })[0];
             if (found) {
                 found.peer = peer;
             }
@@ -1101,12 +1145,12 @@
             try {
                 peer.createOffer(function (offer) {
                     peer.setLocalDescription(offer, function () {
-                        let obj1 = {};
-                        for (let i in offer) {
+                        var obj1 = {};
+                        for (var i in offer) {
                             if (typeof offer[i] != 'function')
                                 obj1[i] = offer[i];
                         }
-                        let obj = {
+                        var obj = {
                             offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
@@ -1120,13 +1164,12 @@
             }
         },
         onIceCandidate: function (e, type) {
-            let obj1 = {};
-            for (let i in e.candidate) {
+            var obj1 = {};
+            for (var i in e.candidate) {
                 if (typeof e.candidate[i] != 'function')
                     obj1[i] = e.candidate[i];
             }
-            console.log(e.candidate);
-            let obj = {
+            var obj = {
                 candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
@@ -1134,11 +1177,14 @@
                 app.videoSocket.send(JSON.stringify(obj));
             }
         },
+        confirm: function () {
+            window.open('/user/waiting', '_self');
+        },
         checkSecurity: function () {
-            let self = this;
+            var self = this;
             if (localStorage['placeConfig']) {
-                let str = window.location.href;
-                let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+                var str = window.location.href;
+                var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
                 $.ajax({
                     url: "/user/GetSecurity?Id=" + newId + '&PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     type: "POST",
@@ -1158,7 +1204,7 @@
             }
         },
         switchLocal: function (id) {
-            let self = this;
+            var self = this;
             switch (id) {
                 case 1: return self.localization == 1 ? "Осталось" : "Left";
                 case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";

@@ -22,5 +22,9 @@
   {
     "outputFile": "Content/Proctoring/index.css",
     "inputFile": "Content/Proctoring/index.less"
+  },
+  {
+    "outputFile": "Content/Statistic/index.css",
+    "inputFile": "Content/Statistic/index.less"
   }
 ]

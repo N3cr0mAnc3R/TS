@@ -6,9 +6,9 @@
 }
 
 <div id="main-window">
-    <div class="test-process">
+    <div class="test-process" v-if="!finishScreen">
         <div class="main-wrapper">
-            <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
+            <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
                 <div v-loader="loadObject">
                     <div class="question-wrapper" v-if="selectedQuestion.QuestionImage">
@@ -180,14 +180,14 @@
                     </div>*@
             <div class="text-chat-wrapper">
                 <ul class="chat-wrapper">
-                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id" >
+                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id">
                         <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
                         <br />
                     </li>
                 </ul>
                 <div class="send-message-wrapper">
                     <div class="message-input">
-                        <textarea v-model="chat.Message"  v-on:focus="subscribeEnter"></textarea>
+                        <textarea v-model="chat.Message" v-on:focus="subscribeEnter"></textarea>
                         <button v-on:click="sendMessage">
                             <span class="fa fa-send"></span>
                         </button>
@@ -219,6 +219,26 @@
             </div>
         </div>
         <img id="photo" />
+    </div>
+    <div v-if="finishScreen" class="test-finish-process">
+        <div class="main-wrapper">
+
+            <div class="panel-center">
+                <div class="base-info">Вступительное испытание завершено.</div>
+                <div class="score-info" v-if="needShowScore">
+                    Ваш результат: <span>{{score}}</span>
+                    <br />
+                    <label>
+                        <input type="checkbox" v-model="confirmed" />
+                        С результатами ознакомлен
+                    </label>
+                    <br />
+                    <div class="control">
+                        <button v-bind:disabled="!confirmed" v-on:click="confirm">Подтвердить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
