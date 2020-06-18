@@ -203,6 +203,7 @@
     </Content>
     <Content Include="Content\Proctoring\list.js" />
     <Content Include="Content\reply.png" />
+    <Content Include="Content\send-chat.png" />
     <Content Include="Content\site.css">
       <DependentUpon>site.less</DependentUpon>
     </Content>

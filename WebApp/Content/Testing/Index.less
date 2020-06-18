@@ -159,7 +159,9 @@
         flex-flow: column;
 
         .camera-wrapper {
+
             #video1 {
+
                 width: 320px;
                 -webkit-transform: scale(-1,1);
                 -ms-transform: scale(-1,1);
@@ -231,6 +233,7 @@
         font-weight: 600;
         font-size: 18px;
         color: #565C72;
+        margin-bottom:40px;
 
 
         .test-wrapper {
@@ -764,8 +767,8 @@
     }
 
     .open-chat-wrapper {
-        top: initial;
-        bottom: 110px;
+       // top: initial;
+        //bottom: 110px;
     }
 }
 
@@ -972,12 +975,23 @@
 
 .pre-video-wrapper {
     video {
+        &.error {
+            border: 2px solid red;
+        }
+
+        &.no-face {
+            border: 2px solid yellow;
+        }
+
         width: 320px;
         height: 230px;
         /*transform: scale(-1,1);*/
     }
 }
-
+canvas{
+    /*position: absolute;
+    top: -100%;*/
+}
 #full-chat-wrapper {
     display: none;
     width: 300px;

@@ -109,6 +109,7 @@ const app = new Vue({
                             if (!found) {
                                 item.errors = [];
                                 item.Image = "";
+                                item.chat = {};
                                 //Сокет на вебку
                                 self.initSocket(2, item, 1);
                                 //Если подтверждён
@@ -220,24 +221,14 @@ const app = new Vue({
                 else {
                     socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
                 }
-                //if (typeof (WebSocket) !== 'undefined') {
-                //    socket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-                //}
-                //else {
-                //    socket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-                //}
-                //if (typeof (WebSocket) !== 'undefined') {
-                //    socket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-                //}
-                //else {
-                //    socket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-                //}
                 self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
-                self.chats.push(self.initChat(a.TestingProfileId));
+                let chat = self.initChat(a.TestingProfileId);
+                self.chats.push(chat);
+                a.chat = chat;
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     self.getMessages(a.TestingProfileId);
-                }
+                };
                 socket.onmessage = function (msg) {
                     let message;
                     if (msg.data.indexOf("\0") != -1) {
@@ -247,7 +238,12 @@ const app = new Vue({
                         message = JSON.parse(msg.data);
                     }
                     message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
-                    let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
+                    console.log(self.chats);
+
+                    //let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
+                    if (!chat.isChatOpened) {
+                        chat.unreadCount++;
+                    }
                     chat.messages.push(message);
                 };
             }
@@ -344,7 +340,6 @@ const app = new Vue({
         },
         isMe: function (message) {
             let self = this;
-            console.log(self.me.Id, message);
             return self.me.Id == message.UserIdFrom;
         },
         verifyUser: function (Verified) {
@@ -387,7 +382,7 @@ const app = new Vue({
         },
         gotRemoteStream: function (e, a, type) {
             let self = this;
-            let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type;  })[0];
+            let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type; })[0];
             if (!found) {
                 self.streamObjects.push({ Id: a.TestingProfileId, stream: e.streams[0], type: type });
             }
@@ -425,8 +420,16 @@ const app = new Vue({
                 participants: [],
                 messages: [],
                 Message: "",
+                unreadCount: 0,
                 testingProfileId: id
             };
+        },
+        findInfoForChat: function () {
+            let self = this;
+            if (!self.currentChat) return;
+            let found = self.computerList.filter(function (item) { return item.TestingProfileId == self.currentChat.testingProfileId; })[0];
+            if (!found) return;
+            return found.LastName + " " + found.FirstName + " " + found.MiddleName;
         },
         findIndex: function (array) {
             if (array.length == 0) return array.length;
@@ -557,20 +560,35 @@ const app = new Vue({
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
                 $('#full-video-camera')[0].srcObject = found[0].stream;
                 if (found[1])
-                $('#full-video-screen')[0].srcObject = found[1].stream;
-               // $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
+                    $('#full-video-screen')[0].srcObject = found[1].stream;
+                // $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
             }, 2000);
         },
         toggleChat: function (id) {
             let self = this;
-            let flagClose = false;
-            let founded = self.chats.find(a => a.testingProfileId == id);
+            console.log('start', id);
+            let founded = self.chats.filter(a => a.testingProfileId == id)[0];
+            console.log('found', founded);
+            if (!founded) return;
+            founded.unreadCount = 0;
             if (self.currentChat && self.currentChat == founded) {
-                flagClose = true;
+                console.log('time to close');
+                self.isChatOpened = false;
+                self.currentChat = null;
             }
-            self.currentChat = founded;
-            if (!flagClose)
-                self.isChatOpened = !self.isChatOpened;
+            else {
+                if (!self.currentChat) {
+                    self.currentChat = founded;
+                    self.isChatOpened = true;
+                }
+                else {
+                    self.currentChat = founded;
+                    console.log('else');
+                }
+            }
+            //if (!flagClose) {
+               // self.isChatOpened = !self.isChatOpened;
+            //}
         },
         resetPlace: function () {
             let self = this;

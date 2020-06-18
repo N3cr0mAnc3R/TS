@@ -5,6 +5,7 @@
         tests: null,
         domain: "",
         activeTests: [],
+        testingTests: [],
         user: '',
         //packages: [],
         interval: null,
@@ -29,13 +30,18 @@
             Message: "",
             testingProfileId: 0
         },
-        recognized: "",
+        recognized: false,
+        tryRec: false,
+        noFace: false,
         unreadCount: 0,
         verified: false,
+        verifyInterval: null,
         pc1: null,
         stream: null,
         queue: [],
-        enabled: false
+        enabled: false,
+        counter: 0,
+        testingProfileId: 0
     },
     methods: {
         init: function () {
@@ -73,10 +79,13 @@
                         //});
                         //Запись и отображение доступных тестов
                         if (!self.tests) {
-                            self.tests = d;
+                            //self.tests = d;
+                            self.tests = d.filter(function (a) { return !a.IsForTesting; });
+                            self.testingTests = d.filter(function (a) { return a.IsForTesting; });
                             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                             //console.log(window.URL);
                             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
+                            self.testingProfileId = d[0].Id;
                             self.initWebCam();
                             self.initChat();
                             //self.initRTCPeer();
@@ -146,8 +155,8 @@
             //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
             //}
             self.chatSocket.onopen = function () {
-                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.tests[0].Id }));
-                self.getMessages(self.tests[0].Id);
+                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+                self.getMessages(self.testingProfileId);
             };
             self.chatSocket.onmessage = function (msg) {
                 //self.messages.push(msg);
@@ -179,7 +188,7 @@
         //Запуск теста
         startTest: function (id) {
             var self = this;
-            window.open("/user/process?Id=" + id, '_self');
+            window.open(window.location.protocol + '//' + window.location.hostname + "/user/process?Id=" + id, '_self');
 
         },
         toggleChat: function () {
@@ -230,7 +239,7 @@
                     }
                     self.videoSocket.onopen = function () {
                         console.log('Соединение открыто');
-                        self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.tests[0].Id }));
+                        self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
                         self.initRTCPeer();
                     };
 
@@ -254,6 +263,7 @@
                             else if (message.verified != undefined) {
                                 console.log(message.verified);
                                 self.verified = message.verified;
+                                clearInterval(self.verifyInterval);
                             }
                             else if (message.requestOffer) {
                                 self.initRTCPeer();
@@ -293,7 +303,7 @@
         },
         sendMessage: function () {
             var self = this;
-            self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.tests[0].Id, ParentId: null }));
+            self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
         getDateFormat: function (date) {
@@ -301,48 +311,44 @@
         },
         tryVerify: function () {
             var self = this;
-            self.loadTestObject.loading = true;
-            self.loadTestObject.loaded = false;
-            var formData = new FormData();
-            var canvas = $('#canvas')[0];
-            var context = canvas.getContext('2d');
-            canvas.width = 320;
-            canvas.height = 230;
-            context.drawImage($('#video1')[0], 0, 0, 320, 230);
+            try {
+                self.tryRec = true;
 
-            var data = canvas.toDataURL('image/png');
+                self.verifyInterval = setInterval(function () {
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.width = 320;
+                    canvas.height = 230;
+                    context.drawImage($('#video1')[0], 0, 0, 320, 230);
+                    var data = canvas.toDataURL('image/png');
+                    $.ajax({
+                        url: "/user/TryVerify",
+                        type: "POST",
+                        async: true,
+                        data: { Image: data.substr(22), Id: self.testingProfileId },
+                        success: function (res) {
+                            if (res.Error == 1) {
+                                self.noFace = true;
+                            }
+                            else {
+                                self.recognized = res;
+                                if (!res) {
+                                    self.noFace = false;
+                                }
+                                else {
+                                    clearInterval(self.verifyInterval);
+                                    console.log('got');
+                                    self.verified = true;
 
-            $.ajax({
-                url: "/user/TryVerify",
-                type: "POST",
-                async: false,
-                data: { Image: data.substr(22), Id: self.tests[0].Id },
-                success: function (res) {
-                    if (res.Error == 1) {
-                        self.tryVerify();
-                    }
-                    else {
-                        if (!res) {
-                            self.tryVerify();
+                                }
+                            }
                         }
-                        else {
-                            self.verified = true;
-                            self.loadTestObject.loading = false;
-                            self.loadTestObject.loaded = true;
-
-                        }
-                    }
-                    console.log(res);
-                    //else self.recognized = 'data:image/png;base64,' + res;
-                    self.loadTestObject.loading = false;
-                    self.loadTestObject.loaded = true;
-                }
-            })
-            //setTimeout(function () {
-            //    self.loadTestObject.loading = false;
-            //    self.loadTestObject.loaded = true;
-            //    self.verified = true;
-            //}, 1000);
+                    });
+                }, 500);
+            }
+            catch (exc) {
+                console.log(exc);
+            }
         },
         initRTCPeer: function () {
             var self = this;
@@ -390,7 +396,7 @@
                                 obj1[i] = offer[i];
                         }
                         var obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
+                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: 1
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
@@ -409,7 +415,7 @@
                     obj1[i] = e.candidate[i];
             }
             var obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.tests[0].Id, type: 1
+                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: 1
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
                 //app.gotICE = true;
@@ -424,9 +430,10 @@
                 case 3: return self.localization == 1 ? "Режим ожидания" : "Waiting";
                 case 4: return self.localization == 1 ? "Пожалуйста, ожидайте. В данный момент все места заняты, либо Вы авторизовались ранее на другом устройстве" : "Please, wait. Available tests will be shown below";
                 case 5: return self.localization == 1 ? "Администратор" : "Administrator";
-                case 6: return self.localization == 1 ? "Перед началом вступительного испытания необходимо пройти процедуру идентификации личности." : "Before start, You must verify Your identity.";
+                case 6: return self.localization == 1 ? 'Перед началом вступительного испытания необходимо пройти процедуру идентификации личности. Нажмите кнопку "Подтвердить" и посмотрите в камеру' : 'Before start, You must verify Your identity. Push Verify and watch to camera';
                 case 7: return self.localization == 1 ? "Подтвердить" : "Verify";
                 case 8: return self.localization == 1 ? "Камера не найдена. Прохождение тестирования невозможно" : "Camera not found. Testing is not available";
+                case 9: return self.localization == 1 ? "Для тестирования системы можете воспользоваться следующими вступительными испытаниями" : "You can try not real tests";
             }
         },
         isMe: function (message) {

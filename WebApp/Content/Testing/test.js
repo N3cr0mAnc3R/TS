@@ -37,6 +37,7 @@
         lostConnection: false,
         finishScreen: false,
         pause: false,
+        testing: false,
         chat: {
             IsOpened: false,
             participants: [],
@@ -44,6 +45,7 @@
             Message: "",
             testingProfileId: 0
         },
+        flagStopRec: false,
         chatSocket: null,
         videoSocket: null,
         loadedSocket: false,
@@ -99,10 +101,6 @@
             self.testingProfileId = newId;
             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
-            self.initVideoSocket();
-            self.initWebCam();
-            self.startCapture({ video: { cursor: 'always' }, audio: true });
-            self.initChat();
             setTimeout(function () {
                 self.maxTipWidth = $('#main-window').width();
                 console.log(self.maxTipWidth);
@@ -124,7 +122,16 @@
                 success: function (info) {
                     console.log(info);
                     if (info.TestingTimeRemaining <= 0) {
-                        window.open('/user/waiting','_self');
+                        //self.finishTest();
+                        //window.open('/user/waiting','_self');
+                    }
+                    self.testing = info.IsForTesting;
+                    if (!self.testing) {
+
+                        self.initVideoSocket();
+                        self.initWebCam();
+                        self.startCapture({ video: { cursor: 'always' }, audio: true });
+                        self.initChat();
                     }
                     self.timeAlarm = info.TimeAlarm;
                     self.needShowScore = info.NeedShowScore;
@@ -278,6 +285,9 @@
                     question.answerImage = data;
                 }
             });
+        },
+        returnToList: function () {
+            window.open(window.location.protocol + '//' + window.location.hostname + '/user/waiting', '_self');
         },
         removeFile: function () {
             var self = this;
@@ -467,6 +477,7 @@
                         },
                         success: function (data) {
                             if (data !== 1) {
+                                console.log('error1');
                                 self.pause = true;
                                 if (!self.intervalConnectionLost) {
                                     self.intervalConnectionLost = setTimeout(function () {
@@ -484,6 +495,7 @@
                             }
                         },
                         error: function () {
+                            console.log('error2');
                             self.pause = true;
                             if (!self.intervalConnectionLost) {
                                 self.intervalConnectionLost = setTimeout(function () {
@@ -510,19 +522,23 @@
                 }
                 if (self.testingTime - self.timeLeft >= self.timeRecording) {
                     setTimeout(function () {
-                    self.cameraRecorder.ondataavailable = null;
-                    self.screenRecorder.ondataavailable = null;
-                        self.finishRecord();
+                        if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
+                        if (self.screenRecorder) self.screenRecorder.ondataavailable = null;
+                        self.finishRecord(self);
                     }, 2000);
 
                 }
             }, 1000);
         },
-        finishRecord: function () {
-            var self = this;
+        finishRecord: function (self) {
+            if (self.flagStopRec) {
+                return;
+            }
+            self.flagStopRec = true;
             console.log('stop recording');
-            if (self.cameraRecorder) self.cameraRecorder.stop();
-            if (self.screenRecorder) self.screenRecorder.stop();
+            console.log();
+            if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
+            if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
             console.log(self.recordedCamera);
             console.log(self.recordedScreen);
             self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
@@ -542,10 +558,6 @@
                 success: function () {
                 }
             });
-        },
-        needAlarm: function () {
-            var self = this;
-            return self.timeLeft <= self.timeAlarm;
         },
         initChat: function () {
             var self = this;
@@ -606,7 +618,7 @@
         },
         beforeSend: function (self) {
             if (event.keyCode == 13 && !event.shiftKey) {
-                self.sendMessage();
+                self.sendMessage(self);
             }
         },
         isMe: function (message) {
@@ -684,34 +696,32 @@
         },
         initWebCam: function () {
             var self = this;
-            var stream = self.cameraStream;
             console.log('init webcam');
-            if (!stream) {
-                navigator.mediaDevices.getUserMedia(
-                    {
-                        video: {
-                            facingMode: 'user'
-                        },
-                        audio: true
-                    }).then(function (videostream) {/*callback в случае удачи*/
-                        stream = videostream;
-                        self.cameraStream = videostream;
-                        console.log('init stream', self.cameraStream);
-                        self.cameraRecorder = new MediaRecorder(videostream);
-                        self.cameraRecorder.ondataavailable = self.recordingCamera;
-                        self.cameraRecorder.start(1000);
+            navigator.mediaDevices.getUserMedia(
+                {
+                    video: {
+                        facingMode: 'user'
+                    },
+                    audio: true
+                }).then(function (videostream) {/*callback в случае удачи*/
 
-                        self.initRTCPeer(1);
-                        $('#video1')[0].srcObject = videostream;
+                    videostream.oninactive = function (er) {
+                        self.initWebCam();
+                    };
+                    self.cameraStream = videostream;
+                    console.log('init stream', self.cameraStream);
+                    self.cameraRecorder = new MediaRecorder(videostream);
+                    self.cameraRecorder.ondataavailable = self.recordingCamera;
+                    self.cameraRecorder.start(1000);
+
+                    self.initRTCPeer(1);
+                    $('#video1')[0].srcObject = videostream;
 
 
 
-                    }).catch(
-                        function (er) {/*callback в случае отказа*/ alert(er); });
-            }
-            else {
-                self.cameraRecorder.start(10);
-            }
+                }).catch(
+                    function (er) {/*callback в случае отказа*/ alert(er); });
+
         },
         sourceOpen: function () {
             var self = this;
@@ -896,18 +906,8 @@
             //var obj = $('#video2')[0];
             //var src = URL.createObjectURL(self.bufferCamera);
             //var src1 = URL.createObjectURL(self.bufferScreen);
-            setTimeout(function () {
-                // reader.onload = function () {
-                //formaData.append('baseFile', reader.result);
-                //console.log(self.selectedTest.Id, file, reader.result);
-                //$.ajax({
-                //    url: "/user/SaveVideoFile",
-                //    type: "POST",
-                //    data: formaData,
-                //    contentType: false,
-                //    processData: false,
-                //    success: function () {
 
+            setTimeout(function () {
                 $.ajax({
                     url: "/user/FinishTest?Id=" + self.testingProfileId,
                     type: "POST",
@@ -923,16 +923,9 @@
                         self.score = info;
                     }
                 });
-                //}
-                // });
-                // }
             }, 2000);
 
 
-            // obj.src = src;
-            //obj.srcObject = self.buffer;
-            //location.reload();
-            //console.log(self.selectedTest);
             $.ajax({
                 url: "/user/HasConnection",
                 type: "POST",
@@ -966,6 +959,7 @@
             })
                 .catch(function (err) {
                     console.error("Error:" + err);
+                    startCapture(displayMediaOptions);
                     alert("Обновите страницу и разрешите запись экрана!");
                     return null;
                 });
@@ -1102,8 +1096,9 @@
                 }
             });
         },
-        sendMessage: function () {
-            var self = this;
+        sendMessage: function (sself) {
+            var self = sself ? sself : this;
+            if (self.chat.Message == "" || self.chat.Message.trim() == "") return;
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
@@ -1226,6 +1221,12 @@
     },
     mounted: function () {
         this.checkSecurity();
+    },
+    computed: {
+        needAlarm: function () {
+            var self = this;
+            return self.timeLeft <= self.timeAlarm;
+        }
     }
 });
 

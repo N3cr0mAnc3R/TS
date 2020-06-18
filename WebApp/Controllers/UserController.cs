@@ -56,7 +56,7 @@ namespace WebApp.Controllers
                 bool HasAccess = await TestManager.GetSecurity(Id, CurrentUser.Id);
                 if (!HasAccess)
                 {
-                    return Redirect("user/waiting");
+                    return Redirect("/user/waiting");
                 }
             }
             //TestManager.GetSecurity(Id, )
@@ -154,17 +154,20 @@ namespace WebApp.Controllers
             Bitmap image1 = ConvertToFormat(second, PixelFormat.Format24bppRgb);
             HaarObjectDetector faceDetector = new HaarObjectDetector(new FaceHaarCascade(), minSize: 25, searchMode: ObjectDetectorSearchMode.NoOverlap);
             RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
+            RectanglesMarker facesMarker1 = new RectanglesMarker(Color.Red);
             facesMarker.Rectangles = faceDetector.ProcessFrame(image);
-            if(facesMarker.Rectangles.Count() == 0)
-            {
-                //1 - не найдено лицо
-                return Json(new { Error = 1 });
-            }
+            //if(facesMarker.Rectangles.Count() == 0)
+            //{
+            //    //1 - не найдено лицо
+            //    return Json(new { Error = 1 });
+            //}
 
+            if(facesMarker.Rectangles.Count() > 0)
             image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
 
-            facesMarker.Rectangles = faceDetector.ProcessFrame(image1);
-            image1 = image1.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
+            facesMarker1.Rectangles = faceDetector.ProcessFrame(image1);
+            if(facesMarker1.Rectangles.Count() > 0)
+            image1 = image1.Clone(facesMarker1.Rectangles.First(), PixelFormat.Format24bppRgb);
 
             //string result = "";
             //using (var ms = new MemoryStream())
@@ -175,7 +178,7 @@ namespace WebApp.Controllers
 
             //return Json(result);
 
-            return Json(Compare(image1, image, 0.8, 0.6f));
+            return Json(Compare(image1, image, 0.9));
             //return Json(Compare(ConvertToFormat(second, PixelFormat.Format24bppRgb), ConvertToFormat(img, PixelFormat.Format24bppRgb), 0.8, 0.6f));
         }
         public static Bitmap ConvertToFormat(Image image, PixelFormat format)
@@ -187,12 +190,23 @@ namespace WebApp.Controllers
             }
             return copy;
         }
-        public static bool Compare(Bitmap image1, Bitmap image2, double comparisionLevel, float threshold)
+        public static bool Compare(Bitmap image1, Bitmap image2, double comparisionLevel)
         {
-            var a = new ExhaustiveTemplateMatching(threshold);
-            var b = a.ProcessImage(image1, image2)[0];
-            var c = b.Similarity >= comparisionLevel;
-            return c;
+            try
+            {
+                var a = new ExhaustiveTemplateMatching();
+                var b = a.ProcessImage(image1, image2);
+                if (b.Count() > 0)
+                {
+                    var c = b[0].Similarity >= comparisionLevel;
+                    return c;
+                }
+                else return false;
+            }
+            catch
+            {
+                return Compare(image2, image1, comparisionLevel);
+            }
             //return new ExhaustiveTemplateMatching(threshold)
             //   .ProcessImage(To24bppRgbFormat(image1), To24bppRgbFormat(image2))[0]
             //  .Similarity >= comparisionLevel;
@@ -376,7 +390,7 @@ namespace WebApp.Controllers
         {
             var timer = (Timer)sender;
             var founded = timers.Where(a => a.Value == timer).First();
-            //TestManager.ToggleTimer(founded.Key, 2, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+            TestManager.ToggleTimer(founded.Key, 2, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Session["Localization"].ToString());
         }
 
         [HttpPost]

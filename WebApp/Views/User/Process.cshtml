@@ -6,7 +6,7 @@
 }
 
 <div id="main-window">
-    <div class="test-process" v-if="!finishScreen">
+    <div class="test-process" v-if="!finishScreen && !pause">
         <div class="main-wrapper">
             <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
@@ -126,7 +126,7 @@
 
             </div>
         </div>
-        <div class="open-chat-wrapper">
+        <div class="open-chat-wrapper" v-if="!testing">
             <div v-on:click="toggleChat()">
                 <svg width="50" height="50" viewBox="0 0 76 74" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                     <rect width="76" height="74" fill="url(#pattern0)" />
@@ -144,7 +144,7 @@
                 </span>
             </div>
         </div>
-        <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}">
+        <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}" v-if="!testing">
             <div class="control"><span v-if="!shownVideos" v-on:click="shownVideos = true"></span><span v-on:click="shownVideos = !shownVideos"><span v-if="shownVideos">{{switchLocal(14)}}</span><span v-if="!shownVideos">{{switchLocal(15)}}</span><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-plus' : !shownVideos }"></i></span></div>
             <div class="video">
                 <div class="camera-wrapper">
@@ -218,9 +218,15 @@
                 </div>
             </div>
         </div>
-        <img id="photo" />
     </div>
-    <div v-if="finishScreen" class="test-finish-process">
+    <div v-if="pause">
+        <div class="main-wrapper">
+            <div class="panel-center">
+                <div class="base-info">Потеряно соединение с сервером.Проверьте Ваше подключение к интернету.</div>
+            </div>
+        </div>
+    </div>
+    <div v-if="finishScreen && !lostConnection" class="test-finish-process">
         <div class="main-wrapper">
 
             <div class="panel-center">
@@ -237,6 +243,9 @@
                         <button v-bind:disabled="!confirmed" v-on:click="confirm">Подтвердить</button>
                     </div>
                 </div>
+            </div>
+            <div class="return-wrapper">
+                <buton class="finish-game" v-on:click="returnToList()">Вернуться к списку</buton>
             </div>
         </div>
     </div>

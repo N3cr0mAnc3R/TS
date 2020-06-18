@@ -125,10 +125,6 @@ namespace WebApp.Models
             }
         }
 
-        public async Task SendOffer(SavePictureModel model)
-        {
-
-        }
 
         //todo: Перебросить в чат
         public async Task<Guid> FileAnswerUploadAsync(SavePictureModel model, Guid? guid)

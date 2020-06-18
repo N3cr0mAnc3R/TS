@@ -195,6 +195,7 @@
   font-weight: 600;
   font-size: 18px;
   color: #565C72;
+  margin-bottom: 40px;
 }
 .not-test .test-list .test-wrapper {
   width: 100%;
@@ -585,10 +586,6 @@
   .videos-wrapper .video .camera-wrapper {
     margin-right: 30px;
   }
-  .open-chat-wrapper {
-    top: initial;
-    bottom: 110px;
-  }
 }
 .panel-top {
   margin-top: 70px;
@@ -768,6 +765,16 @@
   width: 320px;
   height: 230px;
   /*transform: scale(-1,1);*/
+}
+.pre-video-wrapper video.error {
+  border: 2px solid red;
+}
+.pre-video-wrapper video.no-face {
+  border: 2px solid yellow;
+}
+canvas {
+  /*position: absolute;
+    top: -100%;*/
 }
 #full-chat-wrapper {
   display: none;
