@@ -53,6 +53,26 @@ namespace WebApp.Models.Account
 
             return user;
         }
+        public async Task LoadNewUserIfNotExists(Guid guid)
+        {
+            using (var cnt = Concrete.OpenConnection())
+            {
+               await cnt.ExecuteAsync("Administrator_UserLoad", new { guid }, commandType: CommandType.StoredProcedure);
+                //user.Id = user.Uuid.ToString();
+            }
+        }
+        public ApplicationUser GetUser(Guid guid)
+        {
+            ApplicationUser user;
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                user = (cnt.Query<ApplicationUser>("UserPlace_UserNameGet", new { guid }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
+                //user.Id = user.Uuid.ToString();
+            }
+
+            return user;
+        }
         public bool HasOneOfRoles(IEnumerable<int> UserRoles, IEnumerable<int> CheckedRoles)
         {
             foreach (int role in UserRoles)

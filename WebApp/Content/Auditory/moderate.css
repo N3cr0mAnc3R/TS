@@ -37,6 +37,7 @@
 }
 .auditory .computer-list {
   border: 1px solid #ddd;
+  margin: auto;
   margin-top: 40px;
   padding: 40px;
   overflow-y: auto;
@@ -46,7 +47,7 @@
   box-shadow: #a2a2a2 0px 3px 4px;
   background: #eceef1;
   max-height: 650px;
-  max-width: 1024px;
+  /*max-width: 1024px;*/
 }
 .auditory .computer-list .place-table {
   text-align: center;
@@ -69,9 +70,9 @@
   width: 180px;
   height: 130px;
   position: absolute;
-  -webkit-transform: scale(-1, 1);
-  -ms-transform: scale(-1, 1);
-  transform: scale(-1, 1);
+  /*-webkit-transform: scale(-1,1);
+                            -ms-transform: scale(-1,1);
+                            transform: scale(-1,1);*/
   left: 15px;
 }
 .auditory .computer-list .place-table .place-row .place-item .video-wrapper .video-camera {
@@ -127,7 +128,7 @@
 .auditory .computer-list .place-table .place-row .place-item .info-wrapper .control-place .chat-unread-wrapper {
   position: absolute;
   top: 177px;
-  right: 298px;
+  left: 78px;
   background: #FF4170;
   width: 17px;
   height: 17px;
@@ -141,7 +142,13 @@
   font-size: 12px;
   display: block;
 }
-.auditory .control {
+.control-wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+.control-wrapper .control {
+  margin: auto;
   margin-top: 40px;
   width: 225px;
   height: -webkit-max-content;
@@ -149,29 +156,28 @@
   height: max-content;
   background: #565c72;
   padding: 0;
-  margin-left: 15px;
 }
-.auditory .control ul {
+.control-wrapper .control ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.auditory .control ul li {
+.control-wrapper .control ul li {
   border-bottom: 1px solid #A6ACBC;
   min-height: 44px;
   max-height: 88px;
   color: #fff;
   margin: 0;
-  padding-left: 20px;
+  text-align: center;
   font-size: 16px;
   line-height: 33px;
   cursor: pointer;
   width: 225px;
 }
-.auditory .control ul li:hover {
+.control-wrapper .control ul li:hover {
   color: #ddd;
 }
-.auditory .control .btn {
+.control-wrapper .control .btn {
   margin-bottom: 10px;
   width: 160px;
 }
@@ -367,4 +373,7 @@ button:focus {
 #full-wrapper .video-list-wrapper .photo-wrapper {
   margin-left: 30px;
   height: 768px;
+}
+.body-content.container {
+  max-width: initial !important;
 }

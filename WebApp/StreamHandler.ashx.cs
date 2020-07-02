@@ -128,7 +128,7 @@ namespace WebApp
                                 try
                                 {
                                     //Clients.Remove
-                                    List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                    //List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
                                     //cls.Remove(client);
                                     disposedClients.Add(client);
                                     //Clients.Remove
@@ -141,10 +141,11 @@ namespace WebApp
                                 }
                             }
                         }
-                        for (int i = 0; i < disposedClients.Count; i++)
+                        var count = disposedClients.Count;
+                        for (int i = count; i != 0; i--)
                         {
                             List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
-                            cls.Remove(cls[i]);
+                            cls.Remove(disposedClients[i]);
                         }
                     }
                 }

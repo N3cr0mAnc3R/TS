@@ -1,0 +1,197 @@
+﻿.kernel-system {
+  display: none;
+  transition: display ease 0.5s;
+}
+.kernel-system .kernel-system-notifications-overlay {
+  z-index: 8999;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  text-align: center;
+  max-width: 100%;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper {
+  transition: all linear 1s;
+  margin-bottom: 70px;
+  margin-right: 10px;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper {
+  transition: all ease 0.6s;
+  padding: 20px 20px 10px 10px;
+  position: relative;
+  text-align: right;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper .notification {
+  padding: 20px;
+  color: #fff;
+  display: inline-block;
+  text-align: center;
+  -webkit-box-shadow: 0px 10px 10px -5px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0px 10px 10px -5px rgba(0, 0, 0, 0.2);
+  box-shadow: 0px 10px 10px -5px rgba(0, 0, 0, 0.2);
+  transition: 0.3s all;
+  position: relative;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper .notification .body {
+  font-size: 16px;
+  display: inline-block;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper .notification .remove {
+  position: absolute;
+  top: -11px;
+  right: -10px;
+  border-radius: 50%;
+  height: 22px;
+  width: 21px;
+  background: #666;
+  cursor: pointer;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper .notification .remove .fa {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 100;
+  display: block;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.type-error .notification {
+  background: #dc3545;
+  animation: 2s tremor ease-out;
+  animation-iteration-count: infinite;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.type-success .notification {
+  background: #28a745;
+  border-radius: 3px;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-leave.ng-leave-active,
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-move,
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-enter {
+  opacity: 0;
+  transform: rotate(10deg) translateY(50px);
+  right: -100%;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-leave,
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-move.ng-move-active,
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.ng-enter.ng-enter-active {
+  opacity: 1;
+  transform: rotate(0) translateY(0);
+  right: 0;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-1 {
+  transition-delay: 0.05s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-1.type-error .notification {
+  animation-delay: 0.65s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-2 {
+  transition-delay: 0.1s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-2.type-error .notification {
+  animation-delay: 0.7s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-3 {
+  transition-delay: 0.15s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-3.type-error .notification {
+  animation-delay: 0.75s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-4 {
+  transition-delay: 0.2s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-4.type-error .notification {
+  animation-delay: 0.8s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-5 {
+  transition-delay: 0.25s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-5.type-error .notification {
+  animation-delay: 0.85s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-6 {
+  transition-delay: 0.3s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-6.type-error .notification {
+  animation-delay: 0.9s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-7 {
+  transition-delay: 0.35s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-7.type-error .notification {
+  animation-delay: 0.95s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-8 {
+  transition-delay: 0.4s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-8.type-error .notification {
+  animation-delay: 1s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-9 {
+  transition-delay: 0.45s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-9.type-error .notification {
+  animation-delay: 1.05s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-10 {
+  transition-delay: 0.5s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-10.type-error .notification {
+  animation-delay: 1.1s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-11 {
+  transition-delay: 0.55s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-11.type-error .notification {
+  animation-delay: 1.15s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-12 {
+  transition-delay: 0.6s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-12.type-error .notification {
+  animation-delay: 1.2s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-13 {
+  transition-delay: 0.65s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-13.type-error .notification {
+  animation-delay: 1.25s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-14 {
+  transition-delay: 0.7s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-14.type-error .notification {
+  animation-delay: 1.3s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-15 {
+  transition-delay: 0.75s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-15.type-error .notification {
+  animation-delay: 1.35s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-16 {
+  transition-delay: 0.8s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-16.type-error .notification {
+  animation-delay: 1.4s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-17 {
+  transition-delay: 0.85s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-17.type-error .notification {
+  animation-delay: 1.45s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-18 {
+  transition-delay: 0.9s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-18.type-error .notification {
+  animation-delay: 1.5s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-19 {
+  transition-delay: 0.95s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-19.type-error .notification {
+  animation-delay: 1.55s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-20 {
+  transition-delay: 1s;
+}
+.kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.delay-20.type-error .notification {
+  animation-delay: 1.6s;
+}

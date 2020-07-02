@@ -130,7 +130,7 @@ namespace WebApp
                         for (int i = 0; i < disposedClients.Count; i++)
                         {
                             List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
-                            cls.Remove(cls[i]);
+                            cls.Remove(disposedClients[i]);
                         }
                     }
                 }

@@ -122,18 +122,29 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<TestUser>(sql: "[dbo].[Administrator_UserByDateGet]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<TestUser> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
+        public async Task<AuditoryStatistic> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<TestUser>(sql: "[dbo].[Administrator_UserAuditoriumResultGet]", new { auditoriumId, userUID, localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<AuditoryStatistic>(sql: "[dbo].[Administrator_AuditoriumStatisticsGet]", new { auditoriumId, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
+        //public async Task<TestUser> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
+        //{
+        //    using (var cnt = await Concrete.OpenConnectionAsync())
+        //    {
+        //        return await cnt.QueryFirstOrDefaultAsync<TestUser>(sql: "[dbo].[Administrator_UserAuditoriumResultGet]", new { auditoriumId, userUID, localization }, commandType: CommandType.StoredProcedure);
+        //    }
+        //}
         public async Task UpdatePlaceConfig(PlaceConfigModel config, Guid userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == ""? (string)null: config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
+                if (config.PlaceConfig == "")
+                {
+                    await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { userUID, isRequest = 0}, commandType: CommandType.StoredProcedure);
+                }
             }
         }
         public async Task<dynamic> GetPlaceConfig(int pin, Guid? userUID, string localization = "")
@@ -158,6 +169,14 @@ namespace WebApp.Models
             using (var cnt =await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
+        public async Task<int> GetNewPeople(Guid? userUID)
+        {
+            using (var cnt  =await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstAsync<int>(sql: "[dbo].", new { userUID }, commandType: CommandType.StoredProcedure);
 
             }
         }

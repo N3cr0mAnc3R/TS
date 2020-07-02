@@ -16,6 +16,7 @@
             loading: null,
             loaded: null
         },
+        videoSockets: [],
         loadTestObject: {
             loading: null,
             loaded: null
@@ -46,6 +47,10 @@
     methods: {
         init: function () {
             var self = this;
+            self.loadTestObject.loading = true;
+            self.loadTestObject.loaded = false;
+            self.loadObject.loading = true;
+            self.loadObject.loaded = false;
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",
@@ -55,13 +60,30 @@
                 }
             });
             //Загрузка доступных тестов 
+            self.loadTests();
+
+            if (localStorage['placeConfig']) {
+                setInterval(self.findTestInterval);
+                self.hasPlaceConfig = true;
+            }
+            else {
+                self.hasPlaceConfig = false;
+                clearInterval(self.findTestInterval);
+                self.startPlaceConfigInterval();
+            }
+            setTimeout(function () {
+                document.title = self.switchLocal(10);
+            }, 600);
+            //self.startCapture({ video: { cursor: 'always', logicalSurface: true }, audio: true });
+        },
+        loadTests: function () {
+            var self = this;
             self.findTestInterval = setInterval(function () {
                 $.ajax({
                     type: 'POST',
                     dataType: 'json',
                     url: '/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     success: function (d) {
-                        console.log(d);
                         if (d.Error) {
                             localStorage.removeItem('placeConfig');
                             clearInterval(self.findTestInterval);
@@ -77,29 +99,69 @@
                         //    var date = new Date(Number(a.TestingDate.substr(a.TestingDate.indexOf('(') + 1, a.TestingDate.indexOf(')') - a.TestingDate.indexOf('(') - 1)));
                         //    a.TestingDate = date.toLocaleString('Ru-ru');
                         //});
+                        var flag = false;
                         //Запись и отображение доступных тестов
                         if (!self.tests) {
                             //self.tests = d;
                             self.tests = d.filter(function (a) { return !a.IsForTesting; });
                             self.testingTests = d.filter(function (a) { return a.IsForTesting; });
+                            var activeTests = self.testingTests.filter(function (item) { return item.TestingStatusId === 2; });
+                            if (activeTests.length > 0) {
+                                activeTests.forEach(function (test) {
+                                    $.ajax({
+                                        type: 'POST',
+                                        dataType: 'json',
+                                        url: '/user/FinishTest?Id=' + test.Id,
+                                        success: function (d) {
+                                            test.TestingStatusId = 5;
+                                        }
+                                    });
+                                });
+                            }
                             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                             //console.log(window.URL);
                             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
-                            self.testingProfileId = d[0].Id;
-                            self.initWebCam();
-                            self.initChat();
+                            var min = self.tests.length > 0? self.tests[0].Id : 0;
+                            console.log(min);
+                            self.tests.forEach(function (item) {
+                                min = min > item.Id ? item.Id : min;
+                            })
+                            //var min = d[0].Id;
+                            //d.forEach(function (item) {
+                            //    min = min > item.Id ? item.Id : min;
+                            //})
+                            self.testingProfileId = min;// d[0].Id;
+                            if (min != 0) {
+                                self.initWebCam();
+                                self.initChat();
+
+                                clearInterval(self.findTestInterval);
+                            }
+                            self.loadObject.loading = false;
+                            self.loadObject.loaded = true;
                             //self.initRTCPeer();
                         }
                         else {
-                            self.tests = null;
-                            self.tests = d;
+                            console.log('else', d);
+                            d.forEach(function (test) {
+                                var founded = self.tests.filter(function (atest) { return atest.Id == test.Id; })[0];
+                                console.log('founded', founded);
+                                if (!founded) {
+                                    console.log('!founded', test);
+                                    if (!test.IsForTesting) {
+                                        console.log('flag', test);
+                                        self.tests.push(test);
+                                        flag = true;
+                                    }
+                                }
+                            });
                         }
                         //Информация о человеке, проходящем тест
                         self.user = d[0].LastName + " " + d[0].FirstName + " " + d[0].MiddleName;
                         //Если назначен тест, то больше не загружать
-                        if (d.length > 0) {
+                        if (flag) {
+                            console.log('flag');
                             clearInterval(self.findTestInterval);
-                            self.findTestInterval = null;
                         }
                     },
                     error: function (e) {
@@ -108,18 +170,31 @@
                     }
                 });
             }, 1000);
-
-            if (localStorage['placeConfig']) {
-                setInterval(self.findTestInterval);
-                self.hasPlaceConfig = true;
-            }
-            else {
-                self.hasPlaceConfig = false;
-                clearInterval(self.findTestInterval);
-                self.findTestInterval = null;
-                self.startPlaceConfigInterval();
-            }
         },
+        //startCapture: function (displayMediaOptions) {
+        //    var self = this;
+        //    //var captureStream = null;
+
+        //    navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
+        //        var tracks = Str.getVideoTracks();
+        //        console.log(tracks[0].getSettings());
+        //        if (tracks[0].getSettings().displaySurface != 'monitor') {
+        //            console.log('fuck u');
+        //            self.startCapture();
+        //        }
+        //        $('#video2')[0].srcObject = Str;
+        //        Str.oninactive = function (er) {
+        //            console.log(er);
+        //            self.startCapture(displayMediaOptions);
+        //        };
+        //    })
+        //        .catch(function (err) {
+        //            console.error("Error:" + err);
+        //            self.startCapture(displayMediaOptions);
+        //            alert("Обновите страницу и разрешите запись экрана!");
+        //            return null;
+        //        });
+        //},
         startPlaceConfigInterval: function () {
             var self = this;
             self.findPlaceInterval = setInterval(function () {
@@ -132,6 +207,8 @@
                         if (data.Id != 0) {
                             self.createPlaceConfig(data.PlaceId, data.PlaceProfile);
                             clearInterval(self.findPlaceInterval);
+                            location.reload();
+                            setInterval(self.findTestInterval);
                         }
                     }
                 });
@@ -155,7 +232,7 @@
             //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
             //}
             self.chatSocket.onopen = function () {
-                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId, IsSender: true }));
                 self.getMessages(self.testingProfileId);
             };
             self.chatSocket.onmessage = function (msg) {
@@ -210,6 +287,61 @@
                 }
             }
         },
+        initSocket: function (id) {
+            let self = this;
+            let socket = null;
+            if (typeof (WebSocket) !== 'undefined') {
+                socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+            } else {
+                socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            socket.onopen = function () {
+                socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: id }));
+                self.initRTCPeer();
+            };
+
+            socket.onmessage = function (msg) {
+                var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+
+                if (!message.IsSender) {
+                    if (message.candidate && message.candidate != '{}') {
+                        var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                        self.queue.push(candidate);
+                    }
+
+                    else if (message.answer) {
+                        self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
+
+                            self.queue.forEach(function (candidate) {
+                                self.pc1.addIceCandidate(candidate);
+                            })
+                        }, function (r) { console.log(r); })
+                    }
+                    else if (message.verified != undefined) {
+                        console.log(message.verified);
+                        self.verified = message.verified;
+                        clearInterval(self.verifyInterval);
+                    }
+                    else if (message.requestOffer) {
+                        self.initRTCPeer();
+                    }
+                    else if (message.resetRequest) {
+                        localStorage.removeItem('placeConfig');
+                        window.open('/account/logout', '_self');
+                        //location.reload();
+                    }
+                    else if (message.reloadRequest) {
+                        window.reload(true);
+                        //location.reload();
+                    }
+                }
+            };
+            socket.onclose = function () {
+                console.log('Соединение сброшено');
+                self.initWebCam();
+            };
+            self.videoSocket = socket;
+        },
         initWebCam: function () {
             var self = this;
             //if (!self.stream) {
@@ -232,53 +364,15 @@
                     //} else {
                     //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
                     //}
-                    if (typeof (WebSocket) !== 'undefined') {
-                        self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
-                    } else {
-                        self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
-                    }
-                    self.videoSocket.onopen = function () {
-                        console.log('Соединение открыто');
-                        self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                        self.initRTCPeer();
-                    };
 
-                    self.videoSocket.onmessage = function (msg) {
-                        var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                    self.initSocket(self.testingProfileId);
 
-                        if (!message.IsSender) {
-                            if (message.candidate && message.candidate != '{}') {
-                                var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                                self.queue.push(candidate);
-                            }
-
-                            else if (message.answer) {
-                                self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
-
-                                    self.queue.forEach(function (candidate) {
-                                        self.pc1.addIceCandidate(candidate);
-                                    })
-                                }, function (r) { console.log(r); })
-                            }
-                            else if (message.verified != undefined) {
-                                console.log(message.verified);
-                                self.verified = message.verified;
-                                clearInterval(self.verifyInterval);
-                            }
-                            else if (message.requestOffer) {
-                                self.initRTCPeer();
-                            }
-                            else if (message.resetRequest) {
-                                localStorage.removeItem('placeConfig');
-                                window.open('/account/logout', '_self');
-                                //location.reload();
-                            }
-                        }
-                    };
-                    self.videoSocket.onclose = function () {
-                        console.log('Соединение сброшено');
-                        self.initWebCam();
-                    };
+                    //self.tests.forEach(function (item) {
+                    //    self.initSocket(item.Id);
+                    //});
+                    //self.testingTests.forEach(function (item) {
+                    //    self.initSocket(item.Id);
+                    //});
                 }).catch(
                     function (er) {/*callback в случае отказа*/
                         alert(self.switchLocal(8));
@@ -301,8 +395,17 @@
                 }
             });
         },
-        sendMessage: function () {
+        subscribeEnter: function () {
             var self = this;
+            $(document).on('keyup', function () { self.beforeSend(self); });
+        },
+        beforeSend: function (self) {
+            if (event.keyCode == 13 && !event.shiftKey) {
+                self.sendMessage(self);
+            }
+        },
+        sendMessage: function (self1) {
+            var self = self1 ? self1 : this;
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
@@ -403,6 +506,8 @@
                         }
                     }, function () { });
                 }, function () { });
+                self.loadTestObject.loading = false;
+                self.loadTestObject.loaded = true;
             }
             catch (e) {
                 console.log('error');
@@ -422,6 +527,24 @@
                 app.videoSocket.send(JSON.stringify(obj));
             }
         },
+        askReset: function () {
+            var self = this;
+            //GetChatMessages
+            $.ajax({
+                url: "/user/ResetPlaceRequest",
+                type: "POST",
+                async: false,
+                success: function (response) {
+                    if (response == 1) {
+                        notifier([{ Type: 'success', Body: self.switchLocal(15) }]);
+                    }
+                    else {
+                        notifier([{ Type: 'error', Body: self.switchLocal(14) }]);
+
+                    }
+                }
+            });
+        },
         switchLocal: function (id) {
             var self = this;
             switch (id) {
@@ -433,7 +556,13 @@
                 case 6: return self.localization == 1 ? 'Перед началом вступительного испытания необходимо пройти процедуру идентификации личности. Нажмите кнопку "Подтвердить" и посмотрите в камеру' : 'Before start, You must verify Your identity. Push Verify and watch to camera';
                 case 7: return self.localization == 1 ? "Подтвердить" : "Verify";
                 case 8: return self.localization == 1 ? "Камера не найдена. Прохождение тестирования невозможно" : "Camera not found. Testing is not available";
-                case 9: return self.localization == 1 ? "Для тестирования системы можете воспользоваться следующими вступительными испытаниями" : "You can try not real tests";
+                case 9: return self.localization == 1 ? "Для тестирования системы можете воспользоваться следующими вступительными испытаниями" : "You can try preliminary tests";
+                case 10: return self.localization == 1 ? "Режим ожидания" : "Waiting";
+                case 11: return self.localization == 1 ? "Тесты не назначены. Ожидайте..." : "You don't have any tests. Wait...";
+                case 12: return self.localization == 1 ? "Вы можете запросить сбросить предыдущее устройство: " : "You may request for reset previous PC:";
+                case 13: return self.localization == 1 ? "Сбросить" : "Reset";
+                case 14: return self.localization == 1 ? "Во время выполнения запроса произошла ошибка" : "An error occured during Your request";
+                case 15: return self.localization == 1 ? "Запрос успешно отправлен" : "Your request has been sent";
             }
         },
         isMe: function (message) {

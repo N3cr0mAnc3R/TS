@@ -26,7 +26,7 @@ const app = new Vue({
         currentError: 0,
         gotICE: false,
         me: {},
-        queue: [{ type: 1, candidates: [] }, { type: 2, candidates: [] }],
+        queue: [],
         localization: 1,
         currentStatus: -1,
         currentDate: null,
@@ -86,7 +86,7 @@ const app = new Vue({
             $.ajax({
                 url: "/auditory/GetAuditoryInfoForModerate?Id=" + newId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (auditory) {
                     self.auditory = auditory.Id;
                     self.auditoryName = auditory.Name;
@@ -112,6 +112,7 @@ const app = new Vue({
                                 item.chat = {};
                                 //Сокет на вебку
                                 self.initSocket(2, item, 1);
+                                console.log(item.UserVerified);
                                 //Если подтверждён
                                 if (item.UserVerified) {
                                     //Сокет на экран
@@ -122,8 +123,12 @@ const app = new Vue({
                                 self.initSocket(1, item);
                             }
                             else {
+                                if (found.RequestReset) {
+                                    notifier([{ Type: 'error', Body: found.Name + ": запрос на сброс привязанного места" }]);
+                                }
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
                                 if (found.UserVerified != item.UserVerified) {
+                                    console.log('verified');
                                     if (item.UserVerified) {
                                         self.initSocket(2, found, 2);
                                     }
@@ -188,7 +193,6 @@ const app = new Vue({
             peer.addEventListener('icecandidate', function (e) {
                 self.onIceCandidate(peer, e, socket, a.TestingProfileId, type);
             })
-
             peer.addEventListener('connectionstatechange', function (event) {
                 if (peer.connectionState == 'connecting') {
                     setTimeout(function () {
@@ -205,10 +209,16 @@ const app = new Vue({
                 self.gotRemoteStream(e, a, type);
             });
             let found = created.peers.filter(function (item) { return item.type == type; })[0];
+            console.log(found, type);
             if (found) {
                 found.peer = peer;
             }
-            else created.peers.push({ type: type, peer: peer });
+            else {
+                console.log('add', peer);
+                created.peers.push({ type: type, peer: peer });
+            }
+            console.log(type);
+            console.log(created.peers);
         },
         initSocket: function (type, a, cam) {
             if (a.TestingProfileId == 0) return;
@@ -241,36 +251,39 @@ const app = new Vue({
                     console.log(self.chats);
 
                     //let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
-                    if (!chat.isChatOpened) {
+                    if (!chat.isChatOpened && !self.isMe(message)) {
                         chat.unreadCount++;
                     }
                     chat.messages.push(message);
                 };
             }
             else {
-                if (typeof (WebSocket) !== 'undefined') {
-                    socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                let created = self.videoSockets.filter(function (item) { return item.id == a.TestingProfileId; })[0];
+                if (!created) {
+                    if (typeof (WebSocket) !== 'undefined') {
+                        socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                    }
+                    else {
+                        socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                    }
+                    created = { id: a.TestingProfileId, socket: socket, peers: [] };
+                    self.videoSockets.push(created);
                 }
                 else {
-                    socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                    socket = created.socket;
+                    var queue = { type: 2, Id: a.TestingProfileId, candidates: [] };
+                    self.queue.push(queue);
+                    self.initRTCPeer(created, socket, a, cam);
+                    return;
                 }
-                //if (typeof (WebSocket) !== 'undefined') {
-                //    socket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                //}
-                //else {
-                //    socket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                //}
-                //if (typeof (WebSocket) !== 'undefined') {
-                //    socket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                //}
-                //else {
-                //    socket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                //}
-                let created = { id: a.TestingProfileId, socket: socket, peers: [] };
-                self.videoSockets.push(created);
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false }));
+
+                    if (!self.queue.filter(function (item) { item.type == cam && Id == a.TestingProfileId; })[0]) {
+                        var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
+                        self.queue.push(queue);
+                    }
                     self.initRTCPeer(created, socket, a, cam);
                     //self.initRTCPeer(created, socket, a, 2);
 
@@ -281,14 +294,22 @@ const app = new Vue({
                     if (message.IsSender) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                            let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                            queue.candidates.push(candidate);
+                            let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+                            if (!queue) {
+                                queue = { type: message.type, Id: a.TestingProfileId, candidates: [] };
+                            }
+                            if (queue.candidates.indexOf(candidate) === -1)
+                                queue.candidates.push(candidate);
+                            else {
+                                console.log(candidate);
+
+                            }
                         }
                         else if (message.offer) {
                             navigator.getUserMedia({ video: true }, function (stream) {
                                 let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                                 let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
-
+                                console.log(created, peerObj);
                                 if (!peerObj) {
                                     return;
                                 }
@@ -304,10 +325,12 @@ const app = new Vue({
                                             }
                                             obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type };
                                             socket.send(JSON.stringify(obj));
-                                            let queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                                            let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
                                             queue.candidates.forEach(function (candidate) {
                                                 peer.addIceCandidate(candidate);
+                                                console.log('add candidate');
                                             });
+                                            queue.candidates = [];
 
                                         }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); });
@@ -316,9 +339,12 @@ const app = new Vue({
                         }
                     }
                 };
+
             }
             socket.onclose = function (event) {
                 console.log('Соединение закрыто');
+                socket.close();
+                socket = null;
                 self.initSocket(type, a, cam);
             };
         },
@@ -510,7 +536,8 @@ const app = new Vue({
         },
         download: function (type) {
             let self = this;
-            window.open('/auditory/DownloadVideoFile?Id=' + self.currentUser.TestingProfileId + '&Type=' + type, '_blank');
+            //window.open('/auditory/DownloadVideoFile?Id=' + self.currentUser.TestingProfileId + '&Type=' + type, '_blank');
+            window.open('/auditory/DownloadVideoFile?Id=' + 227 + '&Type=' + type, '_blank');
         },
         sendError: function () {
             let self = this;
@@ -539,6 +566,8 @@ const app = new Vue({
                 success: function () {
                 }
             });
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestPause: true, IsSender: false }));
         },
         finishTest: function () {
             let self = this;
@@ -558,6 +587,7 @@ const app = new Vue({
 
             setTimeout(function () {
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
+                console.log(found, self.currentUser.TestingProfileId, self.streamObjects);
                 $('#full-video-camera')[0].srcObject = found[0].stream;
                 if (found[1])
                     $('#full-video-screen')[0].srcObject = found[1].stream;
@@ -587,7 +617,7 @@ const app = new Vue({
                 }
             }
             //if (!flagClose) {
-               // self.isChatOpened = !self.isChatOpened;
+            // self.isChatOpened = !self.isChatOpened;
             //}
         },
         resetPlace: function () {
@@ -604,6 +634,13 @@ const app = new Vue({
                     console.log(self.videoSockets, self.currentUser.TestingProfileId);
                 }
             });
+        },
+        sendReload: function () {
+            let self = this;
+            self.videoSockets.forEach(function (item) {
+                item.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: item.id, reloadRequest: true }));
+            });
+
         },
         toggleTypeChat: function () {
             let self = this;
@@ -647,7 +684,7 @@ const app = new Vue({
             let self = this;
             switch (id) {
                 case 1: return self.localization == 1 ? "Аудитория" : "Auditory";
-                case 2: return self.localization == 1 ? "Выдано" + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
+                case 2: return self.localization == 1 ? "Выдано: " + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
                 case 3: return self.localization == 1 ? "Сохранить" : "Save";
                 case 4: return self.localization == 1 ? "Сообщить о нарушении" : "Issue a warning";
                 case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";

@@ -1,14 +1,12 @@
 ﻿<script src="~/Content/f-awesome.js"></script>
 <link href="~/Content/font-awesome.css" rel="stylesheet" />
 <link href="~/Content/Testing/Index.css" rel="stylesheet" />
-@{
-    ViewBag.Title = "Тестирование";
-}
+
 
 <div id="main-window">
-    <div class="test-process" v-if="!finishScreen && !pause">
+    <div class="test-process" v-if="!finishScreen && !(lostConnection || adminPaused)">
         <div class="main-wrapper">
-            <div class="panel-top"><span class="discipline-title">{{selectedTest.DisciplineName}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
+            <div class="panel-top"><span class="discipline-title">{{NameDiscipline}}</span><span v-if="pause" class="paused">{{switchLocal(16)}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
                 <div v-loader="loadObject">
                     <div class="question-wrapper" v-if="selectedQuestion.QuestionImage">
@@ -107,7 +105,7 @@
                         </svg>
                     </span>
                 </div>
-                <div v-for="tip in sourceMaterials" class="material-wrapper" v-if="!tip.isCalc">
+                <div v-for="tip in sourceMaterials" class="material-wrapper" v-if="!tip.IsCalc">
                     <img v-bind:style="{'width': maxTipWidth + 'px'}" v-bind:src="'data:image/png;base64, ' + tip.Image" />
                     <br />
                 </div>
@@ -188,7 +186,7 @@
                 <div class="send-message-wrapper">
                     <div class="message-input">
                         <textarea v-model="chat.Message" v-on:focus="subscribeEnter"></textarea>
-                        <button v-on:click="sendMessage">
+                        <button v-on:click="sendMessage()">
                             <span class="fa fa-send"></span>
                         </button>
                     </div>
@@ -208,44 +206,56 @@
                         {{switchLocal(11)}}?
                         <div v-if="showCountLeft()">
                             <br />
-                            {{switchLocal(12)}} {{showCountLeft()}}.
+                            {{switchLocal(13)}} {{showCountLeft()}}.
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-                        <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="finishTest()">Завершить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(23)}}</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="finishTest()">{{switchLocal(24)}}</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div v-if="pause">
+    <div v-if="lostConnection" class="test-process">
         <div class="main-wrapper">
+            <div class="panel-top"></div>
             <div class="panel-center">
-                <div class="base-info">Потеряно соединение с сервером.Проверьте Ваше подключение к интернету.</div>
+                <div class="base-info">
+                    {{switchLocal(17)}}</div>
             </div>
         </div>
     </div>
-    <div v-if="finishScreen && !lostConnection" class="test-finish-process">
+    <div v-if="adminPaused" class="test-process">
+        <div class="main-wrapper">
+            <div class="panel-top"></div>
+            <div class="panel-center">
+                <div class="base-info">
+                    {{switchLocal(17)}}</div>
+            </div>
+        </div>
+    </div>
+    <div v-if="finishScreen && !lostConnection" class="test-finish-process" v-loader="loadObject">
         <div class="main-wrapper">
 
             <div class="panel-center">
-                <div class="base-info">Вступительное испытание завершено.</div>
+                <div class="base-info">
+                    {{switchLocal(18)}}</div>
                 <div class="score-info" v-if="needShowScore">
-                    Ваш результат: <span>{{score}}</span>
+                    {{switchLocal(19)}}: <span>{{score}}</span>
                     <br />
                     <label>
                         <input type="checkbox" v-model="confirmed" />
-                        С результатами ознакомлен
+                        {{switchLocal(20)}}
                     </label>
                     <br />
                     <div class="control">
-                        <button v-bind:disabled="!confirmed" v-on:click="confirm">Подтвердить</button>
+                        <button v-bind:disabled="!confirmed" v-on:click="confirm">{{switchLocal(21)}}</button>
                     </div>
                 </div>
             </div>
-            <div class="return-wrapper">
-                <buton class="finish-game" v-on:click="returnToList()">Вернуться к списку</buton>
+            <div class="return-wrapper" v-if="testing">
+                <buton class="back-list" v-on:click="returnToList()">{{switchLocal(22)}}</buton>
             </div>
         </div>
     </div>

@@ -4,10 +4,6 @@
     "inputFile": "Content/Auditory/index.less"
   },
   {
-    "outputFile": "Content/Auditory/moderate.css",
-    "inputFile": "Content/Auditory/moderate.less"
-  },
-  {
     "outputFile": "Content/proctor.css",
     "inputFile": "Content/proctor.less"
   },
@@ -26,5 +22,13 @@
   {
     "outputFile": "Content/Statistic/index.css",
     "inputFile": "Content/Statistic/index.less"
+  },
+  {
+    "outputFile": "Content/Auditory/moderate.css",
+    "inputFile": "Content/Auditory/moderate.less"
+  },
+  {
+    "outputFile": "Content/Shared/Notify.css",
+    "inputFile": "Content/Shared/Notify.less"
   }
 ]

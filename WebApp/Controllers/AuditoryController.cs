@@ -85,6 +85,11 @@ namespace WebApp.Controllers
             return Json(await AuditoryManager.GetAuditoryStatistic(Id, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
+        public async Task<JsonResult> GetNewPeople()
+        {
+            return Json(await AuditoryManager.GetNewPeople(CurrentUser.Id));
+        }
+        [HttpPost]
         public async Task<JsonResult> GetUsersByDate(TestUserModel model)
         {
             if(model.Id != 0) return Json(await AuditoryManager.GetUsersByDateAud(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));

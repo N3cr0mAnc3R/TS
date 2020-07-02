@@ -22,7 +22,17 @@
             });
 
         },
-        loadPeople: function () { },
+        loadPeople: function () {
+            $.ajax({
+                url: "/auditory/GetNewPeople",
+                type: "POST",
+                async: true,
+                success: function (result) {
+                    console.log(result);
+                }
+            });
+
+        },
         showTable: function () {
             this.shownTable = !this.shownTable;
         },

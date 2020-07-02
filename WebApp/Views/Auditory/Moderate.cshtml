@@ -10,8 +10,8 @@
     <div class="auditory-header">
         {{switchLocal(1)}} {{auditoryName}}
     </div>
-    <div class="container auditory row">
-        <div class="container computer-list">
+    <div class="auditory row">
+        <div class="computer-list">
             <div class="place-table">
                 <div v-for="i in maxX+1" class="place-row row">
                     <div v-for="item in filterComps(i-1)" class="col">
@@ -23,8 +23,8 @@
                             </div>
                             <div class="info-wrapper">
                                 <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
-                                <div class="control-place">
-                                    <button class="chat-open" v-on:click="select(item.TestingProfileId)">
+                                <div class="control-place" v-if="item.TestingProfileId">
+                                    <button class="chat-open" v-on:click="select(item.TestingProfileId)" v-if="item.chat">
                                         <i class="fa fa-keyboard"></i>
                                         <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
                                             <span>
@@ -47,13 +47,15 @@
             </div>
             <br />
         </div>
+    </div>
+    <div class="control-wrapper">
         <div class="control">
             <ul>
                 <li v-on:click="openModal()">{{switchLocal(10)}}</li>
+                <li v-on:click="download(1)">Скачать</li>
             </ul>
         </div>
     </div>
-
     <div id="full-chat-wrapper" v-bind:class="{'opened': isChatOpened}">
         <div class="chat-panel">
             <span class="user-info">{{findInfoForChat()}}</span>
@@ -93,6 +95,9 @@
                         <input class="form-control" type="date" v-model="currentDate" />
                         <div><button v-on:click="getUserList()" v-bind:disabled="!currentDate || currentStatus == -1">Отфильтровать</button></div>
                     </div>
+                    <div class="selection">
+                        <div><button v-on:click="sendReload()">Перезагрузить</button></div>
+                    </div>
                 </div>
                 <div class="modal-footer">
 
@@ -116,7 +121,7 @@
                             <video id="full-video-screen" autoplay muted controls></video>
                         </div>
                         <div class="photo-wrapper">
-                            <img id="full-video-photo" v-bind:src="'data:image/png;base64, ' + currentUser.Image" />
+                            <img id="full-video-photo" v-bind:src="'data:image/png;base64, ' + currentUser.Image" width="280" />
                         </div>
                     </div>
                     <div v-if="currentUser.errors.length > 0">
@@ -129,18 +134,18 @@
                     </div>
                     <button class="add-error" v-on:click="showError()">{{switchLocal(4)}}</button>
 
-                    <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">{{switchLocal(5)}}</div><div v-if="currentUser.IsPause">{{switchLocal(6)}}</div></button>
+                    <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
                     <button class="verify-user" v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
                     <button class="verify-user" v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
-                    <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(7)}}</button>
+                    <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(5)}}</button>
                     <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
                     <button class="reconnect" v-on:click="reconnect()">{{switchLocal(14)}}</button>
 
-                    <button class="finish-test" v-on:click="download(1)">Скачать 1</button>
-                    <button class="finish-test" v-on:click="download(2)">Скачать 2</button>
+                    @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
+                    <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(5)}}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(9)}}</button>
                 </div>
             </div>
         </div>

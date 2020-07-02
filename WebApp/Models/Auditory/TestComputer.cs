@@ -22,11 +22,12 @@ namespace WebApp.Models
         public int PlaceProfileId { get; set; }
         public int PIN { get; set; }
         public int TestingProfileId { get; set; }
-
+        public DateTime? TestingBegin { get; set; }
 
 
 
         public bool IsCameraControl { get; set; }
+        public bool RequestReset { get; set; }
         public bool IsRecordOnStart { get; set; }
         public bool IsRecordOnViolation { get; set; }
         public bool IsRecordOnWarning { get; set; }
@@ -36,5 +37,6 @@ namespace WebApp.Models
         public bool NeedShowScore { get; set; }
         public int TestingTime { get; set; }
         public int TestingTimeRemaining { get; set; }
+        public string NameDiscipline{ get; set; }
     }
 }

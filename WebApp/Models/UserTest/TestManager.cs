@@ -124,6 +124,13 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_SaveImageData]", new { image = model.Image, model.Id }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task ResetPlaceRequest(Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { userUID, isRequest = true }, commandType: CommandType.StoredProcedure);
+            }
+        }
 
 
         //todo: Перебросить в чат
@@ -387,7 +394,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<int>(sql: "[dbo].[scoreOfUserTesting]", new { testingProfileId }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<int>(sql: "[dbo].[UserPlace_TestingScoreGet]", new { testingProfileId }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<int> SendMessage(ChatMessage message)

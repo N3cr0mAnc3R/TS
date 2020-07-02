@@ -162,12 +162,12 @@ namespace WebApp.Controllers
             //    return Json(new { Error = 1 });
             //}
 
-            if(facesMarker.Rectangles.Count() > 0)
-            image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
+            if (facesMarker.Rectangles.Count() > 0)
+                image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
 
             facesMarker1.Rectangles = faceDetector.ProcessFrame(image1);
-            if(facesMarker1.Rectangles.Count() > 0)
-            image1 = image1.Clone(facesMarker1.Rectangles.First(), PixelFormat.Format24bppRgb);
+            if (facesMarker1.Rectangles.Count() > 0)
+                image1 = image1.Clone(facesMarker1.Rectangles.First(), PixelFormat.Format24bppRgb);
 
             //string result = "";
             //using (var ms = new MemoryStream())
@@ -178,7 +178,7 @@ namespace WebApp.Controllers
 
             //return Json(result);
 
-            return Json(Compare(image1, image, 0.9));
+            return Json(Compare(image1, image, 0.85));
             //return Json(Compare(ConvertToFormat(second, PixelFormat.Format24bppRgb), ConvertToFormat(img, PixelFormat.Format24bppRgb), 0.8, 0.6f));
         }
         public static Bitmap ConvertToFormat(Image image, PixelFormat format)
@@ -397,6 +397,20 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetChatMessages(int Id)
         {
             return Json(await TestManager.GetChatMessages(Id, Session["Localization"].ToString()));
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> ResetPlaceRequest()
+        {
+            try
+            {
+                await TestManager.ResetPlaceRequest(CurrentUser.Id);
+                return Json(1);
+            }
+            catch (Exception e)
+            {
+                return Json(0);
+            }
         }
         #endregion
         protected TestManager TestManager

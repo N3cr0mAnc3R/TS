@@ -3,7 +3,6 @@
     data: {
         testingProfileId: 0,
         domain: "",
-        selectedTest: {},
         questions: [],
         answers: [],
         page: 0,
@@ -21,6 +20,7 @@
             loading: null,
             loaded: null
         },
+        adminPaused: false,
         unloadedImage: "", //Если вопрос много весит, то загружаем по кусочкам
         buffer: {},
         intervalConnection: null,
@@ -62,6 +62,7 @@
         streamLoaded: null,
         streamQueue: [],
         needCalc: false,
+        NameDiscipline: "",
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -103,7 +104,6 @@
             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
             setTimeout(function () {
                 self.maxTipWidth = $('#main-window').width();
-                console.log(self.maxTipWidth);
             }, 500);
             //GetCurrentUser
             $.ajax({
@@ -112,7 +112,6 @@
                 async: false,
                 success: function (user) {
                     self.currentUser = user;
-                    console.log(user);
                 }
             });
             $.ajax({
@@ -120,7 +119,6 @@
                 type: "POST",
                 async: false,
                 success: function (info) {
-                    console.log(info);
                     if (info.TestingTimeRemaining <= 0) {
                         //self.finishTest();
                         //window.open('/user/waiting','_self');
@@ -137,6 +135,10 @@
                     self.needShowScore = info.NeedShowScore;
                     self.timeRecording = info.TimeRecording;
                     self.testingTime = info.TestingTime;
+                    self.NameDiscipline = info.NameDiscipline;
+                    setTimeout(function () {
+                        document.title = self.switchLocal(26);
+                    }, 600);
                 }
             });
         },
@@ -228,10 +230,9 @@
                     self.questions.forEach(function (a) { a.Answers.sort(function (b, c) { b.Sort - c.Sort; }); });
                     //Текущий вопрос выбираем первый
                     self.selectQuestion(1);
-                    console.log(resp4);
                     self.sourceMaterials = resp4[0];
                     self.sourceMaterials.forEach(function (material) {
-                        self.needCalc = material.isCalc || self.needCalc;
+                        self.needCalc = material.IsCalc || self.needCalc;
                     })
                     self.startCheckConnection(id);
                 }, function (err) {
@@ -247,6 +248,7 @@
             // var reader = new FileReader();
         },
         recordingScreen: function (event) {
+            console.log('opa');
             //console.log(event);
             // if (event.data && event.data.size > 0) {
             app.recordedScreen.push(event.data);
@@ -320,7 +322,6 @@
                     reader.onload = function () {
                         self.selectedQuestion.answerImage = reader.result.substr(reader.result.indexOf(',') + 1);
                     };
-                    console.log(e.target.files[0]);
                     reader.readAsDataURL(e.target.files[0]);
                     self.answerQuestion();
                 }
@@ -409,7 +410,6 @@
 
                             setTimeout(function () {
                                 self.maxTipWidth = $('#main-window').width() < 500 ? $('#main-window').width() : 540;
-                                console.log(self.maxTipWidth);
                             }, 500);
                         }
                         //self.selectedQuestion.QuestionImage += d.QuestionImage;
@@ -458,7 +458,6 @@
                         }
                         else {
                             self.selectedQuestion.fileId = self.selectedQuestion.Answers[0].fileId;
-                            console.log(self.selectedQuestion.fileId);
                         }
                     }
                 }
@@ -477,13 +476,12 @@
                         },
                         success: function (data) {
                             if (data !== 1) {
-                                console.log('error1');
                                 self.pause = true;
                                 if (!self.intervalConnectionLost) {
                                     self.intervalConnectionLost = setTimeout(function () {
                                         clearTimeout(self.intervalConnectionLost);
                                         self.lostConnection = true;
-                                    }, 30000);
+                                    }, 60000);
                                 }
                             }
                             else {
@@ -495,7 +493,6 @@
                             }
                         },
                         error: function () {
-                            console.log('error2');
                             self.pause = true;
                             if (!self.intervalConnectionLost) {
                                 self.intervalConnectionLost = setTimeout(function () {
@@ -512,10 +509,10 @@
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.interval = setInterval(function () {
+                if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
                 if (self.timeLeft <= 0) {
                     clearInterval(self.interval);
-                    self.finishScreen = true;
 
                     clearInterval(self.intervalConnection);
                     self.finishTest();
@@ -535,11 +532,8 @@
                 return;
             }
             self.flagStopRec = true;
-            console.log('stop recording');
-            console.log();
             if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
             if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
-            console.log(self.recordedCamera);
             console.log(self.recordedScreen);
             self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
             self.bufferScreen = new Blob(self.recordedScreen, { type: 'video/webm' });
@@ -652,34 +646,38 @@
                 var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
 
                 if (!message.IsSender) {
-                    console.log(message);
-                    console.log(message.type);
                     if (message.candidate && message.candidate != '{}') {
                         var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                         //self.queue.push(candidate);
 
 
                         var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                        console.log(queue.candidates);
                         queue.candidates.push(candidate);
                     }
                     else if (message.requestOffer) {
                         console.log('start request');
+                        self.reInitPeers();
                         self.initRTCPeer(1);
                         self.initRTCPeer(2);
                     }
+                    else if (message.reloadRequest) {
+                        location.href = location.href;
+                        //window.reload(true);
+                    }
                     else if (message.answer) {
-                        var interval = setInterval(function () {
-                            console.log('start interval');
+                        //var interval = setInterval(function () {
+                            //console.log('start interval');
                             var found = self.peers.filter(function (item) { return item.type == message.type; })[0];
                             console.log('found', found);
                             if (found) {
-                                clearInterval(interval);
+                              //  clearInterval(interval);
                                 var peer = found.peer;
                                 console.log(message);
                                 console.log(peer);
                                 peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
 
-                                    var queue = self.queue.filter(function (item) { return item.type == message.type })[0];
+                                    var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
                                     queue.candidates.forEach(function (candidate) {
                                         peer.addIceCandidate(candidate);
                                     });
@@ -688,15 +686,27 @@
 
 
                             }
-                        }, 500);
+                       // }, 500);
+                    }
+                    else if (message.requestPause) {
+                        self.adminPaused = !self.adminPaused;
+
                     }
                 }
             };
 
         },
+        reInitPeers: function () {
+            var self = this;
+            self.queue = [{ type: 1, candidates: [] }, { type: 2, candidates: [] }];
+            self.gotICE = false;
+            self.peers.forEach(function (peerWithType) {
+                peerWithType.peer.close();
+                peerWithType.peer = null;
+            });
+        },
         initWebCam: function () {
             var self = this;
-            console.log('init webcam');
             navigator.mediaDevices.getUserMedia(
                 {
                     video: {
@@ -709,10 +719,15 @@
                         self.initWebCam();
                     };
                     self.cameraStream = videostream;
-                    console.log('init stream', self.cameraStream);
-                    self.cameraRecorder = new MediaRecorder(videostream);
+                    var options;
+                    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                        options = { mimeType: 'video/webm; codecs=vp9' };
+                    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+                        options = { mimeType: 'video/webm; codecs=vp8' };
+                    }
+                    self.cameraRecorder = new MediaRecorder(videostream, options);
                     self.cameraRecorder.ondataavailable = self.recordingCamera;
-                    self.cameraRecorder.start(1000);
+                    self.cameraRecorder.start(100);
 
                     self.initRTCPeer(1);
                     $('#video1')[0].srcObject = videostream;
@@ -902,28 +917,34 @@
         },
         finishTest: function () {
             var self = this;
+            self.loadObject.loading = true;
+            self.loadObject.loaded = false;
             self.answerQuestion();
             //var obj = $('#video2')[0];
             //var src = URL.createObjectURL(self.bufferCamera);
             //var src1 = URL.createObjectURL(self.bufferScreen);
+            self.finishRecord(self);
+            self.finishScreen = true;
 
-            setTimeout(function () {
-                $.ajax({
-                    url: "/user/FinishTest?Id=" + self.testingProfileId,
-                    type: "POST",
-                    success: function () {
-                    }
-                });
 
-                $.ajax({
-                    url: "/user/GetScore?Id=" + self.testingProfileId,
-                    type: "POST",
-                    async: false,
-                    success: function (info) {
-                        self.score = info;
-                    }
-                });
-            }, 2000);
+            console.log(self.finishScreen, self.lostConnection);
+            $.ajax({
+                url: "/user/FinishTest?Id=" + self.testingProfileId,
+                type: "POST",
+                success: function () {
+                    $.ajax({
+                        url: "/user/GetScore?Id=" + self.testingProfileId,
+                        type: "POST",
+                        async: false,
+                        success: function (info) {
+                            self.loadObject.loading = false;
+                            self.loadObject.loaded = true;
+                            self.score = info;
+                        }
+                    });
+                }
+            });
+
 
 
             $.ajax({
@@ -945,22 +966,31 @@
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
+
                 Str.oninactive = function (er) {
                     console.log(er);
-                    self.startCapture(displayMediaOptions);
+                    if (!finishScreen) {
+                        self.startCapture(displayMediaOptions);
+                    }
                 };
+                var options;
+                if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                    options = { mimeType: 'video/webm; codecs=vp9' };
+                } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+                    options = { mimeType: 'video/webm; codecs=vp8' };
+                }
                 //var tracks = Str.getTracks();
                 //track.forE
+                console.log(options);
                 self.initRTCPeer(2);
-                self.screenRecorder = new MediaRecorder(Str);
+                self.screenRecorder = new MediaRecorder(Str, options);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
-                self.screenRecorder.start(1000);
+                self.screenRecorder.start(100);
                 //   console.log(Str);
             })
                 .catch(function (err) {
                     console.error("Error:" + err);
-                    startCapture(displayMediaOptions);
-                    alert("Обновите страницу и разрешите запись экрана!");
+                    self.startCapture(displayMediaOptions);
                     return null;
                 });
         },
@@ -989,7 +1019,7 @@
                     var str = count + ' ';
                     var procent = count % 10;
                     if (procent == 1) { str += 'вопрос'; }
-                    else if (procent < 4 && procent > 1) { str += 'вопроса'; }
+                    else if (procent < 5 && procent > 1) { str += 'вопроса'; }
                     else { str += 'вопросов'; }
                     return str;
                 }
@@ -1098,7 +1128,7 @@
         },
         sendMessage: function (sself) {
             var self = sself ? sself : this;
-            if (self.chat.Message == "" || self.chat.Message.trim() == "") return;
+            if (!self.chat || self.chat.Message == "" || self.chat.Message.trim() == "") return;
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
@@ -1128,11 +1158,12 @@
             //    console.log(peer.connectionState);
             //});
             var stream = type == 1 ? self.cameraStream : self.screenStream;
+            console.log(type, stream);
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
 
-            var found = self.peers.filter(function (item) { return item.type == type })[0];
+            var found = self.peers.filter(function (item) { return item.type == type; })[0];
             if (found) {
                 found.peer = peer;
             }
@@ -1216,6 +1247,17 @@
                 case 13: return self.localization == 1 ? "Вы не ответили на " : "Not answered: ";
                 case 14: return self.localization == 1 ? "Свернуть" : "Collapse";
                 case 15: return self.localization == 1 ? "Развернуть" : "Expand";
+                case 16: return self.localization == 1 ? "Потеряна связь с сервером" : "Lost connection to the server";
+                case 17: return self.localization == 1 ? "Потеряно соединение с сервером. Проверьте Ваше подключение к интернету." : "Lost connection to the server. Check Your internet-connection.";
+                case 18: return self.localization == 1 ? "Вступительное испытание завершено." : "Your test is over.";
+                case 19: return self.localization == 1 ? "Ваш результат" : "Your score";
+                case 20: return self.localization == 1 ? "С результатами ознакомлен" : "I got acquainted with the results";
+                case 21: return self.localization == 1 ? "Подтвердить" : "Confirm";
+                case 22: return self.localization == 1 ? "Вернуться к списку" : "Back to test list";
+                case 23: return self.localization == 1 ? "Отмена" : "Cancel";
+                case 24: return self.localization == 1 ? "Завершить" : "Finish";
+                case 25: return self.localization == 1 ? "Администратор приостановил тестирование. Пожалуйста, подождите." : "Administrator paused Your test. Please, wait for continue.";
+                case 26: return self.localization == 1 ? "Тестирование" : "Testing";
             }
         }
     },

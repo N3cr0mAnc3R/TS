@@ -42,6 +42,7 @@
 
     .computer-list {
         border: 1px solid #ddd;
+        margin: auto;
         margin-top: 40px;
         padding: 40px;
         overflow-y: auto;
@@ -51,9 +52,7 @@
         box-shadow: #a2a2a2 0px 3px 4px;
         background: #eceef1;
         max-height: 650px;
-        max-width: 1024px;
-
-
+        /*max-width: 1024px;*/
         .place-table {
             text-align: center;
 
@@ -76,9 +75,9 @@
                             width: 180px;
                             height: 130px;
                             position: absolute;
-                            -webkit-transform: scale(-1,1);
+                            /*-webkit-transform: scale(-1,1);
                             -ms-transform: scale(-1,1);
-                            transform: scale(-1,1);
+                            transform: scale(-1,1);*/
                             left: 15px;
                         }
 
@@ -143,7 +142,7 @@
                             .chat-unread-wrapper {
                                 position: absolute;
                                 top: 177px;
-                                right: 298px;
+                                left: 78px;
                                 background: #FF4170;
                                 width: 17px;
                                 height: 17px;
@@ -168,8 +167,15 @@
             }
         }
     }
+}
+
+.control-wrapper {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
 
     .control {
+        margin: auto;
         margin-top: 40px;
         width: 225px;
         height: -webkit-max-content;
@@ -177,7 +183,6 @@
         height: max-content;
         background: #565c72;
         padding: 0;
-        margin-left: 15px;
 
         ul {
             list-style: none;
@@ -190,7 +195,7 @@
                 max-height: 88px;
                 color: #fff;
                 margin: 0;
-                padding-left: 20px;
+                text-align: center;
                 font-size: 16px;
                 line-height: 33px;
                 cursor: pointer;
@@ -441,4 +446,11 @@ button {
         width: 1024px;
         height: 768px;
     }*/
+}
+
+
+.body-content {
+    &.container {
+        max-width: initial !important;
+    }
 }

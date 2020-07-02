@@ -1,9 +1,4 @@
 ﻿
-@{
-    ViewBag.Title = "Режим ожидания";
-}
-
-
 <link href="~/Content/Testing/Index.css" rel="stylesheet" />
 <div id="main-window">
     @if (ViewBag.PlaceInfo != null)
@@ -18,12 +13,16 @@
         @if (Request.IsAuthenticated)
         {
 
-            <div v-if="!hasPlaceConfig" class="container">
+        <div v-if="!hasPlaceConfig" class="container">
 
-                <div class="empty-list">
-                    {{switchLocal(4)}}
-                </div>
+            <div class="empty-list">
+                {{switchLocal(4)}}
             </div>
+            <div class="empty-list">
+                {{switchLocal(12)}}
+                <button v-on:click="askReset()" class="btn-reset">{{switchLocal(13)}}</button>
+            </div>
+        </div>
         }
         else
         {
@@ -40,7 +39,7 @@
         <div class="not-test" v-if="verified">
             <div v-if="tests && tests.length == 0" class="waiting">
                 <div class="empty-list">
-                    {{switchLocal(4)}}
+                    {{switchLocal(11)}}
                 </div>
             </div>
             <template v-if="activeTests.length == 0">
@@ -79,6 +78,22 @@
                     </div>
                 </div>
             </template>
+            <div class="not-test" v-loader="loadObject">
+                <div class="user-info">
+                    <div class="user-either">{{switchLocal(9)}}:</div>
+                </div>
+                <div class="test-list" v-if="activeTests.length == 0">
+                    <div v-for="test in testingTests" class="test-wrapper">
+                        @*- {{test.TestingDate}}*@
+                        <div class="test-item" v-on:click="startTest(test.Id)">
+                            <span class="test-name">{{test.DisciplineName}}</span>
+                            <span class="test-icon">
+                                <i class="far fa-play-circle"></i>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             @*<div class="finish-game"><a class="btn-gray" href="DownloadVideoFile?Id=67">Скачать</a></div>*@
             @*<div class="finish-game"><button class="btn-gray" v-on:click="download()">download</button></div>*@
@@ -98,7 +113,7 @@
                 </div>
             </div>
             <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
-            <div class="not-test">
+            <div class="not-test" v-loader="loadObject">
                 <div class="user-info">
                     <div class="user-either">{{switchLocal(9)}}:</div>
                 </div>
@@ -167,7 +182,7 @@
                 </ul>
                 <div class="send-message-wrapper">
                     <div class="message-input">
-                        <textarea v-model="chat.Message"></textarea>
+                        <textarea v-model="chat.Message" v-on:focus="subscribeEnter"></textarea>
                         <button v-on:click="sendMessage">
                             @*<span class="text">Отправить </span>*@
                             <span>
