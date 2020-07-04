@@ -122,6 +122,13 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<TestUser>(sql: "[dbo].[Administrator_UserByDateGet]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<TestResult>> GetUsersResultByDate(int testingStatusId, DateTime date, Guid userUID, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<TestResult>(sql: "[dbo].[Administrator_TestingResultByDate_Get]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<AuditoryStatistic> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -141,7 +148,7 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == ""? (string)null: config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
-                if (config.PlaceConfig == "")
+                if (config.PlaceConfig == null)
                 {
                     await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { userUID, isRequest = 0}, commandType: CommandType.StoredProcedure);
                 }
@@ -185,6 +192,22 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryAsync<IndexItem>(sql: "[dbo].[Administrator_TestingStatuseGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
+        public async Task<TestUser> GetInfoForReport(int testingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<TestUser>(sql: "[dbo].[Administrator_ReportInfoGet]", new { userUID, testingProfileId }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
+        public async Task<ReportList> GetResultReport(Guid? userUID, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<ReportList>(sql: "[dbo].[Administrator_ResultBlankGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
 
             }
         }

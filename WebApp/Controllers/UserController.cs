@@ -203,7 +203,7 @@ namespace WebApp.Controllers
                 }
                 else return false;
             }
-            catch
+            catch (Exception e)
             {
                 return Compare(image2, image1, comparisionLevel);
             }

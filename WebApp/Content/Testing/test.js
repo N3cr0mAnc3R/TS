@@ -63,6 +63,7 @@
         streamQueue: [],
         needCalc: false,
         NameDiscipline: "",
+        blurReady: false,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -76,7 +77,9 @@
             second: '',
             isExpr: false,
             expr: ''
-        }
+        },
+        errorText: "",
+        adminErrors: []
     },
     methods: {
         init: function () {
@@ -87,6 +90,15 @@
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                }
+            });
+            $(window).on('mousemove', function (e) {
+                if (e.pageX >= $(document.body).width() - 1 || e.pageY > $(document.body).height() || e.pageX <= 1 || e.pageY <= 1) {
+                   // self.errorText = self.switchLocal(27);
+                    if (self.blurReady) {
+                        console.log('m');
+                        notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
+                    }
                 }
             });
             self.mediaSource = new MediaSource();
@@ -393,7 +405,7 @@
                         self.selectedQuestion.QuestionImage = "";
                         self.unloadedImage = "";
                     }
-                    if (d.QuestionImage.indexOf('flag') != -1) {
+                    if (d.QuestionImage.indexOf('flag') != -1 && d.QuestionImage.indexOf('flag') < 3) {
                         self.unloadedImage += d.QuestionImage.substr(4);
                         //self.selectedQuestion.QuestionImage += d.QuestionImage.substr(4);
                         self.askQuestionImagePart(part + 1);
@@ -667,26 +679,26 @@
                     }
                     else if (message.answer) {
                         //var interval = setInterval(function () {
-                            //console.log('start interval');
-                            var found = self.peers.filter(function (item) { return item.type == message.type; })[0];
-                            console.log('found', found);
-                            if (found) {
-                              //  clearInterval(interval);
-                                var peer = found.peer;
-                                console.log(message);
-                                console.log(peer);
-                                peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
+                        //console.log('start interval');
+                        var found = self.peers.filter(function (item) { return item.type == message.type; })[0];
+                        console.log('found', found);
+                        if (found) {
+                            //  clearInterval(interval);
+                            var peer = found.peer;
+                            console.log(message);
+                            console.log(peer);
+                            peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
 
-                                    var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                                    queue.candidates.forEach(function (candidate) {
-                                        peer.addIceCandidate(candidate);
-                                    });
-                                    console.log(r);
-                                }, function (r) { console.log(r); });
+                                var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                                queue.candidates.forEach(function (candidate) {
+                                    peer.addIceCandidate(candidate);
+                                });
+                                console.log(r);
+                            }, function (r) { console.log(r); });
 
 
-                            }
-                       // }, 500);
+                        }
+                        // }, 500);
                     }
                     else if (message.requestPause) {
                         self.adminPaused = !self.adminPaused;
@@ -937,9 +949,9 @@
                         type: "POST",
                         async: false,
                         success: function (info) {
+                            self.score = info;
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
-                            self.score = info;
                         }
                     });
                 }
@@ -969,7 +981,7 @@
 
                 Str.oninactive = function (er) {
                     console.log(er);
-                    if (!finishScreen) {
+                    if (!self.finishScreen) {
                         self.startCapture(displayMediaOptions);
                     }
                 };
@@ -986,6 +998,12 @@
                 self.screenRecorder = new MediaRecorder(Str, options);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
                 self.screenRecorder.start(100);
+                $(window).on('blur', function (e) {
+                    if (self.blurReady) {
+                        notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
+                    }
+                    self.blurReady = true;
+                });
                 //   console.log(Str);
             })
                 .catch(function (err) {
@@ -1258,6 +1276,7 @@
                 case 24: return self.localization == 1 ? "Завершить" : "Finish";
                 case 25: return self.localization == 1 ? "Администратор приостановил тестирование. Пожалуйста, подождите." : "Administrator paused Your test. Please, wait for continue.";
                 case 26: return self.localization == 1 ? "Тестирование" : "Testing";
+                case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
             }
         }
     },

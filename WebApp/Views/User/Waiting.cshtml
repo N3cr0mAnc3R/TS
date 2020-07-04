@@ -100,19 +100,26 @@
         </div>
 
         <div class="disabled-info" v-if="!verified" v-loader="loadTestObject">
-            {{switchLocal(6)}}
-            <br />
-
-
-            <div class="pre-video-wrapper">
-                <div class="video">
-                    <div class="camera-wrapper">
-                        <video id="video1" autoplay muted playsinline poster="~/Content/novideo.png" v-bind:class="{'error': tryRec, 'no-face':noFace}">
-                        </video>
-                    </div>
+            <div v-if="tests && tests.length == 0" class="waiting">
+                <div class="empty-list">
+                    {{switchLocal(11)}}
                 </div>
             </div>
-            <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
+            <div v-if="tests && tests.length > 0">
+                {{switchLocal(6)}}
+                <br />
+
+
+                <div class="pre-video-wrapper">
+                    <div class="video">
+                        <div class="camera-wrapper">
+                            <video id="video1" autoplay muted playsinline poster="~/Content/novideo.png" v-bind:class="{'error': tryRec, 'no-face':noFace}">
+                            </video>
+                        </div>
+                    </div>
+                </div>
+                <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
+            </div>
             <div class="not-test" v-loader="loadObject">
                 <div class="user-info">
                     <div class="user-either">{{switchLocal(9)}}:</div>

@@ -123,8 +123,8 @@ const app = new Vue({
                                 self.initSocket(1, item);
                             }
                             else {
-                                if (found.RequestReset) {
-                                    notifier([{ Type: 'error', Body: found.Name + ": запрос на сброс привязанного места" }]);
+                                if (item.RequestReset && item.TestingProfileId) {
+                                    notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
                                 }
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
                                 if (found.UserVerified != item.UserVerified) {
@@ -631,6 +631,8 @@ const app = new Vue({
                 success: function () {
                     let found = self.videoSockets.filter(function (item) { return item.id == self.currentUser.TestingProfileId; })[0];
                     found.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: self.currentUser.TestingProfileId, resetRequest: true }));
+                    console.log(self.currentUser);
+                    //RequestReset
                     console.log(self.videoSockets, self.currentUser.TestingProfileId);
                 }
             });

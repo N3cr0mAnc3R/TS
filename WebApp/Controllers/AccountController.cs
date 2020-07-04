@@ -166,6 +166,10 @@ namespace WebApp.Controllers
             return result;
             return CurrentUser.Picture != null ? File(CurrentUser.Picture, "image/jpg") : (ActionResult)new HttpStatusCodeResult(404);
         }
+        public JsonResult HasPhoto()
+        {
+            return Json(CurrentUser.Picture != null);
+        }
 
         protected AccountManager AccountManager
         {

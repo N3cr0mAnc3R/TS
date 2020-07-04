@@ -6,7 +6,8 @@
         needShow1: false,
         needShow2: false,
         needShow3: false,
-        needShow4: false
+        needShow4: false,
+        hasPhoto: false
     },
     methods: {
         init: function () {
@@ -21,6 +22,14 @@
                     self.getCurrentUser();
                     $('#window-without-loader').css('display', 'block');
                     $('#main-loader').css('display', 'none');
+                }
+            });
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/account/HasPhoto',
+                success: function (d) {
+                    self.hasPhoto = d;
                 }
             });
             self.showUrl();

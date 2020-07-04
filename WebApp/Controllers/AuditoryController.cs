@@ -20,7 +20,7 @@ namespace WebApp.Controllers
             {
                 return View();
             }
-            else if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4 }))
+            else if (AccountManager.HasOneOfRoles(roles, new int[4] { 1, 2, 3, 4 }))
             {
                 return Redirect("/Verification/List");
             }
@@ -52,6 +52,28 @@ namespace WebApp.Controllers
             {
                 return Redirect("/user/waiting");
             }
+        }
+        async public Task<ActionResult> DownloadReport(int Id)
+        {
+            TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
+            if(t == null)
+            {
+                return JavaScript("window.close();");
+            }
+            ReportList report = await AuditoryManager.GetResultReport(CurrentUser.Id);
+            ReportRender render = new ReportRender(
+            "http://reports.ncfu.ru/ReportServer",
+            "/TestingSystem/TestingResult",
+            "ecampus",
+            "44xwkm8y8c",
+            "st9-dbe-reports");
+
+            FileContentResult result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+
+            result.FileDownloadName = t.LastName + " " + t.FirstName + " " + t.MiddleName + ".pdf";
+
+            return result;
+
         }
         public ActionResult DownloadVideoFile(int Id, int Type)
         {
@@ -92,8 +114,8 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetUsersByDate(TestUserModel model)
         {
-            if(model.Id != 0) return Json(await AuditoryManager.GetUsersByDateAud(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
-            return Json(await AuditoryManager.GetUsersByDate(model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
+            if (model.Id != 0) return Json(await AuditoryManager.GetUsersByDateAud(model.Id, model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
+            return Json(await AuditoryManager.GetUsersResultByDate(model.StatusId, model.Date, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> GetStatuses()

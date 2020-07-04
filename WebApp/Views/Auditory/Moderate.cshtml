@@ -15,14 +15,19 @@
             <div class="place-table">
                 <div v-for="i in maxX+1" class="place-row row">
                     <div v-for="item in filterComps(i-1)" class="col">
-                        <div class="place-item" :title="item.Name">
-                            <div class="video-wrapper">
+                        <div class="place-item" :title="item.Name" :class="{'request': item.RequestReset && item.TestingProfileId }" v-if="item.Name">
+                            <div class="video-wrapper" v-if="item.TestingProfileId">
                                 <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" muted class="video-camera"></video>
                                 <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-2'" muted class="video-screen"></video>
                                 @*<img v-bind:id="'img-' + item.TestingProfileId" />*@
                             </div>
+                            <div class="empty-wrapper" v-if="!item.TestingProfileId">
+                                <div class="empty-info">
+                                    <div class="empty-item">Свободно</div>
+                                </div>
+                            </div>
                             <div class="info-wrapper">
-                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
+                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name" v-if="item.TestingProfileId">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
                                 <div class="control-place" v-if="item.TestingProfileId">
                                     <button class="chat-open" v-on:click="select(item.TestingProfileId)" v-if="item.chat">
                                         <i class="fa fa-keyboard"></i>
@@ -48,14 +53,14 @@
             <br />
         </div>
     </div>
-    <div class="control-wrapper">
+    @*<div class="control-wrapper">
         <div class="control">
             <ul>
                 <li v-on:click="openModal()">{{switchLocal(10)}}</li>
                 <li v-on:click="download(1)">Скачать</li>
             </ul>
         </div>
-    </div>
+    </div>*@
     <div id="full-chat-wrapper" v-bind:class="{'opened': isChatOpened}">
         <div class="chat-panel">
             <span class="user-info">{{findInfoForChat()}}</span>

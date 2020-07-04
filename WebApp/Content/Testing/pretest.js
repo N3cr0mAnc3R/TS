@@ -100,6 +100,7 @@
                         //    a.TestingDate = date.toLocaleString('Ru-ru');
                         //});
                         var flag = false;
+                        var min = 0;
                         //Запись и отображение доступных тестов
                         if (!self.tests) {
                             //self.tests = d;
@@ -121,7 +122,7 @@
                             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                             //console.log(window.URL);
                             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
-                            var min = self.tests.length > 0? self.tests[0].Id : 0;
+                            min = self.tests.length > 0? self.tests[0].Id : 0;
                             console.log(min);
                             self.tests.forEach(function (item) {
                                 min = min > item.Id ? item.Id : min;
@@ -160,7 +161,17 @@
                         self.user = d[0].LastName + " " + d[0].FirstName + " " + d[0].MiddleName;
                         //Если назначен тест, то больше не загружать
                         if (flag) {
-                            console.log('flag');
+                            min = self.tests[0].Id;
+                            self.tests.forEach(function (item) {
+                                min = min > item.Id ? item.Id : min;
+                            })
+                            self.testingProfileId = min;// d[0].Id;
+                            if (min != 0) {
+                                self.initWebCam();
+                                self.initChat();
+
+                                clearInterval(self.findTestInterval);
+                            }
                             clearInterval(self.findTestInterval);
                         }
                     },
@@ -320,6 +331,12 @@
                     else if (message.verified != undefined) {
                         console.log(message.verified);
                         self.verified = message.verified;
+                        if (message.verified == true) {
+                            notifier([{ Type: 'success', Body: self.switchLocal(16) }]);
+                        }
+                        else {
+                            notifier([{ Type: 'error', Body: self.switchLocal(17)}]);
+                        }
                         clearInterval(self.verifyInterval);
                     }
                     else if (message.requestOffer) {
@@ -435,6 +452,7 @@
                             }
                             else {
                                 self.recognized = res;
+                                console.log(res);
                                 if (!res) {
                                     self.noFace = false;
                                 }
@@ -563,6 +581,8 @@
                 case 13: return self.localization == 1 ? "Сбросить" : "Reset";
                 case 14: return self.localization == 1 ? "Во время выполнения запроса произошла ошибка" : "An error occured during Your request";
                 case 15: return self.localization == 1 ? "Запрос успешно отправлен" : "Your request has been sent";
+                case 16: return self.localization == 1 ? "Идентификация успешна" : "Identification succeeded";
+                case 17: return self.localization == 1 ? "Вы не идентфицированы" : "Your identification failed";
             }
         },
         isMe: function (message) {
