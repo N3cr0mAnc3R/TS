@@ -60,13 +60,19 @@ namespace WebApp.Controllers
             {
                 return JavaScript("window.close();");
             }
-            ReportList report = await AuditoryManager.GetResultReport(CurrentUser.Id);
+            ReportList report = await AuditoryManager.GetResultReport(Id, CurrentUser.Id);
             ReportRender render = new ReportRender(
-            "http://reports.ncfu.ru/ReportServer",
-            "/TestingSystem/TestingResult",
+            report.UrlServer,
+            report.ResultBlank,
             "ecampus",
             "44xwkm8y8c",
             "st9-dbe-reports");
+            //ReportRender render = new ReportRender(
+            //"http://reports.ncfu.ru/ReportServer",
+            //"/TestingSystem/TestingResult",
+            //"ecampus",
+            //"44xwkm8y8c",
+            //"st9-dbe-reports");
 
             FileContentResult result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
 

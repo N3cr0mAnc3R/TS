@@ -7,11 +7,9 @@ namespace WebApp.Models.Common
 {
     public class ReportList
     {
+        public string UrlServer { get; set; }
         public string ResultBlank { get; set; }
-        public string ResultBlank5 { get; set; }
-        public string ResultBlank6 { get; set; }
         public string TestingTitle { get; set; }
         public string TestingProtocol { get; set; }
-        public string QuestionAnswers { get; set; }
     }
 }

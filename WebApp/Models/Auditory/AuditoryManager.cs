@@ -203,11 +203,11 @@ namespace WebApp.Models
 
             }
         }
-        public async Task<ReportList> GetResultReport(Guid? userUID, string localization = "")
+        public async Task<ReportList> GetResultReport(int TestingProfileId, Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<ReportList>(sql: "[dbo].[Administrator_ResultBlankGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<ReportList>(sql: "[dbo].[Administrator_TestingProfileResultBlankGet]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
 
             }
         }
