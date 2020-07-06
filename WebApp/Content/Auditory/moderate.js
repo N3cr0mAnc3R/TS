@@ -25,7 +25,10 @@ const app = new Vue({
         shownError: false,
         currentError: 0,
         gotICE: false,
+        socketQueue: [],
+        socketConnecting: false,
         me: {},
+        isSuperAdmin: false,
         queue: [],
         localization: 1,
         currentStatus: -1,
@@ -44,6 +47,14 @@ const app = new Vue({
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                }
+            });
+            $.ajax({
+                url: "/account/IsPaul",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.isSuperAdmin = domain;
                 }
             });
 
@@ -110,21 +121,26 @@ const app = new Vue({
                                 item.errors = [];
                                 item.Image = "";
                                 item.chat = {};
-                                //Сокет на вебку
-                                self.initSocket(2, item, 1);
-                                console.log(item.UserVerified);
                                 //Если подтверждён
                                 if (item.UserVerified) {
+                                    //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
                                     //Сокет на экран
                                     self.initSocket(2, item, 2);
                                 }
+                                //Сокет на вебку
+                                //self.socketQueue.push({ socketType: 2, item: item, videoType: 1 });
+                                self.initSocket(2, item, 1);
                                 //В любом случае нужно добавить в список
                                 self.computerList.push(item);
                                 self.initSocket(1, item);
+                                //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
                             }
                             else {
                                 if (item.RequestReset && item.TestingProfileId) {
-                                    notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
+                                    //notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
+                                }
+                                else {
+                                    found.RequestReset = false;
                                 }
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
                                 if (found.UserVerified != item.UserVerified) {
@@ -176,9 +192,15 @@ const app = new Vue({
         },
         initRTCPeer: function (created, socket, a, type) {
             let self = this;
-            let STUN = {
-                urls: 'stun:stun.advfn.com:3478'
-            };
+            //let STUN = {
+            //    urls: 'stun:stun.advfn.com:3478'
+            //},
+            //    'stun.l.google.com: 19302',
+            //    'stun1.l.google.com: 19302',
+            //    'stun2.l.google.com: 19302',
+            //    'stun3.l.google.com: 19302',
+            //    'stun4.l.google.com: 19302']
+            //};
             let TURN = {
                 url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
@@ -186,7 +208,40 @@ const app = new Vue({
             };
 
             let configuration = {
-                iceServers: [STUN, TURN]
+                iceServers: [
+                    {
+                        urls: 'stun:stun.advfn.com:3478'
+                    },
+                    {
+                        urls: 'stun:stun.l.google.com:3478'
+                    },
+                    {
+                        urls: 'stun:stun1.l.google.com:3478'
+                    },
+                    {
+                        urls: 'stun:stun2.l.google.com:3478'
+                    },
+                    {
+                        urls: 'stun:stun3.l.google.com:3478'
+                    },
+                    {
+                        urls: 'stun:stun4.l.google.com:3478'
+                    },
+                    {
+                        url: 'turn:numb.viagenie.ca',
+                        credential: 'muazkh',
+                        username: 'webrtc@live.com'
+                    },
+                    {
+                        url: 'turn:192.158.29.39:3478?transport=udp',
+                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                        username: '28224511:1379330808'
+                    },
+                    {
+                        url: 'turn:192.158.29.39:3478?transport=tcp',
+                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                        username: '28224511:1379330808'
+                    }]
             };
             let peer = new RTCPeerConnection(configuration);
 
@@ -280,7 +335,7 @@ const app = new Vue({
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false }));
 
-                    if (!self.queue.filter(function (item) { item.type == cam && Id == a.TestingProfileId; })[0]) {
+                    if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
                         var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
                         self.queue.push(queue);
                     }
@@ -637,11 +692,21 @@ const app = new Vue({
                 }
             });
         },
-        sendReload: function () {
+        sendReload: function (id) {
             let self = this;
-            self.videoSockets.forEach(function (item) {
-                item.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: item.id, reloadRequest: true }));
-            });
+            if (!id) {
+                self.videoSockets.forEach(function (item) {
+                    item.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: item.id, reloadRequest: true }));
+                });
+            }
+            else {
+                let founded = self.videoSockets.filter(function (item) {
+                    item.id == id;
+                })[0];
+                if (founded) {
+                    founded.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: id, reloadRequest: true }));
+                }
+            }
 
         },
         toggleTypeChat: function () {
@@ -708,5 +773,13 @@ const app = new Vue({
     mounted() {
         console.log(1);
         this.init();
+    },
+
+    watch: {
+        socketQueue: {
+            handler: function (newOne, oldOne) {
+                console.log(oldOne, newOne);
+            }
+        }
     }
 });

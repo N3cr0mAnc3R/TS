@@ -22,3 +22,6 @@
 .panel-list .panel-wrapper:hover {
   color: #ddd;
 }
+table {
+  margin-bottom: 100px !important;
+}

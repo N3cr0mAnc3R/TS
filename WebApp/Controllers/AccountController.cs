@@ -144,6 +144,11 @@ namespace WebApp.Controllers
         {
             return Json(new { PictureImage = CurrentUser.PictureImage });
         }
+        [HttpPost]
+        public JsonResult IsPaul()
+        {
+            return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"));
+        }
 
 #if DEBUG
         [HttpPost]

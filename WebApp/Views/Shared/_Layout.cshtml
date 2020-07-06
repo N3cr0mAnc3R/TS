@@ -73,7 +73,7 @@
                     <div class="userpic d-none d-md-block" v-if="hasPhoto">
                         <img src="@Url.Action("userpic", "account")" alt="userpic" />
                     </div>
-                    <a class="nav-link d-none d-md-block" href="/account/logout" tabindex="-1" id="nav-11">{{switchLocal(3)}}</a>
+                    <a class="nav-link d-none d-md-block" href="#" tabindex="-1" id="nav-11" onclick="function() { localStorage.removeItem('placeConfig');window.open('/account/logout', '_self'); }">{{switchLocal(3)}}</a>
                 }
             </div>
             <div class="localization-wrapper"><div class="localization-item" id="litem-1" v-on:click="setLocalization(1)">Ru</div><div id="litem-2" class="localization-item" v-on:click="setLocalization(2)">En</div></div>

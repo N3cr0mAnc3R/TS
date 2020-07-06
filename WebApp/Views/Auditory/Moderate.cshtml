@@ -53,14 +53,14 @@
             <br />
         </div>
     </div>
-    @*<div class="control-wrapper">
+    <div class="control-wrapper" v-if="isSuperAdmin">
         <div class="control">
             <ul>
                 <li v-on:click="openModal()">{{switchLocal(10)}}</li>
                 <li v-on:click="download(1)">Скачать</li>
             </ul>
         </div>
-    </div>*@
+    </div>
     <div id="full-chat-wrapper" v-bind:class="{'opened': isChatOpened}">
         <div class="chat-panel">
             <span class="user-info">{{findInfoForChat()}}</span>
@@ -145,6 +145,7 @@
                     <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(5)}}</button>
                     <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
                     <button class="reconnect" v-on:click="reconnect()">{{switchLocal(14)}}</button>
+                    <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin">Перезагрузить</button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
                     <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@

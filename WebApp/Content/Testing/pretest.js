@@ -122,7 +122,7 @@
                             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
                             //console.log(window.URL);
                             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
-                            min = self.tests.length > 0? self.tests[0].Id : 0;
+                            min = self.tests.length > 0 ? self.tests[0].Id : 0;
                             console.log(min);
                             self.tests.forEach(function (item) {
                                 min = min > item.Id ? item.Id : min;
@@ -335,7 +335,7 @@
                             notifier([{ Type: 'success', Body: self.switchLocal(16) }]);
                         }
                         else {
-                            notifier([{ Type: 'error', Body: self.switchLocal(17)}]);
+                            notifier([{ Type: 'error', Body: self.switchLocal(17) }]);
                         }
                         clearInterval(self.verifyInterval);
                     }
@@ -483,7 +483,34 @@
             };
 
             var configuration = {
-                iceServers: [STUN, TURN]
+                iceServers: [{
+                    urls: 'stun:stun.advfn.com:3478'
+                }, {
+                    urls: 'stun:stun.l.google.com:3478'
+                }, {
+                    urls: 'stun:stun1.l.google.com:3478'
+                }, {
+                    urls: 'stun:stun2.l.google.com:3478'
+                }, {
+                    urls: 'stun:stun3.l.google.com:3478'
+                }, {
+                    urls: 'stun:stun4.l.google.com:3478'
+                },
+                {
+                    url: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                }]
             };
             self.pc1 = new RTCPeerConnection(configuration);
             self.pc1.addEventListener('icecandidate', function (e) {
