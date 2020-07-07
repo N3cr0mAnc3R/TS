@@ -4,13 +4,15 @@
         shownTable: false,
         users: [],
         currentStatus: 0,
-        currentDate: null,
+        currentDate: new Date().toISOString().slice(0, 10),
         filterFIO: "",
         statuses: []
     },
     methods: {
         init: function () {
             var self = this;
+           // self.currentDate = new Date();
+            console.log(self.currentDate);
             $.ajax({
                 url: "/auditory/GetStatuses",
                 type: "POST",

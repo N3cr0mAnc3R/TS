@@ -27,7 +27,15 @@
                                 </div>
                             </div>
                             <div class="info-wrapper">
-                                <div class="place-info"><div class="place-name">{{item.Name}}</div><div class="user-name" v-if="item.TestingProfileId">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div></div>
+                                <div class="place-info">
+                                    <div class="place-name">{{item.Name}}</div>
+                                    <div class="user-name" v-if="item.TestingProfileId">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div>
+                                    <div class="user-name">
+                                        <span v-if="item.TestingStatusId == 2">В процессе</span>
+                                        <span v-if="item.TestingStatusId == 5">Собирается</span>
+                                        <span v-if="item.TestingStatusId == 3">Тест завершён</span>
+                                    </div>
+                                </div>
                                 <div class="control-place" v-if="item.TestingProfileId">
                                     <button class="chat-open" v-on:click="select(item.TestingProfileId)" v-if="item.chat">
                                         <i class="fa fa-keyboard"></i>
@@ -148,7 +156,7 @@
                     <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin">Перезагрузить</button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
-                    <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
+                        <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(9)}}</button>

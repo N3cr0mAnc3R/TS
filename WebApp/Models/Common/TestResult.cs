@@ -15,6 +15,7 @@ namespace WebApp.Models.Common
         public string PictureImage { get; set; }
         public DateTime TestingDate { get; set; }
         public float Score { get; set; }
+        public string Discipline { get; set; }
 
     }
 }

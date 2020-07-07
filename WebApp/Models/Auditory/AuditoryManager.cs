@@ -108,7 +108,7 @@ namespace WebApp.Models
                 return await cnt.QueryFirstOrDefaultAsync<TestUser>(sql: "[dbo].[UserPlace_UserPictureGet]", new { testingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<IEnumerable<TestUser>> GetUsersByDateAud(int auditoriumId, int testingStatusId, DateTime date, Guid userUID, string localization = "")
+        public async Task<IEnumerable<TestUser>> GetUsersByDateAud(int auditoriumId, int testingStatusId, DateTime? date, Guid userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
@@ -122,7 +122,7 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<TestUser>(sql: "[dbo].[Administrator_UserByDateGet]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<IEnumerable<TestResult>> GetUsersResultByDate(int testingStatusId, DateTime date, Guid userUID, string localization = "")
+        public async Task<IEnumerable<TestResult>> GetUsersResultByDate(int testingStatusId, DateTime? date, Guid userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {

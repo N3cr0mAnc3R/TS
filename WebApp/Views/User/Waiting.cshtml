@@ -9,9 +9,9 @@
     {
         <span>{{checkAuth(null,null)}}</span>
     }
-    <div>
-        @if (Request.IsAuthenticated)
-        {
+<div>
+    @if (Request.IsAuthenticated)
+    {
 
         <div v-if="!hasPlaceConfig" class="container">
 
@@ -23,18 +23,18 @@
                 <button v-on:click="askReset()" class="btn-reset">{{switchLocal(13)}}</button>
             </div>
         </div>
-        }
-        else
-        {
+    }
+    else
+    {
 
-            <div v-if="!hasPlaceConfig" class="container">
-                <div class="main-window">
-                    <div class="input-pin">
-                        <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN">
-                    </div>
+        <div v-if="!hasPlaceConfig" class="container">
+            <div class="main-window">
+                <div class="input-pin">
+                    <input type="number" class="form-control" maxlength="4" v-model="PIN" placeholder="PIN">
                 </div>
             </div>
-        }
+        </div>
+    }
     <div v-if="hasPlaceConfig" class="test-info" v-loader="loadTestObject">
         <div class="not-test" v-if="verified">
             <div v-if="tests && tests.length == 0" class="waiting">
@@ -201,7 +201,10 @@
             </div>
         </div>
     </div>
+    <div class="instruction-wrapper">
+        Инструкция и правила проведения ВИ доступны по <a href="/files/EntranceInstruction.pdf" target="_blank">ссылке</a>
     </div>
+</div>
 </div>
 
 <script src="~/Content/aes.js"></script>

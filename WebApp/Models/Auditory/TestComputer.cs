@@ -22,6 +22,7 @@ namespace WebApp.Models
         public int PlaceProfileId { get; set; }
         public int PIN { get; set; }
         public int TestingProfileId { get; set; }
+        public int TestingStatusId{ get; set; }
         public DateTime? TestingBegin { get; set; }
 
 

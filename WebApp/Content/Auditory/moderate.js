@@ -122,17 +122,23 @@ const app = new Vue({
                                 item.Image = "";
                                 item.chat = {};
                                 //Если подтверждён
-                                if (item.UserVerified) {
+                                if (item.UserVerified && [2, 5].indexOf(item.TestingStatusId) != -1) {
                                     //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
                                     //Сокет на экран
                                     self.initSocket(2, item, 2);
                                 }
                                 //Сокет на вебку
                                 //self.socketQueue.push({ socketType: 2, item: item, videoType: 1 });
-                                self.initSocket(2, item, 1);
+                                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+                                    self.initSocket(2, item, 1);
+                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                }
                                 //В любом случае нужно добавить в список
                                 self.computerList.push(item);
-                                self.initSocket(1, item);
+                                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    self.initSocket(1, item);
+                                }
                                 //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
                             }
                             else {
@@ -144,9 +150,20 @@ const app = new Vue({
                                 }
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
                                 if (found.UserVerified != item.UserVerified) {
-                                    console.log('verified');
                                     if (item.UserVerified) {
                                         self.initSocket(2, found, 2);
+                                        console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    }
+                                }
+                                if ([2].indexOf(found.TestingStatusId) != -1) {
+                                    var foundedSocket = self.videoSockets.filter(function (item) { return item.id == found.TestingProfileId; })[0];
+                                    if (!foundedSocket) {
+                                        console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                        self.initSocket(2, found, 1);
+                                        if ([2].indexOf(found.TestingStatusId) != -1) {
+                                            console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                            self.initSocket(1, found);
+                                        }
                                     }
                                 }
                             }
@@ -209,24 +226,25 @@ const app = new Vue({
 
             let configuration = {
                 iceServers: [
-                    {
-                        urls: 'stun:stun.advfn.com:3478'
-                    },
-                    {
-                        urls: 'stun:stun.l.google.com:3478'
-                    },
-                    {
-                        urls: 'stun:stun1.l.google.com:3478'
-                    },
-                    {
-                        urls: 'stun:stun2.l.google.com:3478'
-                    },
-                    {
-                        urls: 'stun:stun3.l.google.com:3478'
-                    },
-                    {
-                        urls: 'stun:stun4.l.google.com:3478'
-                    },
+                    { url: 'stun:stun01.sipphone.com' },
+                    { url: 'stun:stun.ekiga.net' },
+                    { url: 'stun:stun.fwdnet.net' },
+                    { url: 'stun:stun.ideasip.com' },
+                    { url: 'stun:stun.iptel.org' },
+                    { url: 'stun:stun.rixtelecom.se' },
+                    { url: 'stun:stun.schlund.de' },
+                    { url: 'stun:stun.l.google.com:19302' },
+                    { url: 'stun:stun1.l.google.com:19302' },
+                    { url: 'stun:stun2.l.google.com:19302' },
+                    { url: 'stun:stun3.l.google.com:19302' },
+                    { url: 'stun:stun4.l.google.com:19302' },
+                    { url: 'stun:stunserver.org' },
+                    { url: 'stun:stun.softjoys.com' },
+                    { url: 'stun:stun.voiparound.com' },
+                    { url: 'stun:stun.voipbuster.com' },
+                    { url: 'stun:stun.voipstunt.com' },
+                    { url: 'stun:stun.voxgratia.org' },
+                    { url: 'stun:stun.xten.com' },
                     {
                         url: 'turn:numb.viagenie.ca',
                         credential: 'muazkh',
@@ -249,14 +267,15 @@ const app = new Vue({
                 self.onIceCandidate(peer, e, socket, a.TestingProfileId, type);
             })
             peer.addEventListener('connectionstatechange', function (event) {
-                if (peer.connectionState == 'connecting') {
+                if (peer && peer.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (peer.connectionState == 'connecting') {
+                            peer = null;
                             self.initRTCPeer(created, socket, a, type);
                         }
                     }, 10000);
                 }
-                if (peer.connectionState == 'disconnected') {
+                else if (peer && peer.connectionState == 'disconnected') {
                     self.initRTCPeer(created, socket, a, type);
                 }
             });
@@ -264,16 +283,12 @@ const app = new Vue({
                 self.gotRemoteStream(e, a, type);
             });
             let found = created.peers.filter(function (item) { return item.type == type; })[0];
-            console.log(found, type);
             if (found) {
                 found.peer = peer;
             }
             else {
-                console.log('add', peer);
                 created.peers.push({ type: type, peer: peer });
             }
-            console.log(type);
-            console.log(created.peers);
         },
         initSocket: function (type, a, cam) {
             if (a.TestingProfileId == 0) return;
@@ -643,7 +658,9 @@ const app = new Vue({
             setTimeout(function () {
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
                 console.log(found, self.currentUser.TestingProfileId, self.streamObjects);
-                $('#full-video-camera')[0].srcObject = found[0].stream;
+                if (found[0]) {
+                    $('#full-video-camera')[0].srcObject = found[0].stream;
+                }
                 if (found[1])
                     $('#full-video-screen')[0].srcObject = found[1].stream;
                 // $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;

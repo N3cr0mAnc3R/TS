@@ -18,13 +18,13 @@ namespace WebApp.Models
     public class TestManager : Manager
     {
         public TestManager(Concrete concrete) : base(concrete) { }
-        public dynamic GetTestsByPlaceConfig(string placeConfig, string Localization)
+        public dynamic GetTestsByPlaceConfig(string placeConfig, string Localization, Guid userUID)
         {
             using (var cnt = Concrete.OpenConnection())
             {
                 try
                 {
-                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, Localization }, commandType: CommandType.StoredProcedure);
+                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {

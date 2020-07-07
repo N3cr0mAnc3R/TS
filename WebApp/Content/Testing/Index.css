@@ -470,6 +470,15 @@
   font-size: 16px;
   display: block;
 }
+.instruction-wrapper {
+  margin-top: 30px;
+  text-align: center;
+  font-family: Montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 33px;
+}
 .panel-right {
   right: -100%;
   position: fixed;
@@ -482,6 +491,7 @@
   -o-transition: right 0.5s ease;
   transition: right 0.5s ease;
   z-index: 5;
+  overflow-y: auto;
 }
 .panel-right.opened {
   right: 0;

@@ -598,6 +598,8 @@
                 message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                 self.chat.messages.push(message);
 
+                notifier([{ Type: 'success', Body: message.Message }]);
+
                 var maxId = 0;
                 self.chat.messages.forEach(function (msg) {
                     maxId = msg.Id > maxId ? msg.Id : maxId;

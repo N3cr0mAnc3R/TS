@@ -120,7 +120,7 @@ namespace WebApp.Controllers
         {
             try
             {
-                List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString());
+                List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString(), CurrentUser.Id);
                 tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString()));
                 return Json(tests);
             }
@@ -136,38 +136,38 @@ namespace WebApp.Controllers
         }
         public async Task<JsonResult> TryVerify(ForRecogn model)
         {
-            // var file = Request.Files.Get(0);
-            Image img, second;
-            using (var ms = new MemoryStream())
-            {
-                byte[] bytes = Convert.FromBase64String(model.Image);
-                ms.Write(bytes, 0, bytes.Length);
-                img = Image.FromStream(ms);
-            }
-            Bitmap image = ConvertToFormat(img, PixelFormat.Format24bppRgb);
-            using (var ms = new MemoryStream())
-            {
-                byte[] bytes = ((await AuditoryManager.GetUserPicture(model.Id, null, Session["Localization"].ToString())).Picture);
-                ms.Write(bytes, 0, bytes.Length);
-                second = Image.FromStream(ms);
-            }
-            Bitmap image1 = ConvertToFormat(second, PixelFormat.Format24bppRgb);
-            HaarObjectDetector faceDetector = new HaarObjectDetector(new FaceHaarCascade(), minSize: 25, searchMode: ObjectDetectorSearchMode.NoOverlap);
-            RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
-            RectanglesMarker facesMarker1 = new RectanglesMarker(Color.Red);
-            facesMarker.Rectangles = faceDetector.ProcessFrame(image);
-            //if(facesMarker.Rectangles.Count() == 0)
+            //// var file = Request.Files.Get(0);
+            //Image img, second;
+            //using (var ms = new MemoryStream())
             //{
-            //    //1 - не найдено лицо
-            //    return Json(new { Error = 1 });
+            //    byte[] bytes = Convert.FromBase64String(model.Image);
+            //    ms.Write(bytes, 0, bytes.Length);
+            //    img = Image.FromStream(ms);
             //}
+            //Bitmap image = ConvertToFormat(img, PixelFormat.Format24bppRgb);
+            //using (var ms = new MemoryStream())
+            //{
+            //    byte[] bytes = ((await AuditoryManager.GetUserPicture(model.Id, null, Session["Localization"].ToString())).Picture);
+            //    ms.Write(bytes, 0, bytes.Length);
+            //    second = Image.FromStream(ms);
+            //}
+            //Bitmap image1 = ConvertToFormat(second, PixelFormat.Format24bppRgb);
+            //HaarObjectDetector faceDetector = new HaarObjectDetector(new FaceHaarCascade(), minSize: 25, searchMode: ObjectDetectorSearchMode.NoOverlap);
+            //RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
+            //RectanglesMarker facesMarker1 = new RectanglesMarker(Color.Red);
+            //facesMarker.Rectangles = faceDetector.ProcessFrame(image);
+            ////if(facesMarker.Rectangles.Count() == 0)
+            ////{
+            ////    //1 - не найдено лицо
+            ////    return Json(new { Error = 1 });
+            ////}
 
-            if (facesMarker.Rectangles.Count() > 0)
-                image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
+            //if (facesMarker.Rectangles.Count() > 0)
+            //    image = image.Clone(facesMarker.Rectangles.First(), PixelFormat.Format24bppRgb);
 
-            facesMarker1.Rectangles = faceDetector.ProcessFrame(image1);
-            if (facesMarker1.Rectangles.Count() > 0)
-                image1 = image1.Clone(facesMarker1.Rectangles.First(), PixelFormat.Format24bppRgb);
+            //facesMarker1.Rectangles = faceDetector.ProcessFrame(image1);
+            //if (facesMarker1.Rectangles.Count() > 0)
+            //    image1 = image1.Clone(facesMarker1.Rectangles.First(), PixelFormat.Format24bppRgb);
 
             //string result = "";
             //using (var ms = new MemoryStream())
@@ -178,7 +178,10 @@ namespace WebApp.Controllers
 
             //return Json(result);
 
-            return Json(Compare(image1, image, 0.85));
+            await AuditoryManager.SetUserVerified(model.Id, true, CurrentUser.Id);
+            System.Threading.Thread.Sleep(3000);
+            return Json(true);
+            //return Json(Compare(image1, image, 0.85));
             //return Json(Compare(ConvertToFormat(second, PixelFormat.Format24bppRgb), ConvertToFormat(img, PixelFormat.Format24bppRgb), 0.8, 0.6f));
         }
         public static Bitmap ConvertToFormat(Image image, PixelFormat format)

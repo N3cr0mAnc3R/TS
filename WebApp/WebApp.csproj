@@ -277,6 +277,7 @@
     <Content Include="Content\bootstrap-grid.css.map" />
     <Content Include="Content\Statistic\index.less" />
     <Content Include="Content\Shared\Notify.less" />
+    <Content Include="Files\EntranceInstruction.pdf" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
