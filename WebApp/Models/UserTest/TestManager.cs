@@ -220,6 +220,13 @@ namespace WebApp.Models
                 return conn.Query<string>("UserPlace_GetStreamBase", new { testProfileId, }, commandType: CommandType.StoredProcedure).FirstOrDefault();
             }
         }
+        public IEnumerable<byte[]> GetFilesByTestingProfile(int testingProfileId, int Type)
+        {
+            using (var conn = Concrete.OpenConnection())
+            {
+                return conn.Query<byte[]>("Administrator_DownloadAllVideos", new { testingProfileId, Type }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public FileStreamDownload FileDownload(int testProfileId, int Type, Guid? UserId)
         {
             using (var conn = Concrete.OpenConnection())

@@ -35,6 +35,9 @@
             });
 
         },
+        Download: function (Id, type) {
+            window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
+        },
         printResult: function (Id) {
             window.open('/auditory/DownloadReport?Id=' + Id, '_blank');
         },

@@ -399,3 +399,54 @@ button:focus {
 .body-content.container {
   max-width: initial !important;
 }
+#schedule .selection {
+  overflow: auto;
+}
+#schedule .selection .item {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  background: #ddd;
+}
+#schedule .selection .input-wrapper {
+  display: flex;
+  margin-bottom: 20px;
+}
+#schedule .selection .input-wrapper .button {
+  line-height: 32px;
+  font-size: 16px;
+  background: #565c72;
+  cursor: pointer;
+  color: #fff;
+  width: 150px;
+  height: 37px;
+  text-align: center;
+  margin-left: 20px;
+}
+.left-schedule {
+  position: fixed;
+  left: 0;
+  top: calc(100vh / 2 - 50px);
+  width: 30px;
+  height: 100px;
+}
+.left-schedule .wrapper {
+  padding: 3px;
+  background: #565c72;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+}
+.left-schedule .wrapper .button {
+  width: 100%;
+  height: 100%;
+  background: #565c72;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+}
+.left-schedule .wrapper .button span {
+  margin-top: auto;
+  margin-bottom: auto;
+}

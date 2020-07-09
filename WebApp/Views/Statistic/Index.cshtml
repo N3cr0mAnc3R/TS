@@ -1,12 +1,14 @@
-﻿<link href="~/Content/Statistic/index.css" rel="stylesheet" />
+﻿<script src="~/Content/f-awesome.js"></script>
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+<link href="~/Content/Statistic/index.css" rel="stylesheet" />
 <div id="main-window">
     <div class="panel-list">
         @*<div class="panel-wrapper" v-on:click="loadPeople">
                 <div class="panel">Выгрузить людей</div>
             </div>*@
         @*<div class="panel-wrapper" v-on:click="showTable">
-            <div class="panel">Просмотреть результаты</div>
-        </div>*@
+                <div class="panel">Просмотреть результаты</div>
+            </div>*@
     </div>
 
     <div class="full-table-wrapper">
@@ -35,7 +37,7 @@
                     <td>{{user.Score}}</td>
                     @*<td>{{findStatus(currentStatus)}}</td>*@
                     <td>{{user.Discipline}}</td>
-                    <td>
+                    <td v-if="[4,3].indexOf(currentStatus) != -1">
                         <span v-on:click="printResult(user.Id)" style="cursor:pointer;">
                             <svg width="22" height="21" viewBox="0 0 22 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <g clip-path="url(#clip0)">
@@ -52,6 +54,16 @@
                                     </clipPath>
                                 </defs>
                             </svg>
+                        </span>
+                    </td>
+                    <td v-if="[4,3].indexOf(currentStatus) != -1">
+                        <span v-on:click="Download(user.Id, 1)" style="cursor:pointer;">
+                            <i class="fa fa-video-camera"></i>
+                        </span>
+                    </td>
+                    <td v-if="[4,3].indexOf(currentStatus) != -1">
+                        <span v-on:click="Download(user.Id, 2)" style="cursor:pointer;">
+                            <i class="fa fa-desktop"></i>
                         </span>
                     </td>
                 </tr>

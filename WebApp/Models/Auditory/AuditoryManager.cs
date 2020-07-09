@@ -36,6 +36,20 @@ namespace WebApp.Models
             }
             return aud;
         }
+        public async Task<IEnumerable<IndexItem>> GetTimes()
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<IndexItem>(sql: "[dbo].[Administrator_Dictionary_TestingTime]", commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<ScheduleModel>> GetUserWithTimes(int AuditoriumId, Guid userUID, DateTime? date)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<ScheduleModel>(sql: "[dbo].[Administrator_UserWithScheduleGet]", new { AuditoriumId, userUID, date }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<Auditory> GetAuditoryByIdForModerate(Guid userUID, int auditoriumId, string localization = "")
         {
             Auditory aud = new Auditory();
@@ -150,7 +164,7 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == ""? (string)null: config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
                 if (config.PlaceConfig == null)
                 {
-                    await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { userUID, isRequest = 0}, commandType: CommandType.StoredProcedure);
+                    await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { placeProfileId = config.Id, userUID, isRequest = 0}, commandType: CommandType.StoredProcedure);
                 }
             }
         }

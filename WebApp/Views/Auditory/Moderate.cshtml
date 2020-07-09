@@ -61,6 +61,11 @@
             <br />
         </div>
     </div>
+    <div class="left-schedule">
+        <div class="wrapper">
+            <div v-on:click="openSchedule" class="button"><span><i class="fa fa-calendar-alt"></i></span></div>
+        </div>
+    </div>
     <div class="control-wrapper" v-if="isSuperAdmin">
         <div class="control">
             <ul>
@@ -110,6 +115,44 @@
                     </div>
                     <div class="selection">
                         <div><button v-on:click="sendReload()">Перезагрузить</button></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="schedule" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="title">График ВИ</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="selection">
+                        <div class="input-wrapper">
+                            <input type="date" v-model="currentDate" class="form-control" />
+                            <div v-on:click="filterSchedule" class="button">Найти</div>
+                        </div>
+
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <td></td>
+                                    <td v-for="item in times">{{item.Name}}</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item1 in filteredPlaceList">
+                                    <td>{{item1}}</td>
+                                    <td v-for="item in times"><div v-for="place in filterScheduleUsers(item1)"><div v-if="item.Id == place.TestingTime" v-bind:title="place.LastName +' ' + place.Discipline" class="item"></div></div></td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <div class="modal-footer">

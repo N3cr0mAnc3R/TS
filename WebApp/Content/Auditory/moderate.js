@@ -34,7 +34,12 @@ const app = new Vue({
         currentStatus: -1,
         currentDate: null,
         statuses: [],
-        streamObjects: []
+        streamObjects: [],
+        currentUid: '',
+        times: [],
+        currentDate: null,
+        scheduleUsers: [],
+        filteredPlaceList: []
     },
     methods: {
         init: function () {
@@ -47,6 +52,14 @@ const app = new Vue({
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                }
+            });
+            $.ajax({
+                url: "/auditory/GetTimes",
+                type: "POST",
+                async: true,
+                success: function (times) {
+                    self.times = times;
                 }
             });
             $.ajax({
@@ -207,6 +220,36 @@ const app = new Vue({
                 self.maxY = Math.max(self.maxY, a.PositionY);
             });
         },
+        openSchedule: function () {
+            $('#schedule').modal('toggle');
+        },
+        filterSchedule: function () {
+            let self = this;
+            console.log(self.currentDate);
+            $.ajax({
+                url: "/auditory/GetUserWithTimes",
+                type: "POST",
+                async: true,
+                data: {
+                    Id: self.auditory,
+                    Date: self.currentDate
+                },
+                success: function (users) {
+                    self.scheduleUsers = users;
+                    console.log(users);
+                    users.forEach(function (item) {
+                        if (self.filteredPlaceList.indexOf(item.PlaceId) == -1) {
+                            self.filteredPlaceList.push(item.PlaceId);
+                        }
+                    });
+                    self.filteredPlaceList.sort();
+                }
+            });
+        },
+        filterScheduleUsers: function (place) {
+            var self = this;
+            return self.scheduleUsers.filter(function (item) { return item.PlaceId == place; });
+        },
         initRTCPeer: function (created, socket, a, type) {
             let self = this;
             //let STUN = {
@@ -225,41 +268,40 @@ const app = new Vue({
             };
 
             let configuration = {
-                iceServers: [
-                    { url: 'stun:stun01.sipphone.com' },
-                    { url: 'stun:stun.ekiga.net' },
-                    { url: 'stun:stun.fwdnet.net' },
-                    { url: 'stun:stun.ideasip.com' },
-                    { url: 'stun:stun.iptel.org' },
-                    { url: 'stun:stun.rixtelecom.se' },
-                    { url: 'stun:stun.schlund.de' },
-                    { url: 'stun:stun.l.google.com:19302' },
-                    { url: 'stun:stun1.l.google.com:19302' },
-                    { url: 'stun:stun2.l.google.com:19302' },
-                    { url: 'stun:stun3.l.google.com:19302' },
-                    { url: 'stun:stun4.l.google.com:19302' },
-                    { url: 'stun:stunserver.org' },
-                    { url: 'stun:stun.softjoys.com' },
-                    { url: 'stun:stun.voiparound.com' },
-                    { url: 'stun:stun.voipbuster.com' },
-                    { url: 'stun:stun.voipstunt.com' },
-                    { url: 'stun:stun.voxgratia.org' },
-                    { url: 'stun:stun.xten.com' },
-                    {
-                        url: 'turn:numb.viagenie.ca',
-                        credential: 'muazkh',
-                        username: 'webrtc@live.com'
-                    },
-                    {
-                        url: 'turn:192.158.29.39:3478?transport=udp',
-                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                        username: '28224511:1379330808'
-                    },
-                    {
-                        url: 'turn:192.158.29.39:3478?transport=tcp',
-                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                        username: '28224511:1379330808'
-                    }]
+                iceServers: [{ url: 'stun:stun01.sipphone.com' },
+                { url: 'stun:stun.ekiga.net' },
+                { url: 'stun:stun.fwdnet.net' },
+                { url: 'stun:stun.ideasip.com' },
+                { url: 'stun:stun.iptel.org' },
+                { url: 'stun:stun.rixtelecom.se' },
+                { url: 'stun:stun.schlund.de' },
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' },
+                { url: 'stun:stun2.l.google.com:19302' },
+                { url: 'stun:stun3.l.google.com:19302' },
+                { url: 'stun:stun4.l.google.com:19302' },
+                { url: 'stun:stunserver.org' },
+                { url: 'stun:stun.softjoys.com' },
+                { url: 'stun:stun.voiparound.com' },
+                { url: 'stun:stun.voipbuster.com' },
+                { url: 'stun:stun.voipstunt.com' },
+                { url: 'stun:stun.voxgratia.org' },
+                { url: 'stun:stun.xten.com' },
+                {
+                    url: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                }]
             };
             let peer = new RTCPeerConnection(configuration);
 
@@ -348,7 +390,8 @@ const app = new Vue({
                 }
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
-                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false }));
+                    self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid  }));
 
                     if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
                         var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
@@ -361,7 +404,7 @@ const app = new Vue({
                 socket.onmessage = function (msg) {
                     //console.log(msg);
                     let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                    if (message.IsSender) {
+                    if (message.IsSender && message.uid == self.currentUid) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
@@ -370,10 +413,6 @@ const app = new Vue({
                             }
                             if (queue.candidates.indexOf(candidate) === -1)
                                 queue.candidates.push(candidate);
-                            else {
-                                console.log(candidate);
-
-                            }
                         }
                         else if (message.offer) {
                             navigator.getUserMedia({ video: true }, function (stream) {
@@ -611,6 +650,10 @@ const app = new Vue({
         },
         sendError: function () {
             let self = this;
+
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestViolation: true, IsSender: false, violation: self.currentError }));
+
             $.ajax({
                 url: "/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
                 type: "POST",
@@ -650,14 +693,20 @@ const app = new Vue({
                 }
             });
         },
+        uuidv4: function () {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        },
         reconnect: function () {
             let self = this;
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
-            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false }));
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false, uid: self.currentUid }));
 
             setTimeout(function () {
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
-                console.log(found, self.currentUser.TestingProfileId, self.streamObjects);
                 if (found[0]) {
                     $('#full-video-camera')[0].srcObject = found[0].stream;
                 }

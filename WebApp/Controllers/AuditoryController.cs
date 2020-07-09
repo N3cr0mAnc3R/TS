@@ -15,6 +15,7 @@ namespace WebApp.Controllers
     {
         public async Task<ActionResult> List()
         {
+            ViewBag.Title = "Список аудиторий";
             List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
             if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
             {
@@ -31,6 +32,7 @@ namespace WebApp.Controllers
         }
         public async Task<ActionResult> Index(int Id)
         {
+            ViewBag.Title = "Модерирование";
             List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
             if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
             {
@@ -101,6 +103,16 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetAuditoryInfoForModerate(int Id)
         {
             return Json(await AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetTimes()
+        {
+            return Json(await AuditoryManager.GetTimes());
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetUserWithTimes(ScheduleModel model)
+        {
+            return Json(await AuditoryManager.GetUserWithTimes(model.Id, CurrentUser.Id, model.Date));
         }
         [HttpPost]
         public async Task<JsonResult> GetAuditoryList()

@@ -63,6 +63,7 @@
         streamQueue: [],
         needCalc: false,
         NameDiscipline: "",
+        startedTimeRecording: 0,
         blurReady: false,
         calculator: {
             rows: [
@@ -79,7 +80,7 @@
             expr: ''
         },
         errorText: "",
-        adminErrors: []
+        adminErrors: [],
     },
     methods: {
         init: function () {
@@ -94,7 +95,7 @@
             });
             $(window).on('mousemove', function (e) {
                 if (e.pageX >= $(document.body).width() - 1 || e.pageY > $(document.body).height() || e.pageX <= 1 || e.pageY <= 1) {
-                   // self.errorText = self.switchLocal(27);
+                    // self.errorText = self.switchLocal(27);
                     if (self.blurReady) {
                         console.log('m');
                         notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
@@ -520,6 +521,7 @@
         startTimer: function () {
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
+            self.startedTimeRecording = self.timeLeft;
             self.interval = setInterval(function () {
                 if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
@@ -529,7 +531,7 @@
                     clearInterval(self.intervalConnection);
                     self.finishTest();
                 }
-                if (self.testingTime - self.timeLeft >= self.timeRecording) {
+                if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
                     setTimeout(function () {
                         if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
                         if (self.screenRecorder) self.screenRecorder.ondataavailable = null;
@@ -546,7 +548,6 @@
             self.flagStopRec = true;
             if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
             if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
-            console.log(self.recordedScreen);
             self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
             self.bufferScreen = new Blob(self.recordedScreen, { type: 'video/webm' });
             var formaData = new FormData();
@@ -554,7 +555,17 @@
             formaData.append('Id', self.testingProfileId);
             formaData.append('File', self.bufferCamera);
             formaData.append('File1', self.bufferScreen);
-
+            var int1;
+            try {
+                self.sendVideo(formaData, int1);
+            }
+            catch{
+                int1 = setInterval(function () {
+                }, 10000);
+            }
+        },
+        sendVideo: function (formaData, interval) {
+            var self = this;
             $.ajax({
                 url: "/user/SaveVideoFile",
                 type: "POST",
@@ -562,6 +573,17 @@
                 contentType: false,
                 processData: false,
                 success: function () {
+                    if (interval) { clearInterval(interval); }
+                    self.recordedCamera = [];
+                    self.recordedScreen = [];
+                    setTimeout(function () {
+                        self.flagStopRec = false;
+                        self.startedTimeRecording = self.timeLeft;
+                        self.cameraRecorder.ondataavailable = self.recordingCamera;
+                        self.cameraRecorder.start(100);
+                        self.screenRecorder.ondataavailable = self.recordingScreen;
+                        self.screenRecorder.start(100);
+                    }, 300000);
                 }
             });
         },
@@ -671,13 +693,26 @@
                     }
                     else if (message.requestOffer) {
                         console.log('start request');
-                        self.reInitPeers();
-                        self.initRTCPeer(1);
-                        self.initRTCPeer(2);
+                        // self.reInitPeers();
+                        self.initRTCPeer(1, message.uuid);
+                        self.initRTCPeer(2, message.uuid);
                     }
                     else if (message.reloadRequest) {
                         location.href = location.href;
                         //window.reload(true);
+                    }
+                    else if (message.requestViolation) {
+                        var errorBody = "";
+                        switch (message.violation) {
+                            case 1: errorBody = 'Пользователь не идентфицирован'; break;
+                            case 2: errorBody = 'В кадре обнаружен посторонний. Попросите его покинуть комнату'; break;
+                            case 3: errorBody = 'Присутствуют посторонние звуки'; break;
+                            case 4: errorBody = 'Сворачивание окна запрещено!'; break;
+                            case 5: errorBody = 'Покидать окно тестов запрещено!'; break;
+                            case 6: errorBody = 'Вы должны всё время находиться в поле зрения веб-камеры!'; break;
+                            default: errorBody = 'Вы нарушаете правила проведения ВИ!!';
+                        }
+                        notifier([{ Type: 'error', Body: errorBody }]);
                     }
                     else if (message.answer) {
                         //var interval = setInterval(function () {
@@ -687,8 +722,6 @@
                         if (found) {
                             //  clearInterval(interval);
                             var peer = found.peer;
-                            console.log(message);
-                            console.log(peer);
                             peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
 
                                 var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
@@ -1155,7 +1188,7 @@
         getDateFormat: function (date) {
             return date.toLocaleTimeString();
         },
-        initRTCPeer: function (type) {
+        initRTCPeer: function (type, uid) {
             console.log('init rtcpeer');
             var self = this;
             var TURN = {
@@ -1165,34 +1198,40 @@
             };
 
             var configuration = {
-                iceServers: [{
-                    urls: 'stun:stun.advfn.com:3478'
-                }, {
-                    urls: 'stun:stun.l.google.com:3478'
-                }, {
-                    urls: 'stun:stun1.l.google.com:3478'
-                }, {
-                    urls: 'stun:stun2.l.google.com:3478'
-                }, {
-                    urls: 'stun:stun3.l.google.com:3478'
-                }, {
-                    urls: 'stun:stun4.l.google.com:3478'
+                iceServers: [{ url: 'stun:stun01.sipphone.com' },
+                { url: 'stun:stun.ekiga.net' },
+                { url: 'stun:stun.fwdnet.net' },
+                { url: 'stun:stun.ideasip.com' },
+                { url: 'stun:stun.iptel.org' },
+                { url: 'stun:stun.rixtelecom.se' },
+                { url: 'stun:stun.schlund.de' },
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' },
+                { url: 'stun:stun2.l.google.com:19302' },
+                { url: 'stun:stun3.l.google.com:19302' },
+                { url: 'stun:stun4.l.google.com:19302' },
+                { url: 'stun:stunserver.org' },
+                { url: 'stun:stun.softjoys.com' },
+                { url: 'stun:stun.voiparound.com' },
+                { url: 'stun:stun.voipbuster.com' },
+                { url: 'stun:stun.voipstunt.com' },
+                { url: 'stun:stun.voxgratia.org' },
+                { url: 'stun:stun.xten.com' },
+                {
+                    url: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
                 },
-                    {
-                        url: 'turn:numb.viagenie.ca',
-                        credential: 'muazkh',
-                        username: 'webrtc@live.com'
-                    },
-                    {
-                        url: 'turn:192.158.29.39:3478?transport=udp',
-                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                        username: '28224511:1379330808'
-                    },
-                    {
-                        url: 'turn:192.158.29.39:3478?transport=tcp',
-                        credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                        username: '28224511:1379330808'
-                    }]
+                {
+                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                }]
             };
             var peer = new RTCPeerConnection(configuration);
             peer.addEventListener('icecandidate', function (e) {
@@ -1205,16 +1244,17 @@
             //    console.log(peer.connectionState);
             //});
             var stream = type == 1 ? self.cameraStream : self.screenStream;
-            console.log(type, stream);
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
 
-            var found = self.peers.filter(function (item) { return item.type == type; })[0];
+            var found = self.peers.filter(function (item) { return item.type == type && item.uid == uid; })[0];
             if (found) {
                 found.peer = peer;
             }
-            else self.peers.push({ type: type, peer: peer });
+            else {
+                self.peers.push({ type: type, peer: peer, uid: uid });
+            }
             try {
                 peer.createOffer(function (offer) {
                     peer.setLocalDescription(offer, function () {
@@ -1224,7 +1264,7 @@
                                 obj1[i] = offer[i];
                         }
                         var obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
+                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type, uid: uid
                         };
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
@@ -1243,7 +1283,7 @@
                     obj1[i] = e.candidate[i];
             }
             var obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type
+                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type, uid: uid
             };
             if (app.videoSocket && app.videoSocket.readyState == 1) {
                 app.gotICE = true;
