@@ -15,5 +15,7 @@ namespace WebApp.Models
         public string Discipline { get; set; }
         public int TestingTime { get; set; }
         public DateTime? Date { get; set; }
+
+        public float? Score { get; set; }
     }
 }

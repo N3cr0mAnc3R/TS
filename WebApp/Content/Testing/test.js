@@ -81,6 +81,7 @@
         },
         errorText: "",
         adminErrors: [],
+        potentialPeers: []
     },
     methods: {
         init: function () {
@@ -261,7 +262,6 @@
             // var reader = new FileReader();
         },
         recordingScreen: function (event) {
-            console.log('opa');
             //console.log(event);
             // if (event.data && event.data.size > 0) {
             app.recordedScreen.push(event.data);
@@ -372,26 +372,34 @@
                 self.loadObject.loaded = false;
                 self.loadObject.loading = true;
                 self.counter = 0;
-                self.askQuestionImagePart(1);
-                //Изображения ответов
-                if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
-                    self.selectedQuestion.Answers.forEach(function (a) {
-                        $.ajax({
-                            type: 'POST',
-                            dataType: 'json',
-                            url: '/user/GetAnswerImage?Id=' + a.Id,
-                            success: function (d) {
-                                a.AnswerImage = d.AnswerImage;
-                                self.counter++;
-                                if (self.counter == self.selectedQuestion.Answers.length + 1) {
-                                    self.loadObject.loading = false;
-                                    self.loadObject.loaded = true;
-                                    //self.loadTestObject.loading = false;
-                                    //self.loadTestObject.loaded = true;
+                try {
+                    self.askQuestionImagePart(1);
+                    //Изображения ответов
+                    if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                        self.selectedQuestion.Answers.forEach(function (a) {
+                            $.ajax({
+                                type: 'POST',
+                                dataType: 'json',
+                                url: '/user/GetAnswerImage?Id=' + a.Id,
+                                success: function (d) {
+                                    a.AnswerImage = d.AnswerImage;
+                                    self.counter++;
+                                    if (self.counter == self.selectedQuestion.Answers.length + 1) {
+                                        self.loadObject.loading = false;
+                                        self.loadObject.loaded = true;
+                                        //self.loadTestObject.loading = false;
+                                        //self.loadTestObject.loaded = true;
+                                    }
+                                },
+                                error: function () {
+                                    location.reload();
                                 }
-                            }
+                            });
                         });
-                    });
+                    }
+                }
+                catch {
+                    location.reload();
                 }
             }
         },
@@ -676,6 +684,7 @@
             self.videoSocket.onopen = function () {
                 console.log('init videosocket');
                 self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
+                self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, startOffer: true }));
             };
 
             self.videoSocket.onmessage = function (msg) {
@@ -694,8 +703,8 @@
                     else if (message.requestOffer) {
                         console.log('start request');
                         // self.reInitPeers();
-                        self.initRTCPeer(1, message.uuid);
-                        self.initRTCPeer(2, message.uuid);
+                        self.initRTCPeer(1, message.uid);
+                        self.initRTCPeer(2, message.uid);
                     }
                     else if (message.reloadRequest) {
                         location.href = location.href;
@@ -776,7 +785,7 @@
                     self.cameraRecorder.ondataavailable = self.recordingCamera;
                     self.cameraRecorder.start(100);
 
-                    self.initRTCPeer(1);
+                    //self.initRTCPeer(1, uid);
                     $('#video1')[0].srcObject = videostream;
 
 
@@ -1029,7 +1038,7 @@
                 //var tracks = Str.getTracks();
                 //track.forE
                 console.log(options);
-                self.initRTCPeer(2);
+               // self.initRTCPeer(2, uid);
                 self.screenRecorder = new MediaRecorder(Str, options);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
                 self.screenRecorder.start(100);
@@ -1231,11 +1240,21 @@
                     url: 'turn:192.158.29.39:3478?transport=tcp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:turn.bistri.com:80',
+                    credential: 'homeo',
+                    username: 'homeo'
+                },
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
                 }]
             };
             var peer = new RTCPeerConnection(configuration);
             peer.addEventListener('icecandidate', function (e) {
-                self.onIceCandidate(e, type);
+                self.onIceCandidate(e, type, uid);
             });
             //peer.addEventListener('iceconnectionstatechange', function (e) {
             //    self.onIceStateChange(self.pc1, e);
@@ -1244,6 +1263,10 @@
             //    console.log(peer.connectionState);
             //});
             var stream = type == 1 ? self.cameraStream : self.screenStream;
+            if (!stream) {
+                peer.close();
+                self.initRTCPeer(type, uid);
+            }
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
@@ -1276,7 +1299,7 @@
                 console.log('error');
             }
         },
-        onIceCandidate: function (e, type) {
+        onIceCandidate: function (e, type, uid) {
             var obj1 = {};
             for (var i in e.candidate) {
                 if (typeof e.candidate[i] != 'function')

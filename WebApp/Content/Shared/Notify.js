@@ -57,7 +57,10 @@ function notifier(incomeMessages) {
             };
             //Добавление сообщения в начало массива
             notifierScope.messages.unshift(messageWrapper);
-
+            if (notifierScope.messages.length > 5) {
+                var removed = notifierScope.pop();
+                removed.remove();
+            }
             //Внешний вид сообщения
             var msgWrapper = `<div class="notification-wrapper type-` + messageWrapper.source.Type + `" id="index-` + lastIndex + `">
                 <div class="notification">

@@ -435,36 +435,36 @@
                 self.tryRec = true;
 
                 //self.verifyInterval = setInterval(function () {
-                    var canvas = document.createElement('canvas');
-                    var context = canvas.getContext('2d');
-                    canvas.width = 320;
-                    canvas.height = 230;
-                    context.drawImage($('#video1')[0], 0, 0, 320, 230);
-                    var data = canvas.toDataURL('image/png');
-                    $.ajax({
-                        url: "/user/TryVerify",
-                        type: "POST",
-                        async: true,
-                        data: { Image: data.substr(22), Id: self.testingProfileId },
-                        success: function (res) {
-                            if (res.Error == 1) {
-                                self.noFace = true;
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
+                canvas.width = 320;
+                canvas.height = 230;
+                context.drawImage($('#video1')[0], 0, 0, 320, 230);
+                var data = canvas.toDataURL('image/png');
+                $.ajax({
+                    url: "/user/TryVerify",
+                    type: "POST",
+                    async: true,
+                    data: { Image: data.substr(22), Id: self.testingProfileId },
+                    success: function (res) {
+                        if (res.Error == 1) {
+                            self.noFace = true;
+                        }
+                        else {
+                            self.recognized = res;
+                            console.log(res);
+                            if (!res) {
+                                self.noFace = false;
                             }
                             else {
-                                self.recognized = res;
-                                console.log(res);
-                                if (!res) {
-                                    self.noFace = false;
-                                }
-                                else {
-                                    clearInterval(self.verifyInterval);
-                                    console.log('got');
-                                    self.verified = true;
+                                clearInterval(self.verifyInterval);
+                                console.log('got');
+                                self.verified = true;
 
-                                }
                             }
                         }
-                    });
+                    }
+                });
                 //}, 500);
             }
             catch (exc) {
@@ -516,6 +516,16 @@
                     url: 'turn:192.158.29.39:3478?transport=tcp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:turn.bistri.com:80',
+                    credential: 'homeo',
+                    username: 'homeo'
+                },
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
                 }]
             };
             self.pc1 = new RTCPeerConnection(configuration);
@@ -588,6 +598,8 @@
                 success: function (response) {
                     if (response == 1) {
                         notifier([{ Type: 'success', Body: self.switchLocal(15) }]);
+                        localStorage.removeItem('placeConfig');
+                        location.reload();
                     }
                     else {
                         notifier([{ Type: 'error', Body: self.switchLocal(14) }]);

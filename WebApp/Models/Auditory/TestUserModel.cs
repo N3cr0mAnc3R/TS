@@ -10,5 +10,6 @@ namespace WebApp.Models
         public int Id { get; set; }
         public int StatusId { get; set; }
         public DateTime? Date { get; set; }
+        public int? Auditory { get; set; }
     }
 }

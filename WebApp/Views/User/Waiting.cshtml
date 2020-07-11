@@ -120,7 +120,7 @@
                 </div>
                 <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
             </div>
-            <div class="not-test" v-loader="loadObject">
+            <div class="not-test" v-loader="loadObject" v-if="testingTests.length > 0">
                 <div class="user-info">
                     <div class="user-either">{{switchLocal(9)}}:</div>
                 </div>

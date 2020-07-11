@@ -9,11 +9,33 @@
         @*<div class="panel-wrapper" v-on:click="showTable">
                 <div class="panel">Просмотреть результаты</div>
             </div>*@
+        <div v-for="item in auditoryList" v-on:click="selectAud(item.Id)" class="panel-wrapper" :class="{'active': currentAud == item.Id}">
+            {{item.Name}}
+        </div>
+        <div class="form-wrapper">
+            <span v-on:click="printAudResult(currentAud)" style="cursor:pointer;">
+                <svg width="22" height="21" viewBox="0 0 22 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0)">
+                        <path d="M19.14 6H2.35C1.46634 6 0.75 6.71634 0.75 7.6V15.4C0.75 16.2837 1.46634 17 2.35 17H19.14C20.0237 17 20.74 16.2837 20.74 15.4V7.6C20.74 6.71634 20.0237 6 19.14 6Z" fill="black" stroke="black" stroke-width="1.5" stroke-linejoin="round" />
+                        <path d="M16.25 12.5H5.25V20.5H16.25V12.5Z" fill="white" stroke="black" stroke-linejoin="round" />
+                        <path d="M16.25 0.5H5.25V5.75H16.25V0.5Z" fill="white" stroke="black" stroke-linejoin="round" />
+                        <path d="M7.25 15.5H14.25" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M7.25 17.5H14.25" stroke="black" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M18.12 9.75001C18.6005 9.75001 18.99 9.3605 18.99 8.88001C18.99 8.39952 18.6005 8.01001 18.12 8.01001C17.6395 8.01001 17.25 8.39952 17.25 8.88001C17.25 9.3605 17.6395 9.75001 18.12 9.75001Z" fill="white" />
+                    </g>
+                    <defs>
+                        <clipPath id="clip0">
+                            <rect width="21.49" height="21" fill="white" />
+                        </clipPath>
+                    </defs>
+                </svg>
+            </span>
+        </div>
     </div>
 
     <div class="full-table-wrapper">
-        <div class="filter-name">ФИО</div>
-        <input type="text" class="form-control" v-model="filterFIO" />
+        @*<div class="filter-name">ФИО</div>
+        <input type="text" class="form-control" v-model="filterFIO" />*@
         <div class="filter-name">Дата</div>
         <input type="date" class="form-control" v-model="currentDate" v-on:change="getUsers()" />
         @*<div class="filter-name">Оценка</div>*@
@@ -38,7 +60,7 @@
                     @*<td>{{findStatus(currentStatus)}}</td>*@
                     <td>{{user.Discipline}}</td>
                     <td v-if="[4,3].indexOf(currentStatus) != -1">
-                        <span v-on:click="printResult(user.Id)" style="cursor:pointer;">
+                        <span v-on:click="printTPResult(user.Id)" style="cursor:pointer;">
                             <svg width="22" height="21" viewBox="0 0 22 21" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <g clip-path="url(#clip0)">
                                     <path d="M19.14 6H2.35C1.46634 6 0.75 6.71634 0.75 7.6V15.4C0.75 16.2837 1.46634 17 2.35 17H19.14C20.0237 17 20.74 16.2837 20.74 15.4V7.6C20.74 6.71634 20.0237 6 19.14 6Z" fill="black" stroke="black" stroke-width="1.5" stroke-linejoin="round" />
@@ -64,6 +86,11 @@
                     <td v-if="[4,3].indexOf(currentStatus) != -1">
                         <span v-on:click="Download(user.Id, 2)" style="cursor:pointer;">
                             <i class="fa fa-desktop"></i>
+                        </span>
+                    </td>
+                    <td v-if="[3].indexOf(currentStatus) != -1">
+                        <span v-on:click="saveResult(user.Id)" style="cursor:pointer;">
+                            <i class="fa fa-share"></i>
                         </span>
                     </td>
                 </tr>

@@ -404,9 +404,13 @@ button:focus {
 }
 #schedule .selection .item {
   cursor: pointer;
-  width: 100%;
-  height: 100%;
-  background: #ddd;
+  height: 30px;
+  margin: -11px;
+  margin-bottom: 3px;
+  margin-top: 0;
+  background: #565c72;
+  text-align: center;
+  color: #fff;
 }
 #schedule .selection .input-wrapper {
   display: flex;

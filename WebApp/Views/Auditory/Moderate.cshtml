@@ -32,7 +32,7 @@
                                     <div class="user-name" v-if="item.TestingProfileId">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div>
                                     <div class="user-name">
                                         <span v-if="item.TestingStatusId == 2">В процессе</span>
-                                        <span v-if="item.TestingStatusId == 5">Собирается</span>
+                                        <span v-if="item.TestingStatusId == 5">Занял место</span>
                                         <span v-if="item.TestingStatusId == 3">Тест завершён</span>
                                     </div>
                                 </div>
@@ -149,7 +149,7 @@
                             <tbody>
                                 <tr v-for="item1 in filteredPlaceList">
                                     <td>{{item1}}</td>
-                                    <td v-for="item in times"><div v-for="place in filterScheduleUsers(item1)"><div v-if="item.Id == place.TestingTime" v-bind:title="place.LastName +' ' + place.Discipline" class="item"></div></div></td>
+                                    <td v-for="item in times"><div v-for="place in filterScheduleUsers(item1)" v-if="item.Id == place.TestingTime" v-bind:title="place.LastName +' ' + place.Discipline" class="item">{{place.Score}}</div></td>
                                 </tr>
                             </tbody>
                         </table>

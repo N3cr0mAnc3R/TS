@@ -77,7 +77,12 @@ const app = new Vue({
             self.getAuditories(newId, self);
 
             setInterval(function () {
-                self.getAuditories(newId, self);
+                try {
+                    self.getAuditories(newId, self);
+                }
+                catch{
+                    location.reload();
+                }
             }, 5000);
 
             $.ajax({
@@ -168,16 +173,25 @@ const app = new Vue({
                                         console.log('socket: ' + item.TestingProfileId, item.LastName);
                                     }
                                 }
-                                if ([2].indexOf(found.TestingStatusId) != -1) {
-                                    var foundedSocket = self.videoSockets.filter(function (item) { return item.id == found.TestingProfileId; })[0];
-                                    if (!foundedSocket) {
-                                        console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                        self.initSocket(2, found, 1);
-                                        if ([2].indexOf(found.TestingStatusId) != -1) {
-                                            console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                            self.initSocket(1, found);
-                                        }
+                                if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
+                                    var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
+                                    if (foundedSocket) {
+                                        foundedSocket.socket.close();
+                                        foundedSocket = null;
+                                        // console.log('socket: ' + found.TestingProfileId, found.LastName);
                                     }
+
+                                    self.initSocket(2, found, 1);
+                                    if ([2].indexOf(found.TestingStatusId) != -1) {
+                                        console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                        self.initSocket(1, found);
+                                    }
+                                     if (found.UserVerified != item.UserVerified) {
+                                    if (item.UserVerified) {
+                                        self.initSocket(2, found, 2);
+                                        console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    }
+                                }
                                 }
                             }
                         });
@@ -188,30 +202,33 @@ const app = new Vue({
                         //self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
                         self.initAud();
                     }
+                },
+                error: function () {
+                    location.reload();
                 }
             });
         },
-        filterComps: function (position) {
-            let self = this;
-            let items = self.computerList.filter((item) => item.PositionX == position);
+        //filterComps: function (position) {
+        //    let self = this;
+        //    let items = self.computerList.filter((item) => item.PositionX == position);
 
-            if (items.length > 0 && items.length < self.maxY + 1) {
-                let maxId = 0;
-                self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
-                maxId++;
-                let length = self.maxY + 1 - items.length;
-                for (let i = 0; i < length; i++) {
-                    items.sort((a, b) => a.PositionY - b.PositionY);
-                    //if (items.length == 0) console.log(position);
-                    let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items) };
-                    items.push(newObj);
-                    self.computerList.push(newObj);
-                    maxId++;
-                }
-            }
-            items.sort((a, b) => a.PositionY - b.PositionY);
-            return items;
-        },
+        //    if (items.length > 0 && items.length < self.maxY + 1) {
+        //        let maxId = 0;
+        //        self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
+        //        maxId++;
+        //        let length = self.maxY + 1 - items.length;
+        //        for (let i = 0; i < length; i++) {
+        //            items.sort((a, b) => a.PositionY - b.PositionY);
+        //            //if (items.length == 0) console.log(position);
+        //            let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items) };
+        //            items.push(newObj);
+        //            self.computerList.push(newObj);
+        //            maxId++;
+        //        }
+        //    }
+        //    items.sort((a, b) => a.PositionY - b.PositionY);
+        //    return items;
+        //},
         initAud: function () {
             let self = this;
             self.maxX = 0, self.maxY = 0;
@@ -242,7 +259,7 @@ const app = new Vue({
                             self.filteredPlaceList.push(item.PlaceId);
                         }
                     });
-                    self.filteredPlaceList.sort();
+                    self.filteredPlaceList.sort(function (a, b) { return a - b; });
                 }
             });
         },
@@ -301,6 +318,21 @@ const app = new Vue({
                     url: 'turn:192.158.29.39:3478?transport=tcp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:turn.bistri.com:80',
+                    credential: 'homeo',
+                    username: 'homeo'
+                },
+                //{
+                //    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                //    credential: 'webrtc',
+                //    username: 'webrtc'
+                //},
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
                 }]
             };
             let peer = new RTCPeerConnection(configuration);
@@ -391,7 +423,7 @@ const app = new Vue({
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
-                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid  }));
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid }));
 
                     if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
                         var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
@@ -432,7 +464,7 @@ const app = new Vue({
                                                 if (typeof answer[i] != 'function')
                                                     obj1[i] = answer[i];
                                             }
-                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type };
+                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
                                             socket.send(JSON.stringify(obj));
                                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
                                             queue.candidates.forEach(function (candidate) {
@@ -445,6 +477,10 @@ const app = new Vue({
                                     }, function (r) { console.log(r); });
                                 }, function (r) { console.log(r); });
                             }, function (r) { console.log(r); });
+                        }
+                        else if (message.startOffer) {
+                            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+                            socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid }));
                         }
                     }
                 };
@@ -464,7 +500,7 @@ const app = new Vue({
                     obj1[i] = e.candidate[i];
             }
             let obj = {
-                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid, type: type
+                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid, type: type, uid: self.currentUid
             };
             if (socket && socket.readyState == 1) {
                 socket.send(JSON.stringify(obj));
@@ -492,6 +528,19 @@ const app = new Vue({
                 async: false,
                 success: function (errors) {
                     self.currentUser.errors = errors;
+                }
+            });
+        },
+        SetPlaceFree: function (id) {
+            let self = this;
+            $.ajax({
+                url: "/auditory/SetPlaceFree?Id=" + id,
+                type: "POST",
+                async: true,
+                success: function (resp) {
+                    if (resp.error) {
+                        notifier([{ Type: 'error', Body: resp.error }]);
+                    }
                 }
             });
         },
@@ -840,7 +889,32 @@ const app = new Vue({
         console.log(1);
         this.init();
     },
+    computed: {
+        filterComps() {
+            return function (position) {
+                let self = this;
+                let items = self.computerList.filter((item) => item.PositionX == position);
 
+                if (items.length > 0 && items.length < self.maxY + 1) {
+                    let maxId = 0;
+                    self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
+                    maxId++;
+                    let length = self.maxY + 1 - items.length;
+                    for (let i = 0; i < length; i++) {
+                        items.sort((a, b) => a.PositionY - b.PositionY);
+                        //if (items.length == 0) console.log(position);
+                        let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items) };
+                        items.push(newObj);
+                        self.computerList.push(newObj);
+                        maxId++;
+                    }
+                }
+                items.sort((a, b) => a.PositionY - b.PositionY);
+                return items;
+            }
+           // return salut => `${salut} ${this.firstName} ${this.lastName}`
+        }
+    },
     watch: {
         socketQueue: {
             handler: function (newOne, oldOne) {

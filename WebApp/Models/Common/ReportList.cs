@@ -11,5 +11,6 @@ namespace WebApp.Models.Common
         public string ResultBlank { get; set; }
         public string TestingTitle { get; set; }
         public string TestingProtocol { get; set; }
+        public string Result { get; set; }
     }
 }

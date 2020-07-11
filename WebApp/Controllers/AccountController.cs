@@ -104,7 +104,7 @@ namespace WebApp.Controllers
                 {
                     user = AccountManager.GetUser(model.Login, null, model.Password);
                 }
-                if (user.Id == Guid.Empty)
+                if (user.Id == Guid.Empty || user == null)
                 {
                     ModelState.AddModelError("", "Неверный логин или пароль");
                     return View(model);

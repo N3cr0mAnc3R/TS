@@ -50,6 +50,13 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<ScheduleModel>(sql: "[dbo].[Administrator_UserWithScheduleGet]", new { AuditoriumId, userUID, date }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task SetPlaceFree(int placeId, Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_SetPlaceFree]", new { placeId, userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<Auditory> GetAuditoryByIdForModerate(Guid userUID, int auditoriumId, string localization = "")
         {
             Auditory aud = new Auditory();
@@ -57,8 +64,29 @@ namespace WebApp.Models
             {
                 aud = await cnt.QueryFirstOrDefaultAsync<Auditory>(sql: "[dbo].[Administrator_AuditoriumGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure);
 
-                aud.ComputerList = await cnt.QueryAsync<TestComputer>(sql: "[dbo].[Administrator_PlacesHasProfileGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure);
-
+               List<TestComputer> computers = (await cnt.QueryAsync<TestComputer>(sql: "[dbo].[Administrator_PlacesHasProfileGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure)).ToList();
+                List<TestComputer> comps = new List<TestComputer>();
+                foreach (TestComputer item in computers)
+                {
+                    TestComputer founded = null;
+                    foreach(var comp in comps)
+                    {
+                        founded = comp.Id == item.Id ? comp : founded;
+                    }
+                    if (founded == null)
+                    {
+                        comps.Add(item);
+                    }
+                    else
+                    {
+                        if(item.TestingStatusId == 2)
+                        {
+                            comps.Remove(founded);
+                            comps.Add(item);
+                        }
+                    }
+                }
+                aud.ComputerList = comps;
             }
             return aud;
         }
@@ -136,11 +164,11 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<TestUser>(sql: "[dbo].[Administrator_UserByDateGet]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<IEnumerable<TestResult>> GetUsersResultByDate(int testingStatusId, DateTime? date, Guid userUID, string localization = "")
+        public async Task<IEnumerable<TestResult>> GetUsersResultByDate(int testingStatusId, int? auditoriumId, DateTime? date, Guid userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryAsync<TestResult>(sql: "[dbo].[Administrator_TestingResultByDate_Get]", new { testingStatusId, date, userUID, localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<TestResult>(sql: "[dbo].[Administrator_TestingResultByDate_Get]", new { testingStatusId, date, auditoriumId, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<AuditoryStatistic> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
@@ -222,6 +250,14 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstOrDefaultAsync<ReportList>(sql: "[dbo].[Administrator_TestingProfileResultBlankGet]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
+        public async Task<int> UpdateStatus(int TestingProfileId, int TestingStatusId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<int>(sql: "[dbo].[Administrator_TestingProfile_StatusUpdate]", new { TestingProfileId, userUID, TestingStatusId }, commandType: CommandType.StoredProcedure);
 
             }
         }
