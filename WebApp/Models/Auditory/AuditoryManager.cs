@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using WebApp.Models.Common;
 using WebApp.Models.DB;
+using WebApp.Models.UserTest;
 
 namespace WebApp.Models
 {
@@ -250,6 +251,14 @@ namespace WebApp.Models
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstOrDefaultAsync<ReportList>(sql: "[dbo].[Administrator_TestingProfileResultBlankGet]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
+        public async Task<TestingModel> GetUserInfo(int TestingProfileId, Guid? userUID, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<TestingModel>(sql: "[dbo].[Administrator_GetUserInfoTestsByTestingProfileId]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
 
             }
         }

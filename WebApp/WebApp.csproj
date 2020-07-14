@@ -411,6 +411,7 @@
     <Compile Include="Models\Auditory\AuditoryManager.cs" />
     <Compile Include="Models\Auditory\AuditoryStatistic.cs" />
     <Compile Include="Models\Auditory\PlaceConfigModel.cs" />
+    <Compile Include="Models\Auditory\ReportModel.cs" />
     <Compile Include="Models\Auditory\SavePictureModel.cs" />
     <Compile Include="Models\Auditory\ScheduleModel.cs" />
     <Compile Include="Models\Auditory\TestComputer.cs" />

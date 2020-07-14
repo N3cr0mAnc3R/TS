@@ -211,6 +211,7 @@
   left: 45px;
   bottom: 90px;
   border: 1px solid #c4c4c4;
+  z-index: 4;
   /*display: none;
     position: fixed;
     right: 20px;

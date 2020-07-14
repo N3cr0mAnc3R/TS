@@ -145,7 +145,7 @@
                 case 1: return self.localization == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System";
                 case 2: return self.localization == 1 ? "Вход" : "Login";
                 case 3: return self.localization == 1 ? "Выход" : "Logout";
-                case 4: return self.localization == 1 ? "Все права защищены, 2020" : "All rights reserved, 2020";
+                case 4: return self.localization == 1 ? "Все права защищены, 2020, СКФУ" : "All rights reserved, 2020, NCFU";
                 case 5: return self.localization == 1 ? "Список аудиторий" : "Auditory list";
                 case 6: return self.localization == 1 ? "Проверка ВИ" : "Verification";
                 case 7: return self.localization == 1 ? "Используйте учетную запись eCampus для входа." : "Enter Your eCampus Login and password";

@@ -188,7 +188,7 @@
                         a.TestingPackage = resp1[0].Packages.filter(function (b) { return b.AnswerId == a.Id; })[0];
                     });
                     self.answers = resp3[0];
-                    self.timeStart = new Date(resp1[0].Date);
+                    self.timeStart = resp1[0].Date;
                     self.startTimer();
                     if (resp1[0].Answered && resp1[0].Answered.length > 0) {
                         self.questions.forEach(function (a) {
@@ -530,6 +530,7 @@
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
+           // console.log(self.timeLeft);
             self.interval = setInterval(function () {
                 if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
@@ -539,6 +540,7 @@
                     clearInterval(self.intervalConnection);
                     self.finishTest();
                 }
+               // console.log(self.startedTimeRecording, self.timeLeft);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
                     setTimeout(function () {
                         if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
@@ -709,6 +711,10 @@
                     else if (message.reloadRequest) {
                         location.href = location.href;
                         //window.reload(true);
+                    }
+                    else if (message.requestFinish) {
+                        notifier([{ Type: 'error', Body: self.switchLocal(28) }]);
+                        self.finishTest();
                     }
                     else if (message.requestViolation) {
                         var errorBody = "";
@@ -1369,6 +1375,7 @@
                 case 25: return self.localization == 1 ? "Администратор приостановил тестирование. Пожалуйста, подождите." : "Administrator paused Your test. Please, wait for continue.";
                 case 26: return self.localization == 1 ? "Тестирование" : "Testing";
                 case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
+                case 28: return self.localization == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
             }
         }
     },

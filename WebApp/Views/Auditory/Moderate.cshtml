@@ -29,7 +29,7 @@
                             <div class="info-wrapper">
                                 <div class="place-info">
                                     <div class="place-name">{{item.Name}}</div>
-                                    <div class="user-name" v-if="item.TestingProfileId">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div>
+                                    <div class="user-name" v-if="item.TestingProfileId" v-on:click="consoleUser(item)" v-on:dblclick="resetUser(item)">({{item.LastName}} {{item.FirstName}} {{item.MiddleName}})</div>
                                     <div class="user-name">
                                         <span v-if="item.TestingStatusId == 2">В процессе</span>
                                         <span v-if="item.TestingStatusId == 5">Занял место</span>

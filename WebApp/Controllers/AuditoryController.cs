@@ -55,7 +55,7 @@ namespace WebApp.Controllers
                 return Redirect("/user/waiting");
             }
         }
-        async public Task<ActionResult> DownloadReport(int Id, int Type, int? StatusId)
+        async public Task<ActionResult> DownloadReport(int Id, int Type, int? StatusId, string? Date)
         {
             ReportList report = await AuditoryManager.GetResultReport(Id, CurrentUser.Id);
             ReportRender render = null;
@@ -88,8 +88,14 @@ namespace WebApp.Controllers
                          "ecampus",
                          "44xwkm8y8c",
                          "st9-dbe-reports");
-                        result = File(render.Render("pdf", new { auditoriumId = Id, testingStatusId = StatusId }), "pdf");
-                        fileName = "Аудитория_" + DateTime.Now.ToString("dd.MM.yyyy") + ".pdf";
+                        DateTime? dt = null;
+                        if (Date != null)
+                        {
+                            int[] DateSplit = Date.Split(',').Select(a => int.Parse(a)).ToArray();
+                            dt = new DateTime(DateSplit[0], DateSplit[1], DateSplit[2]);
+                        }
+                        result = File(render.Render("xls", new { auditoriumId = Id, testingStatusId = StatusId, date = dt }), "xls");
+                        fileName = "Аудитория_" + dt == null? DateTime.Now.ToString("dd.MM.yyyy"): ((DateTime)dt).ToString("dd.MM.yyyy") + ".xls";
                         break;
                     }
             }
@@ -132,6 +138,11 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetAuditoryInfo(int Id)
         {
             return Json(await AuditoryManager.GetAuditoryById(CurrentUser.Id, Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetUserInfo(int Id)
+        {
+            return Json(await AuditoryManager.GetUserInfo(Id, CurrentUser.Id,  Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> UpdateStatus(int Id, int StatusId)

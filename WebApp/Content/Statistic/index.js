@@ -53,6 +53,18 @@
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
         },
         printTPResult: function (Id) {
+
+            //$.ajax({
+            //    url: "/auditory/DownloadReport",
+            //    type: "POST",
+            //    data: {
+            //        Id: Id,
+            //        Type: 1
+            //    },
+            //    async: false,
+            //    success: function () {
+            //    }
+            //});
             window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
         },
         showTable: function () {
@@ -69,16 +81,19 @@
         saveResult: function (Id) {
             var self = this;
             $.ajax({
-                url: "/auditory/UpdateStatus?Id=" + ID + '&StatusId=' + self.currentStatus,
+                url: "/auditory/UpdateStatus?Id=" + Id + '&StatusId=4',
                 type: "POST",
                 async: false,
                 success: function (newStatus) {
                     if (newStatus.Error) {
-                        notifier([{ Type: 'Error', Body: newStatus.Error }]);
+                        notifier([{ Type: 'error', Body: newStatus.Error }]);
                     }
                     else if (newStatus != self.currentStatus) {
                         self.users = self.users.filter(function (item) { return item.Id != Id; });
-                        notifier([{ Type: 'Success', Body: "Результат успешно выгружен" }]);
+                        notifier([{ Type: 'success', Body: "Результат успешно выгружен" }]);
+                    }
+                    else {
+                        notifier([{ Type: 'error', Body: 'Произошла ошибка при выгрузке. Попробуйте позже' }]);
                     }
                 }
             });
