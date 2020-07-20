@@ -422,6 +422,7 @@
     <Compile Include="Models\Common\FileStreamResult.cs" />
     <Compile Include="Models\Common\IndexItem.cs" />
     <Compile Include="Models\Common\MvcResultSqlFileStream.cs" />
+    <Compile Include="Models\Common\OrganizationInfo.cs" />
     <Compile Include="Models\Common\ProctorSocketModel.cs" />
     <Compile Include="Models\Common\ReportList.cs" />
     <Compile Include="Models\Common\ReportRender.cs" />
@@ -431,6 +432,7 @@
     <Compile Include="Models\DB\Extender.cs" />
     <Compile Include="Models\DB\Manager.cs" />
     <Compile Include="Models\DB\StructuredDynamicParameters.cs" />
+    <Compile Include="Models\Logs\LogManager.cs" />
     <Compile Include="Models\Proctoring\AnonymUser.cs" />
     <Compile Include="Models\Proctoring\AnswerInfoScore.cs" />
     <Compile Include="Models\Proctoring\EnrolleeModel.cs" />

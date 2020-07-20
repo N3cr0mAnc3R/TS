@@ -76,7 +76,10 @@
         },
         printAudResult: function (Id) {
             var self = this;
-            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 2 + '&StatusId=' + self.currentStatus, '_blank');
+            //console.log(self.currentDate);
+            //console.log((self.currentDate == null ? '&Date=' + self.currentDate.getFullYear() + ',' + self.currentDate.gegetMonthtMonth() + ',' + self.currentDate.getDate() : ''));
+            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 2 + '&StatusId=' + self.currentStatus + '&Date=' + self.currentDate, '_blank');
+            //window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 2 + '&StatusId=' + self.currentStatus + (self.currentDate == null ? '&Date=' + self.currentDate.getFullYear() + ',' + self.currentDate.gegetMonthtMonth() + ',' + self.currentDate.getDate(): ''), '_blank');
         },
         saveResult: function (Id) {
             var self = this;

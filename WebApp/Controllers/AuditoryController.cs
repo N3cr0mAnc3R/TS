@@ -55,7 +55,7 @@ namespace WebApp.Controllers
                 return Redirect("/user/waiting");
             }
         }
-        async public Task<ActionResult> DownloadReport(int Id, int Type, int? StatusId, string? Date)
+        async public Task<ActionResult> DownloadReport(int Id, int Type, int? StatusId, string Date)
         {
             ReportList report = await AuditoryManager.GetResultReport(Id, CurrentUser.Id);
             ReportRender render = null;
@@ -91,11 +91,11 @@ namespace WebApp.Controllers
                         DateTime? dt = null;
                         if (Date != null)
                         {
-                            int[] DateSplit = Date.Split(',').Select(a => int.Parse(a)).ToArray();
+                            int[] DateSplit = Date.Split('-').Select(a => int.Parse(a)).ToArray();
                             dt = new DateTime(DateSplit[0], DateSplit[1], DateSplit[2]);
                         }
-                        result = File(render.Render("xls", new { auditoriumId = Id, testingStatusId = StatusId, date = dt }), "xls");
-                        fileName = "Аудитория_" + dt == null? DateTime.Now.ToString("dd.MM.yyyy"): ((DateTime)dt).ToString("dd.MM.yyyy") + ".xls";
+                        result = File(render.Render("xls", new { auditoriumId = Id, testingStatusId = StatusId, date = dt == null ? (DateTime?)null : dt }), "xls");
+                        fileName = "Аудитория_" + dt == null ? DateTime.Now.ToString("dd.MM.yyyy") : ((DateTime)dt).ToString("dd.MM.yyyy") + ".xls";
                         break;
                     }
             }
@@ -142,7 +142,12 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetUserInfo(int Id)
         {
-            return Json(await AuditoryManager.GetUserInfo(Id, CurrentUser.Id,  Session["Localization"].ToString()));
+            return Json(await AuditoryManager.GetUserInfo(Id, CurrentUser.Id, Session["Localization"].ToString()));
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetOrganizationContacts()
+        {
+            return Json(await AuditoryManager.GetOrganizationContacts(Session["Localization"].ToString()));
         }
         [HttpPost]
         public async Task<JsonResult> UpdateStatus(int Id, int StatusId)
@@ -153,7 +158,7 @@ namespace WebApp.Controllers
             }
             catch (Exception e)
             {
-                return Json(new {Error = e.Message});
+                return Json(new { Error = e.Message });
             }
         }
         [HttpPost]
@@ -195,9 +200,17 @@ namespace WebApp.Controllers
             return Json(await AuditoryManager.GetAuditoryStatistic(Id, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
-        public async Task<JsonResult> GetNewPeople()
+        public async Task<JsonResult> GetNewPeople(int Id)
         {
-            return Json(await AuditoryManager.GetNewPeople(CurrentUser.Id));
+            try
+            {
+                await AuditoryManager.GetNewPeople(Id, CurrentUser.Id);
+                return Json(1);
+            }
+            catch
+            {
+                return Json(0);
+            }
         }
         [HttpPost]
         public async Task<JsonResult> GetUsersByDate(TestUserModel model)
@@ -259,7 +272,7 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetUserPicture(int Id)
         {
-            return Json(Convert.ToBase64String((await AuditoryManager.GetUserPicture(Id, CurrentUser.Id)).Picture));
+            return Json((await AuditoryManager.GetUserPicture(Id, CurrentUser.Id)).PictureImage);
         }
         bool IsPinBusy(int pin, List<TestComputer> computers)
         {

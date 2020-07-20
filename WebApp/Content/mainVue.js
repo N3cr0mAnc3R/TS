@@ -7,7 +7,8 @@
         needShow2: false,
         needShow3: false,
         needShow4: false,
-        hasPhoto: false
+        hasPhoto: false,
+        info: []
     },
     methods: {
         init: function () {
@@ -32,6 +33,19 @@
                     self.hasPhoto = d;
                 }
             });
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/auditory/GetOrganizationContacts',
+                success: function (d) {
+                    self.info = d;
+                    var result = "";
+                    d.forEach(function (item) {
+                        result += item.Name + ": " + item.Contact + "<br>";
+                    })
+                    $('#nav-5').html(result);
+                }
+            });
             self.showUrl();
         },
         getLocalization: function () {
@@ -45,21 +59,19 @@
                         if (!$('#litem-1').hasClass('active')) { $('#litem-1').addClass('active'); }
                         $('#litem-2').removeClass('active');
                         if (typeof app !== 'undefined') {
-                        app.localization = 1;
+                            app.localization = 1;
                         }
-                        else {
                         self.localization = 1;
-                        }
+
                     }
                     else {
                         if (!$('#litem-2').hasClass('active')) { $('#litem-2').addClass('active'); }
                         $('#litem-1').removeClass('active');
                         if (typeof app !== 'undefined') {
-                        app.localization = 2;
+                            app.localization = 2;
                         }
-                        else {
                         self.localization = 2;
-                        }
+
                     }
                     self.switchLocal1();
                 }
@@ -133,7 +145,7 @@
             var self = this;
             console.log(123);
             var checking = (typeof app == 'undefined') ? self : app;
-            $('#nav-4').text(checking.localization == 1 ? "Все права защищены, 2020" : "All rights reserved, 2020");
+            $('#nav-4').text(checking.localization == 1 ? "Все права защищены, 2020, СКФУ" : "All rights reserved, 2020, NCFU");
             $('#nav-8').text(checking.localization == 1 ? "Логин" : "UserName");
             $('#nav-9').text(checking.localization == 1 ? "Пароль" : "Password");
             $('#nav-10').text(checking.localization == 1 ? "Выполнить вход" : "Log in");

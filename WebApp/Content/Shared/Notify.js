@@ -58,7 +58,7 @@ function notifier(incomeMessages) {
             //Добавление сообщения в начало массива
             notifierScope.messages.unshift(messageWrapper);
             if (notifierScope.messages.length > 5) {
-                var removed = notifierScope.pop();
+                var removed = notifierScope.messages.pop();
                 removed.remove();
             }
             //Внешний вид сообщения

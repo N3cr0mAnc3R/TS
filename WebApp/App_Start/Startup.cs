@@ -10,6 +10,7 @@ using System.Linq;
 using System.Web;
 using WebApp.Models;
 using WebApp.Models.Account;
+using WebApp.Models.Logs;
 using WebApp.Models.Proctoring;
 
 namespace WebApp
@@ -56,6 +57,10 @@ namespace WebApp
             app.CreatePerOwinContext((IdentityFactoryOptions<ProctorManager> options, IOwinContext context) =>
             {
                 return new ProctorManager(context.Get<Concrete>());
+            });
+            app.CreatePerOwinContext((IdentityFactoryOptions<LogManager> options, IOwinContext context) =>
+            {
+                return new LogManager(context.Get<Concrete>());
             });
         }
 

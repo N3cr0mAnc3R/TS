@@ -13,7 +13,7 @@
         IsTipOpened: false,
         tipPosition: {},
         needShowScore: false,
-        score: 0,
+        score: null,
         timeRecording: -1,
         testingTime: 0,
         loadObject: {
@@ -65,6 +65,8 @@
         NameDiscipline: "",
         startedTimeRecording: 0,
         blurReady: false,
+        stepCounter: 0,
+        stepNumber: 60,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -81,7 +83,8 @@
         },
         errorText: "",
         adminErrors: [],
-        potentialPeers: []
+        potentialPeers: [],
+        Turn: {}
     },
     methods: {
         init: function () {
@@ -94,11 +97,23 @@
                     self.domain = domain;
                 }
             });
+            $.ajax({
+                url: "/account/GetLoginAndPassword",
+                type: "GET",
+                async: false,
+                success: function (info) {
+                    //self.domain = domain;
+                    self.TURN = {
+                        url: 'turn:turn.ncfu.ru:8443',
+                        credential: info.Password,
+                        username: info.Login
+                    };
+                }
+            });
             $(window).on('mousemove', function (e) {
                 if (e.pageX >= $(document.body).width() - 1 || e.pageY > $(document.body).height() || e.pageX <= 1 || e.pageY <= 1) {
                     // self.errorText = self.switchLocal(27);
                     if (self.blurReady) {
-                        console.log('m');
                         notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
                     }
                 }
@@ -530,7 +545,7 @@
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
-           // console.log(self.timeLeft);
+            console.log(self.timeLeft);
             self.interval = setInterval(function () {
                 if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
@@ -538,10 +553,18 @@
                     clearInterval(self.interval);
 
                     clearInterval(self.intervalConnection);
-                    self.finishTest();
+                    try {
+                        self.finishTest();
+                    }
+                    catch{
+                        setTimeOut(function () {
+                            self.finishTest();
+                        }, 5000);
+                    }
                 }
-               // console.log(self.startedTimeRecording, self.timeLeft);
+                console.log(self.startedTimeRecording, self.timeLeft);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
+                    console.log('stop recording');
                     setTimeout(function () {
                         if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
                         if (self.screenRecorder) self.screenRecorder.ondataavailable = null;
@@ -552,9 +575,11 @@
             }, 1000);
         },
         finishRecord: function (self) {
+            console.log(self.flagStopRec);
             if (self.flagStopRec) {
                 return;
             }
+            console.log(self.recordedCamera);
             self.flagStopRec = true;
             if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
             if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
@@ -570,8 +595,8 @@
                 self.sendVideo(formaData, int1);
             }
             catch{
-                int1 = setInterval(function () {
-                }, 10000);
+                //int1 = setInterval(function () {
+                //}, 10000);
             }
         },
         sendVideo: function (formaData, interval) {
@@ -589,11 +614,13 @@
                     setTimeout(function () {
                         self.flagStopRec = false;
                         self.startedTimeRecording = self.timeLeft;
+                        console.log('reset time', self.startedTimeRecording);
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(100);
                         self.screenRecorder.ondataavailable = self.recordingScreen;
                         self.screenRecorder.start(100);
-                    }, 300000);
+                    }, self.stepCounter * self.stepNumber);
+                    self.stepCounter++;
                 }
             });
         },
@@ -732,7 +759,7 @@
                     else if (message.answer) {
                         //var interval = setInterval(function () {
                         //console.log('start interval');
-                        var found = self.peers.filter(function (item) { return item.type == message.type; })[0];
+                        var found = self.peers.filter(function (item) { return item.type == message.type && item.uid == message.uid; })[0];
                         console.log('found', found);
                         if (found) {
                             //  clearInterval(interval);
@@ -990,6 +1017,7 @@
 
 
             console.log(self.finishScreen, self.lostConnection);
+
             $.ajax({
                 url: "/user/FinishTest?Id=" + self.testingProfileId,
                 type: "POST",
@@ -1044,7 +1072,7 @@
                 //var tracks = Str.getTracks();
                 //track.forE
                 console.log(options);
-               // self.initRTCPeer(2, uid);
+                // self.initRTCPeer(2, uid);
                 self.screenRecorder = new MediaRecorder(Str, options);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
                 self.screenRecorder.start(100);
@@ -1232,6 +1260,7 @@
                 { url: 'stun:stun.voipstunt.com' },
                 { url: 'stun:stun.voxgratia.org' },
                 { url: 'stun:stun.xten.com' },
+                { url: 'STUN:turn.ncfu.ru:9003' },
                 {
                     url: 'turn:numb.viagenie.ca',
                     credential: 'muazkh',
@@ -1256,7 +1285,8 @@
                     url: 'turn:turn.anyfirewall.com:443?transport=tcp',
                     credential: 'webrtc',
                     username: 'webrtc'
-                }]
+                },
+                self.TURN]
             };
             var peer = new RTCPeerConnection(configuration);
             peer.addEventListener('icecandidate', function (e) {
@@ -1279,6 +1309,7 @@
 
             var found = self.peers.filter(function (item) { return item.type == type && item.uid == uid; })[0];
             if (found) {
+                found.peer.close();
                 found.peer = peer;
             }
             else {
@@ -1304,6 +1335,7 @@
             catch{
                 console.log('error');
             }
+
         },
         onIceCandidate: function (e, type, uid) {
             var obj1 = {};

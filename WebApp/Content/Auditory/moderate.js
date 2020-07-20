@@ -39,7 +39,8 @@ const app = new Vue({
         times: [],
         currentDate: null,
         scheduleUsers: [],
-        filteredPlaceList: []
+        filteredPlaceList: [],
+        TURN: {}
     },
     methods: {
         init: function () {
@@ -60,6 +61,20 @@ const app = new Vue({
                 async: true,
                 success: function (times) {
                     self.times = times;
+                }
+            });
+
+            $.ajax({
+                url: "/account/GetLoginAndPassword",
+                type: "GET",
+                async: false,
+                success: function (info) {
+                    //self.domain = domain;
+                    self.TURN = {
+                        url: 'turn:turn.ncfu.ru:8443',
+                        credential: info.Password,
+                        username: info.Login
+                    };
                 }
             });
             $.ajax({
@@ -125,7 +140,7 @@ const app = new Vue({
                         if (!found) {
                             self.computerList = self.computerList.filter(function (comp) { return comp.Id != item.Id; });
                             var foundedSocket = self.videoSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
-                            foundedSocket.socket.close();
+                            if (foundedSocket) foundedSocket.socket.close();
                             self.videoSockets = self.videoSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
                         }
                     });
@@ -142,22 +157,22 @@ const app = new Vue({
                                 item.Image = "";
                                 item.chat = {};
                                 //Если подтверждён
-                                if (item.UserVerified && [2, 5].indexOf(item.TestingStatusId) != -1) {
+                                if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
                                     //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
                                     //Сокет на экран
                                     self.initSocket(2, item, 2);
+                                    self.initSocket(2, item, 1);
                                 }
                                 //Сокет на вебку
                                 //self.socketQueue.push({ socketType: 2, item: item, videoType: 1 });
-                                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-                                      self.initSocket(2, item, 1);
-                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                }
+                                //  if ([2].indexOf(item.TestingStatusId) != -1) {
+                                // console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                // }
                                 //В любом случае нужно добавить в список
                                 self.computerList.push(item);
                                 if ([2, 5].indexOf(item.TestingStatusId) != -1) {
                                     console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                       self.initSocket(1, item);
+                                    self.initSocket(1, item);
                                 }
                                 //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
                             }
@@ -171,7 +186,7 @@ const app = new Vue({
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
                                 if (found.UserVerified != item.UserVerified) {
                                     if (item.UserVerified) {
-                                          self.initSocket(2, found, 2);
+                                        self.initSocket(2, found, 2);
                                         console.log('socket: ' + item.TestingProfileId, item.LastName);
                                     }
                                 }
@@ -186,11 +201,11 @@ const app = new Vue({
                                     self.initSocket(2, found, 1);
                                     if ([2].indexOf(found.TestingStatusId) != -1) {
                                         console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                         self.initSocket(1, found);
+                                        self.initSocket(1, found);
                                     }
                                     if (found.UserVerified != item.UserVerified) {
                                         if (item.UserVerified) {
-                                             self.initSocket(2, found, 2);
+                                            self.initSocket(2, found, 2);
                                             console.log('socket: ' + item.TestingProfileId, item.LastName);
                                         }
                                     }
@@ -214,13 +229,24 @@ const app = new Vue({
             var self = this;
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/GetUserInfo?Id=" + item.Id,
+                    url: "/auditory/GetUserInfo?Id=" + item.TestingProfileId,
                     type: "POST",
                     async: true,
                     success: function (info) {
-                        console.log(info);
                         info.forEach(function (item) {
-                            console.log(JSON.stringify(item));
+                            var obj = {};
+                            item.forEach(function (keyValuePair) {
+                                if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
+                                    obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+
+                                    console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
+                                }
+                                else {
+                                    obj[keyValuePair.Key] = keyValuePair.Value;
+                                    console.log(obj[keyValuePair.Key]);
+                                }
+                            })
+                            // console.log(JSON.stringify(obj));
                         });
                     }
                 });
@@ -357,7 +383,9 @@ const app = new Vue({
                     url: 'turn:turn.anyfirewall.com:443?transport=tcp',
                     credential: 'webrtc',
                     username: 'webrtc'
-                }]
+                },
+                self.TURN
+                ]
             };
             let peer = new RTCPeerConnection(configuration);
 
@@ -367,7 +395,7 @@ const app = new Vue({
             peer.addEventListener('connectionstatechange', function (event) {
                 if (peer && peer.connectionState == 'connecting') {
                     setTimeout(function () {
-                        if (peer.connectionState == 'connecting') {
+                        if (!peer || peer.connectionState == 'connecting') {
                             peer = null;
                             self.initRTCPeer(created, socket, a, type);
                         }
@@ -827,12 +855,25 @@ const app = new Vue({
                 data: obj,
                 success: function () {
                     let found = self.videoSockets.filter(function (item) { return item.id == self.currentUser.TestingProfileId; })[0];
-                    found.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: self.currentUser.TestingProfileId, resetRequest: true }));
+                    if (found)
+                        found.socket.send(JSON.stringify({ IsSender: false, TestingProfileId: self.currentUser.TestingProfileId, resetRequest: true }));
                     console.log(self.currentUser);
                     //RequestReset
                     console.log(self.videoSockets, self.currentUser.TestingProfileId);
                 }
             });
+        },
+        loadPeople: function () {
+            var self = this;
+            $.ajax({
+                url: "/auditory/GetNewPeople?Id=" + self.auditory,
+                type: "POST",
+                async: true,
+                success: function (result) {
+                    notifier({ Type: 'success', Body: 'Данные загружены' });
+                }
+            });
+
         },
         sendReload: function (id) {
             let self = this;
@@ -912,7 +953,6 @@ const app = new Vue({
         }
     },
     mounted() {
-        console.log(1);
         this.init();
     },
     computed: {

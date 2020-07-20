@@ -44,6 +44,13 @@ namespace WebApp.Models
                 return await cnt.QueryAsync<IndexItem>(sql: "[dbo].[Administrator_Dictionary_TestingTime]", commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<OrganizationInfo>> GetOrganizationContacts(string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<OrganizationInfo>(sql: "[dbo].[OrganizationInfoGet]", new { localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<IEnumerable<ScheduleModel>> GetUserWithTimes(int AuditoriumId, Guid userUID, DateTime? date)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -65,12 +72,12 @@ namespace WebApp.Models
             {
                 aud = await cnt.QueryFirstOrDefaultAsync<Auditory>(sql: "[dbo].[Administrator_AuditoriumGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure);
 
-               List<TestComputer> computers = (await cnt.QueryAsync<TestComputer>(sql: "[dbo].[Administrator_PlacesHasProfileGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure)).ToList();
+                List<TestComputer> computers = (await cnt.QueryAsync<TestComputer>(sql: "[dbo].[Administrator_PlacesHasProfileGet]", new { userUID, auditoriumId, localization }, commandType: CommandType.StoredProcedure)).ToList();
                 List<TestComputer> comps = new List<TestComputer>();
                 foreach (TestComputer item in computers)
                 {
                     TestComputer founded = null;
-                    foreach(var comp in comps)
+                    foreach (var comp in comps)
                     {
                         founded = comp.Id == item.Id ? comp : founded;
                     }
@@ -80,7 +87,7 @@ namespace WebApp.Models
                     }
                     else
                     {
-                        if(item.TestingStatusId == 2)
+                        if (item.TestingStatusId == 2)
                         {
                             comps.Remove(founded);
                             comps.Add(item);
@@ -141,14 +148,14 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_TestingProfileUserVerifiedSet]", new { testingProfileId, userVerified,  userUID, localization }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_TestingProfileUserVerifiedSet]", new { testingProfileId, userVerified, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public async Task<TestUser> GetUserPicture(int testingProfileId, Guid? userUID, string localization = "")
+        public async Task<ApplicationUser> GetUserPicture(int testingProfileId, Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<TestUser>(sql: "[dbo].[UserPlace_UserPictureGet]", new { testingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<ApplicationUser>(sql: "[dbo].[UserPlace_UserPictureGet]", new { testingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<IEnumerable<TestUser>> GetUsersByDateAud(int auditoriumId, int testingStatusId, DateTime? date, Guid userUID, string localization = "")
@@ -190,10 +197,10 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == ""? (string)null: config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_PlaceProfileUpdate]", new { placeProfileId = config.Id > 0 ? config.Id : (int?)null, placeConfig = config.PlaceConfig == "" ? (string)null : config.PlaceConfig, placeId = config.PlaceId, userUID }, commandType: CommandType.StoredProcedure);
                 if (config.PlaceConfig == null)
                 {
-                    await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { placeProfileId = config.Id, userUID, isRequest = 0}, commandType: CommandType.StoredProcedure);
+                    await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_ResetRequest_Update]", new { placeProfileId = config.Id, userUID, isRequest = 0 }, commandType: CommandType.StoredProcedure);
                 }
             }
         }
@@ -216,17 +223,17 @@ namespace WebApp.Models
         }
         public async Task<PlaceConfigModel> GetFreePlaces(Guid? userUID, string localization = "")
         {
-            using (var cnt =await Concrete.OpenConnectionAsync())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
 
             }
         }
-        public async Task<int> GetNewPeople(Guid? userUID)
+        public async Task GetNewPeople(int Id, Guid? userUID)
         {
-            using (var cnt  =await Concrete.OpenConnectionAsync())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstAsync<int>(sql: "[dbo].", new { userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].Administrator_UsersAndTestingPofilesForTypeTesting1Load", new { auditoriumId = Id, userUID }, commandType: CommandType.StoredProcedure);
 
             }
         }
@@ -254,11 +261,11 @@ namespace WebApp.Models
 
             }
         }
-        public async Task<TestingModel> GetUserInfo(int TestingProfileId, Guid? userUID, string localization = "")
+        public async Task<IEnumerable<dynamic>> GetUserInfo(int TestingProfileId, Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstOrDefaultAsync<TestingModel>(sql: "[dbo].[Administrator_GetUserInfoTestsByTestingProfileId]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<dynamic>(sql: "[dbo].[Administrator_GetUserInfoTestsByTestingProfileId]", new { TestingProfileId, userUID, localization }, commandType: CommandType.StoredProcedure);
 
             }
         }

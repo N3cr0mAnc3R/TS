@@ -264,6 +264,14 @@ body .localization-wrapper .localization-item.active {
   -webkit-box-shadow: inset #565c72 0px 1px 4px;
   box-shadow: inset #565c72 0px 1px 4px;
 }
+.footer-container {
+  font-size: 18px;
+  display: flex;
+  justify-content: space-between;
+}
+.footer-container #nav-5 {
+  line-height: 35px;
+}
 #nav-7 {
   color: #565C72;
 }

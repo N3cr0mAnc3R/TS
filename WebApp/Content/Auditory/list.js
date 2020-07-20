@@ -3,6 +3,7 @@
     data: {
         auditoryList: [],
         selectedAud: {},
+        isSuperAdmin: false,
         localization: 1
     },
     methods: {
@@ -24,6 +25,15 @@
                     self.auditoryList.forEach(function (a) {
                         self.getAuditoryStatistic(a.Id);
                     });
+                }
+            });
+
+            $.ajax({
+                url: "/account/IsPaul",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.isSuperAdmin = domain;
                 }
             });
         },

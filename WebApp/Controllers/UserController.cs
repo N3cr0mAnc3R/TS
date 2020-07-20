@@ -16,6 +16,7 @@ using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Models.Common;
 using WebApp.Models.DB;
+using WebApp.Models.Logs;
 using WebApp.Models.Proctoring;
 using WebApp.Models.UserTest;
 using Image = System.Drawing.Image;
@@ -219,6 +220,7 @@ namespace WebApp.Controllers
         public async Task<JsonResult> FinishTest(int Id)
         {
             //ToDo Раскомментить 
+            await LogManager.SavelLog(CurrentUser.Id, Request.ServerVariables["REMOTE_ADDR"], 4);
             await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             return Json(true);
         }
@@ -226,6 +228,8 @@ namespace WebApp.Controllers
         {
             //ToDo Раскомментить 
             await TestManager.StartTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
+
+            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 2);
             var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
             return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
         }
@@ -261,6 +265,7 @@ namespace WebApp.Controllers
         public async Task<JsonResult> UpdateQuestionAnswer(IEnumerable<QuestionAnswer> answer)
         {
             await TestManager.UpdateQuestionAnswer(answer);
+            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return Json(true);
         }
         public JsonResult GetQuestionImage(int Id, int Part = 1)
@@ -359,7 +364,8 @@ namespace WebApp.Controllers
                     timers[model.TestingProfileId].Dispose();
                     timers.Remove(model.TestingProfileId);
                 }
-                //await FinishTest(model.TestingProfileId);
+                await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
+                await FinishTest(model.TestingProfileId);
             }
             return Json(1);
             //await TestManager.SaveImage(model);
@@ -387,6 +393,7 @@ namespace WebApp.Controllers
             {
                 model.AnswerFile = Request.Files.Get(0);
             }
+            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -435,6 +442,14 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<ProctorManager>();
+            }
+        }
+
+        protected LogManager LogManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<LogManager>();
             }
         }
 

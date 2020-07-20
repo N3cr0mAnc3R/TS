@@ -21,7 +21,7 @@
             <TextBox Name="Id1" Width="100"></TextBox>
             <CheckBox x:Name="IsQwestion" Checked="IsQwestion_Checked">Вопросы</CheckBox>
             <CheckBox x:Name="IsStraightCh" Checked="IsStraight_Checked" IsChecked="True">В прямом порядке</CheckBox>
-            <CheckBox Checked="IsNorm_Checked" IsChecked="True">Юрин</CheckBox>
+            <CheckBox Checked="IsNorm_Checked" IsChecked="True">Мой</CheckBox>
             <TextBox x:Name="dpi" Width="100" TextChanged="dpi_TextChanged">300</TextBox>
         </StackPanel>
         <ScrollViewer Grid.Row="1">

@@ -8,11 +8,14 @@ using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.Protocols;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
 using WebApp.Models.Account;
+using WebApp.Models.Logs;
 
 namespace WebApp.Controllers
 {
@@ -104,7 +107,7 @@ namespace WebApp.Controllers
                 {
                     user = AccountManager.GetUser(model.Login, null, model.Password);
                 }
-                if (user.Id == Guid.Empty || user == null)
+                if (user == null || user.Id == Guid.Empty)
                 {
                     ModelState.AddModelError("", "Неверный логин или пароль");
                     return View(model);
@@ -114,7 +117,7 @@ namespace WebApp.Controllers
 
 
                 SignInManager.SignIn(user, false, false);
-
+                await LogManager.SavelLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
 
                 List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
                 if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4}))
@@ -147,7 +150,16 @@ namespace WebApp.Controllers
         [HttpPost]
         public JsonResult IsPaul()
         {
-            return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"));
+            return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651")|| CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
+        }
+
+        private string Secret = ConfigurationManager.AppSettings["turn:secret"];
+        [HttpGet]
+        public JsonResult GetLoginAndPassword()
+        {
+            MD5 md5 = MD5.Create();
+            string Login = System.Web.Security.Membership.GeneratePassword(6, 0);
+            return Json(new { Login, Password = Convert.ToBase64String(md5.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
         }
 
 #if DEBUG
@@ -188,6 +200,13 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<AuditoryManager>();
+            }
+        }
+        protected LogManager LogManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<LogManager>();
             }
         }
     }
