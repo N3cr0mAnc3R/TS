@@ -159,7 +159,8 @@ namespace WebApp.Controllers
         {
             MD5 md5 = MD5.Create();
             string Login = System.Web.Security.Membership.GeneratePassword(6, 0);
-            return Json(new { Login, Password = Convert.ToBase64String(md5.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
+            HMAC mc = HMAC.Create("HMACSHA1");
+            return Json(new { Login, Password = Convert.ToBase64String(mc.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
         }
 
 #if DEBUG

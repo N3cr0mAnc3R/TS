@@ -16,6 +16,7 @@ namespace WebApp.Models.Common
         public Guid? UserIdFrom { get; set; }
         public Guid? UserIdTo { get; set; }
         public bool ForCreate { get; set; }
+        public bool ForReset{ get; set; }
         public byte[] Stream { get; set; }
     }
 }

@@ -565,6 +565,24 @@ const app = new Vue({
             let self = this;
             return self.me.Id == message.UserIdFrom;
         },
+        ResetServer: function () {
+            var socket = null, socket1 = null;
+            if (typeof (WebSocket) !== 'undefined') {
+                socket = new WebSocket(self.domain + "/ChatHandler.ashx");
+                socket1 = new WebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            else {
+                socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
+                socket1 = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            socket.onopen = function () {
+                socket.send(JSON.stringify({ ForReset: true }));
+
+            };
+            socket1.onopen = function () {
+                socket.send(JSON.stringify({ ForReset: true}));
+            };
+        },
         verifyUser: function (Verified) {
             //SetUserVerified
             let self = this;

@@ -18,7 +18,7 @@ namespace WebApp
     public class StreamHandler : IHttpHandler
     {
 
-        private static readonly Dictionary<int, List<WebSocket>> Clients = new Dictionary<int, List<WebSocket>>();
+        private static Dictionary<int, List<WebSocket>> Clients = new Dictionary<int, List<WebSocket>>();
         private static readonly ReaderWriterLockSlim Locker = new ReaderWriterLockSlim();
         public void ProcessRequest(HttpContext context)
         {
@@ -91,7 +91,18 @@ namespace WebApp
                         cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
                     }
                     jsonparsed = Json.Decode<Offer>(cathing);
-
+                    if (jsonparsed.ForReset)
+                    {
+                        foreach (var client in Clients)
+                        {
+                            foreach (var item in client.Value)
+                            {
+                                await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
+                                item.Dispose();
+                            }
+                        }
+                        Clients = new Dictionary<int, List<WebSocket>>();
+                    }
                     if (jsonparsed.ForCreate)
                     {
                         if (!Clients.ContainsKey(jsonparsed.TestingProfileId)) Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
@@ -159,7 +170,7 @@ namespace WebApp
         {
             get
             {
-                return false;
+                return true;
             }
         }
     }

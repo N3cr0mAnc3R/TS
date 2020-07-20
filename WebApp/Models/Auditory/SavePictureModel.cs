@@ -24,6 +24,7 @@ namespace WebApp.Models
     {
         public int TestingProfileId { get; set; }
         public bool ForCreate { get; set; }
+        public bool ForReset { get; set; }
 
     }
 }

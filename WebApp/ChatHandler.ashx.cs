@@ -21,7 +21,7 @@ namespace WebApp
     /// </summary>
     public class ChatHandler : IHttpHandler
     {
-        private static readonly Dictionary<int, List<WebSocket>> Clients = new Dictionary<int, List<WebSocket>>(); 
+        private static Dictionary<int, List<WebSocket>> Clients = new Dictionary<int, List<WebSocket>>(); 
         private static readonly ReaderWriterLockSlim Locker = new ReaderWriterLockSlim();
         public void ProcessRequest(HttpContext context)
         {
@@ -67,6 +67,19 @@ namespace WebApp
                     }
                     jsonparsed = Json.Decode<ChatMessage>(cathing);
 
+                    if (jsonparsed.ForReset)
+                    {
+                        foreach (var client in Clients)
+                        {
+                            foreach (var item in client.Value)
+                            {
+                                await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
+                                item.Dispose();
+                            }
+                        }
+                        Clients = new Dictionary<int, List<WebSocket>>();
+                        return
+                    }
                     if (jsonparsed.ForCreate)
                     {
                         if (!Clients.ContainsKey(jsonparsed.TestingProfileId)) Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
@@ -144,7 +157,7 @@ namespace WebApp
         {
             get
             {
-                return false;
+                return true;
             }
         }
 

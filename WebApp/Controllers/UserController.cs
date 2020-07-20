@@ -122,7 +122,7 @@ namespace WebApp.Controllers
             try
             {
                 List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString(), CurrentUser.Id);
-                tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString()));
+                tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, CurrentUser.Id, Session["Localization"].ToString()));
                 return Json(tests);
             }
             catch (Exception e)

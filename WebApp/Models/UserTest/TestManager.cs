@@ -32,13 +32,13 @@ namespace WebApp.Models
                 }
             }
         }
-        public dynamic GetActiveTestsByPlaceConfig(string placeConfig, string Localization)
+        public dynamic GetActiveTestsByPlaceConfig(string placeConfig, Guid userUID, string Localization)
         {
             using (var cnt = Concrete.OpenConnection())
             {
                 try
                 {
-                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, testingStatusId = 2, Localization }, commandType: CommandType.StoredProcedure);
+                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
