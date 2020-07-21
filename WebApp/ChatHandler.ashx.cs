@@ -78,7 +78,7 @@ namespace WebApp
                             }
                         }
                         Clients = new Dictionary<int, List<WebSocket>>();
-                        return
+                        return;
                     }
                     if (jsonparsed.ForCreate)
                     {

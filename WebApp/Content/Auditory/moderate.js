@@ -567,6 +567,7 @@ const app = new Vue({
         },
         ResetServer: function () {
             var socket = null, socket1 = null;
+            var self = this;
             if (typeof (WebSocket) !== 'undefined') {
                 socket = new WebSocket(self.domain + "/ChatHandler.ashx");
                 socket1 = new WebSocket(self.domain + "/StreamHandler.ashx");
@@ -577,10 +578,11 @@ const app = new Vue({
             }
             socket.onopen = function () {
                 socket.send(JSON.stringify({ ForReset: true }));
-
+                socket.close();
             };
             socket1.onopen = function () {
-                socket.send(JSON.stringify({ ForReset: true}));
+                socket1.send(JSON.stringify({ ForReset: true }));
+                socket1.close();
             };
         },
         verifyUser: function (Verified) {

@@ -382,8 +382,14 @@ namespace WebApp.Controllers
                     model.ScreenFile = Request.Files.Get(1);
                 }
             }
-            await TestManager.FileUploadAsync(model, 1, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
-            await TestManager.FileUploadAsync(model, 2, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
+            if (model.CameraFile.ContentLength > 0)
+            {
+                await TestManager.FileUploadAsync(model, 1, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
+            }
+            if (model.ScreenFile.ContentLength > 0)
+            {
+                await TestManager.FileUploadAsync(model, 2, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
+            }
             return Json(true);
         }
         [HttpPost]

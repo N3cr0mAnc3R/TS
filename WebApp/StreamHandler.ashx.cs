@@ -97,11 +97,13 @@ namespace WebApp
                         {
                             foreach (var item in client.Value)
                             {
+                                await item.SendAsync(new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes("{reloadRequest: true, IsSender: false}")), WebSocketMessageType.Text, true, CancellationToken.None);
                                 await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
                                 item.Dispose();
                             }
                         }
                         Clients = new Dictionary<int, List<WebSocket>>();
+                        return;
                     }
                     if (jsonparsed.ForCreate)
                     {

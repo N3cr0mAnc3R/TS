@@ -110,14 +110,14 @@
                     };
                 }
             });
-            $(window).on('mousemove', function (e) {
-                if (e.pageX >= $(document.body).width() - 1 || e.pageY > $(document.body).height() || e.pageX <= 1 || e.pageY <= 1) {
-                    // self.errorText = self.switchLocal(27);
-                    if (self.blurReady) {
-                        notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
-                    }
-                }
-            });
+            //$(window).on('mousemove', function (e) {
+            //    if (e.pageX >= $(document.body).width() - 1 || e.pageY > $(document.body).height() || e.pageX <= 1 || e.pageY <= 1) {
+            //        // self.errorText = self.switchLocal(27);
+            //        if (self.blurReady) {
+            //            notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
+            //        }
+            //    }
+            //});
             self.mediaSource = new MediaSource();
             self.streamLoaded = URL.createObjectURL(self.mediaSource);
             self.mediaSource.addEventListener('sourceopen', self.sourceOpen);
@@ -141,6 +141,9 @@
                 async: false,
                 success: function (user) {
                     self.currentUser = user;
+                },
+                error: function () {
+                    location.reload();
                 }
             });
             $.ajax({
@@ -545,7 +548,7 @@
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
-            console.log(self.timeLeft);
+           // console.log(self.timeLeft);
             self.interval = setInterval(function () {
                 if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
@@ -562,9 +565,9 @@
                         }, 5000);
                     }
                 }
-                console.log(self.startedTimeRecording, self.timeLeft);
+               // console.log(self.startedTimeRecording, self.timeLeft);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
-                    console.log('stop recording');
+                    //console.log('stop recording');
                     setTimeout(function () {
                         if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
                         if (self.screenRecorder) self.screenRecorder.ondataavailable = null;
@@ -575,11 +578,11 @@
             }, 1000);
         },
         finishRecord: function (self) {
-            console.log(self.flagStopRec);
+            //console.log(self.flagStopRec);
             if (self.flagStopRec) {
                 return;
             }
-            console.log(self.recordedCamera);
+            //console.log(self.recordedCamera, self.recordedScreen);
             self.flagStopRec = true;
             if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
             if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
@@ -784,6 +787,9 @@
                 }
             };
 
+            self.videoSocket.onclose = function () {
+                self.initVideoSocket();
+            }
         },
         reInitPeers: function () {
             var self = this;
@@ -1156,8 +1162,10 @@
         },
         resizing: function (self) {
             $(document).on('mouseup', function () { self.stopResizing(self); });
-            $('#panel-right').width(self.tipPosition.start - event.pageX);
-            self.maxTipWidth = self.tipPosition.start - event.pageX - 20;
+            if (self.tipPosition.start - event.pageX > 320) {
+                $('#panel-right').width(self.tipPosition.start - event.pageX);
+                self.maxTipWidth = self.tipPosition.start - event.pageX - 20;
+            }
         },
         stopResizing: function (self) {
             self.tipPosition.width = $('#panel-right').width();

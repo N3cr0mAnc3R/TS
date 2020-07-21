@@ -143,9 +143,10 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
-        public JsonResult GetCurrentUser()
+        public async Task<JsonResult> GetCurrentUser()
         {
-            return Json(new { PictureImage = CurrentUser.PictureImage });
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1,2,3,4,6,7}) });
         }
         [HttpPost]
         public JsonResult IsPaul()
