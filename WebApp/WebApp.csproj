@@ -250,7 +250,7 @@
       <DependentUpon>Index.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\pretest.js" />
-    <Content Include="Content\Testing\test.js" />
+    <Content Include="Content\Testing\test3.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />

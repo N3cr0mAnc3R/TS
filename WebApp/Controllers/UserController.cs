@@ -376,17 +376,20 @@ namespace WebApp.Controllers
         {
             if (Request.Files.Count > 0)
             {
-                model.CameraFile = Request.Files.Get(0);
-                if (Request.Files.Count > 1)
+                if (model.Type == 1)
                 {
-                    model.ScreenFile = Request.Files.Get(1);
+                    model.CameraFile = Request.Files.Get(0);
+                }
+                else
+                {
+                    model.ScreenFile = Request.Files.Get(0);
                 }
             }
             if (model.CameraFile.ContentLength > 0)
             {
                 await TestManager.FileUploadAsync(model, 1, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             }
-            if (model.ScreenFile.ContentLength > 0)
+            if (model.ScreenFile != null && model.ScreenFile.ContentLength > 0)
             {
                 await TestManager.FileUploadAsync(model, 2, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             }

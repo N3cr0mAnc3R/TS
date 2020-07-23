@@ -201,7 +201,7 @@ namespace Parser
                 proc.StartInfo.FileName = ghostScriptPath;
                 proc.StartInfo.Arguments = ars;
                 proc.StartInfo.CreateNoWindow = true;
-                proc.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 proc.Start();
                 proc.EnableRaisingEvents = true;
                 // proc.Exited += Proc_Exited;

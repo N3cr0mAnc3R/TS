@@ -254,7 +254,7 @@
                         a.Answers = self.answers.filter(function (b) { return b.QuestionId == a.Id });
                         a.IsLoaded = false;
                         a.changed = false;
-                        a.answered = a.answered ? a.answered : false;
+                        // a.answered = a.answered ? a.answered : false;
                     });
                     //Сортируем вопросы в нужном порядке
                     self.questions.sort(function (a, b) { a.Rank - b.Rank });
@@ -485,6 +485,7 @@
                 type: 'POST',
                 dataType: 'json',
                 url: '/user/UpdatequestionAnswer',
+                async: false,
                 data: { answer: answers },
                 success: function () {
                     //Сбрасываем флаг изменения
@@ -548,7 +549,7 @@
             var self = this;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
-           // console.log(self.timeLeft);
+            // console.log(self.timeLeft);
             self.interval = setInterval(function () {
                 if (self.lostConnection || self.adminPaused) return;
                 self.timeLeft--;
@@ -565,7 +566,7 @@
                         }, 5000);
                     }
                 }
-               // console.log(self.startedTimeRecording, self.timeLeft);
+                // console.log(self.startedTimeRecording, self.timeLeft);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
                     //console.log('stop recording');
                     setTimeout(function () {
@@ -588,36 +589,37 @@
             if (self.screenRecorder && self.screenRecorder.state != 'inactive') self.screenRecorder.stop();
             self.bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
             self.bufferScreen = new Blob(self.recordedScreen, { type: 'video/webm' });
-            var formaData = new FormData();
+            var formaData1 = new FormData();
 
-            formaData.append('Id', self.testingProfileId);
-            formaData.append('File', self.bufferCamera);
-            formaData.append('File1', self.bufferScreen);
-            var int1;
-            try {
-                self.sendVideo(formaData, int1);
-            }
-            catch{
-                //int1 = setInterval(function () {
-                //}, 10000);
-            }
-        },
-        sendVideo: function (formaData, interval) {
-            var self = this;
+            formaData1.append('Id', self.testingProfileId);
+            formaData1.append('Type', 1);
+            formaData1.append('File', self.bufferCamera, self.showTimeLeft());
+            var formaData2 = new FormData();
+
+            formaData2.append('Id', self.testingProfileId);
+            formaData2.append('Type', 2);
+            formaData2.append('File', self.bufferScreen, self.showTimeLeft());
             $.ajax({
                 url: "/user/SaveVideoFile",
                 type: "POST",
-                data: formaData,
+                data: formaData1,
                 contentType: false,
                 processData: false,
                 success: function () {
-                    if (interval) { clearInterval(interval); }
-                    self.recordedCamera = [];
+                }
+            });
+            $.ajax({
+                url: "/user/SaveVideoFile",
+                type: "POST",
+                data: formaData2,
+                contentType: false,
+                processData: false,
+                success: function () {
                     self.recordedScreen = [];
+                    self.recordedCamera = [];
                     setTimeout(function () {
                         self.flagStopRec = false;
                         self.startedTimeRecording = self.timeLeft;
-                        console.log('reset time', self.startedTimeRecording);
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(100);
                         self.screenRecorder.ondataavailable = self.recordingScreen;
@@ -788,6 +790,7 @@
             };
 
             self.videoSocket.onclose = function () {
+                console.log('close video');
                 self.initVideoSocket();
             }
         },
@@ -830,7 +833,9 @@
 
 
                 }).catch(
-                    function (er) {/*callback в случае отказа*/ alert(er); });
+                    function (er) {/*callback в случае отказа*/
+                        alert("Ваш браузер не поддерживается");
+                    });
 
         },
         sourceOpen: function () {
@@ -1314,7 +1319,7 @@
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
-
+            app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, uid: uid }));
             var found = self.peers.filter(function (item) { return item.type == type && item.uid == uid; })[0];
             if (found) {
                 found.peer.close();
@@ -1370,7 +1375,7 @@
                 $.ajax({
                     url: "/user/GetSecurity?Id=" + newId + '&PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     type: "POST",
-                    async: false,
+                    async: true,
                     success: function (result) {
                         if (result.HasAccess) {
                             self.init();

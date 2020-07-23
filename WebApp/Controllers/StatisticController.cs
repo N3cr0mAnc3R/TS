@@ -22,19 +22,18 @@ namespace WebApp.Controllers
         {
             return DownloadMultipleFiles(TestManager.GetFilesByTestingProfile(Id, Type).ToList());
         }
-        public FileResult DownloadMultipleFiles(List<byte[]> byteArrayList)
+        public FileResult DownloadMultipleFiles(List<WebApp.Models.Common.FileStreamResult> byteArrayList)
         {
             using (MemoryStream ms = new MemoryStream())
             {
                 using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, true))
                 {
-                    int counter = 0;
                     foreach (var file in byteArrayList)
                     {
-                        var entry = archive.CreateEntry(counter++ + ".webm", CompressionLevel.Fastest);
+                        var entry = archive.CreateEntry(file.Name + ".webm", CompressionLevel.Fastest);
                         using (var zipStream = entry.Open())
                         {
-                            zipStream.Write(file, 0, file.Length);
+                            zipStream.Write(file.FileStreamContext, 0, file.FileStreamContext.Length);
                         }
                     }
                 }

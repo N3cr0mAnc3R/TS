@@ -13,6 +13,7 @@ namespace WebApp.Models
         public HttpPostedFileBase AnswerFile { get; set; }
         public string AnswerFileExtension { get; set; }
         public HttpPostedFileBase ScreenFile { get; set; }
+        public int Type { get; set; }
         public Offer Offer { get; set; }
         public string Icecandidate { get; set; }
         public string Answer { get; set; }

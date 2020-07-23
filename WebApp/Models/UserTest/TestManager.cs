@@ -189,6 +189,7 @@ namespace WebApp.Models
                                                 ContentType = Type == 1 ? model.CameraFile.ContentType : model.ScreenFile.ContentType,
                                                 PlaceConfig = model.Id,
                                                 UserId = guid,
+                                                FileName = Type == 1 ? model.CameraFile.FileName : model.ScreenFile.FileName,
                                                 extension = ".webm",
                                                 type = Type
                                             }, trans, commandType: CommandType.StoredProcedure)).FirstOrDefault();
@@ -220,11 +221,11 @@ namespace WebApp.Models
                 return conn.Query<string>("UserPlace_GetStreamBase", new { testProfileId, }, commandType: CommandType.StoredProcedure).FirstOrDefault();
             }
         }
-        public IEnumerable<byte[]> GetFilesByTestingProfile(int testingProfileId, int Type)
+        public IEnumerable<FileStreamResult> GetFilesByTestingProfile(int testingProfileId, int Type)
         {
             using (var conn = Concrete.OpenConnection())
             {
-                return conn.Query<byte[]>("Administrator_DownloadAllVideos", new { testingProfileId, Type }, commandType: CommandType.StoredProcedure);
+                return conn.Query<FileStreamResult>("Administrator_DownloadAllVideos", new { testingProfileId, Type }, commandType: CommandType.StoredProcedure);
             }
         }
         public FileStreamDownload FileDownload(int testProfileId, int Type, Guid? UserId)

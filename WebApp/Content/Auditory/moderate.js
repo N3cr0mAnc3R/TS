@@ -171,7 +171,7 @@ const app = new Vue({
                                 //В любом случае нужно добавить в список
                                 self.computerList.push(item);
                                 if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    //console.log('socket: ' + item.TestingProfileId, item.LastName);
                                     self.initSocket(1, item);
                                 }
                                 //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
@@ -237,15 +237,21 @@ const app = new Vue({
                             var obj = {};
                             item.forEach(function (keyValuePair) {
                                 if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
-                                    obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+                                    if (keyValuePair.Value != null) {
+                                        obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+                                        console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
 
-                                    console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
+                                    }
+                                    else {
+                                        console.log(keyValuePair.Key + ' is null');
+                                    }
                                 }
                                 else {
                                     obj[keyValuePair.Key] = keyValuePair.Value;
                                     console.log(obj[keyValuePair.Key]);
                                 }
                             })
+                            console.log('----------------------------');
                             // console.log(JSON.stringify(obj));
                         });
                     }
@@ -427,6 +433,7 @@ const app = new Vue({
                 else {
                     socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
                 }
+                console.log('Соединение чата открыто: ' + a.TestingProfileId);
                 self.chatSockets.push({ id: a.TestingProfileId, socket: socket });
                 let chat = self.initChat(a.TestingProfileId);
                 self.chats.push(chat);
@@ -462,11 +469,13 @@ const app = new Vue({
                     else {
                         socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
                     }
+                    console.log('Соединение потоков открыто: ' + a.TestingProfileId);
                     created = { id: a.TestingProfileId, socket: socket, peers: [] };
                     self.videoSockets.push(created);
                 }
                 else {
                     socket = created.socket;
+                    console.log('Второй поток: ' + a.TestingProfileId);
                     var queue = { type: 2, Id: a.TestingProfileId, candidates: [] };
                     self.queue.push(queue);
                     self.initRTCPeer(created, socket, a, cam);
@@ -539,7 +548,7 @@ const app = new Vue({
 
             }
             socket.onclose = function (event) {
-                console.log('Соединение закрыто');
+                console.log('Соединение закрыто:' + type + ' '+ a.TestingProfileId);
                 socket.close();
                 socket = null;
                 self.initSocket(type, a, cam);
