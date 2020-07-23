@@ -1008,3 +1008,6 @@ canvas {
 .calc-wrapper .calculator .button-wrapper .calc-row .calc-col .key.s-2 {
   width: 110px;
 }
+#flash-toggle {
+  display: none;
+}

@@ -308,6 +308,20 @@ namespace WebApp.Models
 
             }
         }
+        //public async Task<string> GetQrCode(int Id, Guid userUID)
+        //{
+        //    using (var cnt = await Concrete.OpenConnectionAsync())
+        //    {
+        //        return await cnt.QueryFirstOrDefaultAsync<string>(sql: "[dbo].[]", new { Id, userUID }, commandType: CommandType.StoredProcedure);
+        //    }
+        //}
+        public async Task SaveQrCode(int TestingProfileId, int TestingPackageId, string qrCode)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_QRCodeSave]", new { TestingProfileId, TestingPackageId, qrCode }, commandType: CommandType.StoredProcedure);
+            }
+        }
         //public async Task<string> GetImage(int Id)
         //{
         //    using (var cnt = await Concrete.OpenConnectionAsync())
@@ -320,6 +334,14 @@ namespace WebApp.Models
             using (var cnt = Concrete.OpenConnection())
             {
                 var t = cnt.Query<QuestionModel>(sql: "[dbo].[UserPlace_QuestionImageGet]", new { questionId, Localization }, commandType: CommandType.StoredProcedure);
+                return t;
+            }
+        }
+        public async Task<string> GetUserAnswer(Guid fileId, Guid userUID, string Localization)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                var t = Convert.ToBase64String(await cnt.QueryFirstOrDefaultAsync<byte[]>(sql: "[dbo].[UserPlace_UserAnswerRemoteFileGet]", new { fileId, userUID, Localization }, commandType: CommandType.StoredProcedure));
                 return t;
             }
         }

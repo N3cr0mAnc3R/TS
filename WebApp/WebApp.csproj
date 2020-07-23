@@ -85,6 +85,9 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.1.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="MessagingToolkit.QRCode">
+      <HintPath>Content\Shared\MessagingToolkit.QRCode.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.AspNet.Identity.Core, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Identity.Core.2.2.3\lib\net45\Microsoft.AspNet.Identity.Core.dll</HintPath>
     </Reference>
@@ -250,6 +253,9 @@
       <DependentUpon>Index.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\pretest.js" />
+    <Content Include="Content\Testing\qr-scanner-worker.min.js" />
+    <Content Include="Content\Testing\qrscanner.js" />
+    <Content Include="Content\Testing\scannerlib.js" />
     <Content Include="Content\Testing\test3.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
@@ -491,6 +497,7 @@
     <Content Include="Scripts\jquery-3.5.1.min.map" />
     <Content Include="Views\Statistic\Index.cshtml" />
     <Content Include="Views\Shared\Notifier.cshtml" />
+    <Content Include="Views\User\QRScanner.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

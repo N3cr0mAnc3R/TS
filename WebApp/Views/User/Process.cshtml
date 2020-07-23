@@ -43,6 +43,12 @@
                                 <div v-if="!selectedQuestion.fileId">
                                     <input v-on:change="changeFile" type="file" accept="image/*" />
                                 </div>
+                                <div class="request-qr-wrapper">
+                                    <div class="qr-info-wrapper">{{switchLocal(30)}} <span class="href">https://de.ncfu.ru/user/qrscanner</span> {{switchLocal(31)}}</div>
+                                    @*<button class="button-create-qr" v-on:click="saveQrCode()">{{switchLocal(29)}}</button>*@
+                                    <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeImage" v-if="openedQRPage" />
+                                    <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeHref" v-if="!openedQRPage" />
+                                </div>
                                 <div v-if="selectedQuestion.fileId">
                                     <div class="image-preview-wrapper">
                                         <img v-bind:src="'data:image/jpg;base64, ' + selectedQuestion.answerImage" width="400" />

@@ -2,7 +2,9 @@
 using Accord.Imaging.Filters;
 using Accord.Vision.Detection;
 using Accord.Vision.Detection.Cascades;
+using MessagingToolkit.QRCode.Codec;
 using Microsoft.AspNet.Identity.Owin;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -47,6 +49,10 @@ namespace WebApp.Controllers
             return Json(await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
         }
         public ActionResult TestList()
+        {
+            return View();
+        }
+        public ActionResult QRScanner()
         {
             return View();
         }
@@ -293,6 +299,11 @@ namespace WebApp.Controllers
             model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
             return Json(model);
         }
+        public async Task<JsonResult> GetUserAnswer(Guid Id)
+        {
+            
+            return Json(await TestManager.GetUserAnswer(Id, CurrentUser.Id, Session["Localization"].ToString()));
+        }
         public async Task<JsonResult> GetErrorTypes()
         {
             return Json(await TestManager.GetErrorTypes(Session["Localization"].ToString(), (CurrentUser != null ? CurrentUser.Id : (Guid?)null)));
@@ -402,7 +413,7 @@ namespace WebApp.Controllers
             {
                 model.AnswerFile = Request.Files.Get(0);
             }
-            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
+            //await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -416,6 +427,37 @@ namespace WebApp.Controllers
         public async Task<JsonResult> GetChatMessages(int Id)
         {
             return Json(await TestManager.GetChatMessages(Id, Session["Localization"].ToString()));
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> GetQrCode(int Id)
+        {
+            QRCodeEncoder encoder = new QRCodeEncoder();
+            Bitmap qrCode = encoder.Encode("https://de.ncfu.ru/user/qrscanner?Id=" + Id);
+            string base64 = "";
+            using (var ms = new MemoryStream())
+            {
+                qrCode.Save(ms, ImageFormat.Bmp);
+                base64 = Convert.ToBase64String(ms.GetBuffer());
+            }
+            return Json(base64);
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> SaveQrCode(int Id, int TestingPackageId)
+        {
+            QRCodeEncoder encoder = new QRCodeEncoder();
+            Bitmap qrCode = encoder.Encode(JsonConvert.SerializeObject(new { TestingProfileId = Id, TestingPackageId  }));
+            string base64 = "";
+            using (var ms = new MemoryStream())
+            {
+                qrCode.Save(ms, ImageFormat.Bmp);
+                base64 = Convert.ToBase64String(ms.GetBuffer());
+            }
+            await TestManager.SaveQrCode(Id, TestingPackageId, base64);
+            return Json(base64);
         }
 
         [HttpPost]

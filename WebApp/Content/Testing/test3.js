@@ -84,7 +84,10 @@
         errorText: "",
         adminErrors: [],
         potentialPeers: [],
-        Turn: {}
+        Turn: {},
+        QRCodeImage: "",
+        QRCodeHref: "",
+        openedQRPage: false
     },
     methods: {
         init: function () {
@@ -128,6 +131,7 @@
             var str = window.location.href;
             var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.startTest(newId);
+            self.GetQrHref(newId);
             self.testingProfileId = newId;
             //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
@@ -718,7 +722,7 @@
             self.videoSocket.onopen = function () {
                 console.log('init videosocket');
                 self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, startOffer: true }));
+                self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: true, startOffer: true }));
             };
 
             self.videoSocket.onmessage = function (msg) {
@@ -747,6 +751,20 @@
                     else if (message.requestFinish) {
                         notifier([{ Type: 'error', Body: self.switchLocal(28) }]);
                         self.finishTest();
+                    }
+                    else if (message.requestLoadFile) {
+                        self.saveQrCode();
+                        self.openedQRPage = true;
+                    }
+                    else if (message.gotUserAnswer) {
+                        $.ajax({
+                            url: "/user/GetUserAnswer?Id=" + message.Id,
+                            type: "POST",
+                            success: function (data) {
+                                self.selectedQuestion.fileId = message.Id;
+                                self.selectedQuestion.answerImage = data;
+                            }
+                        });
                     }
                     else if (message.requestViolation) {
                         var errorBody = "";
@@ -1235,6 +1253,30 @@
                 }
             });
         },
+        saveQrCode: function () {
+            var self = this;
+            //GetChatMessages
+            $.ajax({
+                url: "/user/SaveQrCode?Id=" + self.testingProfileId + '&TestingPackageId=' + self.selectedQuestion.Answers[0].TestingPackage.Id,
+                type: "POST",
+                async: false,
+                success: function (qrString) {
+                    self.QRCodeImage = qrString;
+                }
+            });
+        },
+        GetQrHref: function (newId) {
+            var self = this;
+            //GetChatMessages
+            $.ajax({
+                url: "/user/GetQrCode?Id=" + newId,
+                type: "POST",
+                async: false,
+                success: function (qrString) {
+                    self.QRCodeHref = qrString;
+                }
+            });
+        },
         sendMessage: function (sself) {
             var self = sself ? sself : this;
             if (!self.chat || self.chat.Message == "" || self.chat.Message.trim() == "") return;
@@ -1421,6 +1463,9 @@
                 case 26: return self.localization == 1 ? "Тестирование" : "Testing";
                 case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
                 case 28: return self.localization == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
+                case 29: return self.localization == 1 ? "Сгенерировать qr-код" : "Generate QR-Code";
+                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете сгенерировать qr-код. 1. Нажмите на кнопку ниже. 2. Откройте на телефоне ссылку: " : "For upload image using Your cell-phone You can generate QR-Code. 1. Push the button below. 2.Open link on Your phone: ";
+                case 31: return self.localization == 1 ? "3. Наведите на сгенерированый qr" : "3. Point camera on the screen";
             }
         }
     },
