@@ -44,10 +44,18 @@
                                     <input v-on:change="changeFile" type="file" accept="image/*" />
                                 </div>
                                 <div class="request-qr-wrapper">
-                                    <div class="qr-info-wrapper">{{switchLocal(30)}} <span class="href">https://de.ncfu.ru/user/qrscanner</span> {{switchLocal(31)}}</div>
-                                    @*<button class="button-create-qr" v-on:click="saveQrCode()">{{switchLocal(29)}}</button>*@
-                                    <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeImage" v-if="openedQRPage" />
-                                    <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeHref" v-if="!openedQRPage" />
+                                    <div class="qr-info-wrapper">
+                                        {{switchLocal(30)}}
+                                        <p>{{switchLocal(32)}}</p>
+                                        <p>{{switchLocal(33)}}</p>
+                                        <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeHref" v-if="!openedQRPage" />
+                                        <p>{{switchLocal(38)}}</p>
+                                        <p>{{switchLocal(34)}}</p>
+                                        <p>{{switchLocal(35)}}</p>
+                                        <img width="300" height="300" v-bind:src="'data:image/jpg;base64, ' + QRCodeImage" v-if="openedQRPage" />
+                                        <p>{{switchLocal(36)}}</p>
+                                        <p>{{switchLocal(37)}}</p>
+                                    </div>
                                 </div>
                                 <div v-if="selectedQuestion.fileId">
                                     <div class="image-preview-wrapper">
@@ -112,7 +120,7 @@
                     </span>
                 </div>
                 <div v-for="tip in sourceMaterials" class="material-wrapper" v-if="!tip.IsCalc">
-                    <img v-bind:style="{'width': maxTipWidth + 'px'}" v-bind:src="'data:image/png;base64, ' + tip.Image" />
+                    <img v-bind:style="{'width': maxTipWidth + 'px'}" v-bind:src="'data:image/png;base64, ' + tip.Image" width="200" />
                     <br />
                 </div>
                 <div class="calc-wrapper material-wrapper" v-if="needCalc">
@@ -228,7 +236,8 @@
             <div class="panel-top"></div>
             <div class="panel-center">
                 <div class="base-info">
-                    {{switchLocal(17)}}</div>
+                    {{switchLocal(17)}}
+                </div>
             </div>
         </div>
     </div>
@@ -237,7 +246,8 @@
             <div class="panel-top"></div>
             <div class="panel-center">
                 <div class="base-info">
-                    {{switchLocal(25)}}</div>
+                    {{switchLocal(25)}}
+                </div>
             </div>
         </div>
     </div>
@@ -246,7 +256,8 @@
 
             <div class="panel-center">
                 <div class="base-info">
-                    {{switchLocal(18)}}</div>
+                    {{switchLocal(18)}}
+                </div>
                 <div class="score-info" v-if="needShowScore">
                     {{switchLocal(19)}}: <span>{{score}}</span>
                     <br />
@@ -267,4 +278,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test3.js"></script>
+<script src="~/Content/Testing/test7586.js"></script>

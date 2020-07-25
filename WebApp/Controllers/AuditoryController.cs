@@ -270,9 +270,9 @@ namespace WebApp.Controllers
             await AuditoryManager.ResetPins(Id, CurrentUser.Id);
         }
         [HttpPost]
-        public async Task<JsonResult> GetUserPicture(int Id)
+        public async Task<string> GetUserPicture(int Id)
         {
-            return Json((await AuditoryManager.GetUserPicture(Id, CurrentUser.Id)).PictureImage);
+            return (await AuditoryManager.GetUserPicture(Id, CurrentUser.Id)).PictureImage;
         }
         bool IsPinBusy(int pin, List<TestComputer> computers)
         {

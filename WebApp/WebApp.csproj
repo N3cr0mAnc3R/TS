@@ -254,9 +254,9 @@
     </Content>
     <Content Include="Content\Testing\pretest.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
-    <Content Include="Content\Testing\qrscanner.js" />
+    <Content Include="Content\Testing\qrscanner2.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test3.js" />
+    <Content Include="Content\Testing\test7586.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />

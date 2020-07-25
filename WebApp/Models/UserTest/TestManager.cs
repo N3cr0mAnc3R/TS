@@ -394,16 +394,24 @@ namespace WebApp.Models
             {
                 var result = await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[Administrator_SourceMaterialsTestingProfileGet]", new { testingProfileId, Localization, userUid }, commandType: CommandType.StoredProcedure);
 
-                foreach (var item in result)
-                {
-                    if (!item.IsCalc)
-                    {
-                        item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
-                        item.Image = Convert.ToBase64String(item.SourceMaterialImage);
-                    }
-                }
+                //foreach (var item in result)
+                //{
+                //    if (!item.IsCalc)
+                //    {
+                //        item.SourceMaterialImage = (await cnt.QueryAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId = item.Id, Localization, userUid }, commandType: CommandType.StoredProcedure)).First().SourceMaterialImage;
+                //        item.Image = Convert.ToBase64String(item.SourceMaterialImage);
+                //    }
+                //}
 
                 return result;
+            }
+        }
+        public async Task<string> GetSourceMaterial(int sourceMaterialId, string Localization, Guid? userUid)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                var t =  await cnt.QueryFirstOrDefaultAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId, Localization, userUid }, commandType: CommandType.StoredProcedure);
+                return Convert.ToBase64String(t.SourceMaterialImage);
             }
         }
         public async Task<bool> GetSecurity(int testingProfileId, Guid? userUID, string PlaceConfig = null)

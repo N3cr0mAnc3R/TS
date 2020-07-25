@@ -7,7 +7,7 @@
         bestResult: {},
         fileId: '',
         flag: false,
-        answerImage: '',
+        answerImage: null,
         loadObject: {
             loading: null,
             loaded: null
@@ -29,9 +29,9 @@
             var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.testingProfileId = newId;
             if (typeof (WebSocket) !== 'undefined') {
-                self.socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                self.socket = new WebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
             } else {
-                self.socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                self.socket = new MozWebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
             }
             self.socket.onopen = function () {
                 self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: newId }));
@@ -79,7 +79,7 @@
                     var reader = new FileReader();
                     reader.onload = function () {
                         self.answerImage = reader.result.substr(reader.result.indexOf(',') + 1);
-                        self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true }));
+                        self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                     };
                     reader.readAsDataURL(e.target.files[0]);
                     self.answerQuestion();
@@ -88,10 +88,6 @@
                     alert(er);
                 }
             });
-
-            //Такая же метка, как в radio, чтобы исключить повторную загрузку
-            this.selectedQuestion.changed = true;
-            this.selectedQuestion.answered = true;
             //self.AnswerFileExtension = ;
         },
         answerQuestion: function () {

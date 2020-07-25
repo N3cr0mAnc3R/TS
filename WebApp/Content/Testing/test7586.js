@@ -268,6 +268,16 @@
                     self.selectQuestion(1);
                     self.sourceMaterials = resp4[0];
                     self.sourceMaterials.forEach(function (material) {
+                        if (!material.IsCalc) {
+                            $.ajax({
+                                type: 'POST',
+                                url: '/user/GetSourceMaterial?Id=' + material.Id,
+                                success: function (data) {
+                                    material.Image = data;
+                                    console.log(material);
+                                }
+                            });
+                        }
                         self.needCalc = material.IsCalc || self.needCalc;
                     })
                     self.startCheckConnection(id);
@@ -1463,9 +1473,15 @@
                 case 26: return self.localization == 1 ? "Тестирование" : "Testing";
                 case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
                 case 28: return self.localization == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
-                case 29: return self.localization == 1 ? "Сгенерировать qr-код" : "Generate QR-Code";
-                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете сгенерировать qr-код. 1. Нажмите на кнопку ниже. 2. Откройте на телефоне ссылку: " : "For upload image using Your cell-phone You can generate QR-Code. 1. Push the button below. 2.Open link on Your phone: ";
-                case 31: return self.localization == 1 ? "3. Наведите на сгенерированый qr" : "3. Point camera on the screen";
+                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете использовать qr-код:" : "For upload image using Your cell-phone You can use qr-code:";
+                case 32: return self.localization == 1 ? "1. Откройте сканер qr-кодов на телефоне и наведите на изображение" : "1. Open an app for reading QR-codes";
+                case 33: return self.localization == 1 ? "2. Наведите камеру на qr-код" : "2. Point camera on the screen";
+                case 38: return self.localization == 1 ? "3. Перейдите по ссылке, которую распознал сканер" : "3. Open recognized link on Your smartphone";
+                case 34: return self.localization == 1 ? "4. В открывшемся окне нажмите Start" : "4. In opened window push 'Start'";
+                case 35: return self.localization == 1 ? "5. Наведите камеру на qr-код" : "5. Point camera on the screen";
+                case 36: return self.localization == 1 ? "6. Загрузите фотографию с помощью устройства." : "6. Choose picture or make one and upload it.";
+                case 37: return self.localization == 1 ? "7. По окончании загрузки Вы увидете загруженное изображение и на телефоне, и на компьютере" : "7. After picture upload, You will see on both: smartphone and PC";
+
             }
         }
     },

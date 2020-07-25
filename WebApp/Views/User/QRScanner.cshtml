@@ -2,19 +2,19 @@
 <script src="~/Content/Testing/scannerlib.js"></script>
 <div id="main-window">
     <div v-if="!flag">
-        <video id="qr-video" muted autoplay playsinline width="320" height="240"></video>
+        <video id="qr-video" muted autoplay playsinline width="1" height="1"></video>
         <br>
         <b>Detected QR code: </b>
         <span id="cam-qr-result">None</span>
         <br>
         <button id="start-button" v-on:click="start()">Start</button>
     </div>
-    <div v-if="flag"  v-loader="loadObject">
+    <div v-if="flag"  v-loader="loadObject" class="wrapper">
         <input v-on:change="changeFile" type="file" accept="image/*" />
 
-        <div class="image-preview-wrapper">
+        <div class="image-preview-wrapper" v-if="answerImage">
             <img v-bind:src="'data:image/jpg;base64, ' + answerImage" width="400" />
         </div>
     </div>
 </div>
-<script src="~/Content/Testing/qrscanner.js"></script>
+<script src="~/Content/Testing/qrscanner2.js"></script>

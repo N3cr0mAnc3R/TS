@@ -40,6 +40,11 @@ namespace WebApp.Controllers
         #region Представления
         public async Task<ActionResult> Waiting()
         {
+            if (Session["Localization"] == null)
+            {
+                Session["Localization"] = Language.RU;
+            }
+            ViewBag.Title = (Session["Localization"]).ToString() == "RU" ? "Режим ожидания" : "Waiting";
             ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id);
             return View();
         }
@@ -54,6 +59,7 @@ namespace WebApp.Controllers
         }
         public ActionResult QRScanner()
         {
+            ViewBag.Title = (Session["Localization"]).ToString() == "RU"? "Удалённая загрузка": "Remote uploading";
             return View();
         }
         public async Task<ActionResult> Process(int Id)
@@ -255,6 +261,10 @@ namespace WebApp.Controllers
         {
             return Json(await TestManager.GetSourceMaterials(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
+        public async Task<string> GetSourceMaterial(int Id)
+        {
+            return await TestManager.GetSourceMaterial(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null);
+        }
         [HttpPost]
         public async Task<JsonResult> GetCurrentUser(int Id)
         {
@@ -299,10 +309,10 @@ namespace WebApp.Controllers
             model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
             return Json(model);
         }
-        public async Task<JsonResult> GetUserAnswer(Guid Id)
+        public async Task<string> GetUserAnswer(Guid Id)
         {
             
-            return Json(await TestManager.GetUserAnswer(Id, CurrentUser.Id, Session["Localization"].ToString()));
+            return await TestManager.GetUserAnswer(Id, CurrentUser.Id, Session["Localization"].ToString());
         }
         public async Task<JsonResult> GetErrorTypes()
         {

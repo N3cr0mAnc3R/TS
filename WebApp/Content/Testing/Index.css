@@ -374,6 +374,9 @@
   max-width: initial;
   height: 200px;
 }
+.panel-center .answer-list .answer-wrapper .textarea-wrapper .image-preview-wrapper img {
+  width: 400px;
+}
 .panel-center .tip {
   font-family: Montserrat;
   font-style: normal;
@@ -519,6 +522,8 @@
   margin-left: -18px;
 }
 .panel-right .tip-wrapper {
+  overflow: auto;
+  margin-bottom: 135px;
   margin-left: -10px;
 }
 .panel-right .tip-wrapper .top-panel {
@@ -1010,4 +1015,14 @@ canvas {
 }
 #flash-toggle {
   display: none;
+}
+.wrapper {
+  margin-top: 30px;
+}
+.request-qr-wrapper {
+  font-family: montserrat;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 40px;
 }

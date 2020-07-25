@@ -206,6 +206,7 @@ const app = new Vue({
                                     if (found.UserVerified != item.UserVerified) {
                                         if (item.UserVerified) {
                                             self.initSocket(2, found, 2);
+                                            self.initSocket(2, item, 1);
                                             console.log('socket: ' + item.TestingProfileId, item.LastName);
                                         }
                                     }
