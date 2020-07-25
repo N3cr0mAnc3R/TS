@@ -59,6 +59,10 @@ namespace WebApp.Controllers
         }
         public ActionResult QRScanner()
         {
+            if (Session["Localization"] == null)
+            {
+                Session["Localization"] = Language.RU;
+            }
             ViewBag.Title = (Session["Localization"]).ToString() == "RU"? "Удалённая загрузка": "Remote uploading";
             return View();
         }
