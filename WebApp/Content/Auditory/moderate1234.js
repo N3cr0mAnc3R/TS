@@ -304,6 +304,12 @@ const app = new Vue({
                 });
             }
         },
+        consolePlace: function (item) {
+            var self = this;
+            if (self.isSuperAdmin) {
+                console.log(item);
+            }
+        },
         consoleUser: function (item) {
             var self = this;
             if (self.isSuperAdmin) {

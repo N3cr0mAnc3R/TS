@@ -42,8 +42,9 @@
         <div class="filter-name">Статус</div>
         <select class="form-control" v-model="currentStatus" v-on:change="getUsers"> <option v-for="item of statuses" v-bind:value="item.Id">{{item.Name}}</option></select>
 
-        <div v-if="isSuperAdmin && [4].indexOf(currentStatus) != -1">
-            <button v-on:click="donwloadAll()">Скачать всё</button>
+        <div v-if="isSuperAdmin">
+            <button v-on:click="donwloadAll()" v-if="[4].indexOf(currentStatus) != -1">Скачать всё</button>
+            <button v-on:click="uploadAll()" v-if="[3].indexOf(currentStatus) != -1">Скачать всё</button>
         </div>
         <table class="table table-striped">
             <thead>
@@ -102,4 +103,4 @@
         </table>
     </div>
 </div>
-<script src="~/Content/Statistic/index7588.js"></script>
+<script src="~/Content/Statistic/index7589.js"></script>

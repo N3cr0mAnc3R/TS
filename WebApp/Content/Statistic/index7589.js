@@ -124,6 +124,16 @@
                     self.printTPResult(item.Id);
                 })
             }
+        },
+        uploadAll: function () {
+            var self = this;
+            if (self.isSuperAdmin) {
+                self.users.forEach(function (item) {
+                    if (item.Score > 20) {
+                        self.saveResult(item.Id);
+                    }
+                })
+            }
         }
 
     },
