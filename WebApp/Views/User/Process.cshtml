@@ -39,6 +39,10 @@
                                     </button>
                                 </div>
                             </div>
+                            <div v-if="selectedQuestion.TypeAnswerId == 5" class="textarea-wrapper">
+                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false" rows="15"> </textarea>
+                                <br />
+                            </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">
                                 <div v-if="!selectedQuestion.fileId">
                                     <input v-on:change="changeFile" type="file" accept="image/*" />
@@ -278,4 +282,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test7586.js"></script>
+<script src="~/Content/Testing/test7591.js"></script>

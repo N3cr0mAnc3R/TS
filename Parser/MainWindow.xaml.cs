@@ -29,7 +29,7 @@ namespace Parser
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null and question is not null union all select count(1) as total from Answers nolock where answerImage is null and answer is not null) as t";
+            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 and question is not null union all select count(1) as total from Answers nolock where  loaded = 0 and answer is not null) as t";
 
             conn.Open();
             using (var reader = cmd.ExecuteReader())
@@ -118,7 +118,7 @@ namespace Parser
 
                     SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                     SqlCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where questionImage is null and question is not null union all select count(1) as total from Answers nolock where answerImage is null and answer is not null) as t";
+                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where  loaded = 0 and question is not null union all select count(1) as total from Answers nolock where loaded = 0 and answer is not null) as t";
                     conn.Open();
                     int count = 0;
                     using (var reader = cmd.ExecuteReader())
@@ -155,11 +155,11 @@ namespace Parser
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, question from [Questions] where [questionImage] is null and question is not null" + (IsStraight? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0 and question is not null" + (IsStraight? "" : " order by ID desc");
                 }
                 else
                 {
-                    cmd.CommandText = "select top 1 ID, answer from [Answers] where [answerImage] is null and answer is not null" + (IsStraight ? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0 and answer is not null" + (IsStraight ? "" : " order by ID desc");
                 }
                 conn.Open();
                 string input = "D:\\test4.pdf", output = "D:\\test";
@@ -260,15 +260,23 @@ namespace Parser
                         if (IsChecked)
                         {
                             cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
+                            SqlCommand cmd2 = conn.CreateCommand();
+                            cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
+                            cmd2.ExecuteScalar();
                         }
                         else
                         {
                             cmd1.CommandText = "update Answers set answerImage = '" + img + "'  where ID = " + Id;
+                            SqlCommand cmd2 = conn.CreateCommand();
+                            cmd2.CommandText = "update Answers set loaded = 1 where ID = " + Id;
+                            cmd2.ExecuteScalar();
                         }
                         //cmd1.CommandText = "update tests set QuestionIMG = '" + img + "'  where KOD_TEST = " + Id;
                         //cmd1.CommandText = "update testans set ANSWERIMG = '" + img + "'  where KOD_ANS = " + Id;
                         //cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
                         cmd1.ExecuteScalar();
+
+                        conn.Close();
                         bck.ReportProgress(99);
                     }
                 }
@@ -283,7 +291,7 @@ namespace Parser
             catch (IOException exc)
             {
 
-                File.Delete("D:\\test4.doc");
+             //   File.Delete("D:\\test4.doc");
                 MessageBox.Show(exc.Message);
                 //Process1(sender, e);
             }

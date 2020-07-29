@@ -200,6 +200,57 @@ namespace WebApp.Controllers
             return Json(await AuditoryManager.GetAuditoryStatistic(Id, CurrentUser.Id, Session["Localization"].ToString()));
         }
         [HttpPost]
+        public async Task<JsonResult> ResetTest(int Id)
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                await AuditoryManager.ResetTest(Id, Session["Localization"].ToString());
+                return Json(1);
+            }
+            else
+            {
+                return Json("Мечтай");
+            }
+        }
+        [HttpPost]
+        public async Task<JsonResult> FinishTest(int Id)
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser.Id);
+                return Json(1);
+            }
+            else
+            {
+                return Json("Мечтай");
+            }
+        }
+        [HttpPost]
+        public async Task<JsonResult> DeletePreliminary(int Id)
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                await AuditoryManager.DeletePreliminary(Id);
+                return Json(1);
+            }
+            else
+            {
+                return Json("Мечтай");
+            }
+        }
+        [HttpPost]
+        public async Task<JsonResult> GetInfoForAdmin(int Id)
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                return Json(await AuditoryManager.GetInfoForAdmin(Id, CurrentUser.Id, Session["Localization"].ToString()));
+            }
+            else
+            {
+                return Json("Мечтай");
+            }
+        }
+        [HttpPost]
         public async Task<JsonResult> GetNewPeople(int Id)
         {
             try

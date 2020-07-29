@@ -186,6 +186,27 @@ namespace WebApp.Models
                 return await cnt.QueryFirstOrDefaultAsync<AuditoryStatistic>(sql: "[dbo].[Administrator_AuditoriumStatisticsGet]", new { auditoriumId, userUID, localization }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<dynamic> GetInfoForAdmin(int TestingProfileId, Guid userUID, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<dynamic>(sql: "[dbo].[Administrator_GetInfoAboutUser]", new { TestingProfileId, localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task ResetTest(int TestingProfileId, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[Administrator_TestingProfileReset]", new { TestingProfileId }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task DeletePreliminary(int TestingProfileId, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[Debug_DeletePreliminary]", new { TestingProfileId }, commandType: CommandType.StoredProcedure);
+            }
+        }
         //public async Task<TestUser> GetAuditoryStatistic(int auditoriumId, Guid userUID, string localization = "")
         //{
         //    using (var cnt = await Concrete.OpenConnectionAsync())

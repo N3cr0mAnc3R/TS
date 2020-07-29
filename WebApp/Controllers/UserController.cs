@@ -410,7 +410,7 @@ namespace WebApp.Controllers
                     model.ScreenFile = Request.Files.Get(0);
                 }
             }
-            if (model.CameraFile.ContentLength > 0)
+            if (model.CameraFile != null && model.CameraFile.ContentLength > 0)
             {
                 await TestManager.FileUploadAsync(model, 1, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             }

@@ -607,12 +607,12 @@
 
             formaData1.append('Id', self.testingProfileId);
             formaData1.append('Type', 1);
-            formaData1.append('File', self.bufferCamera, self.showTimeLeft());
+            formaData1.append('File', self.bufferCamera, self.showTimeLeft().replace(':', '_'));
             var formaData2 = new FormData();
 
             formaData2.append('Id', self.testingProfileId);
             formaData2.append('Type', 2);
-            formaData2.append('File', self.bufferScreen, self.showTimeLeft());
+            formaData2.append('File', self.bufferScreen, self.showTimeLeft().replace(':', '_'));
             $.ajax({
                 url: "/user/SaveVideoFile",
                 type: "POST",
@@ -620,6 +620,7 @@
                 contentType: false,
                 processData: false,
                 success: function () {
+                    self.recordedCamera = [];
                 }
             });
             $.ajax({
@@ -630,7 +631,18 @@
                 processData: false,
                 success: function () {
                     self.recordedScreen = [];
-                    self.recordedCamera = [];
+                    setTimeout(function () {
+                        self.flagStopRec = false;
+                        self.startedTimeRecording = self.timeLeft;
+                        self.cameraRecorder.ondataavailable = self.recordingCamera;
+                        self.cameraRecorder.start(100);
+                        self.screenRecorder.ondataavailable = self.recordingScreen;
+                        self.screenRecorder.start(100);
+                    }, self.stepCounter * self.stepNumber);
+                    self.stepCounter++;
+                },
+                error: function () {
+                    self.recordedScreen = [];
                     setTimeout(function () {
                         self.flagStopRec = false;
                         self.startedTimeRecording = self.timeLeft;
@@ -642,6 +654,7 @@
                     self.stepCounter++;
                 }
             });
+
         },
         initChat: function () {
             var self = this;
@@ -779,13 +792,13 @@
                     else if (message.requestViolation) {
                         var errorBody = "";
                         switch (message.violation) {
-                            case 1: errorBody = 'Пользователь не идентфицирован'; break;
-                            case 2: errorBody = 'В кадре обнаружен посторонний. Попросите его покинуть комнату'; break;
-                            case 3: errorBody = 'Присутствуют посторонние звуки'; break;
-                            case 4: errorBody = 'Сворачивание окна запрещено!'; break;
-                            case 5: errorBody = 'Покидать окно тестов запрещено!'; break;
-                            case 6: errorBody = 'Вы должны всё время находиться в поле зрения веб-камеры!'; break;
-                            default: errorBody = 'Вы нарушаете правила проведения ВИ!!';
+                            case 1: errorBody = self.switchLocal(39); break;
+                            case 2: errorBody = self.switchLocal(40); break;
+                            case 3: errorBody = self.switchLocal(41); break;
+                            case 4: errorBody = self.switchLocal(42); break;
+                            case 5: errorBody = self.switchLocal(43); break;
+                            case 6: errorBody = self.switchLocal(44); break;
+                            default: errorBody = self.switchLocal(45);
                         }
                         notifier([{ Type: 'error', Body: errorBody }]);
                     }
@@ -1260,6 +1273,9 @@
                     var messages = messageList;
                     messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
                     self.chat.messages = messages;
+                },
+                error: function () {
+                    location.reload;
                 }
             });
         },
@@ -1473,14 +1489,21 @@
                 case 26: return self.localization == 1 ? "Тестирование" : "Testing";
                 case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
                 case 28: return self.localization == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
-                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете использовать qr-код:" : "For upload image using Your cell-phone You can use qr-code:";
-                case 32: return self.localization == 1 ? "1. Откройте сканер qr-кодов на телефоне и наведите на изображение" : "1. Open an app for reading QR-codes";
-                case 33: return self.localization == 1 ? "2. Наведите камеру на qr-код" : "2. Point camera on the screen";
+                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете использовать QR-код:" : "For upload image using Your cell-phone You can use QR-code:";
+                case 32: return self.localization == 1 ? "1. Откройте сканер QR-кодов на телефоне и наведите на изображение" : "1. Open an app for reading QR-codes";
+                case 33: return self.localization == 1 ? "2. Наведите камеру на QR-код" : "2. Point camera on the screen";
                 case 38: return self.localization == 1 ? "3. Перейдите по ссылке, которую распознал сканер" : "3. Open recognized link on Your smartphone";
                 case 34: return self.localization == 1 ? "4. В открывшемся окне нажмите Start" : "4. In opened window push 'Start'";
-                case 35: return self.localization == 1 ? "5. Наведите камеру на qr-код" : "5. Point camera on the screen";
+                case 35: return self.localization == 1 ? "5. Наведите камеру на QR-код" : "5. Point camera on the screen";
                 case 36: return self.localization == 1 ? "6. Загрузите фотографию с помощью устройства." : "6. Choose picture or make one and upload it.";
                 case 37: return self.localization == 1 ? "7. По окончании загрузки Вы увидете загруженное изображение и на телефоне, и на компьютере" : "7. After picture upload, You will see on both: smartphone and PC";
+                case 39: return self.localization == 1 ? "Пользователь не идентфицирован" : "User is undefined";
+                case 40: return self.localization == 1 ? "В кадре обнаружен посторонний. Попросите его покинуть комнату" : "There are someone else int he room. Please, let him leave";
+                case 41: return self.localization == 1 ? "Присутствуют посторонние звуки" : "There are undefined sounds";
+                case 42: return self.localization == 1 ? "Сворачивание окна запрещено!" : "You not allowed collapse the window";
+                case 43: return self.localization == 1 ? "Покидать окно тестов запрещено" : "You not allowed leave the window";
+                case 44: return self.localization == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
+                case 45: return self.localization == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
 
             }
         }

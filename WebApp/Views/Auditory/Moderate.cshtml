@@ -163,6 +163,35 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="user-info-wrapper" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" v-if="currentUser">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="title">{{currentUser.Name}} - {{currentUser.LastName}} {{currentUser.FirstName}} {{currentUser.MiddleName}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table v-if="fullInfo">
+                        <thead></thead>
+                        <tbody>
+                            <tr v-for="test in fullInfo.tests">
+                                <td>{{test.FullName}}</td>
+                                <td>{{test.Discipline}}</td>
+                                <td>{{test.Status}}</td>
+                                <td><button class="reload" v-on:click="resetTest(test.TestingProfileId)" v-if="isSuperAdmin" title="Сбросить тест"><i class="fa fa-retweet"></i></button></td>
+                                <td> <button class="reload" v-on:click="finishTest(test.TestingProfileId)" v-if="isSuperAdmin" title="завершить тест"><i class="fa fa-check"></i></button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{switchLocal(9)}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="full-wrapper" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" v-if="currentUser">
@@ -199,6 +228,8 @@
                     <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
                     <button class="reconnect" v-on:click="reconnect()">{{switchLocal(14)}}</button>
                     <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin">Перезагрузить</button>
+                    <button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>
+                    <button class="reload" data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
                         <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@

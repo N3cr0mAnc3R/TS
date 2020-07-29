@@ -137,9 +137,9 @@
 }
 .videos-wrapper .video .camera-wrapper #video1 {
   width: 320px;
-  -webkit-transform: scale(-1, 1);
-  -ms-transform: scale(-1, 1);
-  transform: scale(-1, 1);
+  /*-webkit-transform: scale(-1,1);
+                -ms-transform: scale(-1,1);
+                transform: scale(-1,1);*/
   height: 230px;
 }
 .videos-wrapper .video .screen-wrapper #video2 {

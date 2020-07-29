@@ -8,7 +8,8 @@
         filterFIO: "",
         statuses: [],
         auditoryList: [],
-        currentAud: null
+        currentAud: null,
+        isSuperAdmin: false
     },
     methods: {
         init: function () {
@@ -22,6 +23,14 @@
                 success: function (statuses) {
                     self.statuses = statuses;
                     self.currentStatus = statuses[0].Id;
+                }
+            });
+            $.ajax({
+                url: "/account/IsPaul",
+                type: "POST",
+                async: false,
+                success: function (domain) {
+                    self.isSuperAdmin = domain;
                 }
             });
 
@@ -53,18 +62,6 @@
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
         },
         printTPResult: function (Id) {
-
-            //$.ajax({
-            //    url: "/auditory/DownloadReport",
-            //    type: "POST",
-            //    data: {
-            //        Id: Id,
-            //        Type: 1
-            //    },
-            //    async: false,
-            //    success: function () {
-            //    }
-            //});
             window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
         },
         showTable: function () {
@@ -119,6 +116,14 @@
                     })
                 }
             });
+        },
+        donwloadAll: function () {
+            var self = this;
+            if (self.isSuperAdmin) {
+                self.users.forEach(function (item) {
+                    self.printTPResult(item.Id);
+                })
+            }
         }
 
     },

@@ -2,12 +2,12 @@
 const app = new Vue({
     el: "#main-window",
     data: {
-        img: null,
+        //img: null,
         domain: "",
         interval: null,
-        video3: null,
-        pc2Local: null,
-        stream: null,
+        //video3: null,
+        //pc2Local: null,
+        //stream: null,
         auditory: 0,
         auditoryName: '',
         computerList: [],
@@ -19,14 +19,14 @@ const app = new Vue({
         chatSockets: [],
         videoSockets: [],
         currentChat: null,
-        pc2: null,
+        //pc2: null,
         currentUser: null,
         errorTypes: [],
         shownError: false,
         currentError: 0,
-        gotICE: false,
-        socketQueue: [],
-        socketConnecting: false,
+        //gotICE: false,
+        //socketQueue: [],
+        //socketConnecting: false,
         me: {},
         isSuperAdmin: false,
         queue: [],
@@ -37,15 +37,16 @@ const app = new Vue({
         streamObjects: [],
         currentUid: '',
         times: [],
-        currentDate: null,
+        //currentDate: null,
         scheduleUsers: [],
         filteredPlaceList: [],
-        TURN: {}
+        TURN: {},
+        fullInfo: null
     },
     methods: {
         init: function () {
             let self = this;
-            window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
+            //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
 
             $.ajax({
                 url: "/account/GetDomain",
@@ -142,6 +143,10 @@ const app = new Vue({
                             var foundedSocket = self.videoSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
                             if (foundedSocket) foundedSocket.socket.close();
                             self.videoSockets = self.videoSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
+
+                            var foundedSocket1 = self.chatSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
+                            if (foundedSocket1) foundedSocket1.socket.close();
+                            self.chatSockets = self.chatSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
                         }
                     });
                     //Смотрим то, что пришло
@@ -177,20 +182,21 @@ const app = new Vue({
                                 //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
                             }
                             else {
-                                if (item.RequestReset && item.TestingProfileId) {
-                                    //notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
-                                }
-                                else {
-                                    found.RequestReset = false;
-                                }
+                                //if (item.RequestReset && item.TestingProfileId) {
+                                //    //notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
+                                //}
+                                //else {
+                                //    found.RequestReset = false;
+                                //}
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
-                                if (found.UserVerified != item.UserVerified) {
-                                    if (item.UserVerified) {
-                                        self.initSocket(2, found, 2);
-                                        console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                    }
-                                }
+                             //   if (found.UserVerified != item.UserVerified) {
+                                  //  if (item.UserVerified) {
+                                     //   self.initSocket(2, found, 2);
+                                   //     console.log('socket: ' + item.TestingProfileId, item.LastName);
+                              //      }
+                              //  }
                                 if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
+                                    found = item;
                                     var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
                                     if (foundedSocket) {
                                         foundedSocket.socket.close();
@@ -225,6 +231,78 @@ const app = new Vue({
                     location.reload();
                 }
             });
+        },
+        getInfoForAdmin: function () {
+            var self = this;
+
+            $('#user-info-wrapper').modal('show');
+            if (self.isSuperAdmin) {
+                $.ajax({
+                    url: "/auditory/getInfoForAdmin?Id=" + self.currentUser.TestingProfileId,
+                    type: "POST",
+                    async: true,
+                    success: function (info) {
+                        self.fullInfo = {};
+                        self.fullInfo.tests = [];
+                        info.forEach(function (item) {
+                            var obj = {};
+                            item.forEach(function (keyValuePair) {
+                                if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
+                                    if (keyValuePair.Value != null) {
+                                        obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+
+                                    }
+                                    else {
+                                    }
+                                }
+                                else {
+                                    obj[keyValuePair.Key] = keyValuePair.Value;
+                                }
+                            })
+                            self.fullInfo.tests.push(obj);
+                        });
+                    }
+                });
+            }
+        },
+        resetTest: function (Id) {
+            var self = this;
+            if (self.isSuperAdmin) {
+                $.ajax({
+                    url: "/auditory/resetTest?Id=" + Id,
+                    type: "POST",
+                    async: true,
+                    success: function () {
+                        self.getInfoForAdmin();
+                    }
+                });
+            }
+        },
+        deletePreliminary: function (Id) {
+            var self = this;
+            if (self.isSuperAdmin) {
+                $.ajax({
+                    url: "/auditory/DeletePreliminary?Id=" + Id,
+                    type: "POST",
+                    async: true,
+                    success: function () {
+                        self.getInfoForAdmin();
+                    }
+                });
+            }
+        },
+        finishTest: function (Id) {
+            var self = this;
+            if (self.isSuperAdmin) {
+                $.ajax({
+                    url: "/auditory/finishTest?Id=" + Id,
+                    type: "POST",
+                    async: true,
+                    success: function () {
+                        self.getInfoForAdmin();
+                    }
+                });
+            }
         },
         consoleUser: function (item) {
             var self = this;
@@ -361,6 +439,7 @@ const app = new Vue({
                 { url: 'stun:stun.voipstunt.com' },
                 { url: 'stun:stun.voxgratia.org' },
                 { url: 'stun:stun.xten.com' },
+                { url: 'STUN:turn.ncfu.ru:9003' },
                 {
                     url: 'turn:numb.viagenie.ca',
                     credential: 'muazkh',
@@ -505,7 +584,8 @@ const app = new Vue({
                             if (!queue) {
                                 queue = { type: message.type, Id: a.TestingProfileId, candidates: [] };
                             }
-                            if (queue.candidates.indexOf(candidate) === -1)
+                            
+                            if (queue.candidates)
                                 queue.candidates.push(candidate);
                         }
                         else if (message.offer) {
@@ -529,11 +609,11 @@ const app = new Vue({
                                             obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
                                             socket.send(JSON.stringify(obj));
                                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
-                                            queue.candidates.forEach(function (candidate) {
+                                            if (queue.candidates) queue.candidates.forEach(function (candidate) {
                                                 peer.addIceCandidate(candidate);
                                                 console.log('add candidate');
                                             });
-                                            queue.candidates = [];
+                                            queue.candidates = null;
 
                                         }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); });
@@ -990,7 +1070,7 @@ const app = new Vue({
             return function (position) {
                 let self = this;
                 let items = self.computerList.filter((item) => item.PositionX == position);
-
+                console.log('recompile');
                 if (items.length > 0 && items.length < self.maxY + 1) {
                     let maxId = 0;
                     self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
