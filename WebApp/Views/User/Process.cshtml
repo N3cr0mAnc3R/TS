@@ -40,7 +40,7 @@
                                 </div>
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 5" class="textarea-wrapper">
-                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false" rows="15"> </textarea>
+                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false" rows="15" id="noCopyPaste" oncontextmenu='return false;'> </textarea>
                                 <br />
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">

@@ -19,6 +19,9 @@
                             <div class="video-wrapper" v-if="item.TestingProfileId">
                                 <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" muted class="video-camera"></video>
                                 <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-2'" muted class="video-screen"></video>
+                                <div class="delete" title="Заменить" v-on:click="switchVideo('video-' + item.TestingProfileId)" v-if="!item.Deleted">
+                                    <i class="fa fa-sync-alt"></i>
+                                </div>
                                 @*<img v-bind:id="'img-' + item.TestingProfileId" />*@
                             </div>
                             <div class="empty-wrapper" v-if="!item.TestingProfileId">

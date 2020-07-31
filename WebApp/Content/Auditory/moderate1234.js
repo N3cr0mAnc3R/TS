@@ -189,12 +189,12 @@ const app = new Vue({
                                 //    found.RequestReset = false;
                                 //}
                                 //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
-                             //   if (found.UserVerified != item.UserVerified) {
-                                  //  if (item.UserVerified) {
-                                     //   self.initSocket(2, found, 2);
-                                   //     console.log('socket: ' + item.TestingProfileId, item.LastName);
-                              //      }
-                              //  }
+                                //   if (found.UserVerified != item.UserVerified) {
+                                //  if (item.UserVerified) {
+                                //   self.initSocket(2, found, 2);
+                                //     console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                //      }
+                                //  }
                                 if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
                                     found = item;
                                     var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
@@ -590,7 +590,7 @@ const app = new Vue({
                             if (!queue) {
                                 queue = { type: message.type, Id: a.TestingProfileId, candidates: [] };
                             }
-                            
+
                             if (queue.candidates)
                                 queue.candidates.push(candidate);
                         }
@@ -635,7 +635,7 @@ const app = new Vue({
 
             }
             socket.onclose = function (event) {
-                console.log('Соединение закрыто:' + type + ' '+ a.TestingProfileId);
+                console.log('Соединение закрыто:' + type + ' ' + a.TestingProfileId);
                 socket.close();
                 socket = null;
                 self.initSocket(type, a, cam);
@@ -660,6 +660,11 @@ const app = new Vue({
         isMe: function (message) {
             let self = this;
             return self.me.Id == message.UserIdFrom;
+        },
+        switchVideo: function (partId) {
+            let self = this;
+            $('#' + partId + '-1').css('z-index', $('#' + partId + '-1').css('z-index') == 1 ? 2 : 1);
+            $('#' + partId + '-2').css('z-index', $('#' + partId + '-2').css('z-index') == 1 ? 2 : 1);
         },
         ResetServer: function () {
             var socket = null, socket1 = null;

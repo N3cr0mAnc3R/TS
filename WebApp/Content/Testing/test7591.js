@@ -92,6 +92,29 @@
     methods: {
         init: function () {
             var self = this;
+
+            var ctrlDown = false,
+                ctrlKey = 17,
+                cmdKey = 91,
+                shiftKey = 16,
+                vKey = 86,
+                cKey = 67;
+
+            $(document).keydown(function (e) {
+                if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = true;
+            }).keyup(function (e) {
+                if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = false;
+            });
+
+            $("#noCopyPaste").keydown(function (e) {
+                if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey || e.keyCode == 45)) return false;
+            });
+
+            // Document Ctrl + C/V 
+            $(document).keydown(function (e) {
+                if (ctrlDown && (e.keyCode == cKey)) console.log("Document catch Ctrl+C");
+                if (ctrlDown && (e.keyCode == vKey)) console.log("Document catch Ctrl+V");
+            });
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",

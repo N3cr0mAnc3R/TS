@@ -44,7 +44,7 @@
 
         <div v-if="isSuperAdmin">
             <button v-on:click="donwloadAll()" v-if="[4].indexOf(currentStatus) != -1">Скачать всё</button>
-            <button v-on:click="uploadAll()" v-if="[3].indexOf(currentStatus) != -1">Скачать всё</button>
+            <button v-on:click="uploadAll()" v-if="[3].indexOf(currentStatus) != -1">убрать всё</button>
         </div>
         <table class="table table-striped">
             <thead>

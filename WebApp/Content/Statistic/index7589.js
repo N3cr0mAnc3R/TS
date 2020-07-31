@@ -83,7 +83,7 @@
             $.ajax({
                 url: "/auditory/UpdateStatus?Id=" + Id + '&StatusId=4',
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (newStatus) {
                     if (newStatus.Error) {
                         notifier([{ Type: 'error', Body: newStatus.Error }]);

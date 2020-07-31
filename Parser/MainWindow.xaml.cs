@@ -191,7 +191,7 @@ namespace Parser
                     return;
                 }
                 Parsing parser = new Parsing();
-                parser.ParseAsync("D:\\test4.doc", input);
+                parser.ParseAsync("D:\\test4.doc", input, IsChecked);
 
 
                 string ghostScriptPath = IsUra? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"D:\Old\gs9.50\bin\gswin64.exe";

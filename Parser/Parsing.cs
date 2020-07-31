@@ -16,7 +16,7 @@ namespace Parser
 {
     public class Parsing
     {
-        public string ParseAsync(string path, string outputPath)
+        public string ParseAsync(string path, string outputPath, bool IsChecked = true)
         {
             StringBuilder text = new StringBuilder();
 
@@ -40,13 +40,19 @@ namespace Parser
                 //outputFileName = GetExeDirectory().Substring(0, GetExeDirectory().LastIndexOf('/')).Substring(0, GetExeDirectory().LastIndexOf('/')).Substring(0, GetExeDirectory().LastIndexOf('/')) + "/Content/TMP/" + path.Substring(path.LastIndexOf('\\') + 1).Replace(".doc", ".pdf");
                 outputFileName = outputPath.Replace(".doc", ".pdf");
                 doc.Content.Font.Size = 12;
+                if (!IsChecked)
+                {
+                    doc.Content.Font.Bold = 0;
+                    doc.Content.Font.Name = "Times New Roman";
+                }
+
                 doc.SaveAs(ref outputFileName,
            ref fileFormat, ref oMissing, ref oMissing,
            ref oMissing, ref oMissing, ref oMissing, ref oMissing,
            ref oMissing, ref oMissing, ref oMissing, ref oMissing,
            ref oMissing, ref oMissing, ref oMissing, ref oMissing);
 
-                object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
+                object saveChanges = WdSaveOptions.wdSaveChanges;
                 ((_Document)doc).Close(ref saveChanges, ref oMissing, ref oMissing);
                 doc = null;
 
