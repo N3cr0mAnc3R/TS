@@ -52,6 +52,9 @@
 .auditory .computer-list .place-table {
   text-align: center;
 }
+.auditory .computer-list .place-table .place-row .full-col {
+  min-width: initial !important;
+}
 .auditory .computer-list .place-table .place-row .place-item {
   width: 180px;
   height: 240px;

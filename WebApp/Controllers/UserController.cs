@@ -28,6 +28,7 @@ namespace WebApp.Controllers
     public class UserController : BaseController
     {
         public static Dictionary<int, Timer> timers;
+        public static List<int> requestList;
         public enum Language
         {
             RU = 1,
@@ -84,6 +85,16 @@ namespace WebApp.Controllers
             bool HasAccess = await TestManager.GetSecurity(Id, (Guid?)null, PlaceConfig);
             return Json(new { HasAccess });
         }
+        public async Task ReconnectToSocket()
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                foreach (var item in timers)
+                {
+                    requestList.Add(item.Key);
+                }
+            }
+        }
         public async Task<ActionResult> ProctorProcessList()
         {
             List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
@@ -133,12 +144,12 @@ namespace WebApp.Controllers
         {
             return Json(TestManager.CheckPIN(pin, Session["Localization"].ToString()));
         }
-        public JsonResult GetTests(string PlaceConfig)
+        public async Task<JsonResult> GetTests(string PlaceConfig)
         {
             try
             {
-                List<TestingModel> tests = TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString(), CurrentUser.Id);
-                tests.AddRange(TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, CurrentUser.Id, Session["Localization"].ToString()));
+                List<TestingModel> tests = await TestManager.GetTestsByPlaceConfig(PlaceConfig, Session["Localization"].ToString(), CurrentUser.Id);
+                tests.AddRange(await TestManager.GetActiveTestsByPlaceConfig(PlaceConfig, CurrentUser.Id, Session["Localization"].ToString()));
                 return Json(tests);
             }
             catch (Exception e)
@@ -196,7 +207,7 @@ namespace WebApp.Controllers
             //return Json(result);
 
             await AuditoryManager.SetUserVerified(model.Id, true, CurrentUser.Id);
-            System.Threading.Thread.Sleep(3000);
+            //System.Threading.Thread.Sleep(3000);
             return Json(true);
             //return Json(Compare(image1, image, 0.85));
             //return Json(Compare(ConvertToFormat(second, PixelFormat.Format24bppRgb), ConvertToFormat(img, PixelFormat.Format24bppRgb), 0.8, 0.6f));
@@ -236,18 +247,25 @@ namespace WebApp.Controllers
         public async Task<JsonResult> FinishTest(int Id)
         {
             //ToDo Раскомментить 
-            await LogManager.SavelLog(CurrentUser.Id, Request.ServerVariables["REMOTE_ADDR"], 4);
+            await LogManager.SaveLog(CurrentUser.Id, Request.ServerVariables["REMOTE_ADDR"], 4);
             await TestManager.FinishTest(Id, Session["Localization"].ToString(), CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             return Json(true);
         }
         public async Task<JsonResult> StartTest(int Id, string localization = null)
         {
-            //ToDo Раскомментить 
-            await TestManager.StartTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
+            try
+            {
+                //ToDo Раскомментить 
+                await TestManager.StartTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString());
 
-            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 2);
-            var Answered = TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
-            return Json(new { Packages = TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = TestManager.ToggleTimer(Id, 2, null, localization), Answered = Answered });
+                await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 2);
+                var Answered = await TestManager.GetActiveTestAnswers(Id, Session["Localization"].ToString());
+                return Json(new { Packages = await TestManager.GetTestPackageById(Id, Session["Localization"].ToString()), Date = await TestManager.ToggleTimer(Id, 2, null, localization), Answered });
+            }
+            catch(Exception e)
+            {
+                return Json(e.Message);
+            }
         }
         public async Task<JsonResult> GetInfoAboutTest(int Id)
         {
@@ -257,9 +275,9 @@ namespace WebApp.Controllers
         {
             return Json(await TestManager.GetScore(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null, Session["Localization"].ToString()));
         }
-        public JsonResult GetTestPackageById(int Id)
+        public async Task<JsonResult> GetTestPackageById(int Id)
         {
-            return Json(TestManager.GetTestPackageById(Id, Session["Localization"].ToString()));
+            return Json(await TestManager.GetTestPackageById(Id, Session["Localization"].ToString()));
         }
         public async Task<JsonResult> GetSourceMaterials(int Id)
         {
@@ -274,23 +292,23 @@ namespace WebApp.Controllers
         {
             return Json(await TestManager.GetUserInfoByTestingProfile(Id, Session["Localization"].ToString()));
         }
-        public JsonResult GetTestQuestionsById(int Id)
+        public async Task<JsonResult> GetTestQuestionsById(int Id)
         {
-            return Json(TestManager.GetTestQuestionsById(Id, Session["Localization"].ToString()));
+            return Json(await TestManager.GetTestQuestionsById(Id, Session["Localization"].ToString()));
         }
-        public JsonResult GetTestAnswersById(int Id)
+        public async Task<JsonResult> GetTestAnswersById(int Id)
         {
-            return Json(TestManager.GetTestAnswersById(Id, Session["Localization"].ToString()));
+            return Json(await TestManager.GetTestAnswersById(Id, Session["Localization"].ToString()));
         }
         public async Task<JsonResult> UpdateQuestionAnswer(IEnumerable<QuestionAnswer> answer)
         {
             await TestManager.UpdateQuestionAnswer(answer);
-            await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
+            await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return Json(true);
         }
-        public JsonResult GetQuestionImage(int Id, int Part = 1)
+        public async Task<JsonResult> GetQuestionImage(int Id, int Part = 1)
         {
-            QuestionModel model = TestManager.GetQuestionImage(Id, Session["Localization"].ToString()).First();
+            QuestionModel model = (await TestManager.GetQuestionImage(Id, Session["Localization"].ToString())).First();
             //if (Type != 3)
             // {
             model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
@@ -307,9 +325,9 @@ namespace WebApp.Controllers
             }
             return Json(model);
         }
-        public JsonResult GetAnswerImage(int Id)
+        public async Task<JsonResult> GetAnswerImage(int Id)
         {
-            AnswerModel model = TestManager.GetAnswerImage(Id, Session["Localization"].ToString()).First();
+            AnswerModel model = (await TestManager.GetAnswerImage(Id, Session["Localization"].ToString())).First();
             model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
             return Json(model);
         }
@@ -330,9 +348,9 @@ namespace WebApp.Controllers
         {
             return Json(await TestManager.GetUserErrors(Id, Session["Localization"].ToString(), (CurrentUser != null ? CurrentUser.Id : (Guid?)null)));
         }
-        public void PauseTest(int Id, string Localization)
+        public async Task PauseTest(int Id, string Localization)
         {
-            TestManager.ToggleTimer(Id, 1, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Localization);
+            await TestManager.ToggleTimer(Id, 1, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Localization);
         }
 
         [HttpPost]
@@ -365,6 +383,10 @@ namespace WebApp.Controllers
             {
                 timers = new Dictionary<int, Timer>();
             }
+            if (requestList == null)
+            {
+                requestList = new List<int>();
+            }
             if (!model.NeedDispose)
             {
                 if (timers.ContainsKey(model.TestingProfileId))
@@ -389,10 +411,18 @@ namespace WebApp.Controllers
                     timers[model.TestingProfileId].Dispose();
                     timers.Remove(model.TestingProfileId);
                 }
-                await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
+                await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
                 await FinishTest(model.TestingProfileId);
             }
-            return Json(1);
+            if (requestList.Count > 0)
+            {
+                if (requestList.Contains(model.TestingProfileId))
+                {
+                    requestList.Remove(model.TestingProfileId);
+                    return Json(true);
+                }
+            }
+            return Json(false);
             //await TestManager.SaveImage(model);
         }
 
@@ -430,11 +460,11 @@ namespace WebApp.Controllers
             //await LogManager.SavelLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return Json(await TestManager.FileAnswerUploadAsync(model, CurrentUser != null ? CurrentUser.Id : (Guid?)null));
         }
-        private void Timer_Elapsed(object sender, ElapsedEventArgs e)
+        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             var timer = (Timer)sender;
             var founded = timers.Where(a => a.Value == timer).First();
-            TestManager.ToggleTimer(founded.Key, 2, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Session["Localization"].ToString());
+            await TestManager.ToggleTimer(founded.Key, 2, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Session["Localization"].ToString());
         }
 
         [HttpPost]
@@ -463,7 +493,7 @@ namespace WebApp.Controllers
         public async Task<JsonResult> SaveQrCode(int Id, int TestingPackageId)
         {
             QRCodeEncoder encoder = new QRCodeEncoder();
-            Bitmap qrCode = encoder.Encode(JsonConvert.SerializeObject(new { TestingProfileId = Id, TestingPackageId  }));
+            Bitmap qrCode = encoder.Encode(await Task.Factory.StartNew(() => JsonConvert.SerializeObject(new { TestingProfileId = Id, TestingPackageId  })));
             string base64 = "";
             using (var ms = new MemoryStream())
             {

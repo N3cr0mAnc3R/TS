@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
@@ -18,11 +19,11 @@ namespace WebApp.Controllers
             ViewBag.Title = "Отчёты и статистика";
             return View();
         }
-        public FileResult Download(int Id, int Type)
+        public async Task<FileResult> Download(int Id, int Type)
         {
-            return DownloadMultipleFiles(TestManager.GetFilesByTestingProfile(Id, Type).ToList());
+            return await DownloadMultipleFiles((await TestManager.GetFilesByTestingProfile(Id, Type)).ToList());
         }
-        public FileResult DownloadMultipleFiles(List<WebApp.Models.Common.FileStreamResult> byteArrayList)
+        public async Task<FileResult> DownloadMultipleFiles(List<WebApp.Models.Common.FileStreamResult> byteArrayList)
         {
             using (MemoryStream ms = new MemoryStream())
             {
@@ -33,7 +34,7 @@ namespace WebApp.Controllers
                         var entry = archive.CreateEntry(file.Name + ".webm", CompressionLevel.Fastest);
                         using (var zipStream = entry.Open())
                         {
-                            zipStream.Write(file.FileStreamContext, 0, file.FileStreamContext.Length);
+                           await  zipStream.WriteAsync(file.FileStreamContext, 0, file.FileStreamContext.Length);
                         }
                     }
                 }

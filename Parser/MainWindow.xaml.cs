@@ -29,7 +29,7 @@ namespace Parser
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 and question is not null union all select count(1) as total from Answers nolock where  loaded = 0 and answer is not null) as t";
+            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 union all select count(1) as total from Answers nolock where  loaded = 0) as t";
 
             conn.Open();
             using (var reader = cmd.ExecuteReader())
@@ -118,7 +118,7 @@ namespace Parser
 
                     SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                     SqlCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where  loaded = 0 and question is not null union all select count(1) as total from Answers nolock where loaded = 0 and answer is not null) as t";
+                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where  loaded = 0 union all select count(1) as total from Answers nolock where loaded = 0) as t";
                     conn.Open();
                     int count = 0;
                     using (var reader = cmd.ExecuteReader())
@@ -155,11 +155,11 @@ namespace Parser
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0 and question is not null" + (IsStraight? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0" + (IsStraight? "" : " order by ID desc");
                 }
                 else
                 {
-                    cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0 and answer is not null" + (IsStraight ? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
                 }
                 conn.Open();
                 string input = "D:\\test4.pdf", output = "D:\\test";

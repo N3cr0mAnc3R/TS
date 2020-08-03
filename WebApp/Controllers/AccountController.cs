@@ -117,7 +117,7 @@ namespace WebApp.Controllers
 
 
                 SignInManager.SignIn(user, false, false);
-                await LogManager.SavelLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
+                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
 
                 List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
                 if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4}))
@@ -149,7 +149,7 @@ namespace WebApp.Controllers
             return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1,2,3,4,6,7})? CurrentUser.Id : (Guid?)null });
         }
         [HttpPost]
-        public JsonResult IsPaul()
+        public async Task<JsonResult> IsPaul()
         {
             return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651")|| CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
         }

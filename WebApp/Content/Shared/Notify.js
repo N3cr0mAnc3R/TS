@@ -62,19 +62,13 @@ function notifier(incomeMessages) {
                 removed.remove();
             }
             //Внешний вид сообщения
-            var msgWrapper = `<div class="notification-wrapper type-` + messageWrapper.source.Type + `" id="index-` + lastIndex + `">
-                <div class="notification">
-                    <div class="body">`+ messageWrapper.source.Body + `</div>
-                    <div class="remove"><i class="fa fa-times-circle" aria-hidden="true"></i></div>
-
-                </div>
-            </div>`;
+            var msgWrapper = '<div class="notification-wrapper type-' + messageWrapper.source.Type + '" id="index-' + lastIndex + '"><div class="notification"><div class="body">'+ messageWrapper.source.Body + '</div><div class="remove"><i class="fa fa-times-circle" aria-hidden="true"></i></div></div></div>';
             //Добавление сообщения для оболочки
             $(msgWrapper).appendTo(findLastChild(fullWrapper));
             //Для ууспешных и неуспешных сообщений разные delay-и
             setTimeout(function () {
                 //Удаляем сообщение по истечении времени жизни
-                if (notifierScope.messages.find(a => a.index === messageWrapper.index)) {
+                if (notifierScope.messages.filter(function (a) { a.index === messageWrapper.index })[0]) {
                     messageWrapper.remove();
                 }
             }, removeDelay * (message.Type === 'success' ? 1 : 2));

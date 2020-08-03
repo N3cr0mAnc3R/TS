@@ -18,13 +18,13 @@ namespace WebApp.Models
     public class TestManager : Manager
     {
         public TestManager(Concrete concrete) : base(concrete) { }
-        public dynamic GetTestsByPlaceConfig(string placeConfig, string Localization, Guid userUID)
+        public async Task<dynamic> GetTestsByPlaceConfig(string placeConfig, string Localization, Guid userUID)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 try
                 {
-                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -32,13 +32,13 @@ namespace WebApp.Models
                 }
             }
         }
-        public dynamic GetActiveTestsByPlaceConfig(string placeConfig, Guid userUID, string Localization)
+        public async Task<dynamic> GetActiveTestsByPlaceConfig(string placeConfig, Guid userUID, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 try
                 {
-                    return cnt.Query<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -46,13 +46,13 @@ namespace WebApp.Models
                 }
             }
         }
-        public dynamic GetActiveTestAnswers(int testingProfileId, string Localization)
+        public async Task<dynamic> GetActiveTestAnswers(int testingProfileId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
                 try
                 {
-                    return cnt.Query<QuestionAnswer>(sql: "[dbo].[UserPlace_TestingLogsGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<QuestionAnswer>(sql: "[dbo].[UserPlace_TestingLogsGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -60,11 +60,11 @@ namespace WebApp.Models
                 }
             }
         }
-        public IEnumerable<TestingPackage> GetTestPackageById(int testingProfileId, string Localization)
+        public async Task<IEnumerable<TestingPackage>> GetTestPackageById(int testingProfileId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return cnt.Query<TestingPackage>(sql: "[dbo].[UserPlace_TestingPackagesGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<TestingPackage>(sql: "[dbo].[UserPlace_TestingPackagesGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<Guid> GetUserInfoByTestingProfile(int testingProfileId, string Localization)
@@ -74,12 +74,12 @@ namespace WebApp.Models
                 return await cnt.QueryFirstOrDefaultAsync<Guid>(sql: "[dbo].[UserPlace_UserUIDTestingProfileIdGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public int ToggleTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID, string localization)
+        public async Task<int> ToggleTimer(int testingProfileId, int reasonForStoppingId, Guid? userUID, string localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                cnt.Execute(sql: "[dbo].[Administrator_TestingProfilesTimeControlsSave]", new { testingProfileId, reasonForStoppingId, userUID }, commandType: CommandType.StoredProcedure);
-                return cnt.Query<int>("UserPlace_TestingTimeRemainingGet", new { testingProfileId, localization, userUID }, commandType: CommandType.StoredProcedure).FirstOrDefault();
+                await cnt.ExecuteReaderAsync(sql: "[dbo].[Administrator_TestingProfilesTimeControlsSave]", new { testingProfileId, reasonForStoppingId, userUID }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstOrDefaultAsync<int>("UserPlace_TestingTimeRemainingGet", new { testingProfileId, localization, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task StartTest(int testingProfileId, Guid? userUID, string Localization)
@@ -103,18 +103,18 @@ namespace WebApp.Models
                 return cnt.Query<TestingPackage>(sql: "[dbo].[UserPlace_CheckPin]", new { pin, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public IEnumerable<QuestionModel> GetTestQuestionsById(int testingProfileId, string Localization)
+        public async Task<IEnumerable<QuestionModel>> GetTestQuestionsById(int testingProfileId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return cnt.Query<QuestionModel>(sql: "[dbo].[UserPlace_TestingPackagesQuestionsGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<QuestionModel>(sql: "[dbo].[UserPlace_TestingPackagesQuestionsGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
-        public IEnumerable<AnswerModel> GetTestAnswersById(int testingProfileId, string Localization)
+        public async Task<IEnumerable<AnswerModel>> GetTestAnswersById(int testingProfileId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return cnt.Query<AnswerModel>(sql: "[dbo].[UserPlace_TestingPackagesAnswersGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<AnswerModel>(sql: "[dbo].[UserPlace_TestingPackagesAnswersGet]", new { testingProfileId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task SaveImage(SavePictureModel model)
@@ -221,11 +221,11 @@ namespace WebApp.Models
                 return conn.Query<string>("UserPlace_GetStreamBase", new { testProfileId, }, commandType: CommandType.StoredProcedure).FirstOrDefault();
             }
         }
-        public IEnumerable<FileStreamResult> GetFilesByTestingProfile(int testingProfileId, int Type)
+        public async Task<IEnumerable<FileStreamResult>> GetFilesByTestingProfile(int testingProfileId, int Type)
         {
-            using (var conn = Concrete.OpenConnection())
+            using (var conn = await Concrete.OpenConnectionAsync())
             {
-                return conn.Query<FileStreamResult>("Administrator_DownloadAllVideos", new { testingProfileId, Type }, commandType: CommandType.StoredProcedure);
+                return await conn.QueryAsync<FileStreamResult>("Administrator_DownloadAllVideos", new { testingProfileId, Type }, commandType: CommandType.StoredProcedure);
             }
         }
         public FileStreamDownload FileDownload(int testProfileId, int Type, Guid? UserId)
@@ -329,11 +329,11 @@ namespace WebApp.Models
         //        return (await cnt.QueryAsync<string>(sql: "[dbo].[UserPlace_GetImageData]", new { Id }, commandType: CommandType.StoredProcedure)).FirstOrDefault();
         //    }
         //}
-        public IEnumerable<QuestionModel> GetQuestionImage(int questionId, string Localization)
+        public async Task<IEnumerable<QuestionModel>> GetQuestionImage(int questionId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                var t = cnt.Query<QuestionModel>(sql: "[dbo].[UserPlace_QuestionImageGet]", new { questionId, Localization }, commandType: CommandType.StoredProcedure);
+                var t = await cnt.QueryAsync<QuestionModel>(sql: "[dbo].[UserPlace_QuestionImageGet]", new { questionId, Localization }, commandType: CommandType.StoredProcedure);
                 return t;
             }
         }
@@ -345,11 +345,11 @@ namespace WebApp.Models
                 return t;
             }
         }
-        public IEnumerable<AnswerModel> GetAnswerImage(int answerId, string Localization)
+        public async Task<IEnumerable<AnswerModel>> GetAnswerImage(int answerId, string Localization)
         {
-            using (var cnt = Concrete.OpenConnection())
+            using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return cnt.Query<AnswerModel>(sql: "[dbo].[UserPlace_AnswerImageGet]", new { answerId, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryAsync<AnswerModel>(sql: "[dbo].[UserPlace_AnswerImageGet]", new { answerId, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<IEnumerable<Violation>> GetUserErrors(int TestingProfileId, string Localization, Guid? userUID)

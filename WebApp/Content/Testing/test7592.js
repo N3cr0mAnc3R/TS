@@ -165,7 +165,7 @@
             $.ajax({
                 url: "/user/GetCurrentUser?Id=" + newId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (user) {
                     self.currentUser = user;
                 },
@@ -176,7 +176,7 @@
             $.ajax({
                 url: "/user/GetInfoAboutTest?Id=" + newId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (info) {
                     if (info.TestingTimeRemaining <= 0) {
                         //self.finishTest();
@@ -294,6 +294,7 @@
                         if (!material.IsCalc) {
                             $.ajax({
                                 type: 'POST',
+                                async: true,
                                 url: '/user/GetSourceMaterial?Id=' + material.Id,
                                 success: function (data) {
                                     material.Image = data;
@@ -350,6 +351,7 @@
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
+                async: true,
                 url: '/auditory/DownloadFile?Id=' + Id,
                 success: function (data) {
                     question.answerImage = data;
@@ -436,6 +438,7 @@
                                 type: 'POST',
                                 dataType: 'json',
                                 url: '/user/GetAnswerImage?Id=' + a.Id,
+                                async: true,
                                 success: function (d) {
                                     a.AnswerImage = d.AnswerImage;
                                     self.counter++;
@@ -463,6 +466,7 @@
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
+                async: true,
                 url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
                 success: function (d) {
                     if (!self.unloadedImage || part == 1) {
@@ -522,7 +526,7 @@
                 type: 'POST',
                 dataType: 'json',
                 url: '/user/UpdatequestionAnswer',
-                async: false,
+                async: true,
                 data: { answer: answers },
                 success: function () {
                     //Сбрасываем флаг изменения
@@ -547,12 +551,13 @@
                     $.ajax({
                         url: "/user/HasConnection",
                         type: "POST",
+                        async: true,
                         data: {
                             TestingProfileId: id,
                             NeedDispose: false
                         },
                         success: function (data) {
-                            if (data !== 1) {
+                            if (data == null || data == undefined) {
                                 self.pause = true;
                                 if (!self.intervalConnectionLost) {
                                     self.intervalConnectionLost = setTimeout(function () {
@@ -562,12 +567,34 @@
                                 }
                             }
                             else {
-                                if (self.intervalConnectionLost) {
-                                    clearTimeout(self.intervalConnectionLost);
-                                    self.lostConnection = false;
-                                    self.pause = false;
+                                if (data == true) {
+                                    location.reload();
+                                }
+                                else {
+                                    if (self.intervalConnectionLost) {
+                                        clearTimeout(self.intervalConnectionLost);
+                                        self.intervalConnectionLost
+                                        self.lostConnection = false;
+                                        self.pause = false;
+                                    }
                                 }
                             }
+                            //if (data !== 1) {
+                            //    self.pause = true;
+                            //    if (!self.intervalConnectionLost) {
+                            //        self.intervalConnectionLost = setTimeout(function () {
+                            //            clearTimeout(self.intervalConnectionLost);
+                            //            self.lostConnection = true;
+                            //        }, 60000);
+                            //    }
+                            //}
+                            //else {
+                            //    if (self.intervalConnectionLost) {
+                            //        clearTimeout(self.intervalConnectionLost);
+                            //        self.lostConnection = false;
+                            //        self.pause = false;
+                            //    }
+                            //}
                         },
                         error: function () {
                             self.pause = true;
@@ -806,6 +833,7 @@
                         $.ajax({
                             url: "/user/GetUserAnswer?Id=" + message.Id,
                             type: "POST",
+                            async: true,
                             success: function (data) {
                                 self.selectedQuestion.fileId = message.Id;
                                 self.selectedQuestion.answerImage = data;
@@ -1091,16 +1119,15 @@
             self.finishScreen = true;
 
 
-            console.log(self.finishScreen, self.lostConnection);
-
             $.ajax({
                 url: "/user/FinishTest?Id=" + self.testingProfileId,
                 type: "POST",
+                async: true,
                 success: function () {
                     $.ajax({
                         url: "/user/GetScore?Id=" + self.testingProfileId,
                         type: "POST",
-                        async: false,
+                        async: true,
                         success: function (info) {
                             self.score = info;
                             self.loadObject.loading = false;
@@ -1115,6 +1142,7 @@
             $.ajax({
                 url: "/user/HasConnection",
                 type: "POST",
+                async: true,
                 data: {
                     TestingProfileId: self.testingProfileId,
                     NeedDispose: true
@@ -1165,21 +1193,22 @@
                     return null;
                 });
         },
-        download: function () {
-            $.ajax({
-                url: "GetFileBase?Id=67",
-                type: "POST",
-                success: function (data) {
-                    const downloadLink = document.createElement('a');
-                    document.body.appendChild(downloadLink);
+        //download: function () {
+        //    $.ajax({
+        //        url: "GetFileBase?Id=67",
+        //        type: "POST",
+        //        async: true,
+        //        success: function (data) {
+        //            const downloadLink = document.createElement('a');
+        //            document.body.appendChild(downloadLink);
 
-                    downloadLink.href = data;
-                    downloadLink.target = '_self';
-                    downloadLink.download = "na.webm";
-                    downloadLink.click();
-                }
-            });
-        },
+        //            downloadLink.href = data;
+        //            downloadLink.target = '_self';
+        //            downloadLink.download = "na.webm";
+        //            downloadLink.click();
+        //        }
+        //    });
+        //},
         showCountLeft: function () {
             var self = this;
             var count = self.questions.length;
@@ -1308,7 +1337,7 @@
             $.ajax({
                 url: "/user/SaveQrCode?Id=" + self.testingProfileId + '&TestingPackageId=' + self.selectedQuestion.Answers[0].TestingPackage.Id,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (qrString) {
                     self.QRCodeImage = qrString;
                 }
@@ -1320,7 +1349,7 @@
             $.ajax({
                 url: "/user/GetQrCode?Id=" + newId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (qrString) {
                     self.QRCodeHref = qrString;
                 }

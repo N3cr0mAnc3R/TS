@@ -51,6 +51,10 @@
             self.loadTestObject.loaded = false;
             self.loadObject.loading = true;
             self.loadObject.loaded = false;
+            var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            if (is_safari || navigator.userAgent.indexOf("Edge") > -1 || (typeof document !== 'undefined' && !!document.documentMode)) {
+                notifier([{ Type: 'error', Body: self.switchLocal(18) }]);
+            }
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",
@@ -629,6 +633,7 @@
                 case 15: return self.localization == 1 ? "Запрос успешно отправлен" : "Your request has been sent";
                 case 16: return self.localization == 1 ? "Идентификация успешна" : "Identification succeeded";
                 case 17: return self.localization == 1 ? "Вы не идентфицированы" : "Your identification failed";
+                case 18: return self.localization == 1 ? "Ваш браузер не поддерживается. Воспользуйтесь другим устройством" : "Your browser is not supported. Please, try another device";
             }
         },
         isMe: function (message) {

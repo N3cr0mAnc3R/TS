@@ -81,7 +81,7 @@ const app = new Vue({
             $.ajax({
                 url: "/account/IsPaul",
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (domain) {
                     self.isSuperAdmin = domain;
                 }
@@ -92,19 +92,19 @@ const app = new Vue({
             let newId = Number.parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.getAuditories(newId, self);
 
-            setInterval(function () {
-                try {
-                    self.getAuditories(newId, self);
-                }
-                catch{
-                    location.reload();
-                }
-            }, 5000);
+            //setInterval(function () {
+            //    try {
+            //        self.getAuditories(newId, self);
+            //    }
+            //    catch{
+            //        location.reload();
+            //    }
+            //}, 5000);
 
             $.ajax({
                 url: "/user/GetErrorTypes",
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (errorTypes) {
                     self.errorTypes = errorTypes;
                 }
@@ -112,7 +112,7 @@ const app = new Vue({
             $.ajax({
                 url: "/auditory/GetStatuses",
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (statuses) {
                     self.statuses = statuses;
                 }
@@ -121,7 +121,7 @@ const app = new Vue({
             $.ajax({
                 url: "/account/GetCurrentUser",
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (user) {
                     self.me = user;
                 }
@@ -667,24 +667,33 @@ const app = new Vue({
             $('#' + partId + '-2').css('z-index', $('#' + partId + '-2').css('z-index') == 1 ? 2 : 1);
         },
         ResetServer: function () {
-            var socket = null, socket1 = null;
+          //  var socket = null, socket1 = null;
             var self = this;
-            if (typeof (WebSocket) !== 'undefined') {
-                socket = new WebSocket(self.domain + "/ChatHandler.ashx");
-                socket1 = new WebSocket(self.domain + "/StreamHandler.ashx");
-            }
-            else {
-                socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
-                socket1 = new MozWebSocket(self.domain + "/StreamHandler.ashx");
-            }
-            socket.onopen = function () {
-                socket.send(JSON.stringify({ ForReset: true }));
-                socket.close();
-            };
-            socket1.onopen = function () {
-                socket1.send(JSON.stringify({ ForReset: true }));
-                socket1.close();
-            };
+            $.ajax({
+                url: "/user/ReconnectToSocket",
+                type: "POST",
+                async: true,
+                success: function () {
+                    notifier([{ Type: 'success', Body: 'Попытка' }]);
+
+                }
+            });
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    socket = new WebSocket(self.domain + "/ChatHandler.ashx");
+            //    socket1 = new WebSocket(self.domain + "/StreamHandler.ashx");
+            //}
+            //else {
+            //    socket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
+            //    socket1 = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+            //}
+            //socket.onopen = function () {
+            //    socket.send(JSON.stringify({ ForReset: true }));
+            //    socket.close();
+            //};
+            //socket1.onopen = function () {
+            //    socket1.send(JSON.stringify({ ForReset: true }));
+            //    socket1.close();
+            //};
         },
         verifyUser: function (Verified) {
             //SetUserVerified
@@ -698,7 +707,7 @@ const app = new Vue({
                     Verified: Verified
                 },
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
                 }
@@ -731,7 +740,7 @@ const app = new Vue({
                     Date: self.currentDate
                 },
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
                 }
@@ -829,7 +838,7 @@ const app = new Vue({
             $.ajax({
                 url: "/auditory/GetUserPicture?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (picture) {
                     self.currentUser.Image = picture;
                 }
@@ -849,7 +858,7 @@ const app = new Vue({
             $.ajax({
                 url: "/user/GetUserErrors?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
                 }
@@ -879,7 +888,7 @@ const app = new Vue({
             $.ajax({
                 url: "/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
                     self.shownError = !self.shownError;
@@ -898,7 +907,7 @@ const app = new Vue({
             $.ajax({
                 url: "/user/PauseTest?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function () {
                 }
             });
@@ -910,7 +919,7 @@ const app = new Vue({
             $.ajax({
                 url: "/user/FinishTest?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function () {
 
                     let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
@@ -972,7 +981,7 @@ const app = new Vue({
             $.ajax({
                 url: "/auditory/UpdatePlaceConfig",
                 type: "POST",
-                async: false,
+                async: true,
                 data: obj,
                 success: function () {
                     let found = self.videoSockets.filter(function (item) { return item.id == self.currentUser.TestingProfileId; })[0];
@@ -1025,7 +1034,7 @@ const app = new Vue({
             $.ajax({
                 url: "/user/GetChatMessages?Id=" + newId,
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (messageList) {
                     let messages = messageList;
                     messages.map(a => a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))));
@@ -1081,7 +1090,6 @@ const app = new Vue({
             return function (position) {
                 let self = this;
                 let items = self.computerList.filter((item) => item.PositionX == position);
-                console.log('recompile');
                 if (items.length > 0 && items.length < self.maxY + 1) {
                     let maxId = 0;
                     self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);

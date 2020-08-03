@@ -11,7 +11,7 @@ namespace WebApp.Models.Logs
     public class LogManager : Manager
     {
         public LogManager(Concrete concrete) : base(concrete) { }
-        public async Task SavelLog(Guid userUID, string ip, int ActionType)
+        public async Task SaveLog(Guid userUID, string ip, int ActionType)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {

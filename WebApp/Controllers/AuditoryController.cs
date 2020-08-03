@@ -55,6 +55,18 @@ namespace WebApp.Controllers
                 return Redirect("/user/waiting");
             }
         }
+        public async Task<ActionResult> FullWindow(int Id)
+        {
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
+        }
         async public Task<ActionResult> DownloadReport(int Id, int Type, int? StatusId, string Date)
         {
             ReportList report = await AuditoryManager.GetResultReport(Id, CurrentUser.Id);
