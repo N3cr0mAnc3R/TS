@@ -1,5 +1,5 @@
 ﻿
-<link href="~/Content/Testing/Index.css" rel="stylesheet" />
+<link href="~/Content/Testing/Index1235.css" rel="stylesheet" />
 <div id="main-window">
     @if (ViewBag.PlaceInfo != null)
     {
@@ -117,6 +117,11 @@
                             </video>
                         </div>
                     </div>
+                    <div class="info-wrapper" v-if="identificationTimeLeft != 45">
+                        <span>{{switchLocal(19)}} </span>
+                        <span>{{identificationTimeLeft}} </span>
+                        <span>{{switchLocal(20)}} </span>
+                    </div>
                 </div>
                 <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
             </div>
@@ -213,4 +218,4 @@
 </div>
 
 <script src="~/Content/aes.js"></script>
-<script src="~/Content/Testing/pretest1234.js"></script>
+<script src="~/Content/Testing/pretest1235.js"></script>

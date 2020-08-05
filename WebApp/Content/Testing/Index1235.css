@@ -372,7 +372,6 @@
 .panel-center .answer-list .answer-wrapper .textarea-wrapper textarea {
   resize: vertical;
   max-width: initial;
-  height: 200px;
 }
 .panel-center .answer-list .answer-wrapper .textarea-wrapper .image-preview-wrapper img {
   width: 400px;

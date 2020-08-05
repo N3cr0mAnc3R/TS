@@ -16,6 +16,8 @@
             loading: null,
             loaded: null
         },
+        recordedCamera: [],
+        cameraRecorder: null,
         videoSockets: [],
         loadTestObject: {
             loading: null,
@@ -31,6 +33,7 @@
             Message: "",
             testingProfileId: 0
         },
+        artFlag: false,
         recognized: false,
         tryRec: false,
         noFace: false,
@@ -42,7 +45,8 @@
         queue: [],
         enabled: false,
         counter: 0,
-        testingProfileId: 0
+        testingProfileId: 0,
+        identificationTimeLeft: 45
     },
     methods: {
         init: function () {
@@ -131,7 +135,11 @@
                             console.log(min);
                             self.tests.forEach(function (item) {
                                 min = min > item.Id ? item.Id : min;
+                                if (item.DisciplineName == 'Испытание творческой направленности (Журналистика)') {
+                                    self.artFlag = true;
+                                }
                             })
+                            console.log(self.artFlag);
                             //var min = d[0].Id;
                             //d.forEach(function (item) {
                             //    min = min > item.Id ? item.Id : min;
@@ -434,6 +442,53 @@
         getDateFormat: function (date) {
             return date.toLocaleTimeString();
         },
+        startRecord: function () {
+            var self = this; var options;
+            if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                options = { mimeType: 'video/webm; codecs=vp9' };
+            } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+                options = { mimeType: 'video/webm; codecs=vp8' };
+            }
+            self.cameraRecorder = new MediaRecorder(self.stream, options);
+            self.cameraRecorder.ondataavailable = self.recordingCamera;
+            self.cameraRecorder.start(100);
+            setTimeout(function () {
+                self.cameraRecorder.stop();
+                var bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
+                var formaData1 = new FormData();
+
+                formaData1.append('Id', self.testingProfileId);
+                formaData1.append('Type', 1);
+                formaData1.append('File', bufferCamera, 'identification');
+
+                $.ajax({
+                    url: "/user/SaveVideoFile",
+                    type: "POST",
+                    data: formaData1,
+                    contentType: false,
+                    processData: false,
+                    success: function () {
+
+                        clearInterval(self.verifyInterval);
+                        console.log('got');
+                        self.verified = true;
+                    }
+                });
+
+
+
+            }, 45000);
+            var intLeft = setInterval(function () {
+                self.identificationTimeLeft--;
+                if (self.identificationTimeLeft == 0) {
+                    clearInterval(intLeft);
+                }
+            }, 1000)
+        },
+        recordingCamera: function (event) {
+            app.recordedCamera.push(event.data);
+            // var reader = new FileReader();
+        },
         tryVerify: function () {
             var self = this;
             try {
@@ -446,30 +501,35 @@
                 canvas.height = 230;
                 context.drawImage($('#video1')[0], 0, 0, 320, 230);
                 var data = canvas.toDataURL('image/png');
-                $.ajax({
-                    url: "/user/TryVerify",
-                    type: "POST",
-                    async: true,
-                    data: { Image: data.substr(22), Id: self.testingProfileId },
-                    success: function (res) {
-                        if (res.Error == 1) {
-                            self.noFace = true;
-                        }
-                        else {
-                            self.recognized = res;
-                            console.log(res);
-                            if (!res) {
-                                self.noFace = false;
+                if (!self.artFlag) {
+                    $.ajax({
+                        url: "/user/TryVerify",
+                        type: "POST",
+                        async: true,
+                        data: { Image: data.substr(22), Id: self.testingProfileId },
+                        success: function (res) {
+                            if (res.Error == 1) {
+                                self.noFace = true;
                             }
                             else {
-                                clearInterval(self.verifyInterval);
-                                console.log('got');
-                                self.verified = true;
+                                self.recognized = res;
+                                console.log(res);
+                                if (!res) {
+                                    self.noFace = false;
+                                }
+                                else {
+                                    clearInterval(self.verifyInterval);
+                                    console.log('got');
+                                    self.verified = true;
 
+                                }
                             }
                         }
-                    }
-                });
+                    });
+                }
+                else {
+                    self.startRecord();
+                }
                 //}, 500);
             }
             catch (exc) {
@@ -634,6 +694,8 @@
                 case 16: return self.localization == 1 ? "Идентификация успешна" : "Identification succeeded";
                 case 17: return self.localization == 1 ? "Вы не идентфицированы" : "Your identification failed";
                 case 18: return self.localization == 1 ? "Ваш браузер не поддерживается. Воспользуйтесь другим устройством" : "Your browser is not supported. Please, try another device";
+                case 19: return self.localization == 1 ? "До окончания процедуры идентификации осталось: " : "Until the end of identification left: ";
+                case 20: return self.localization == 1 ? "секунд" : "seconds";
             }
         },
         isMe: function (message) {
