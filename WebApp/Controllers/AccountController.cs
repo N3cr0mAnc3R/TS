@@ -145,8 +145,12 @@ namespace WebApp.Controllers
         [HttpPost]
         public async Task<JsonResult> GetCurrentUser()
         {
-            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
-            return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1,2,3,4,6,7})? CurrentUser.Id : (Guid?)null });
+            if (CurrentUser != null)
+            {
+                List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+                return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1, 2, 3, 4, 6, 7 }) ? CurrentUser.Id : (Guid?)null });
+            }
+            return Json(new { });
         }
         [HttpPost]
         public async Task<JsonResult> IsPaul()

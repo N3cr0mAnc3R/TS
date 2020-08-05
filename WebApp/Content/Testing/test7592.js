@@ -106,15 +106,22 @@
                 if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = false;
             });
 
+
             $("#noCopyPaste").keydown(function (e) {
-                if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey || e.keyCode == 45)) return false;
+                if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey || e.keyCode == 45)) {
+                    e.preventDefault();
+                    return false;
+                }
             });
 
             // Document Ctrl + C/V 
             $(document).keydown(function (e) {
-                if (ctrlDown && (e.keyCode == cKey)) console.log("Document catch Ctrl+C");
-                if (ctrlDown && (e.keyCode == vKey)) console.log("Document catch Ctrl+V");
+                if (ctrlDown && (e.keyCode == cKey))
+                    e.preventDefault();// console.log("Document catch Ctrl+C");
+                if (ctrlDown && (e.keyCode == vKey))
+                    e.preventDefault();//console.log("Document catch Ctrl+V");
             });
+
             $.ajax({
                 url: "/account/GetDomain",
                 type: "POST",
@@ -346,6 +353,10 @@
             //Такая же метка, как в radio, чтобы исключить повторную загрузку
             this.selectedQuestion.changed = true;
             this.selectedQuestion.answered = true;
+            var self = this;
+            setInterval(function () {
+                self.answerQuestion();
+            }, 30000);
         },
         getAnswerFile: function (question, Id) {
             $.ajax({
@@ -1516,7 +1527,7 @@
                 case 1: return self.localization == 1 ? "Осталось" : "Left";
                 case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
                 case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
-                case 4: return self.localization == 1 ? "Выберите файл для загрузки (если требуется) и впишите ответ в поле" : "Select file to upload (if necessary) and enter the answer in the field";
+                case 4: return self.localization == 1 ? "Впишите ответ в поле" : "Enter Your answer in the field";
                 case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";
                 case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
                 case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
