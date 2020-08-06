@@ -10,6 +10,9 @@
     <div class="auditory-header">
         {{switchLocal(1)}} {{auditoryName}}
     </div>
+    <div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
+        <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
+    </div>
     <div class="auditory row">
         <div class="computer-list">
             <div class="place-table">

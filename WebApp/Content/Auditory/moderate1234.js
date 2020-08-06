@@ -41,7 +41,10 @@ const app = new Vue({
         scheduleUsers: [],
         filteredPlaceList: [],
         TURN: {},
-        fullInfo: null
+        artArray: [3, 4, 5, 6, 103, 105],
+        fullInfo: null,
+        offset: 1,
+        fullComputerList: []
     },
     methods: {
         init: function () {
@@ -136,102 +139,174 @@ const app = new Vue({
                     self.auditory = auditory.Id;
                     self.auditoryName = auditory.Name;
                     self.NeedPin = auditory.NeedPin;
-                    self.computerList.forEach(function (item) {
-                        let found = auditory.ComputerList.filter(function (comp) { return item.Id == comp.Id; })[0];
-                        if (!found) {
-                            self.computerList = self.computerList.filter(function (comp) { return comp.Id != item.Id; });
-                            var foundedSocket = self.videoSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
-                            if (foundedSocket) foundedSocket.socket.close();
-                            self.videoSockets = self.videoSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
-
-                            var foundedSocket1 = self.chatSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
-                            if (foundedSocket1) foundedSocket1.socket.close();
-                            self.chatSockets = self.chatSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
-                        }
-                    });
-                    //Смотрим то, что пришло
-                    if (auditory.ComputerList.length > 0) {
-                        auditory.ComputerList.forEach(function (item) {
-                            //Если уже есть в списке, находим
-                            let found = self.computerList.filter(function (comp) {
-                                return comp.Id == item.Id;
-                            })[0];
-                            //Если нет, то инициализируем
+                    if (self.artArray.indexOf(self.auditory) == -1) {
+                        self.computerList.forEach(function (item) {
+                            let found = auditory.ComputerList.filter(function (comp) { return item.Id == comp.Id; })[0];
                             if (!found) {
-                                item.errors = [];
-                                item.Image = "";
-                                item.chat = {};
-                                //Если подтверждён
-                                if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
-                                    //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
-                                    //Сокет на экран
-                                    self.initSocket(2, item, 2);
-                                    self.initSocket(2, item, 1);
-                                }
-                                //Сокет на вебку
-                                //self.socketQueue.push({ socketType: 2, item: item, videoType: 1 });
-                                //  if ([2].indexOf(item.TestingStatusId) != -1) {
-                                // console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                // }
-                                //В любом случае нужно добавить в список
-                                self.computerList.push(item);
-                                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-                                    //console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                    self.initSocket(1, item);
-                                }
-                                //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
-                            }
-                            else {
-                                //if (item.RequestReset && item.TestingProfileId) {
-                                //    //notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
-                                //}
-                                //else {
-                                //    found.RequestReset = false;
-                                //}
-                                //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
-                                //   if (found.UserVerified != item.UserVerified) {
-                                //  if (item.UserVerified) {
-                                //   self.initSocket(2, found, 2);
-                                //     console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                //      }
-                                //  }
-                                if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
-                                    found = item;
-                                    var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
-                                    if (foundedSocket) {
-                                        foundedSocket.socket.close();
-                                        foundedSocket = null;
-                                        // console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                    }
+                                self.computerList = self.computerList.filter(function (comp) { return comp.Id != item.Id; });
+                                var foundedSocket = self.videoSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
+                                if (foundedSocket) foundedSocket.socket.close();
+                                self.videoSockets = self.videoSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
 
-                                    self.initSocket(2, found, 1);
-                                    if ([2].indexOf(found.TestingStatusId) != -1) {
-                                        console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                        self.initSocket(1, found);
+                                var foundedSocket1 = self.chatSockets.filter(function (sock) { return sock.id == item.TestingProfileId; })[0];
+                                if (foundedSocket1) foundedSocket1.socket.close();
+                                self.chatSockets = self.chatSockets.filter(function (sock) { return sock.id != item.TestingProfileId; });
+                            }
+                        });
+                        //Смотрим то, что пришло
+                        if (auditory.ComputerList.length > 0) {
+                            auditory.ComputerList.forEach(function (item) {
+                                //Если уже есть в списке, находим
+                                let found = self.computerList.filter(function (comp) {
+                                    return comp.Id == item.Id;
+                                })[0];
+                                //Если нет, то инициализируем
+                                if (!found) {
+                                    item.errors = [];
+                                    item.Image = "";
+                                    item.chat = {};
+                                    //Если подтверждён
+                                    if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
+                                        //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
+                                        //Сокет на экран
+                                        self.initSocket(2, item, 2);
+                                        self.initSocket(2, item, 1);
                                     }
-                                    if (found.UserVerified != item.UserVerified) {
-                                        if (item.UserVerified) {
-                                            self.initSocket(2, found, 2);
-                                            self.initSocket(2, item, 1);
-                                            console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    //Сокет на вебку
+                                    //self.socketQueue.push({ socketType: 2, item: item, videoType: 1 });
+                                    //  if ([2].indexOf(item.TestingStatusId) != -1) {
+                                    // console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    // }
+                                    //В любом случае нужно добавить в список
+                                    self.computerList.push(item);
+                                    if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+                                        //console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                        self.initSocket(1, item);
+                                    }
+                                    //self.socketQueue.push({ socketType: 1, item: item, videoType: null });
+                                }
+                                else {
+                                    //if (item.RequestReset && item.TestingProfileId) {
+                                    //    //notifier([{ Type: 'error', Body: "Место " + found.Name + ": запрос на сброс привязанного места" }]);
+                                    //}
+                                    //else {
+                                    //    found.RequestReset = false;
+                                    //}
+                                    //Если уже существует и сменился статус подтверждения, то значит, нужно получить экран
+                                    //   if (found.UserVerified != item.UserVerified) {
+                                    //  if (item.UserVerified) {
+                                    //   self.initSocket(2, found, 2);
+                                    //     console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                    //      }
+                                    //  }
+                                    if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
+                                        found = item;
+                                        var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
+                                        if (foundedSocket) {
+                                            foundedSocket.socket.close();
+                                            foundedSocket = null;
+                                            // console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                        }
+
+                                        self.initSocket(2, found, 1);
+                                        if ([2].indexOf(found.TestingStatusId) != -1) {
+                                            console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                            self.initSocket(1, found);
+                                        }
+                                        if (found.UserVerified != item.UserVerified) {
+                                            if (item.UserVerified) {
+                                                self.initSocket(2, found, 2);
+                                                self.initSocket(2, item, 1);
+                                                console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        });
+                            });
 
-                        //auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
-                        //console.log(auditory.ComputerList);
-                        //self.computerList = auditory.ComputerList;
-                        //self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
-                        self.initAud();
+                            //auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
+                            //console.log(auditory.ComputerList);
+                            //self.computerList = auditory.ComputerList;
+                            //self.computerList.map(a => self.maxContent = Math.max(self.maxContent, +a.Name));
+                            self.initAud();
+                        }
                     }
+                    else {
+                        self.fullComputerList = auditory.ComputerList;
+                    }
+
+
+
                 },
                 error: function () {
                     location.reload();
                 }
             });
         },
+
+        setOffset: function (offset) {
+            var self = this;
+            self.computerList = [];
+            //Смотрим то, что пришло
+            if (self.fullComputerList.length > 0) {
+                self.fullComputerList.forEach(function (item) {
+                    //Если уже есть в списке, находим
+                    let found = self.computerList.filter(function (comp) {
+                        return comp.Id == item.Id;
+                    })[0];
+                    //Если нет, то инициализируем
+                    if (!found && +item.Name > (offset - 1) * 50 && item.Name < offset * 50) {
+                        item.errors = [];
+                        item.Image = "";
+                        item.chat = {};
+                        //Если подтверждён
+                        if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
+                            //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
+                            //Сокет на экран
+                            self.initSocket(2, item, 2);
+                            self.initSocket(2, item, 1);
+                        }
+                        //Сокет на вебку
+                        //В любом случае нужно добавить в список
+
+                        self.computerList.push(item);
+                        if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+                            //console.log('socket: ' + item.TestingProfileId, item.LastName);
+                            self.initSocket(1, item);
+                        }
+                    }
+                    else {
+                        if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
+                            found = item;
+                            var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
+                            if (foundedSocket) {
+                                foundedSocket.socket.close();
+                                foundedSocket = null;
+                                // console.log('socket: ' + found.TestingProfileId, found.LastName);
+                            }
+
+                            self.initSocket(2, found, 1);
+                            if ([2].indexOf(found.TestingStatusId) != -1) {
+                                console.log('socket: ' + found.TestingProfileId, found.LastName);
+                                self.initSocket(1, found);
+                            }
+                            if (found.UserVerified != item.UserVerified) {
+                                if (item.UserVerified) {
+                                    self.initSocket(2, found, 2);
+                                    self.initSocket(2, item, 1);
+                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
+                                }
+                            }
+                        }
+                    }
+                });
+
+                self.initAud();
+            }
+
+
+        },
+
         getInfoForAdmin: function () {
             var self = this;
 
@@ -667,7 +742,7 @@ const app = new Vue({
             $('#' + partId + '-2').css('z-index', $('#' + partId + '-2').css('z-index') == 1 ? 2 : 1);
         },
         ResetServer: function () {
-          //  var socket = null, socket1 = null;
+            //  var socket = null, socket1 = null;
             var self = this;
             $.ajax({
                 url: "/user/ReconnectToSocket",
