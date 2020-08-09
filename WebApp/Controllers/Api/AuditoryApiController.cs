@@ -241,6 +241,14 @@ namespace WebApp.Controllers.Api
             await AuditoryManager.UpdatePlaceConfig(model, CurrentUser.Id);
             return WrapResponse(true);
         }
+        [Route("DownloadFile")]
+        [HttpPost]
+        public async Task<IHttpActionResult> DownloadFile(Guid? Id)
+        {
+            //FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
+            //return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
+            return WrapResponse(await TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)));
+        }
         [HttpPost]
         [Route("SetUserVerified")]
         public async Task<IHttpActionResult> SetUserVerified(VerifyModel model)

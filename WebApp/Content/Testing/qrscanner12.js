@@ -80,11 +80,9 @@
                     var reader = new FileReader();
                     reader.onload = function () {
                         self.answerImage = reader.result.substr(reader.result.indexOf(',') + 1);
-                        self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                     };
                     reader.readAsDataURL(e.target.files[0]);
-                    alert('file отправлен');
-                    self.answerQuestion();
+                    self.answerQuestion(data);
                 },
                 error: function (er) {
                     self.error = er;
@@ -92,7 +90,7 @@
             });
             //self.AnswerFileExtension = ;
         },
-        answerQuestion: function () {
+        answerQuestion: function (data) {
             var self = this;
             //ToDo безтттопастттттттность!!
             var answers = [{ TestingPackageId: self.bestResult.TestingPackageId, TestingTime: 3, UserAnswer: null, FileId: self.fileId }];
@@ -103,10 +101,9 @@
                 async: true,
                 data: { answers: answers },
                 success: function () {
-                    alert('ответ сохранён')
+                    self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                 },
                 error: function (er) {
-                    self.error = this.data;
                 }
             });
         },

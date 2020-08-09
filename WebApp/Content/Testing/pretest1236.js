@@ -230,7 +230,6 @@
                     success: function (data) {
                         if (data.Message) {
                             notifier([{ Type: 'error', Body: self.switchLocal(21) }]);
-                            return;
                         }
                         if (data.Id != 0) {
                             self.createPlaceConfig(data.PlaceId, data.PlaceProfile);

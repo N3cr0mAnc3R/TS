@@ -269,7 +269,7 @@
     </Content>
     <Content Include="Content\Testing\pretest1236.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
-    <Content Include="Content\Testing\qrscanner10.js" />
+    <Content Include="Content\Testing\qrscanner12.js" />
     <Content Include="Content\Testing\scannerlib.js" />
     <Content Include="Content\Testing\test7598.js" />
     <Content Include="Content\vue.js" />

@@ -262,15 +262,15 @@ namespace WebApp.Models
                 }
             }
         }
-        public string DownloadFileById(Guid? FileId, Guid? UserId)
+        public async Task<string> DownloadFileById(Guid? FileId, Guid? UserId)
         {
-            using (var conn = Concrete.OpenConnection())
+            using (var conn = await Concrete.OpenConnectionAsync())
             {
                 IDbTransaction trans = conn.BeginTransaction();
                 try
                 {
                     //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
-                    SourceMaterial filestream = conn.QueryFirstOrDefault<SourceMaterial>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
+                    SourceMaterial filestream = await conn.QueryFirstOrDefaultAsync<SourceMaterial>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
 
                     return Convert.ToBase64String(filestream.SourceMaterialImage);
 
