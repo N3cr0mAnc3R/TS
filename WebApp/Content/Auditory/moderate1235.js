@@ -44,7 +44,8 @@ const app = new Vue({
         artArray: [3, 4, 5, 6, 103, 105],
         fullInfo: null,
         offset: 1,
-        fullComputerList: []
+        fullComputerList: [],
+        isDebug: true
     },
     methods: {
         init: function () {
@@ -52,15 +53,16 @@ const app = new Vue({
             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
 
             $.ajax({
-                url: "/account/GetDomain",
+                url: "/api/account/GetDomain",
                 type: "POST",
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                    self.isDebug = domain.indexOf('wss') == -1;
                 }
             });
             $.ajax({
-                url: "/auditory/GetTimes",
+                url: "/api/auditory/GetTimes",
                 type: "POST",
                 async: true,
                 success: function (times) {
@@ -69,8 +71,8 @@ const app = new Vue({
             });
 
             $.ajax({
-                url: "/account/GetLoginAndPassword",
-                type: "GET",
+                url: "/api/account/GetLoginAndPassword",
+                type: "post",
                 async: false,
                 success: function (info) {
                     //self.domain = domain;
@@ -82,7 +84,7 @@ const app = new Vue({
                 }
             });
             $.ajax({
-                url: "/account/IsPaul",
+                url: "/api/account/IsPaul",
                 type: "POST",
                 async: true,
                 success: function (domain) {
@@ -105,7 +107,7 @@ const app = new Vue({
             //}, 5000);
 
             $.ajax({
-                url: "/user/GetErrorTypes",
+                url: "/api/user/GetErrorTypes",
                 type: "POST",
                 async: true,
                 success: function (errorTypes) {
@@ -113,7 +115,7 @@ const app = new Vue({
                 }
             });
             $.ajax({
-                url: "/auditory/GetStatuses",
+                url: "/api/auditory/GetStatuses",
                 type: "POST",
                 async: true,
                 success: function (statuses) {
@@ -122,7 +124,7 @@ const app = new Vue({
             });
 
             $.ajax({
-                url: "/account/GetCurrentUser",
+                url: "/api/account/GetCurrentUser",
                 type: "POST",
                 async: true,
                 success: function (user) {
@@ -132,7 +134,7 @@ const app = new Vue({
         },
         getAuditories: function (newId, self) {
             $.ajax({
-                url: "/auditory/GetAuditoryInfoForModerate?Id=" + newId,
+                url: "/api/auditory/GetAuditoryInfoForModerate?Id=" + newId,
                 type: "POST",
                 async: true,
                 success: function (auditory) {
@@ -166,7 +168,7 @@ const app = new Vue({
                                     item.Image = "";
                                     item.chat = {};
                                     //Если подтверждён
-                                    if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
+                                    if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
                                         //Сокет на экран
                                         self.initSocket(2, item, 2);
@@ -179,7 +181,7 @@ const app = new Vue({
                                     // }
                                     //В любом случае нужно добавить в список
                                     self.computerList.push(item);
-                                    if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+                                    if ([2, 5].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //console.log('socket: ' + item.TestingProfileId, item.LastName);
                                         self.initSocket(1, item);
                                     }
@@ -199,7 +201,7 @@ const app = new Vue({
                                     //     console.log('socket: ' + item.TestingProfileId, item.LastName);
                                     //      }
                                     //  }
-                                    if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
+                                    if (item.TestingStatusId == 2 && found.TestingStatusId == 5 && !self.isDebug) {
                                         found = item;
                                         var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
                                         if (foundedSocket) {
@@ -313,7 +315,7 @@ const app = new Vue({
             $('#user-info-wrapper').modal('show');
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/getInfoForAdmin?Id=" + self.currentUser.TestingProfileId,
+                    url: "/api/auditory/getInfoForAdmin?Id=" + self.currentUser.TestingProfileId,
                     type: "POST",
                     async: true,
                     success: function (info) {
@@ -321,20 +323,20 @@ const app = new Vue({
                         self.fullInfo.tests = [];
                         info.forEach(function (item) {
                             var obj = {};
-                            item.forEach(function (keyValuePair) {
-                                if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
-                                    if (keyValuePair.Value != null) {
-                                        obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+                            //item.forEach(function (keyValuePair) {
+                            //    if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
+                            //        if (keyValuePair.Value != null) {
+                            //            obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
 
-                                    }
-                                    else {
-                                    }
-                                }
-                                else {
-                                    obj[keyValuePair.Key] = keyValuePair.Value;
-                                }
-                            })
-                            self.fullInfo.tests.push(obj);
+                            //        }
+                            //        else {
+                            //        }
+                            //    }
+                            //    else {
+                            //        obj[keyValuePair.Key] = keyValuePair.Value;
+                            //    }
+                            //})
+                            self.fullInfo.tests.push(item);
                         });
                     }
                 });
@@ -344,7 +346,7 @@ const app = new Vue({
             var self = this;
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/resetTest?Id=" + Id,
+                    url: "/api/auditory/resetTest?Id=" + Id,
                     type: "POST",
                     async: true,
                     success: function () {
@@ -357,7 +359,7 @@ const app = new Vue({
             var self = this;
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/DeletePreliminary?Id=" + Id,
+                    url: "/api/auditory/DeletePreliminary?Id=" + Id,
                     type: "POST",
                     async: true,
                     success: function () {
@@ -370,7 +372,7 @@ const app = new Vue({
             var self = this;
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/finishTest?Id=" + Id,
+                    url: "/api/auditory/finishTest?Id=" + Id,
                     type: "POST",
                     async: true,
                     success: function () {
@@ -389,7 +391,7 @@ const app = new Vue({
             var self = this;
             if (self.isSuperAdmin) {
                 $.ajax({
-                    url: "/auditory/GetUserInfo?Id=" + item.TestingProfileId,
+                    url: "/api/auditory/GetUserInfo?Id=" + item.TestingProfileId,
                     type: "POST",
                     async: true,
                     success: function (info) {
@@ -460,7 +462,7 @@ const app = new Vue({
             let self = this;
             console.log(self.currentDate);
             $.ajax({
-                url: "/auditory/GetUserWithTimes",
+                url: "/api/auditory/GetUserWithTimes",
                 type: "POST",
                 async: true,
                 data: {
@@ -745,7 +747,7 @@ const app = new Vue({
             //  var socket = null, socket1 = null;
             var self = this;
             $.ajax({
-                url: "/user/ReconnectToSocket",
+                url: "/api/user/ReconnectToSocket",
                 type: "POST",
                 async: true,
                 success: function () {
@@ -776,7 +778,7 @@ const app = new Vue({
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId })[0];
             socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, verified: Verified, IsSender: false }));
             $.ajax({
-                url: "/auditory/SetUserVerified",
+                url: "/api/auditory/SetUserVerified",
                 data: {
                     Id: self.currentUser.TestingProfileId,
                     Verified: Verified
@@ -791,7 +793,7 @@ const app = new Vue({
         SetPlaceFree: function (id) {
             let self = this;
             $.ajax({
-                url: "/auditory/SetPlaceFree?Id=" + id,
+                url: "/api/auditory/SetPlaceFree?Id=" + id,
                 type: "POST",
                 async: true,
                 success: function (resp) {
@@ -808,7 +810,7 @@ const app = new Vue({
                 return;
             }
             $.ajax({
-                url: "/auditory/GetUsersByDate",
+                url: "/api/auditory/GetUsersByDate",
                 data: {
                     Id: self.auditory,
                     StatusId: self.currentStatus,
@@ -911,7 +913,7 @@ const app = new Vue({
             self.getErrors();
             //GetUserPicture
             $.ajax({
-                url: "/auditory/GetUserPicture?Id=" + self.currentUser.TestingProfileId,
+                url: "/api/auditory/GetUserPicture?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
                 async: true,
                 success: function (picture) {
@@ -931,7 +933,7 @@ const app = new Vue({
         getErrors: function () {
             let self = this;
             $.ajax({
-                url: "/user/GetUserErrors?Id=" + self.currentUser.TestingProfileId,
+                url: "/api/user/GetUserErrors?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
                 async: true,
                 success: function (errors) {
@@ -961,7 +963,7 @@ const app = new Vue({
             socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestViolation: true, IsSender: false, violation: self.currentError }));
 
             $.ajax({
-                url: "/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
+                url: "/api/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
                 type: "POST",
                 async: true,
                 success: function (errors) {
@@ -980,7 +982,7 @@ const app = new Vue({
             let self = this;
             self.currentUser.IsPause = !self.currentUser.IsPause;
             $.ajax({
-                url: "/user/PauseTest?Id=" + self.currentUser.TestingProfileId,
+                url: "/api/user/PauseTest?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
                 async: true,
                 success: function () {
@@ -992,7 +994,7 @@ const app = new Vue({
         finishTest: function () {
             let self = this;
             $.ajax({
-                url: "/user/FinishTest?Id=" + self.currentUser.TestingProfileId,
+                url: "/api/user/FinishTest?Id=" + self.currentUser.TestingProfileId,
                 type: "POST",
                 async: true,
                 success: function () {
@@ -1054,7 +1056,7 @@ const app = new Vue({
             let self = this;
             let obj = { Id: self.currentUser.PlaceProfileId, PlaceConfig: null, PlaceId: self.currentUser.Id };
             $.ajax({
-                url: "/auditory/UpdatePlaceConfig",
+                url: "/api/auditory/UpdatePlaceConfig",
                 type: "POST",
                 async: true,
                 data: obj,
@@ -1071,7 +1073,7 @@ const app = new Vue({
         loadPeople: function () {
             var self = this;
             $.ajax({
-                url: "/auditory/GetNewPeople?Id=" + self.auditory,
+                url: "/api/auditory/GetNewPeople?Id=" + self.auditory,
                 type: "POST",
                 async: true,
                 success: function (result) {
@@ -1107,7 +1109,7 @@ const app = new Vue({
             let self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/GetChatMessages?Id=" + newId,
+                url: "/api/user/GetChatMessages?Id=" + newId,
                 type: "POST",
                 async: true,
                 success: function (messageList) {
@@ -1137,20 +1139,20 @@ const app = new Vue({
         switchLocal: function (id) {
             let self = this;
             switch (id) {
-                case 1: return self.localization == 1 ? "Аудитория" : "Auditory";
-                case 2: return self.localization == 1 ? "Выдано: " + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
-                case 3: return self.localization == 1 ? "Сохранить" : "Save";
-                case 4: return self.localization == 1 ? "Сообщить о нарушении" : "Issue a warning";
-                case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";
-                case 6: return self.localization == 1 ? "Приостановить вступительное испытание" : "Pause test";
-                case 7: return self.localization == 1 ? "Возобновить вступительное испытание" : "Resume test";
-                case 8: return self.localization == 1 ? "Сбросить место" : "Reset place";
-                case 9: return self.localization == 1 ? "Закрыть" : "Close";
-                case 10: return self.localization == 1 ? "Открыть список" : "Open user list";
-                case 11: return self.localization == 1 ? "Список пользователей" : "User list";
-                case 12: return self.localization == 1 ? "Отклонить" : "Decline";
-                case 13: return self.localization == 1 ? "Подтвердить" : "Verify";
-                case 14: return self.localization == 1 ? "Переподключиться" : "Reconnect";
+                case 1: return localStorage["localization"] == 1 ? "Аудитория" : "Auditory";
+                case 2: return localStorage["localization"] == 1 ? "Выдано: " + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
+                case 3: return localStorage["localization"] == 1 ? "Сохранить" : "Save";
+                case 4: return localStorage["localization"] == 1 ? "Сообщить о нарушении" : "Issue a warning";
+                case 5: return localStorage["localization"] == 1 ? "Завершить вступительное испытание" : "Finish test";
+                case 6: return localStorage["localization"] == 1 ? "Приостановить вступительное испытание" : "Pause test";
+                case 7: return localStorage["localization"] == 1 ? "Возобновить вступительное испытание" : "Resume test";
+                case 8: return localStorage["localization"] == 1 ? "Сбросить место" : "Reset place";
+                case 9: return localStorage["localization"] == 1 ? "Закрыть" : "Close";
+                case 10: return localStorage["localization"] == 1 ? "Открыть список" : "Open user list";
+                case 11: return localStorage["localization"] == 1 ? "Список пользователей" : "User list";
+                case 12: return localStorage["localization"] == 1 ? "Отклонить" : "Decline";
+                case 13: return localStorage["localization"] == 1 ? "Подтвердить" : "Verify";
+                case 14: return localStorage["localization"] == 1 ? "Переподключиться" : "Reconnect";
             }
         },
         getDateFormat: function (date) {

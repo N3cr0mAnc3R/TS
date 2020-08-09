@@ -11,10 +11,12 @@
     </div>
     <div v-if="flag"  v-loader="loadObject" class="wrapper">
         <input v-on:change="changeFile" type="file" accept="image/*" />
-
+        <div><pre>
+            {{error}}
+            </pre> </div>
         <div class="image-preview-wrapper" v-if="answerImage">
             <img v-bind:src="'data:image/jpg;base64, ' + answerImage" width="400" />
         </div>
     </div>
 </div>
-<script src="~/Content/Testing/qrscanner2.js"></script>
+<script src="~/Content/Testing/qrscanner10.js"></script>

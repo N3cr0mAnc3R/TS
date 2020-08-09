@@ -35,6 +35,7 @@
         cameraStream: null,
         screenStream: null,
         lostConnection: false,
+        timerStarted: false,
         finishScreen: false,
         pause: false,
         testing: false,
@@ -123,7 +124,7 @@
             });
 
             $.ajax({
-                url: "/account/GetDomain",
+                url: "/api/account/GetDomain",
                 type: "POST",
                 async: false,
                 success: function (domain) {
@@ -131,8 +132,8 @@
                 }
             });
             $.ajax({
-                url: "/account/GetLoginAndPassword",
-                type: "GET",
+                url: "/api/account/GetLoginAndPassword",
+                type: "post",
                 async: false,
                 success: function (info) {
                     //self.domain = domain;
@@ -170,7 +171,7 @@
             }, 500);
             //GetCurrentUser
             $.ajax({
-                url: "/user/GetCurrentUser?Id=" + newId,
+                url: "/api/user/GetCurrentUser?Id=" + newId,
                 type: "POST",
                 async: true,
                 success: function (user) {
@@ -181,7 +182,7 @@
                 }
             });
             $.ajax({
-                url: "/user/GetInfoAboutTest?Id=" + newId,
+                url: "/api/user/GetInfoAboutTest?Id=" + newId,
                 type: "POST",
                 async: true,
                 success: function (info) {
@@ -211,110 +212,113 @@
         startTest: function (id) {
             var self = this;
             try {
-                $.when($.ajax({
-                    url: "/user/StartTest?Id=" + id,
+                $.ajax({
+                    url: "/api/user/StartTest?Id=" + id,
                     type: "POST",
-                    async: true
-                }), $.ajax({
-                    url: "/user/GetTestquestionsById?Id=" + id,
-                    type: "POST",
-                    async: true
-                }), $.ajax({
-                    url: "/user/GetTestAnswersById?Id=" + id,
-                    type: "POST",
-                    async: true
-                }), $.ajax({
-                    url: "/user/GetSourceMaterials?Id=" + id,
-                    type: "POST",
-                    async: true
-                })).then(function (resp1, resp2, resp3, resp4) {
-                    //Получаем пакеты вопросов, ответов и то, как их разместить
-                    var questions = resp2[0];
-                    questions.map(function (question) { question.answerImage = ""; });
-                    self.questions = questions;
+                    async: true,
+                    success: function (resp1) {
+                        $.when($.ajax({
+                            url: "/api/user/GetTestquestionsById?Id=" + id,
+                            type: "POST",
+                            async: true
+                        }), $.ajax({
+                            url: "/api/user/GetTestAnswersById?Id=" + id,
+                            type: "POST",
+                            async: true
+                        }), $.ajax({
+                            url: "/api/user/GetSourceMaterials?Id=" + id,
+                            type: "POST",
+                            async: true
+                        })).then(function (resp2, resp3, resp4) {
+                            //Получаем пакеты вопросов, ответов и то, как их разместить
+                            var questions = resp2[0];
+                            questions.map(function (question) { question.answerImage = ""; });
+                            self.questions = questions;
 
-                    //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
-                    resp3[0].map(function (a) {
-                        a.IsAnswered = false;
-                        a.fileId = null;
-                        a.TestingPackage = resp1[0].Packages.filter(function (b) { return b.AnswerId == a.Id; })[0];
-                    });
-                    self.answers = resp3[0];
-                    self.timeStart = resp1[0].Date;
-                    self.startTimer();
-                    if (resp1[0].Answered && resp1[0].Answered.length > 0) {
-                        self.questions.forEach(function (a) {
-                            resp1[0].Answered.forEach(function (b) {
-                                if (a.Id == b.Id) {
-                                    if (a.TypeAnswerId == 1) {
-                                        if (b.UserAnswer) {
-                                            a.answer = b.AnswerId;
-                                            a.answered = true;
-                                        }
-                                    }
-                                    else if (a.TypeAnswerId == 2) {
-                                        if (b.UserAnswer) {
-                                            self.answers.filter(function (c) { return c.Id == b.AnswerId; })[0].IsAnswered = true;
-                                            a.answered = true;
-                                        }
-                                    }
-                                    else if (a.TypeAnswerId == 3) {
-                                        a.answered = true;
-                                        a.answer = b.UserAnswer;
-                                        a.fileId = b.FileId;
-                                        if (a.fileId) {
-                                            self.getAnswerFile(a, a.fileId);
-                                        }
-                                        else {
-                                            a.answered = false;
-                                        }
-                                    }
-                                    else if (a.TypeAnswerId == 4) {
-                                        a.answered = true;
-                                        a.fileId = b.FileId;
-                                        if (a.fileId) {
-                                            self.getAnswerFile(a, a.fileId);
-                                        }
-                                        else {
-                                            a.answered = false;
-                                        }
-                                    }
-                                }
-                            })
-                        })
-                    }
-                    //Маппим ответы для вопросов, добавляем флаги загрузки, изменения и ответа в принципе
-                    self.questions.map(function (a) {
-                        a.Answers = self.answers.filter(function (b) { return b.QuestionId == a.Id });
-                        a.IsLoaded = false;
-                        a.changed = false;
-                        // a.answered = a.answered ? a.answered : false;
-                    });
-                    //Сортируем вопросы в нужном порядке
-                    self.questions.sort(function (a, b) { a.Rank - b.Rank });
-                    //Сортируем ответы
-                    self.questions.forEach(function (a) { a.Answers.sort(function (b, c) { b.Sort - c.Sort; }); });
-                    //Текущий вопрос выбираем первый
-                    self.selectQuestion(1);
-                    self.sourceMaterials = resp4[0];
-                    self.sourceMaterials.forEach(function (material) {
-                        if (!material.IsCalc) {
-                            $.ajax({
-                                type: 'POST',
-                                async: true,
-                                url: '/user/GetSourceMaterial?Id=' + material.Id,
-                                success: function (data) {
-                                    material.Image = data;
-                                    console.log(material);
-                                }
+                            //Добавляем пару своих полей для удобной работы (флаг, что выбран один из вариантов ответа, и порядок)
+                            resp3[0].map(function (a) {
+                                a.IsAnswered = false;
+                                a.fileId = null;
+                                a.TestingPackage = resp1.Packages.filter(function (b) { return b.AnswerId == a.Id; })[0];
                             });
-                        }
-                        self.needCalc = material.IsCalc || self.needCalc;
-                    })
-                    self.startCheckConnection(id);
-                }, function (err) {
-                    //alert(self.switchLocal(6));
+                            self.answers = resp3[0];
+                            self.timeStart = resp1.Date;
+                            if (resp1.Answered && resp1.Answered.length > 0) {
+                                self.questions.forEach(function (a) {
+                                    resp1.Answered.forEach(function (b) {
+                                        if (a.Id == b.Id) {
+                                            if (a.TypeAnswerId == 1) {
+                                                if (b.UserAnswer) {
+                                                    a.answer = b.AnswerId;
+                                                    a.answered = true;
+                                                }
+                                            }
+                                            else if (a.TypeAnswerId == 2) {
+                                                if (b.UserAnswer) {
+                                                    self.answers.filter(function (c) { return c.Id == b.AnswerId; })[0].IsAnswered = true;
+                                                    a.answered = true;
+                                                }
+                                            }
+                                            else if (a.TypeAnswerId == 3) {
+                                                a.answered = true;
+                                                a.answer = b.UserAnswer;
+                                                a.fileId = b.FileId;
+                                                if (a.fileId) {
+                                                    self.getAnswerFile(a, a.fileId);
+                                                }
+                                                else {
+                                                    a.answered = false;
+                                                }
+                                            }
+                                            else if (a.TypeAnswerId == 4) {
+                                                a.answered = true;
+                                                a.fileId = b.FileId;
+                                                if (a.fileId) {
+                                                    self.getAnswerFile(a, a.fileId);
+                                                }
+                                                else {
+                                                    a.answered = false;
+                                                }
+                                            }
+                                        }
+                                    })
+                                })
+                            }
+                            //Маппим ответы для вопросов, добавляем флаги загрузки, изменения и ответа в принципе
+                            self.questions.map(function (a) {
+                                a.Answers = self.answers.filter(function (b) { return b.QuestionId == a.Id });
+                                a.IsLoaded = false;
+                                a.changed = false;
+                                // a.answered = a.answered ? a.answered : false;
+                            });
+                            //Сортируем вопросы в нужном порядке
+                            self.questions.sort(function (a, b) { a.Rank - b.Rank });
+                            //Сортируем ответы
+                            self.questions.forEach(function (a) { a.Answers.sort(function (b, c) { b.Sort - c.Sort; }); });
+                            //Текущий вопрос выбираем первый
+                            self.selectQuestion(1);
+                            self.sourceMaterials = resp4[0];
+                            self.sourceMaterials.forEach(function (material) {
+                                if (!material.IsCalc) {
+                                    $.ajax({
+                                        type: 'POST',
+                                        async: true,
+                                        url: '/api/user/GetSourceMaterial?Id=' + material.Id,
+                                        success: function (data) {
+                                            material.Image = data;
+                                            console.log(material);
+                                        }
+                                    });
+                                }
+                                self.needCalc = material.IsCalc || self.needCalc;
+                            })
+                            //self.startCheckConnection(id);
+                        }, function (err) {
+                            //alert(self.switchLocal(6));
+                        });
+                    }
                 });
+                
             }
             catch (exc) {
                 console.log(exc);
@@ -363,7 +367,7 @@
                 type: 'POST',
                 dataType: 'json',
                 async: true,
-                url: '/auditory/DownloadFile?Id=' + Id,
+                url: '/api/auditory/DownloadFile?Id=' + Id,
                 success: function (data) {
                     question.answerImage = data;
                 }
@@ -388,7 +392,7 @@
             formaData.append('AnswerFileExtension', extension);
             $.ajax({
                 type: 'POST',
-                url: '/user/SaveAnswerFile',
+                url: '/api/user/SaveAnswerFile',
                 data: formaData,
                 contentType: false,
                 processData: false,
@@ -448,7 +452,7 @@
                             $.ajax({
                                 type: 'POST',
                                 dataType: 'json',
-                                url: '/user/GetAnswerImage?Id=' + a.Id,
+                                url: '/api/user/GetAnswerImage?Id=' + a.Id,
                                 async: true,
                                 success: function (d) {
                                     a.AnswerImage = d.AnswerImage;
@@ -456,6 +460,7 @@
                                     if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                         self.loadObject.loading = false;
                                         self.loadObject.loaded = true;
+                                        self.startTimer();
                                         //self.loadTestObject.loading = false;
                                         //self.loadTestObject.loaded = true;
                                     }
@@ -476,21 +481,22 @@
             var self = this;
             $.ajax({
                 type: 'POST',
-                dataType: 'json',
                 async: true,
-                url: '/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
+                url: '/api/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
                 success: function (d) {
                     if (!self.unloadedImage || part == 1) {
                         self.selectedQuestion.QuestionImage = "";
                         self.unloadedImage = "";
                     }
-                    if (d.QuestionImage.indexOf('flag') != -1 && d.QuestionImage.indexOf('flag') < 3) {
-                        self.unloadedImage += d.QuestionImage.substr(4);
+                    if (d.indexOf('flag') != -1 && d.indexOf('flag') < 3) {
+                        console.log('agaibn');
+                        self.unloadedImage += d.substr(4);
                         //self.selectedQuestion.QuestionImage += d.QuestionImage.substr(4);
                         self.askQuestionImagePart(part + 1);
                     }
                     else {
-                        self.unloadedImage += d.QuestionImage;
+                        console.log('loaded');
+                        self.unloadedImage += d;
                         self.selectedQuestion.QuestionImage = self.unloadedImage;
                         //После загрузки ставим метку, что загружено
                         self.counter++;
@@ -498,6 +504,7 @@
                         if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
+                            self.startTimer();
 
                             setTimeout(function () {
                                 self.maxTipWidth = $('#main-window').width() < 500 ? $('#main-window').width() : 540;
@@ -535,10 +542,9 @@
             }
             $.ajax({
                 type: 'POST',
-                dataType: 'json',
-                url: '/user/UpdatequestionAnswer',
-                async: true,
-                data: { answer: answers },
+                url: '/api/user/UpdatequestionAnswer',
+                async: false,
+                data: { answers: answers },
                 success: function () {
                     //Сбрасываем флаг изменения
                     self.selectedQuestion.changed = false;
@@ -560,7 +566,7 @@
             self.intervalConnection = setInterval(
                 function () {
                     $.ajax({
-                        url: "/user/HasConnection",
+                        url: "/api/user/HasConnection",
                         type: "POST",
                         async: true,
                         data: {
@@ -622,6 +628,8 @@
         },
         startTimer: function () {
             var self = this;
+            if (self.timerStarted) return;
+            self.timerStarted = true;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
             // console.log(self.timeLeft);
@@ -842,7 +850,7 @@
                     }
                     else if (message.gotUserAnswer) {
                         $.ajax({
-                            url: "/user/GetUserAnswer?Id=" + message.Id,
+                            url: "/api/user/GetUserAnswer?Id=" + message.Id,
                             type: "POST",
                             async: true,
                             success: function (data) {
@@ -1131,34 +1139,40 @@
 
 
             $.ajax({
-                url: "/user/FinishTest?Id=" + self.testingProfileId,
+                url: "/api/user/FinishTest?Id=" + self.testingProfileId,
                 type: "POST",
                 async: true,
                 success: function () {
-                    $.ajax({
-                        url: "/user/GetScore?Id=" + self.testingProfileId,
-                        type: "POST",
-                        async: true,
-                        success: function (info) {
-                            self.score = info;
-                            self.loadObject.loading = false;
-                            self.loadObject.loaded = true;
-                        }
-                    });
+                    if (self.needShowScore) {
+                        $.ajax({
+                            url: "/api/user/GetScore?Id=" + self.testingProfileId,
+                            type: "POST",
+                            async: true,
+                            success: function (info) {
+                                self.score = info;
+                                self.loadObject.loading = false;
+                                self.loadObject.loaded = true;
+                            }
+                        });
+                    }
+                    else {
+                        self.loadObject.loading = false;
+                        self.loadObject.loaded = true;
+                    }
                 }
             });
 
 
 
-            $.ajax({
-                url: "/user/HasConnection",
-                type: "POST",
-                async: true,
-                data: {
-                    TestingProfileId: self.testingProfileId,
-                    NeedDispose: true
-                }
-            });
+            //$.ajax({
+            //    url: "/user/HasConnection",
+            //    type: "POST",
+            //    async: true,
+            //    data: {
+            //        TestingProfileId: self.testingProfileId,
+            //        NeedDispose: true
+            //    }
+            //});
             clearTimeout(self.intervalConnectionLost);
             clearTimeout(self.intervalConnection);
             //self.init();
@@ -1226,7 +1240,7 @@
 
             self.questions.forEach(function (a) { count = a.answered ? (count - 1) : count });
             if (count > 0) {
-                if (self.localization == 1) {
+                if (localStorage["localization"] == 1) {
                     var str = count + ' ';
                     var procent = count % 10;
                     if (procent == 1) { str += 'вопрос'; }
@@ -1329,7 +1343,7 @@
             var self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/GetChatMessages?Id=" + newId,
+                url: "/api/user/GetChatMessages?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (messageList) {
@@ -1346,7 +1360,7 @@
             var self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/SaveQrCode?Id=" + self.testingProfileId + '&TestingPackageId=' + self.selectedQuestion.Answers[0].TestingPackage.Id,
+                url: "/api/user/SaveQrCode?Id=" + self.testingProfileId + '&TestingPackageId=' + self.selectedQuestion.Answers[0].TestingPackage.Id,
                 type: "POST",
                 async: true,
                 success: function (qrString) {
@@ -1358,7 +1372,7 @@
             var self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/GetQrCode?Id=" + newId,
+                url: "/api/user/GetQrCode?Id=" + newId,
                 type: "POST",
                 async: true,
                 success: function (qrString) {
@@ -1504,7 +1518,7 @@
                 var str = window.location.href;
                 var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
                 $.ajax({
-                    url: "/user/GetSecurity?Id=" + newId + '&PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
+                    url: "/api/user/GetSecurity?Id=" + newId + '&PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     type: "POST",
                     async: true,
                     success: function (result) {
@@ -1524,49 +1538,49 @@
         switchLocal: function (id) {
             var self = this;
             switch (id) {
-                case 1: return self.localization == 1 ? "Осталось" : "Left";
-                case 2: return self.localization == 1 ? "Выберите несколько ответов" : "Select multiple answers";
-                case 3: return self.localization == 1 ? "Выберите один ответ" : "Select one answer";
-                case 4: return self.localization == 1 ? "Впишите ответ в поле" : "Enter Your answer in the field";
-                case 5: return self.localization == 1 ? "Завершить вступительное испытание" : "Finish test";
-                case 6: return self.localization == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
-                case 7: return self.localization == 1 ? "Открыть чат" : "Open chat";
-                case 8: return self.localization == 1 ? "Выберите файл для загрузки" : "Select file";
-                case 9: return self.localization == 1 ? "Администратор" : "Administrator";
-                case 10: return self.localization == 1 ? "Удалить файл" : "Remove file";
-                case 11: return self.localization == 1 ? "Вы действительно хотите завершить тестирование" : "Are You sure, You want to finish test";
-                case 12: return self.localization == 1 ? "Подтверждение" : "Confirmation";
-                case 13: return self.localization == 1 ? "Вы не ответили на " : "Not answered: ";
-                case 14: return self.localization == 1 ? "Свернуть" : "Collapse";
-                case 15: return self.localization == 1 ? "Развернуть" : "Expand";
-                case 16: return self.localization == 1 ? "Потеряна связь с сервером" : "Lost connection to the server";
-                case 17: return self.localization == 1 ? "Потеряно соединение с сервером. Проверьте Ваше подключение к интернету." : "Lost connection to the server. Check Your internet-connection.";
-                case 18: return self.localization == 1 ? "Вступительное испытание завершено." : "Your test is over.";
-                case 19: return self.localization == 1 ? "Ваш результат" : "Your score";
-                case 20: return self.localization == 1 ? "С результатами ознакомлен" : "I got acquainted with the results";
-                case 21: return self.localization == 1 ? "Подтвердить" : "Confirm";
-                case 22: return self.localization == 1 ? "Вернуться к списку" : "Back to test list";
-                case 23: return self.localization == 1 ? "Отмена" : "Cancel";
-                case 24: return self.localization == 1 ? "Завершить" : "Finish";
-                case 25: return self.localization == 1 ? "Администратор приостановил тестирование. Пожалуйста, подождите." : "Administrator paused Your test. Please, wait for continue.";
-                case 26: return self.localization == 1 ? "Тестирование" : "Testing";
-                case 27: return self.localization == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
-                case 28: return self.localization == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
-                case 30: return self.localization == 1 ? "Для загрузки изображения через телефон Вы можете использовать QR-код:" : "For upload image using Your cell-phone You can use QR-code:";
-                case 32: return self.localization == 1 ? "1. Откройте сканер QR-кодов на телефоне и наведите на изображение" : "1. Open an app for reading QR-codes";
-                case 33: return self.localization == 1 ? "2. Наведите камеру на QR-код" : "2. Point camera on the screen";
-                case 38: return self.localization == 1 ? "3. Перейдите по ссылке, которую распознал сканер" : "3. Open recognized link on Your smartphone";
-                case 34: return self.localization == 1 ? "4. В открывшемся окне нажмите Start" : "4. In opened window push 'Start'";
-                case 35: return self.localization == 1 ? "5. Наведите камеру на QR-код" : "5. Point camera on the screen";
-                case 36: return self.localization == 1 ? "6. Загрузите фотографию с помощью устройства." : "6. Choose picture or make one and upload it.";
-                case 37: return self.localization == 1 ? "7. По окончании загрузки Вы увидете загруженное изображение и на телефоне, и на компьютере" : "7. After picture upload, You will see on both: smartphone and PC";
-                case 39: return self.localization == 1 ? "Пользователь не идентфицирован" : "User is undefined";
-                case 40: return self.localization == 1 ? "В кадре обнаружен посторонний. Попросите его покинуть комнату" : "There are someone else int he room. Please, let him leave";
-                case 41: return self.localization == 1 ? "Присутствуют посторонние звуки" : "There are undefined sounds";
-                case 42: return self.localization == 1 ? "Сворачивание окна запрещено!" : "You not allowed collapse the window";
-                case 43: return self.localization == 1 ? "Покидать окно тестов запрещено" : "You not allowed leave the window";
-                case 44: return self.localization == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
-                case 45: return self.localization == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
+                case 1: return localStorage["localization"] == 1 ? "Осталось" : "Left";
+                case 2: return localStorage["localization"] == 1 ? "Выберите несколько ответов" : "Select multiple answers";
+                case 3: return localStorage["localization"] == 1 ? "Выберите один ответ" : "Select one answer";
+                case 4: return localStorage["localization"] == 1 ? "Впишите ответ в поле" : "Enter Your answer in the field";
+                case 5: return localStorage["localization"] == 1 ? "Завершить вступительное испытание" : "Finish test";
+                case 6: return localStorage["localization"] == 1 ? "Произошла ошибка. Попробуйте перезагрузить страницу" : "An error occured. Try reload the page";
+                case 7: return localStorage["localization"] == 1 ? "Открыть чат" : "Open chat";
+                case 8: return localStorage["localization"] == 1 ? "Выберите файл для загрузки" : "Select file";
+                case 9: return localStorage["localization"] == 1 ? "Администратор" : "Administrator";
+                case 10: return localStorage["localization"] == 1 ? "Удалить файл" : "Remove file";
+                case 11: return localStorage["localization"] == 1 ? "Вы действительно хотите завершить тестирование" : "Are You sure, You want to finish test";
+                case 12: return localStorage["localization"] == 1 ? "Подтверждение" : "Confirmation";
+                case 13: return localStorage["localization"] == 1 ? "Вы не ответили на " : "Not answered: ";
+                case 14: return localStorage["localization"] == 1 ? "Свернуть" : "Collapse";
+                case 15: return localStorage["localization"] == 1 ? "Развернуть" : "Expand";
+                case 16: return localStorage["localization"] == 1 ? "Потеряна связь с сервером" : "Lost connection to the server";
+                case 17: return localStorage["localization"] == 1 ? "Потеряно соединение с сервером. Проверьте Ваше подключение к интернету." : "Lost connection to the server. Check Your internet-connection.";
+                case 18: return localStorage["localization"] == 1 ? "Вступительное испытание завершено." : "Your test is over.";
+                case 19: return localStorage["localization"] == 1 ? "Ваш результат" : "Your score";
+                case 20: return localStorage["localization"] == 1 ? "С результатами ознакомлен" : "I got acquainted with the results";
+                case 21: return localStorage["localization"] == 1 ? "Подтвердить" : "Confirm";
+                case 22: return localStorage["localization"] == 1 ? "Вернуться к списку" : "Back to test list";
+                case 23: return localStorage["localization"] == 1 ? "Отмена" : "Cancel";
+                case 24: return localStorage["localization"] == 1 ? "Завершить" : "Finish";
+                case 25: return localStorage["localization"] == 1 ? "Администратор приостановил тестирование. Пожалуйста, подождите." : "Administrator paused Your test. Please, wait for continue.";
+                case 26: return localStorage["localization"] == 1 ? "Тестирование" : "Testing";
+                case 27: return localStorage["localization"] == 1 ? "Пожалуйста, не покидайте страницу" : "Please, return to the page";
+                case 28: return localStorage["localization"] == 1 ? "Было допущено многократное нарушение правил. Проведение ВИ завершено." : "You have achieved too many violations. The test has been finished";
+                case 30: return localStorage["localization"] == 1 ? "Для загрузки изображения через телефон Вы можете использовать QR-код:" : "For upload image using Your cell-phone You can use QR-code:";
+                case 32: return localStorage["localization"] == 1 ? "1. Откройте сканер QR-кодов на телефоне и наведите на изображение" : "1. Open an app for reading QR-codes";
+                case 33: return localStorage["localization"] == 1 ? "2. Наведите камеру на QR-код" : "2. Point camera on the screen";
+                case 38: return localStorage["localization"] == 1 ? "3. Перейдите по ссылке, которую распознал сканер" : "3. Open recognized link on Your smartphone";
+                case 34: return localStorage["localization"] == 1 ? "4. В открывшемся окне нажмите Start" : "4. In opened window push 'Start'";
+                case 35: return localStorage["localization"] == 1 ? "5. Наведите камеру на QR-код" : "5. Point camera on the screen";
+                case 36: return localStorage["localization"] == 1 ? "6. Загрузите фотографию с помощью устройства." : "6. Choose picture or make one and upload it.";
+                case 37: return localStorage["localization"] == 1 ? "7. По окончании загрузки Вы увидете загруженное изображение и на телефоне, и на компьютере" : "7. After picture upload, You will see on both: smartphone and PC";
+                case 39: return localStorage["localization"] == 1 ? "Пользователь не идентфицирован" : "User is undefined";
+                case 40: return localStorage["localization"] == 1 ? "В кадре обнаружен посторонний. Попросите его покинуть комнату" : "There are someone else int he room. Please, let him leave";
+                case 41: return localStorage["localization"] == 1 ? "Присутствуют посторонние звуки" : "There are undefined sounds";
+                case 42: return localStorage["localization"] == 1 ? "Сворачивание окна запрещено!" : "You not allowed collapse the window";
+                case 43: return localStorage["localization"] == 1 ? "Покидать окно тестов запрещено" : "You not allowed leave the window";
+                case 44: return localStorage["localization"] == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
+                case 45: return localStorage["localization"] == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
 
             }
         }

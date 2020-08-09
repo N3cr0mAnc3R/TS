@@ -48,109 +48,116 @@ namespace WebApp
             {
                 Locker.ExitWriteLock();
             }
-
-            // Слушаем его
-            while (true)
+            try
             {
-                var buffer = new ArraySegment<byte>(new byte[1024]);
+                // Слушаем его
+                while (true)
+                {
+                    var buffer = new ArraySegment<byte>(new byte[1024]);
 
-                // Ожидаем данные от него
-                var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
-                ChatMessage jsonparsed = new ChatMessage();
-                try {
-
-                    string cathing = System.Text.Encoding.UTF8.GetString(buffer.Array);
-                    int nStrtP = cathing.IndexOf("\0");
-                    if (nStrtP != -1) //вхождение нулевого символ найденj
+                    // Ожидаем данные от него
+                    var result = await socket.ReceiveAsync(buffer, CancellationToken.None);
+                    ChatMessage jsonparsed = new ChatMessage();
+                    try
                     {
-                        cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
-                    }
-                    jsonparsed = Json.Decode<ChatMessage>(cathing);
 
-                    if (jsonparsed.ForReset)
-                    {
-                        foreach (var client in Clients)
+                        string cathing = System.Text.Encoding.UTF8.GetString(buffer.Array);
+                        int nStrtP = cathing.IndexOf("\0");
+                        if (nStrtP != -1) //вхождение нулевого символ найденj
                         {
-                            foreach (var item in client.Value)
+                            cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
+                        }
+                        jsonparsed = Json.Decode<ChatMessage>(cathing);
+
+                        if (jsonparsed.ForReset)
+                        {
+                            foreach (var client in Clients)
                             {
-                                await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
-                                item.Dispose();
-                            }
-                        }
-                        Clients = new Dictionary<int, List<WebSocket>>();
-                        return;
-                    }
-                    if (jsonparsed.ForCreate)
-                    {
-                        if (!Clients.ContainsKey(jsonparsed.TestingProfileId)) Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
-                        else
-                        {
-                            List<WebSocket> foundedClient = Clients.Where(a => a.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
-                            if (!foundedClient.Contains(socket))
-                            {
-                                foundedClient.Add(socket);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (jsonparsed.IsSender)
-                        {
-                            jsonparsed.UserIdFrom = null;
-                            jsonparsed.UserIdTo = null;
-                        }
-                        else
-                        {
-                            jsonparsed.UserIdFrom = AccountManager.GetUser(((ClaimsIdentity)context.User.Identity).Claims.Select(a => a.Value).FirstOrDefault()).Id;
-                        }
-
-                        jsonparsed.Id = await TestManager.SendMessage(jsonparsed);
-                        var newJson = Json.Encode(jsonparsed);
-                        buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(newJson));
-                        List<WebSocket> disposedClients = new List<WebSocket>();
-                        //Передаём сообщение всем клиентам
-                        foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
-                        {
-
-                            // WebSocket client = client1;
-
-                            try
-                            {
-                                if (client.State == WebSocketState.Open)
+                                foreach (var item in client.Value)
                                 {
-                                    await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                    await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
+                                    item.Dispose();
                                 }
                             }
-
-                            catch (ObjectDisposedException)
+                            Clients = new Dictionary<int, List<WebSocket>>();
+                            return;
+                        }
+                        if (jsonparsed.ForCreate)
+                        {
+                            if (!Clients.ContainsKey(jsonparsed.TestingProfileId)) Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
+                            else
                             {
-                                Locker.EnterWriteLock();
+                                List<WebSocket> foundedClient = Clients.Where(a => a.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                if (!foundedClient.Contains(socket))
+                                {
+                                    foundedClient.Add(socket);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (jsonparsed.IsSender)
+                            {
+                                jsonparsed.UserIdFrom = null;
+                                jsonparsed.UserIdTo = null;
+                            }
+                            else
+                            {
+                                jsonparsed.UserIdFrom = AccountManager.GetUser(((ClaimsIdentity)context.User.Identity).Claims.Select(a => a.Value).FirstOrDefault()).Id;
+                            }
+
+                            jsonparsed.Id = await TestManager.SendMessage(jsonparsed);
+                            var newJson = Json.Encode(jsonparsed);
+                            buffer = new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes(newJson));
+                            List<WebSocket> disposedClients = new List<WebSocket>();
+                            //Передаём сообщение всем клиентам
+                            foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
+                            {
+
+                                // WebSocket client = client1;
+
                                 try
                                 {
-                                    List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
-                                    //cls.Remove(client);
-                                    disposedClients.Add(client);
-                                    //Clients.Remove
-                                    // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
-                                    //i--;
+                                    if (client.State == WebSocketState.Open)
+                                    {
+                                        await client.SendAsync(buffer, WebSocketMessageType.Text, true, CancellationToken.None);
+                                    }
                                 }
-                                finally
+
+                                catch (ObjectDisposedException)
                                 {
-                                    Locker.ExitWriteLock();
+                                    Locker.EnterWriteLock();
+                                    try
+                                    {
+                                        List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                        //cls.Remove(client);
+                                        disposedClients.Add(client);
+                                        //Clients.Remove
+                                        // Clients.Remove(Clients.Where(a => a.Value == client).FirstOrDefault().Key);
+                                        //i--;
+                                    }
+                                    finally
+                                    {
+                                        Locker.ExitWriteLock();
+                                    }
                                 }
                             }
-                        }
-                        for (int i = 0; i < disposedClients.Count; i++)
-                        {
-                            List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
-                            cls.Remove(disposedClients[i]);
+                            for (int i = 0; i < disposedClients.Count; i++)
+                            {
+                                List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                cls.Remove(disposedClients[i]);
+                            }
                         }
                     }
+                    catch (Exception e)
+                    {
+                        socket.Dispose();
+                    }
                 }
-                catch(Exception e)
-                {
+            }
+            catch
+            {
 
-                }
             }
         }
         public bool IsReusable

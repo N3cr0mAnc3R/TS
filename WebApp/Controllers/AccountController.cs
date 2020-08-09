@@ -67,25 +67,25 @@ namespace WebApp.Controllers
             return Json(CurrentUser.Id != Guid.Empty);
 
         }
-        [AllowAnonymous]
-        public async Task<JsonResult> HasAccess(int url)
-        {
-            bool result = false;
+        //[AllowAnonymous]
+        //public async Task<JsonResult> HasAccess(int url)
+        //{
+        //    bool result = false;
 
-            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+        //    List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
 
-            //1 - аудитории, 2 - Проверка, 3 - отчёты для админа, 4 - отчёты для комиссии
-            switch (url)
-            {
-                case 1: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 4, 6, 7 })) result = true; break;
-                case 2: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1,2,3,4,7 })) result = true; break;
-                case 3: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 6,7 })) result = true; break;
-                case 4: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1, 2, 3, 4, 6, 7 })) result = true; break;
-                default: break;
-            }
-            return Json(result);
+        //    //1 - аудитории, 2 - Проверка, 3 - отчёты для админа, 4 - отчёты для комиссии
+        //    switch (url)
+        //    {
+        //        case 1: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 4, 6, 7 })) result = true; break;
+        //        case 2: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1,2,3,4,7 })) result = true; break;
+        //        case 3: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 6,7 })) result = true; break;
+        //        case 4: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1, 2, 3, 4, 6, 7 })) result = true; break;
+        //        default: break;
+        //    }
+        //    return Json(result);
 
-        }
+        //}
         [AllowAnonymous]
         public ActionResult Logout()
         {
@@ -142,51 +142,51 @@ namespace WebApp.Controllers
 
         }
 
-        [HttpPost]
-        public async Task<JsonResult> GetCurrentUser()
-        {
-            if (CurrentUser != null)
-            {
-                List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
-                return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1, 2, 3, 4, 6, 7 }) ? CurrentUser.Id : (Guid?)null });
-            }
-            return Json(new { });
-        }
-        [HttpPost]
-        public async Task<JsonResult> IsPaul()
-        {
-            return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651")|| CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
-        }
+        //[HttpPost]
+        //public async Task<JsonResult> GetCurrentUser()
+        //{
+        //    if (CurrentUser != null)
+        //    {
+        //        List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+        //        return Json(new { PictureImage = CurrentUser.PictureImage, Id = AccountManager.HasOneOfRoles(roles, new int[] { 1, 2, 3, 4, 6, 7 }) ? CurrentUser.Id : (Guid?)null });
+        //    }
+        //    return Json(new { });
+        //}
+        //[HttpPost]
+        //public async Task<JsonResult> IsPaul()
+        //{
+        //    return Json(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651")|| CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
+        //}
 
-        private string Secret = ConfigurationManager.AppSettings["turn:secret"];
-        [HttpGet]
-        public JsonResult GetLoginAndPassword()
-        {
-            MD5 md5 = MD5.Create();
-            string Login = System.Web.Security.Membership.GeneratePassword(6, 0);
-            HMAC mc = HMAC.Create("HMACSHA1");
-            return Json(new { Login, Password = Convert.ToBase64String(mc.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
-        }
+        //private string Secret = ConfigurationManager.AppSettings["turn:secret"];
+        //[HttpGet]
+        //public JsonResult GetLoginAndPassword()
+        //{
+        //    MD5 md5 = MD5.Create();
+        //    string Login = System.Web.Security.Membership.GeneratePassword(6, 0);
+        //    HMAC mc = HMAC.Create("HMACSHA1");
+        //    return Json(new { Login, Password = Convert.ToBase64String(mc.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
+        //}
 
-#if DEBUG
-        [HttpPost]
-        public JsonResult GetDomain()
-        {
-            return Json("ws://localhost");
-        }
-#else
-        [HttpPost]
-        public JsonResult GetDomain()
-        {
-            return Json("wss://de.ncfu.ru");
-        }
-#endif
+//#if DEBUG
+//        [HttpPost]
+//        public JsonResult GetDomain()
+//        {
+//            return Json("ws://localhost");
+//        }
+//#else
+//        [HttpPost]
+//        public JsonResult GetDomain()
+//        {
+//            return Json("wss://de.ncfu.ru");
+//        }
+//#endif
 
 
         public ActionResult UserPic()
         {
-            var result = File(CurrentUser.Picture, "image/jpg");
-            return result;
+            //var result = File(CurrentUser.Picture, "image/jpg");
+            //return result;
             return CurrentUser.Picture != null ? File(CurrentUser.Picture, "image/jpg") : (ActionResult)new HttpStatusCodeResult(404);
         }
         public JsonResult HasPhoto()

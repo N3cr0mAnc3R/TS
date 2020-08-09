@@ -40,7 +40,7 @@
                                 </div>
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 3" class="textarea-wrapper">
-                                <textarea v-on:change="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false" rows="15" id="noCopyPaste" oncontextmenu='return false;'> </textarea>
+                                <textarea v-on:focus="changeText" v-model="selectedQuestion.answer" class="form-control" spellcheck="false" rows="15" id="noCopyPaste" oncontextmenu='return false;'> </textarea>
                                 <br />
                             </div>
                             <div v-if="selectedQuestion.TypeAnswerId == 4" class="textarea-wrapper">
@@ -282,4 +282,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test7593.js"></script>
+<script src="~/Content/Testing/test7598.js"></script>

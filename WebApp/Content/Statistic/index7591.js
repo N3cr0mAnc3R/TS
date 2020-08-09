@@ -17,7 +17,7 @@
            // self.currentDate = new Date();
             console.log(self.currentDate);
             $.ajax({
-                url: "/auditory/GetStatuses",
+                url: "/api/auditory/GetStatuses",
                 type: "POST",
                 async: false,
                 success: function (statuses) {
@@ -26,7 +26,7 @@
                 }
             });
             $.ajax({
-                url: "/account/IsPaul",
+                url: "/api/account/IsPaul",
                 type: "POST",
                 async: false,
                 success: function (domain) {
@@ -35,7 +35,7 @@
             });
 
             $.ajax({
-                url: "/auditory/GetAuditoryList",
+                url: "/api/auditory/GetAuditoryList",
                 type: "POST",
                 async: false,
                 success: function (auditories) {
@@ -49,7 +49,7 @@
         },
         loadPeople: function () {
             $.ajax({
-                url: "/auditory/GetNewPeople",
+                url: "/api/auditory/GetNewPeople",
                 type: "POST",
                 async: true,
                 success: function (result) {
@@ -81,7 +81,7 @@
         saveResult: function (Id) {
             var self = this;
             $.ajax({
-                url: "/auditory/UpdateStatus?Id=" + Id + '&StatusId=4',
+                url: "/api/auditory/UpdateStatus?Id=" + Id + '&StatusId=4',
                 type: "POST",
                 async: true,
                 success: function (newStatus) {
@@ -101,7 +101,7 @@
         getUsers: function () {
             var self = this;
             $.ajax({
-                url: "/auditory/GetUsersByDate",
+                url: "/api/auditory/GetUsersByDate",
                 data: {
                     StatusId: self.currentStatus,
                     Date: self.currentDate,
@@ -111,9 +111,9 @@
                 async: false,
                 success: function (users) {
                     self.users = users;
-                    self.users.forEach(function (user) {
-                        user.TestingDate = new Date(Number(user.TestingDate.substr(user.TestingDate.indexOf('(') + 1, user.TestingDate.indexOf(')') - user.TestingDate.indexOf('(') - 1))).toLocaleString();
-                    })
+                    //self.users.forEach(function (user) {
+                    //    user.TestingDate = new Date(Number(user.TestingDate.substr(user.TestingDate.indexOf('(') + 1, user.TestingDate.indexOf(')') - user.TestingDate.indexOf('(') - 1))).toLocaleString();
+                    //})
                 }
             });
         },

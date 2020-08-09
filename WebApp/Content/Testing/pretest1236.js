@@ -60,7 +60,7 @@
                 notifier([{ Type: 'error', Body: self.switchLocal(18) }]);
             }
             $.ajax({
-                url: "/account/GetDomain",
+                url: "/api/account/GetDomain",
                 type: "POST",
                 async: false,
                 success: function (domain) {
@@ -90,13 +90,13 @@
                 $.ajax({
                     type: 'POST',
                     dataType: 'json',
-                    url: '/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
+                    url: '/api/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
                     success: function (d) {
                         if (d.Error) {
                             localStorage.removeItem('placeConfig');
                             clearInterval(self.findTestInterval);
                             self.hasPlaceConfig = false;
-                            location.reload();
+                            //location.reload();
                             return;
                         }
                         if (d.length == 0) {
@@ -121,7 +121,7 @@
                                     $.ajax({
                                         type: 'POST',
                                         dataType: 'json',
-                                        url: '/user/FinishTest?Id=' + test.Id,
+                                        url: '/api/user/FinishTest?Id=' + test.Id,
                                         success: function (d) {
                                             test.TestingStatusId = 3;
                                         }
@@ -224,10 +224,14 @@
             self.findPlaceInterval = setInterval(function () {
                 //GetFreePlaces
                 $.ajax({
-                    url: "/user/GetFreePlaces",
+                    url: "/api/user/GetFreePlaces",
                     type: "POST",
                     async: true,
                     success: function (data) {
+                        if (data.Message) {
+                            notifier([{ Type: 'error', Body: self.switchLocal(21) }]);
+                            return;
+                        }
                         if (data.Id != 0) {
                             self.createPlaceConfig(data.PlaceId, data.PlaceProfile);
                             clearInterval(self.findPlaceInterval);
@@ -415,7 +419,7 @@
             var self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/GetChatMessages?Id=" + newId,
+                url: "/api/user/GetChatMessages?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (messageList) {
@@ -453,7 +457,7 @@
             self.cameraRecorder.ondataavailable = self.recordingCamera;
             self.cameraRecorder.start(100);
             setTimeout(function () {
-                self.cameraRecorder.stop();
+                if (self.cameraRecorder && self.cameraRecorder.state != 'inactive') self.cameraRecorder.stop();
                 var bufferCamera = new Blob(self.recordedCamera, { type: 'video/webm' });
                 var formaData1 = new FormData();
 
@@ -477,7 +481,8 @@
 
 
 
-            }, 45000);
+            }, 40000);
+            self.enabled = false;
             var intLeft = setInterval(function () {
                 self.identificationTimeLeft--;
                 if (self.identificationTimeLeft == 0) {
@@ -503,7 +508,7 @@
                 var data = canvas.toDataURL('image/png');
                 if (!self.artFlag) {
                     $.ajax({
-                        url: "/user/TryVerify",
+                        url: "/api/user/TryVerify",
                         type: "POST",
                         async: true,
                         data: { Image: data.substr(22), Id: self.testingProfileId },
@@ -657,7 +662,7 @@
             var self = this;
             //GetChatMessages
             $.ajax({
-                url: "/user/ResetPlaceRequest",
+                url: "/api/user/ResetPlaceRequest",
                 type: "POST",
                 async: false,
                 success: function (response) {
@@ -676,26 +681,27 @@
         switchLocal: function (id) {
             var self = this;
             switch (id) {
-                case 1: return self.localization == 1 ? "Вам доступны следующие вступительные испытания для прохождения" : "The following tests are available";
-                case 2: return self.localization == 1 ? "Вы не завершили следующие вступительные испытания" : "Not completed";
-                case 3: return self.localization == 1 ? "Режим ожидания" : "Waiting";
-                case 4: return self.localization == 1 ? "Пожалуйста, ожидайте. В данный момент все места заняты, либо Вы авторизовались ранее на другом устройстве" : "Please, wait. Available tests will be shown below";
-                case 5: return self.localization == 1 ? "Администратор" : "Administrator";
-                case 6: return self.localization == 1 ? 'Перед началом вступительного испытания необходимо пройти процедуру идентификации личности. Нажмите кнопку "Подтвердить" и посмотрите в камеру' : 'Before start, You must verify Your identity. Push Verify and watch to camera';
-                case 7: return self.localization == 1 ? "Подтвердить" : "Verify";
-                case 8: return self.localization == 1 ? "Камера не найдена. Прохождение тестирования невозможно" : "Camera not found. Testing is not available";
-                case 9: return self.localization == 1 ? "Для тестирования системы можете воспользоваться следующими вступительными испытаниями" : "You can try preliminary tests";
-                case 10: return self.localization == 1 ? "Режим ожидания" : "Waiting";
-                case 11: return self.localization == 1 ? "Тесты не назначены. Ожидайте..." : "You don't have any tests. Wait...";
-                case 12: return self.localization == 1 ? "Вы можете запросить сбросить предыдущее устройство: " : "You may request for reset previous PC:";
-                case 13: return self.localization == 1 ? "Сбросить" : "Reset";
-                case 14: return self.localization == 1 ? "Во время выполнения запроса произошла ошибка" : "An error occured during Your request";
-                case 15: return self.localization == 1 ? "Запрос успешно отправлен" : "Your request has been sent";
-                case 16: return self.localization == 1 ? "Идентификация успешна" : "Identification succeeded";
-                case 17: return self.localization == 1 ? "Вы не идентфицированы" : "Your identification failed";
-                case 18: return self.localization == 1 ? "Ваш браузер не поддерживается. Воспользуйтесь другим устройством" : "Your browser is not supported. Please, try another device";
-                case 19: return self.localization == 1 ? "До окончания процедуры идентификации осталось: " : "Until the end of identification left: ";
-                case 20: return self.localization == 1 ? "секунд" : "seconds";
+                case 1: return localStorage["localization"] == 1 ? "Вам доступны следующие вступительные испытания для прохождения" : "The following tests are available";
+                case 2: return localStorage["localization"] == 1 ? "Вы не завершили следующие вступительные испытания" : "Not completed";
+                case 3: return localStorage["localization"] == 1 ? "Режим ожидания" : "Waiting";
+                case 4: return localStorage["localization"] == 1 ? "Пожалуйста, ожидайте. В данный момент все места заняты, либо Вы авторизовались ранее на другом устройстве" : "Please, wait. Available tests will be shown below";
+                case 5: return localStorage["localization"] == 1 ? "Администратор" : "Administrator";
+                case 6: return localStorage["localization"] == 1 ? 'Перед началом вступительного испытания необходимо пройти процедуру идентификации личности. Нажмите кнопку "Подтвердить" и посмотрите в камеру' : 'Before start, You must verify Your identity. Push Verify and watch to camera';
+                case 7: return localStorage["localization"] == 1 ? "Подтвердить" : "Verify";
+                case 8: return localStorage["localization"] == 1 ? "Камера не найдена. Прохождение тестирования невозможно" : "Camera not found. Testing is not available";
+                case 9: return localStorage["localization"] == 1 ? "Для тестирования системы можете воспользоваться следующими вступительными испытаниями" : "You can try preliminary tests";
+                case 10: return localStorage["localization"] == 1 ? "Режим ожидания" : "Waiting";
+                case 11: return localStorage["localization"] == 1 ? "Тесты не назначены. Ожидайте..." : "You don't have any tests. Wait...";
+                case 12: return localStorage["localization"] == 1 ? "Вы можете запросить сбросить предыдущее устройство: " : "You may request for reset previous PC:";
+                case 13: return localStorage["localization"] == 1 ? "Сбросить" : "Reset";
+                case 14: return localStorage["localization"] == 1 ? "Во время выполнения запроса произошла ошибка" : "An error occured during Your request";
+                case 15: return localStorage["localization"] == 1 ? "Запрос успешно отправлен" : "Your request has been sent";
+                case 16: return localStorage["localization"] == 1 ? "Идентификация успешна" : "Identification succeeded";
+                case 17: return localStorage["localization"] == 1 ? "Вы не идентфицированы" : "Your identification failed";
+                case 18: return localStorage["localization"] == 1 ? "Ваш браузер не поддерживается. Воспользуйтесь другим устройством" : "Your browser is not supported. Please, try another device";
+                case 19: return localStorage["localization"] == 1 ? "До окончания процедуры идентификации осталось: " : "Until the end of identification left: ";
+                case 20: return localStorage["localization"] == 1 ? "секунд" : "seconds";
+                case 21: return localStorage["localization"] == 1 ? "Тесты не назначены. Можете покинуть страницу" : "Tests not found. You may leave this page now";
             }
         },
         isMe: function (message) {
@@ -710,10 +716,10 @@
             var obj = { Id: PlaceProfile, PlaceConfig: str.toString(), PlaceId: placeId };
             console.log(obj);
             $.ajax({
-                url: "/auditory/UpdatePlaceConfig",
+                url: "/api/auditory/UpdatePlaceConfig",
                 type: "POST",
-                async: false,
-                data: { model: obj },
+                async: true,
+                data: obj,
                 success: function (data) {
                     console.log(data);
                     self.hasPlaceConfig = true;

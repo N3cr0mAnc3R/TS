@@ -28,7 +28,7 @@
             let self = this;
 
             $.ajax({
-                url: "/account/GetDomain",
+                url: "/api/account/GetDomain",
                 type: "POST",
                 async: false,
                 success: function (domain) {
@@ -39,7 +39,7 @@
             let newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.getPlaceByConfig();
             $.ajax({
-                url: "/auditory/GetAuditoryInfo?Id=" + newId,
+                url: "/api/auditory/GetAuditoryInfo?Id=" + newId,
                 type: "POST",
                 async: false,
                 success: function (auditory) {
@@ -76,7 +76,7 @@
                 }
             });
             $.ajax({
-                url: "/auditory/ResetPins?Id=" + newId,
+                url: "/api/auditory/ResetPins?Id=" + newId,
                 type: "POST",
                 async: false
             });
@@ -88,7 +88,7 @@
             let self = this;
             self.intervalPin = setInterval(function () {
                 $.ajax({
-                    url: "/auditory/GetAuditoryCompsWithoutPin?Id=" + self.auditory,
+                    url: "/api/auditory/GetAuditoryCompsWithoutPin?Id=" + self.auditory,
                     type: "POST",
                     async: false,
                     success: function (compIds) {
@@ -340,7 +340,7 @@
             localStorage['placeConfig'] = str.toString();
             let obj = { Id: self.selectedComp.PlaceProfileId, PlaceConfig: str.toString(), PlaceId: self.selected };
             $.ajax({
-                url: "/auditory/UpdatePlaceConfig",
+                url: "/api/auditory/UpdatePlaceConfig",
                 type: "POST",
                 async: false,
                 data: obj,
@@ -356,7 +356,7 @@
             if (!localStorage['placeConfig']) return;
             let self = this;
             $.ajax({
-                url: "/auditory/GetProfileByPlaceConfig?placeConfig=" + encodeURIComponent(localStorage['placeConfig']),
+                url: "/api/auditory/GetProfileByPlaceConfig?placeConfig=" + encodeURIComponent(localStorage['placeConfig']),
                 type: "POST",
                 async: false,
                 success: function (id) {
@@ -374,7 +374,7 @@
             }
             let obj = { Id: self.selectedComp.PlaceProfileId, PlaceConfig: null, PlaceId: self.selectedComp.Id };
             $.ajax({
-                url: "/auditory/UpdatePlaceConfig",
+                url: "/api/auditory/UpdatePlaceConfig",
                 type: "POST",
                 async: false,
                 data: obj,
@@ -398,7 +398,7 @@
 
 
             $.ajax({
-                url: "/auditory/GenerateConfiguration",
+                url: "/api/auditory/GenerateConfiguration",
                 type: "POST",
                 async: false,
                 data: auditory,
@@ -430,7 +430,7 @@
             console.log(items);
             let auditory = { Id: self.auditory, ComputerList: items };
             $.ajax({
-                url: "/auditory/UpdateAuditoryInfo",
+                url: "/api/auditory/UpdateAuditoryInfo",
                 type: "POST",
                 async: false,
                 data: { auditory: auditory },

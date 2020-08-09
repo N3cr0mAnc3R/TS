@@ -13,7 +13,8 @@
             loaded: null
         },
         socket: null,
-        testingProfileId: 0
+        testingProfileId: 0,
+        error: {}
     },
     methods: {
         init: function () {
@@ -82,10 +83,11 @@
                         self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                     };
                     reader.readAsDataURL(e.target.files[0]);
+                    alert('file отправлен');
                     self.answerQuestion();
                 },
                 error: function (er) {
-                    alert(er);
+                    self.error = er;
                 }
             });
             //self.AnswerFileExtension = ;
@@ -93,16 +95,18 @@
         answerQuestion: function () {
             var self = this;
             //ToDo безтттопастттттттность!!
-            answer = [{ TestingPackageId: self.bestResult.TestingPackageId, TestingTime: 3, UserAnswer: null, FileId: self.fileId }];
+            var answers = [{ TestingPackageId: self.bestResult.TestingPackageId, TestingTime: 3, UserAnswer: null, FileId: self.fileId }];
 
             $.ajax({
                 type: 'POST',
-                dataType: 'json',
-                url: '/user/UpdatequestionAnswer',
-                async: false,
-                data: { answer: answer },
+                url: 'https://de.ncfu.ru/api/user/UpdateQuestionAnswer',
+                async: true,
+                data: { answers: answers },
                 success: function () {
-
+                    alert('ответ сохранён')
+                },
+                error: function (er) {
+                    self.error = this.data;
                 }
             });
         },

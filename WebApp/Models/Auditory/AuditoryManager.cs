@@ -242,12 +242,18 @@ namespace WebApp.Models
                 }
             }
         }
-        public async Task<PlaceConfigModel> GetFreePlaces(Guid? userUID, string localization = "")
+        public async Task<dynamic> GetFreePlaces(Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
-
+                try
+                {
+                    return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception e)
+                {
+                    return new { State = 1, e.Message };
+                }
             }
         }
         public async Task GetNewPeople(int Id, Guid? userUID)

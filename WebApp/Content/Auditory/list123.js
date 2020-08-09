@@ -10,7 +10,7 @@
         init: function () {
             let self = this;
             $.ajax({
-                url: "/auditory/GetAuditoryList",
+                url: "/api/auditory/GetAuditoryList",
                 type: "POST",
                 async: false,
                 success: function (auditories) {
@@ -29,7 +29,7 @@
             });
 
             $.ajax({
-                url: "/account/IsPaul",
+                url: "/api/account/IsPaul",
                 type: "POST",
                 async: false,
                 success: function (domain) {
@@ -43,7 +43,7 @@
                 return auditory.Id === Id;
             })[0];
             $.ajax({
-                url: "/auditory/GetAuditoryStatistic?Id=" + Id,
+                url: "/api/auditory/GetAuditoryStatistic?Id=" + Id,
                 type: "POST",
                 async: false,
                 success: function (info) {
@@ -101,14 +101,14 @@
         switchLocal: function (id) {
             let self = this;
             switch (id) {
-                case 1: return self.localization == 1 ? "Список аудиторий" : "Auditory list";
-                case 2: return self.localization == 1 ? "Сохранить" : "Save";
-                case 3: return self.localization == 1 ? "Переименовать элемент" : "Rename item";
-                case 4: return self.localization == 1 ? "Закрыть" : "Close";
-                case 5: return self.localization == 1 ? "Ошибка" : "Error";
-                case 6: return self.localization == 1 ? "Сперва сохраните изменения" : "Save changes before leaving";
-                case 7: return self.localization == 1 ? "Места:" : "Places:";
-                case 8: return self.localization == 1 ? "Пользователи:" : "Users:";
+                case 1: return localStorage["localization"] == 1 ? "Список аудиторий" : "Auditory list";
+                case 2: return localStorage["localization"] == 1 ? "Сохранить" : "Save";
+                case 3: return localStorage["localization"] == 1 ? "Переименовать элемент" : "Rename item";
+                case 4: return localStorage["localization"] == 1 ? "Закрыть" : "Close";
+                case 5: return localStorage["localization"] == 1 ? "Ошибка" : "Error";
+                case 6: return localStorage["localization"] == 1 ? "Сперва сохраните изменения" : "Save changes before leaving";
+                case 7: return localStorage["localization"] == 1 ? "Места:" : "Places:";
+                case 8: return localStorage["localization"] == 1 ? "Пользователи:" : "Users:";
             }
         }
     },
