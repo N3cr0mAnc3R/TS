@@ -92,6 +92,40 @@ namespace WebApp.Controllers
                         result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
                         break;
                     }
+                case 3:
+                    {
+                        TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
+                        if (t == null)
+                        {
+                            return JavaScript("window.close();");
+                        }
+                        fileName = t.LastName + " " + t.FirstName + " " + t.MiddleName + " title.pdf";
+                        render = new ReportRender(
+                          report.UrlServer,
+                          report.TestingTitle,
+                          "ecampus",
+                          "44xwkm8y8c",
+                          "st9-dbe-reports");
+                        result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+                        break;
+                    }
+                case 4:
+                    {
+                        TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
+                        if (t == null)
+                        {
+                            return JavaScript("window.close();");
+                        }
+                        fileName = t.LastName + " " + t.FirstName + " " + t.MiddleName + " protocol.pdf";
+                        render = new ReportRender(
+                          report.UrlServer,
+                          report.TestingProtocol,
+                          "ecampus",
+                          "44xwkm8y8c",
+                          "st9-dbe-reports");
+                        result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+                        break;
+                    }
                 case 2:
                     {
                         render = new ReportRender(

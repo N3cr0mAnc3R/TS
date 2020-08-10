@@ -10,9 +10,9 @@
     <div class="auditory-header">
         {{switchLocal(1)}} {{auditoryName}}
     </div>
-    <div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
+    @*<div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
         <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
-    </div>
+    </div>*@
     <div class="auditory row">
         <div class="computer-list">
             <div class="place-table">
@@ -29,8 +29,10 @@
                             </div>
                             <div class="empty-wrapper" v-if="!item.TestingProfileId">
                                 <div class="empty-info">
-                                    <div class="empty-item">Свободно</div>
+                                    <div class="empty-item" v-if="!item.IsUsed">Свободно</div>
+                                    <div class="empty-item" v-if="item.IsUsed">Занято</div>
                                 </div>
+                                <div class="control-reset" v-if="item.IsUsed"><span v-on:click="resetIpConfig(item)"><i class="fa fa-power-off"></i></span></div>
                             </div>
                             <div class="info-wrapper">
                                 <div class="place-info">
@@ -247,4 +249,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate1235.js"></script>
+<script src="~/Content/Auditory/moderate1236.js"></script>

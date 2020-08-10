@@ -21,6 +21,18 @@ namespace WebApp.Controllers.Api
         {
             await ProctorManager.SaveMark(CurrentUser.Id, model);
         }
+        [HttpPost]
+        [Route("GetDisciplines")]
+        public async Task<IHttpActionResult> GetDisciplines(SaveMarkModel model)
+        {
+            return WrapResponse(await ProctorManager.GetDisciplines(CurrentUser.Id));
+        }
+        [HttpPost]
+        [Route("GetMarks")]
+        public async Task<IHttpActionResult> GetMarks(int Id)
+        {
+            return WrapResponse(await ProctorManager.GetMarks(CurrentUser.Id, Id));
+        }
         protected ProctorManager ProctorManager
         {
             get

@@ -34,5 +34,9 @@
   {
     "outputFile": "Content/Testing/Index1235.css",
     "inputFile": "Content/Testing/Index1235.less"
+  },
+  {
+    "outputFile": "Content/Statistic/savescore.css",
+    "inputFile": "Content/Statistic/savescore.less"
   }
 ]

@@ -229,6 +229,26 @@ namespace WebApp.Models.Proctoring
                  );
             }
         }
+        public async Task<IEnumerable<IndexItem>> GetDisciplines(Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<IndexItem>(
+                     sql: "[dbo].[GetArtDisciplines]",
+                     new { userUID },
+                     commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<dynamic>> GetMarks(Guid userUID, int disciplineId)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<dynamic>(
+                     sql: "[dbo].[GetArtInfoForScore]",
+                     new { userUID, disciplineId },
+                     commandType: CommandType.StoredProcedure);
+            }
+        }
 
     }
 }

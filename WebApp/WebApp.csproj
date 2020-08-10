@@ -208,7 +208,7 @@
     <Content Include="Content\Auditory\moderate.css">
       <DependentUpon>moderate.less</DependentUpon>
     </Content>
-    <Content Include="Content\Auditory\moderate1235.js" />
+    <Content Include="Content\Auditory\moderate1236.js" />
     <Content Include="Content\Auditory\moderate.min.css">
       <DependentUpon>moderate.css</DependentUpon>
     </Content>
@@ -257,9 +257,16 @@
     <Content Include="Content\Statistic\index.css">
       <DependentUpon>index.less</DependentUpon>
     </Content>
-    <Content Include="Content\Statistic\index7591.js" />
+    <Content Include="Content\Statistic\index7593.js" />
     <Content Include="Content\Statistic\index.min.css">
       <DependentUpon>index.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Statistic\JavaScript.js" />
+    <Content Include="Content\Statistic\savescore.css">
+      <DependentUpon>savescore.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Statistic\savescore.min.css">
+      <DependentUpon>savescore.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.css">
       <DependentUpon>Index1235.less</DependentUpon>
@@ -267,7 +274,7 @@
     <Content Include="Content\Testing\Index1235.min.css">
       <DependentUpon>Index1235.css</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\pretest1236.js" />
+    <Content Include="Content\Testing\pretest1237.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner12.js" />
     <Content Include="Content\Testing\scannerlib.js" />
@@ -301,6 +308,7 @@
     <Content Include="Content\Statistic\index.less" />
     <Content Include="Content\Shared\Notify.less" />
     <Content Include="Files\Instruction.pdf" />
+    <Content Include="Content\Statistic\savescore.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -522,6 +530,7 @@
     <Content Include="Views\Shared\Notifier.cshtml" />
     <Content Include="Views\User\QRScanner.cshtml" />
     <Content Include="Views\Auditory\FullWindow.cshtml" />
+    <Content Include="Views\Verification\SaveResult.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

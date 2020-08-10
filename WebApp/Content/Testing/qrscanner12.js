@@ -14,7 +14,10 @@
         },
         socket: null,
         testingProfileId: 0,
-        error: {}
+        isSuperAdmin: false,
+        error: {},
+        testingProfileId: 0,
+        testingPackageId: 0
     },
     methods: {
         init: function () {
@@ -41,6 +44,14 @@
             self.camQrResult.parentNode.insertBefore(self.scanner.$canvas, self.camQrResult.nextSibling);
             self.scanner.$canvas.style.display = 'block';
 
+            $.ajax({
+                url: "/api/account/IsPaul",
+                type: "POST",
+                async: true,
+                success: function (domain) {
+                    self.isSuperAdmin = domain;
+                }
+            });
         },
         start: function () {
             try {
@@ -56,6 +67,35 @@
         },
         stop: function () {
             this.QrScanner.stop();
+        },
+        changeFile1: function (e) {
+            var self = this;
+            var extension = e.target.files[0].name.substr(e.target.files[0].name.lastIndexOf('.'));
+            var formaData = new FormData();
+            formaData.append('Id', self.testingPackageId);
+            formaData.append('File', e.target.files[0]);
+            formaData.append('AnswerFileExtension', extension);
+
+            $.ajax({
+                type: 'POST',
+                url: '/user/SaveAnswerFile',
+                data: formaData,
+                contentType: false,
+                processData: false,
+                success: function (data) {
+                    var answers = [];
+                    answers.push({ TestingPackageId: self.testingPackageId, TestingTime: 3, UserAnswer: null, FileId: data });
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/user/UpdatequestionAnswer',
+                        async: false,
+                        data: { answers: answers },
+                        success: function () {
+                        }
+                    });
+                }
+            });
+
         },
         changeFile: function (e) {
             var self = this;

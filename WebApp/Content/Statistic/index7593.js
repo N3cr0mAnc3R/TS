@@ -64,6 +64,12 @@
         printTPResult: function (Id) {
             window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
         },
+        printTitleResult: function (Id) {
+            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 3, '_blank');
+        },
+        printProtocolResult: function (Id) {
+            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 4, '_blank');
+        },
         showTable: function () {
             this.shownTable = !this.shownTable;
         },

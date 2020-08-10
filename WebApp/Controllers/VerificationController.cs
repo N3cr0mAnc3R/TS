@@ -46,6 +46,18 @@ namespace WebApp.Controllers
                 return Redirect("/user/waiting");
             }
         }
+        public async Task<ActionResult> SaveResult()
+        {
+            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[] { 1, 2, 3, 4, 6, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
+        }
 
 
         [HttpPost]

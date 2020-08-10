@@ -123,6 +123,10 @@
 .auditory .computer-list .place-table .place-row .place-item .empty-wrapper .empty-info .empty-item {
   margin: auto;
 }
+.auditory .computer-list .place-table .place-row .place-item .empty-wrapper .control-reset {
+  position: absolute;
+  cursor: pointer;
+}
 .auditory .computer-list .place-table .place-row .place-item .info-wrapper {
   width: 180px;
   height: 110px;

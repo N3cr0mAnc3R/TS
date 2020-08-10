@@ -96,11 +96,12 @@
                             localStorage.removeItem('placeConfig');
                             clearInterval(self.findTestInterval);
                             self.hasPlaceConfig = false;
-                            //location.reload();
+                            location.reload();
                             return;
                         }
                         if (d.length == 0) {
                             self.tests = [];
+                            //localStorage.removeItem('placeConfig');
                             return;
                         }
                         //Отобразить дату в корректном формате
@@ -284,7 +285,7 @@
         },
         checkAuth: function (placeId, PlaceProfile) {
             if (localStorage['placeConfig']) {
-                console.log();
+                //console.log();
             } else {
                 this.createPlaceConfig(placeId, PlaceProfile);
             }

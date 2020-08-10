@@ -15,5 +15,19 @@
             <img v-bind:src="'data:image/jpg;base64, ' + answerImage" width="400" />
         </div>
     </div>
+
+    <div v-if="isSuperAdmin">
+        <label>
+            TestingProfileId
+            <input type="number" v-model="testingProfileId" />
+        </label>
+        <label>
+            TestingPackageId
+            <input type="number" v-model="testingPackageId" />
+        </label>
+        <label>
+            <input v-on:change="changeFile1" type="file" accept="image/*" />
+        </label>
+    </div>
 </div>
 <script src="~/Content/Testing/qrscanner12.js"></script>

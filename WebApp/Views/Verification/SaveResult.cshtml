@@ -1,0 +1,25 @@
+﻿<link href="~/Content/Statistic/savescore.css" rel="stylesheet" />
+<div id="main-window">
+    <div v-if="!listOpened">
+        <table class="table table-bordered table-striped table-hover">
+            <tr v-for="discipline in disciplines" v-on:click="selectDiscipline(discipline.Id)">
+                <td>{{discipline.Name}}</td>
+            </tr>
+        </table>
+    </div>
+    <div v-if="listOpened">
+        <h1>
+            {{currentDiscipline}}
+        </h1>
+        <br />
+        <table class="table table-bordered table-striped">
+            <tr v-for="item in items">
+                <td>{{item.Name}}</td>
+                <td><input type="number" max="100" v-model="item.Score" class="form-control" /></td>
+                <td><button v-on:click="saveMark(item)">Сохранить</button></td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+<script src="~/Content/Statistic/JavaScript.js"></script>

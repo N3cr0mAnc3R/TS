@@ -67,7 +67,7 @@
         startedTimeRecording: 0,
         blurReady: false,
         stepCounter: 0,
-        stepNumber: 60,
+        stepNumber: 120,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -392,7 +392,7 @@
             formaData.append('AnswerFileExtension', extension);
             $.ajax({
                 type: 'POST',
-                url: '/api/user/SaveAnswerFile',
+                url: '/user/SaveAnswerFile',
                 data: formaData,
                 contentType: false,
                 processData: false,

@@ -41,7 +41,7 @@ const app = new Vue({
         scheduleUsers: [],
         filteredPlaceList: [],
         TURN: {},
-        artArray: [3, 4, 5, 6, 103, 105],
+        artArray: [],
         fullInfo: null,
         offset: 1,
         fullComputerList: [],
@@ -246,68 +246,68 @@ const app = new Vue({
             });
         },
 
-        setOffset: function (offset) {
-            var self = this;
-            self.computerList = [];
-            //Смотрим то, что пришло
-            if (self.fullComputerList.length > 0) {
-                self.fullComputerList.forEach(function (item) {
-                    //Если уже есть в списке, находим
-                    let found = self.computerList.filter(function (comp) {
-                        return comp.Id == item.Id;
-                    })[0];
-                    //Если нет, то инициализируем
-                    if (!found && +item.Name > (offset - 1) * 50 && item.Name < offset * 50) {
-                        item.errors = [];
-                        item.Image = "";
-                        item.chat = {};
-                        //Если подтверждён
-                        if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
-                            //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
-                            //Сокет на экран
-                            self.initSocket(2, item, 2);
-                            self.initSocket(2, item, 1);
-                        }
-                        //Сокет на вебку
-                        //В любом случае нужно добавить в список
+        //setOffset: function (offset) {
+        //    var self = this;
+        //    self.computerList = [];
+        //    //Смотрим то, что пришло
+        //    if (self.fullComputerList.length > 0) {
+        //        self.fullComputerList.forEach(function (item) {
+        //            //Если уже есть в списке, находим
+        //            let found = self.computerList.filter(function (comp) {
+        //                return comp.Id == item.Id;
+        //            })[0];
+        //            //Если нет, то инициализируем
+        //            if (!found && +item.Name > (offset - 1) * 50 && item.Name < offset * 50) {
+        //                item.errors = [];
+        //                item.Image = "";
+        //                item.chat = {};
+        //                //Если подтверждён
+        //                if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
+        //                    //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
+        //                    //Сокет на экран
+        //                    self.initSocket(2, item, 2);
+        //                    self.initSocket(2, item, 1);
+        //                }
+        //                //Сокет на вебку
+        //                //В любом случае нужно добавить в список
 
-                        self.computerList.push(item);
-                        if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-                            //console.log('socket: ' + item.TestingProfileId, item.LastName);
-                            self.initSocket(1, item);
-                        }
-                    }
-                    else {
-                        if (item.TestingStatusId == 2 && found.TestingStatusId == 5) {
-                            found = item;
-                            var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
-                            if (foundedSocket) {
-                                foundedSocket.socket.close();
-                                foundedSocket = null;
-                                // console.log('socket: ' + found.TestingProfileId, found.LastName);
-                            }
+        //                self.computerList.push(item);
+        //                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
+        //                    //console.log('socket: ' + item.TestingProfileId, item.LastName);
+        //                    self.initSocket(1, item);
+        //                }
+        //            }
+        //            else {
+        //                if (item.TestingStatusId == 2 && item.TestingStatusId == 5) {
+        //                    found = item;
+        //                    var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
+        //                    if (foundedSocket) {
+        //                        foundedSocket.socket.close();
+        //                        foundedSocket = null;
+        //                        // console.log('socket: ' + found.TestingProfileId, found.LastName);
+        //                    }
 
-                            self.initSocket(2, found, 1);
-                            if ([2].indexOf(found.TestingStatusId) != -1) {
-                                console.log('socket: ' + found.TestingProfileId, found.LastName);
-                                self.initSocket(1, found);
-                            }
-                            if (found.UserVerified != item.UserVerified) {
-                                if (item.UserVerified) {
-                                    self.initSocket(2, found, 2);
-                                    self.initSocket(2, item, 1);
-                                    console.log('socket: ' + item.TestingProfileId, item.LastName);
-                                }
-                            }
-                        }
-                    }
-                });
+        //                    self.initSocket(2, found, 1);
+        //                    if ([2].indexOf(found.TestingStatusId) != -1) {
+        //                        console.log('socket: ' + found.TestingProfileId, found.LastName);
+        //                        self.initSocket(1, found);
+        //                    }
+        //                    if (found.UserVerified != item.UserVerified) {
+        //                        if (item.UserVerified) {
+        //                            self.initSocket(2, found, 2);
+        //                            self.initSocket(2, item, 1);
+        //                            console.log('socket: ' + item.TestingProfileId, item.LastName);
+        //                        }
+        //                    }
+        //                }
+        //            }
+        //        });
 
-                self.initAud();
-            }
+        //        self.initAud();
+        //    }
 
 
-        },
+        //},
 
         getInfoForAdmin: function () {
             var self = this;
@@ -397,28 +397,46 @@ const app = new Vue({
                     success: function (info) {
                         info.forEach(function (item) {
                             var obj = {};
-                            item.forEach(function (keyValuePair) {
-                                if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
-                                    if (keyValuePair.Value != null) {
-                                        obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
-                                        console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
+                            //item.forEach(function (keyValuePair) {
+                            //    if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
+                            //        if (keyValuePair.Value != null) {
+                            //            obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
+                            //            console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
 
-                                    }
-                                    else {
-                                        console.log(keyValuePair.Key + ' is null');
-                                    }
-                                }
-                                else {
-                                    obj[keyValuePair.Key] = keyValuePair.Value;
-                                    console.log(obj[keyValuePair.Key]);
-                                }
-                            })
+                            //        }
+                            //        else {
+                            //            console.log(keyValuePair.Key + ' is null');
+                            //        }
+                            //    }
+                            //    else {
+                            //        obj[keyValuePair.Key] = keyValuePair.Value;
+                            //        console.log(obj[keyValuePair.Key]);
+                            //    }
+                            //})
+                            console.log(item);
                             console.log('----------------------------');
                             // console.log(JSON.stringify(obj));
                         });
                     }
                 });
             }
+        },
+        resetIpConfig: function (item) {
+            let self = this;
+            $.ajax({
+                url: "/api/auditory/UpdatePlaceConfig",
+                type: "POST",
+                async: false,
+                data: {
+                    Id: item.PlaceProfileId,
+                    PlaceConfig: null, 
+                    PlaceId: item.Id
+                },
+                success: function () {
+                    item.IsUsed = false;
+                }
+            });
+
         },
         resetUser: function (item) {
             var self = this;
