@@ -93,6 +93,14 @@
                         success: function () {
                         }
                     });
+                    $.ajax({
+                        type: 'POST',
+                        url: '/api/user/UpdatequestionAnswer1',
+                        async: false,
+                        data: { answers: answers },
+                        success: function () {
+                        }
+                    });
                 }
             });
 

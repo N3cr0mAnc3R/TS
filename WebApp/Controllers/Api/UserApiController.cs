@@ -95,7 +95,7 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("GetQuestionImage")]
-        public async Task<string> GetQuestionImage(int Id, int Type, int Part = 1)
+        public async Task<string> GetQuestionImage(int Id, int Type = 1, int Part = 1)
         {
             QuestionModel model = (await TestManager.GetQuestionImage(Id)).First();
             if (Type != 4)
@@ -122,6 +122,22 @@ namespace WebApp.Controllers.Api
             await TestManager.UpdateQuestionAnswer(model.answers);
             //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
             return WrapResponse(true);
+        }
+        [Route("UpdateQuestionAnswer1")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> UpdateQuestionAnswer1(UpdateAnswerModel model)
+        {
+            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+            {
+                await TestManager.UpdateQuestionAnswer1(model.answers, CurrentUser.Id);
+                //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
+                return WrapResponse(true);
+            }
+            else
+            {
+                return WrapResponse("Мечтай");
+            }
         }
         [HttpPost]
         [Route("GetFreePlaces")]

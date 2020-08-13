@@ -433,7 +433,7 @@
                 url: "/api/auditory/UpdateAuditoryInfo",
                 type: "POST",
                 async: false,
-                data: { auditory: auditory },
+                data: auditory,
                 success: function (data) {
                     if (data.Error) {
                         return;

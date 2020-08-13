@@ -38,5 +38,9 @@
   {
     "outputFile": "Content/Statistic/savescore.css",
     "inputFile": "Content/Statistic/savescore.less"
+  },
+  {
+    "outputFile": "Content/Statistic/total.css",
+    "inputFile": "Content/Statistic/total.less"
   }
 ]

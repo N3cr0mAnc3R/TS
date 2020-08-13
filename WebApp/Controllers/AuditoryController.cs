@@ -174,11 +174,11 @@ namespace WebApp.Controllers
             FileStreamDownload dwnl = TestManager.FileDownload(Id, Type, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
             return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
         }
-        public JsonResult DownloadFile(Guid? Id)
+        public async Task<FileResult> DownloadFile(Guid? Id)
         {
             //FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
             //return new System.Web.Mvc.FileStreamResult(dwnl.Stream, dwnl.ContentType) { FileDownloadName = dwnl.Name };
-            return Json(TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)));
+            return File(await TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)), "image/jpeg");
         }
         //[HttpPost]
         //public async Task<JsonResult> GetAuditoryInfo(int Id)

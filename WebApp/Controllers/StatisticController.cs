@@ -19,6 +19,11 @@ namespace WebApp.Controllers
             ViewBag.Title = "Отчёты и статистика";
             return View();
         }
+        public ActionResult Total()
+        {
+            ViewBag.Title = "Страница полного модерирования";
+            return View();
+        }
         public async Task<FileResult> Download(int Id, int Type)
         {
             return await DownloadMultipleFiles((await TestManager.GetFilesByTestingProfile(Id, Type)).ToList());

@@ -262,7 +262,7 @@ namespace WebApp.Models
                 }
             }
         }
-        public async Task<string> DownloadFileById(Guid? FileId, Guid? UserId)
+        public async Task<byte[]> DownloadFileById(Guid? FileId, Guid? UserId)
         {
             using (var conn = await Concrete.OpenConnectionAsync())
             {
@@ -270,9 +270,10 @@ namespace WebApp.Models
                 try
                 {
                     //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
-                    SourceMaterial filestream = await conn.QueryFirstOrDefaultAsync<SourceMaterial>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
+                    byte[] filestream = await conn.QueryFirstOrDefaultAsync<byte[]>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
 
-                    return Convert.ToBase64String(filestream.SourceMaterialImage);
+                    //return Convert.ToBase64String(filestream);
+                    return filestream;
 
                     //FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
@@ -379,6 +380,14 @@ namespace WebApp.Models
             {
                 var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer, fileId = a.FileId });
                 await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingLogsSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray() }), commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task UpdateQuestionAnswer1(IEnumerable<QuestionAnswer> testingLogs, Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                var t = testingLogs.Select(a => new { testingPackageId = a.TestingPackageId, time = DateTime.Now, testingTime = a.TestingTime, userAnswer = a.UserAnswer, fileId = a.FileId });
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingResultSave]", new StructuredDynamicParameters(new { testingLogs = t.ToArray(), userUID }), commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<IEnumerable<ChatMessage>> GetChatMessages(int testingProfileId, string Localization)

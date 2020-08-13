@@ -46,7 +46,8 @@
         enabled: false,
         counter: 0,
         testingProfileId: 0,
-        identificationTimeLeft: 45
+        identificationTimeLeft: 45,
+        TURN: {}
     },
     methods: {
         init: function () {
@@ -65,6 +66,20 @@
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                }
+            });
+
+            $.ajax({
+                url: "/api/account/GetLoginAndPassword",
+                type: "post",
+                async: false,
+                success: function (info) {
+                    //self.domain = domain;
+                    self.TURN = {
+                        url: 'turn:turn.ncfu.ru:8443',
+                        credential: info.Password,
+                        username: info.Login
+                    };
                 }
             });
             //Загрузка доступных тестов 
@@ -381,8 +396,8 @@
             //if (!self.stream) {
             navigator.mediaDevices.getUserMedia(
                 {
-                    video: true,
-                    audio: true
+                    video: true//,
+                    //audio: true
                 }).then(function (stream) {/*callback в случае удачи*/
                     self.stream = stream;
                     self.enabled = true;
@@ -572,31 +587,7 @@
                 { url: 'stun:stun.voipstunt.com' },
                 { url: 'stun:stun.voxgratia.org' },
                 { url: 'stun:stun.xten.com' },
-                {
-                    url: 'turn:numb.viagenie.ca',
-                    credential: 'muazkh',
-                    username: 'webrtc@live.com'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=udp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=tcp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:turn.bistri.com:80',
-                    credential: 'homeo',
-                    username: 'homeo'
-                },
-                {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                    credential: 'webrtc',
-                    username: 'webrtc'
-                }]
+                self.TURN]
             };
             self.pc1 = new RTCPeerConnection(configuration);
             self.pc1.addEventListener('icecandidate', function (e) {

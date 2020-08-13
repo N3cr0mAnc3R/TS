@@ -194,7 +194,7 @@
                     if (!self.testing) {
 
                         self.initVideoSocket();
-                        self.initWebCam();
+                        self.initWebCam({ video: { facingMode: 'user' }, audio: true });
                         self.startCapture({ video: { cursor: 'always' }, audio: true });
                         self.initChat();
                     }
@@ -318,7 +318,7 @@
                         });
                     }
                 });
-                
+
             }
             catch (exc) {
                 console.log(exc);
@@ -914,39 +914,37 @@
                 peerWithType.peer = null;
             });
         },
-        initWebCam: function () {
+        initWebCam: function (params) {
             var self = this;
-            navigator.mediaDevices.getUserMedia(
-                {
-                    video: {
-                        facingMode: 'user'
-                    },
-                    audio: true
-                }).then(function (videostream) {/*callback в случае удачи*/
+            navigator.mediaDevices.getUserMedia(params
+            ).then(function (videostream) {/*callback в случае удачи*/
 
-                    videostream.oninactive = function (er) {
-                        self.initWebCam();
-                    };
-                    self.cameraStream = videostream;
-                    var options;
-                    if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
-                        options = { mimeType: 'video/webm; codecs=vp9' };
-                    } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
-                        options = { mimeType: 'video/webm; codecs=vp8' };
-                    }
-                    self.cameraRecorder = new MediaRecorder(videostream, options);
-                    self.cameraRecorder.ondataavailable = self.recordingCamera;
-                    self.cameraRecorder.start(100);
+                videostream.oninactive = function (er) {
+                    self.initWebCam(params);
+                };
+                self.cameraStream = videostream;
+                var options;
+                if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
+                    options = { mimeType: 'video/webm; codecs=vp9' };
+                } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
+                    options = { mimeType: 'video/webm; codecs=vp8' };
+                }
+                self.cameraRecorder = new MediaRecorder(videostream, options);
+                self.cameraRecorder.ondataavailable = self.recordingCamera;
+                self.cameraRecorder.start(100);
 
-                    //self.initRTCPeer(1, uid);
-                    $('#video1')[0].srcObject = videostream;
+                //self.initRTCPeer(1, uid);
+                $('#video1')[0].srcObject = videostream;
 
 
 
-                }).catch(
-                    function (er) {/*callback в случае отказа*/
-                        alert("Ваш браузер не поддерживается");
-                    });
+            }).catch(
+                function (er) {/*callback в случае отказа*/
+
+                    self.initWebCam({ video: { facingMode: 'user' } });
+
+                    //alert("Ваш браузер не поддерживается");
+                });
 
         },
         sourceOpen: function () {

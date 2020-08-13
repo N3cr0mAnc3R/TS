@@ -89,8 +89,9 @@ namespace Cropper
                             }
                         }
                     }
-                    //right = 1877;
-                    right = 2175;
+                    right = right > 2175 ? right : 2175;
+                   // right = 2175;
+                  // right = 2400;
                     //Костыль
                     //top = 56;
                     Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(left, top, right - left, bottom - top), bmp.PixelFormat);

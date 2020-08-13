@@ -268,17 +268,24 @@
     <Content Include="Content\Statistic\savescore.min.css">
       <DependentUpon>savescore.css</DependentUpon>
     </Content>
+    <Content Include="Content\Statistic\total.css">
+      <DependentUpon>total.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Statistic\total.js" />
+    <Content Include="Content\Statistic\total.min.css">
+      <DependentUpon>total.css</DependentUpon>
+    </Content>
     <Content Include="Content\Testing\Index1235.css">
       <DependentUpon>Index1235.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.min.css">
       <DependentUpon>Index1235.css</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\pretest1237.js" />
+    <Content Include="Content\Testing\pretest1238.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
-    <Content Include="Content\Testing\qrscanner12.js" />
+    <Content Include="Content\Testing\qrscanner13.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test7598.js" />
+    <Content Include="Content\Testing\test7599.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
@@ -309,6 +316,7 @@
     <Content Include="Content\Shared\Notify.less" />
     <Content Include="Files\Instruction.pdf" />
     <Content Include="Content\Statistic\savescore.less" />
+    <Content Include="Content\Statistic\total.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -430,6 +438,7 @@
     <Compile Include="Controllers\Api\AccountApiController.cs" />
     <Compile Include="Controllers\Api\AuditoryApiController.cs" />
     <Compile Include="Controllers\Api\BaseApiController.cs" />
+    <Compile Include="Controllers\Api\StatisticApiController.cs" />
     <Compile Include="Controllers\Api\UserApiController.cs" />
     <Compile Include="Controllers\Api\VerificationApiController.cs" />
     <Compile Include="Controllers\AuditoryController.cs" />
@@ -479,6 +488,8 @@
     <Compile Include="Models\Proctoring\SaveMarkModel.cs" />
     <Compile Include="Models\Proctoring\TestResultScore.cs" />
     <Compile Include="Models\Proctoring\ProctorEnrollee.cs" />
+    <Compile Include="Models\StatisticManager.cs" />
+    <Compile Include="Models\TotalModel.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
     <Compile Include="Models\UserTest\QuestionAnswer.cs" />
     <Compile Include="Models\UserTest\QuestionModel.cs" />
@@ -531,6 +542,7 @@
     <Content Include="Views\User\QRScanner.cshtml" />
     <Content Include="Views\Auditory\FullWindow.cshtml" />
     <Content Include="Views\Verification\SaveResult.cshtml" />
+    <Content Include="Views\Statistic\Total.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

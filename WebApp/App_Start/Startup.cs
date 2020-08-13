@@ -62,6 +62,10 @@ namespace WebApp
             {
                 return new LogManager(context.Get<Concrete>());
             });
+            app.CreatePerOwinContext((IdentityFactoryOptions<StatisticManager> options, IOwinContext context) =>
+            {
+                return new StatisticManager(context.Get<Concrete>());
+            });
         }
 
         public Concrete CreateConcrete(IdentityFactoryOptions<Concrete> options, IOwinContext context)
