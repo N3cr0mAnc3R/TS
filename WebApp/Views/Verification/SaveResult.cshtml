@@ -16,10 +16,12 @@
         <br />
         <table class="table table-bordered table-striped">
             <tr v-for="item in items">
-                <td><input type="checkbox" v-model="item.checked" class="form-control" /></td>
+                @*<td><input type="checkbox" v-model="item.checked" class="form-control" /></td>*@
                 <td>{{item.Name}}</td>
-                <td><input type="number" max="100" v-model="item.Score" class="form-control" /></td>
-                <td><button v-on:click="saveMark(item)">Сохранить</button></td>
+                <td>@*<input type="number" max="100" v-model="item.Score" class="form-control" />*@
+                {{item.Score}}
+                </td>
+                @*<td><button v-on:click="saveMark(item)">Сохранить</button></td>*@
             </tr>
         </table>
     </div>

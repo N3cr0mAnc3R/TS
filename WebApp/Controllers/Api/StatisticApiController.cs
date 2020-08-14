@@ -43,7 +43,15 @@ namespace WebApp.Controllers.Api
 		[Route("deleteProfile")]
 		public async Task<IHttpActionResult> DeleteProfile(int Id)
 		{
-			return WrapResponse(await StatisticManager.DeleteProfile(Id, CurrentUser.Id));
+			try
+			{
+				await StatisticManager.DeleteProfile(Id, CurrentUser.Id);
+				return WrapResponse(1);
+			}
+			catch
+			{
+				return WrapResponse(0);
+			}
 		}
 		[HttpPost]
 		[Route("getCurrentPlace")]

@@ -89,7 +89,7 @@ namespace Cropper
                             }
                         }
                     }
-                    right = right > 2175 ? right : 2175;
+                    right = right > 2100 ? right : 2100;
                    // right = 2175;
                   // right = 2400;
                     //Костыль

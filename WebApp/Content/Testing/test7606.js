@@ -92,6 +92,7 @@
     },
     methods: {
         init: function () {
+            //alert('start init');
             var self = this;
 
             var ctrlDown = false,
@@ -107,6 +108,7 @@
                 if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = false;
             });
 
+            //alert('subscription');
 
             $("#noCopyPaste").keydown(function (e) {
                 if (ctrlDown && (e.keyCode == vKey || e.keyCode == cKey || e.keyCode == 45)) {
@@ -123,12 +125,14 @@
                     e.preventDefault();//console.log("Document catch Ctrl+V");
             });
 
+            //alert('домен');
             $.ajax({
                 url: "/api/account/GetDomain",
                 type: "POST",
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
+                    // alert(JSON.stringify(domain));
                 }
             });
             $.ajax({
@@ -152,10 +156,6 @@
             //        }
             //    }
             //});
-            self.mediaSource = new MediaSource();
-            self.streamLoaded = URL.createObjectURL(self.mediaSource);
-            self.mediaSource.addEventListener('sourceopen', self.sourceOpen);
-            self.mediaSource.addEventListener('sourceclose', function (e) { console.log(e); });
             self.questions = [];
             self.answers = [];
             self.selectedQuestion = {};
@@ -194,7 +194,7 @@
                     if (!self.testing) {
 
                         self.initVideoSocket();
-                        self.initWebCam({ video: { facingMode: 'user' }, audio: true });
+                         self.initWebCam({ video: { facingMode: 'user' }, audio: true });
                         self.startCapture({ video: { cursor: 'always' }, audio: true });
                         self.initChat();
                     }
@@ -321,6 +321,7 @@
 
             }
             catch (exc) {
+                //alert(exc);
                 console.log(exc);
             }
         },
@@ -916,11 +917,13 @@
         },
         initWebCam: function (params) {
             var self = this;
-            navigator.mediaDevices.getUserMedia(params
-            ).then(function (videostream) {/*callback в случае удачи*/
+            navigator.mediaDevices.getUserMedia(params).then(function (videostream) {/*callback в случае удачи*/
 
                 videostream.oninactive = function (er) {
                     self.initWebCam(params);
+                    self.cameraStream = null;
+                    self.cameraRecorder = null;
+                    $('#video1')[0].srcObject = null;
                 };
                 self.cameraStream = videostream;
                 var options;
@@ -940,21 +943,10 @@
 
             }).catch(
                 function (er) {/*callback в случае отказа*/
-
                     self.initWebCam({ video: { facingMode: 'user' } });
-
                     //alert("Ваш браузер не поддерживается");
                 });
 
-        },
-        sourceOpen: function () {
-            var self = this;
-            self.sourceBuffer = self.mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
-            //self.sourceBuffer.addEventListener('update', function () {
-            //    if (self.streamQueue.length > 0 && !self.sourceBuffer.updating) {
-            //        self.sourceBuffer.appendBuffer(self.streamQueue.shift());
-            //    }
-            //});
         },
         b64toBlob: function (b64Data, sliceSize = 512) {
             // console.log(b64Data.substr(b64Data.indexOf('base64') + 7));
@@ -1595,6 +1587,6 @@
 });
 
 window.onerror = function (msg, url, line, col, error) {
-    console.log(msg, url, line, col, error);
+    alert(msg, url, line, col, error);
     //code to handle or report error goes here
 }

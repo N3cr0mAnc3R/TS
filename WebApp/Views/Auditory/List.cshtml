@@ -8,7 +8,7 @@
     <div class="auditory-header">
         {{switchLocal(1)}}
     </div>
-
+    <div v-if="isSuperAdmin"><a href="/statistic/total">Полный доступ</a></div>
     <div class="auditory-list">
         <template v-for="item in auditoryList">
             <div class="auditory-wrapper">

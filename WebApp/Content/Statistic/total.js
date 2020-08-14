@@ -7,7 +7,10 @@
 		currentHuman: { disciplines: []},
 		auditories: [],
 		auditory: {},
-		places: []
+		places: [],
+		objectLoading: {
+			loading: false
+		}
 	},
 	methods: {
 
@@ -38,11 +41,13 @@
 		},
 		resetTP: function (item) {
 			var self = this;
+			self.objectLoading.loading = true;
 			$.ajax({
 				url: "/api/statistic/resetProfile?Id=" + item.Id,
 				type: 'post',
 				success: function (data) {
 					self.currentHuman.disciplines = data;
+					self.objectLoading.loading = false;
 				}
 			})
 		},
@@ -62,7 +67,12 @@
 				url: "/api/statistic/deleteProfile?Id=" + item.Id,
 				type: 'post',
 				success: function (data) {
-					self.currentHuman.disciplines = data;
+					if (data == 1) {
+						self.currentHuman.disciplines = self.currentHuman.disciplines.filter(function (item1) { return item1.Id != item.Id });
+					}
+					else{
+						notifier([{ Type: 'error', Body: 'Сперва нужно сбросить' }]);
+					}
 				}
 			})
 		},

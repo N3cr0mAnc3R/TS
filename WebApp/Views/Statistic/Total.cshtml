@@ -27,7 +27,7 @@
                     <button v-on:click="resetTP(discipline)"><i class="fa fa-sync"></i></button>
                     <button v-on:click="finishTP(discipline)"><i class="fa fa-check"></i></button>
                     <button v-on:click="deleteTP(discipline)"><i class="fa fa-times"></i></button>
-                    <button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>
+                    @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
                 </td>
             </tr>
         </table>
@@ -53,6 +53,11 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div id="circleG" v-if="objectLoading.loading">
+        <div id="circleG_1" class="circleG"></div>
+        <div id="circleG_2" class="circleG"></div>
+        <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
 <script src="~/Content/Statistic/total.js"></script>
