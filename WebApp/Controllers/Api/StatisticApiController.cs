@@ -40,6 +40,12 @@ namespace WebApp.Controllers.Api
 			return WrapResponse(await StatisticManager.FinishProfile(Id, CurrentUser.Id));
 		}
 		[HttpPost]
+		[Route("nullifyProfile")]
+		public async Task<IHttpActionResult> NullifyProfile(int Id)
+		{
+			return WrapResponse(await StatisticManager.NullifyProfile(Id, CurrentUser.Id));
+		}
+		[HttpPost]
 		[Route("deleteProfile")]
 		public async Task<IHttpActionResult> DeleteProfile(int Id)
 		{

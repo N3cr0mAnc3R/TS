@@ -285,7 +285,7 @@
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner13.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test7606.js" />
+    <Content Include="Content\Testing\test7622.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
@@ -489,6 +489,7 @@
     <Compile Include="Models\Proctoring\TestResultScore.cs" />
     <Compile Include="Models\Proctoring\ProctorEnrollee.cs" />
     <Compile Include="Models\StatisticManager.cs" />
+    <Compile Include="Models\Statistic\UserStatistic.cs" />
     <Compile Include="Models\TotalModel.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
     <Compile Include="Models\UserTest\QuestionAnswer.cs" />

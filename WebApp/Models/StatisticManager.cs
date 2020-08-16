@@ -66,6 +66,22 @@ namespace WebApp.Models
                 );
             }
         }
+        public async Task<IEnumerable<dynamic>> NullifyProfile(int testingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(
+                    sql: "[dbo].[SuperAdmin_NullifyProfile]",
+                    new { userUID, testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return await cnt.QueryAsync<dynamic>(
+                    sql: "[dbo].[SuperAdmin_GetUserByTPId]",
+                    new { userUID, Id = testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
         public async Task DeleteProfile(int testingProfileId, Guid? userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())

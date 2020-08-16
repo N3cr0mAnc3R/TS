@@ -11,6 +11,7 @@
     <div class="info-wrapper">
         <table class="table table-bordered table-stripped table-hover">
             <tr v-for="human in filteredPeople" v-on:click="selectHuman(human.Id)">
+                <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" /></td>
                 <td>{{human.Id}}</td>
                 <td>{{human.Name}}</td>
                 <td>{{human.Guid}}</td>
@@ -27,6 +28,7 @@
                     <button v-on:click="resetTP(discipline)"><i class="fa fa-sync"></i></button>
                     <button v-on:click="finishTP(discipline)"><i class="fa fa-check"></i></button>
                     <button v-on:click="deleteTP(discipline)"><i class="fa fa-times"></i></button>
+                    <button v-on:click="nullify(discipline)">0</button>
                     @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
                 </td>
             </tr>

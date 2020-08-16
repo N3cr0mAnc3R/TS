@@ -63,9 +63,34 @@ namespace WebApp.Controllers.Api
         public IHttpActionResult GetLoginAndPassword()
         {
             MD5 md5 = MD5.Create();
-            string Login = System.Web.Security.Membership.GeneratePassword(6, 0);
+            string Login = GeneratePassword(6); //System.Web.Security.Membership.GeneratePassword(6, 0);
             HMAC mc = HMAC.Create("HMACSHA1");
             return WrapResponse(new { Login, Password = Convert.ToBase64String(mc.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) });
+        }
+        public string GeneratePassword(int passwordSize)
+        {
+            string LOWER_CASE = "abcdefghijklmnopqursuvwxyz";
+            string UPPER_CAES = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            string NUMBERS = "123456789";
+            char[] _password = new char[passwordSize];
+            string charSet = ""; // Initialise to blank
+            System.Random _random = new Random();
+            int counter;
+
+            // Build up the character set to choose from
+            charSet += LOWER_CASE;
+
+            charSet += UPPER_CAES;
+
+            charSet += NUMBERS;
+
+
+            for (counter = 0; counter < passwordSize; counter++)
+            {
+                _password[counter] = charSet[_random.Next(charSet.Length - 1)];
+            }
+
+            return String.Join(null, _password);
         }
         [HttpPost]
         [Route("HasPhoto")]
@@ -98,6 +123,6 @@ namespace WebApp.Controllers.Api
         {
             return WrapResponse("wss://de.ncfu.ru");
         }
-        #endif
+#endif
     }
 }

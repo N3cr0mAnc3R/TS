@@ -61,6 +61,16 @@
 				}
 			})
 		},
+		nullify: function (item) {
+			var self = this;
+			$.ajax({
+				url: "/api/statistic/nullifyProfile?Id=" + item.Id,
+				type: 'post',
+				success: function (data) {
+					self.currentHuman.disciplines = data;
+				}
+			})
+		},
 		deleteTP: function (item) {
 			var self = this;
 			$.ajax({

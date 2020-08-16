@@ -67,7 +67,7 @@
         startedTimeRecording: 0,
         blurReady: false,
         stepCounter: 0,
-        stepNumber: 120,
+        stepNumber: 240,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -141,6 +141,7 @@
                 async: false,
                 success: function (info) {
                     //self.domain = domain;
+                    alert(JSON.stringify(info));
                     self.TURN = {
                         url: 'turn:turn.ncfu.ru:8443',
                         credential: info.Password,
@@ -192,10 +193,20 @@
                     }
                     self.testing = info.IsForTesting;
                     if (!self.testing) {
-
+                        alert('start socket');
                         self.initVideoSocket();
-                         self.initWebCam({ video: { facingMode: 'user' }, audio: true });
-                        self.startCapture({ video: { cursor: 'always' }, audio: true });
+                        alert('start init webcam');
+                        self.initWebCam({ video: { facingMode: 'user' }, audio: true });
+                        alert('start capture');
+
+                        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                        if (!is_safari) {
+                            self.startCapture({ video: { cursor: 'always' }, audio: true });
+                        }
+                        else {
+                            self.shownVideos = false;
+                        }
+                        alert('start chat');
                         self.initChat();
                     }
                     self.timeAlarm = info.TimeAlarm;
@@ -706,8 +717,10 @@
                         self.startedTimeRecording = self.timeLeft;
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(100);
-                        self.screenRecorder.ondataavailable = self.recordingScreen;
-                        self.screenRecorder.start(100);
+                        if (self.screenRecorder) {
+                            self.screenRecorder.ondataavailable = self.recordingScreen;
+                            self.screenRecorder.start(100); \
+                        }
                     }, self.stepCounter * self.stepNumber);
                     self.stepCounter++;
                 },
@@ -718,8 +731,10 @@
                         self.startedTimeRecording = self.timeLeft;
                         self.cameraRecorder.ondataavailable = self.recordingCamera;
                         self.cameraRecorder.start(100);
-                        self.screenRecorder.ondataavailable = self.recordingScreen;
-                        self.screenRecorder.start(100);
+                        if (self.screenRecorder) {
+                            self.screenRecorder.ondataavailable = self.recordingScreen;
+                            self.screenRecorder.start(100);
+                        }
                     }, self.stepCounter * self.stepNumber);
                     self.stepCounter++;
                 }
@@ -944,6 +959,7 @@
             }).catch(
                 function (er) {/*callback в случае отказа*/
                     self.initWebCam({ video: { facingMode: 'user' } });
+
                     //alert("Ваш браузер не поддерживается");
                 });
 
@@ -1170,7 +1186,7 @@
         startCapture: function (displayMediaOptions) {
             var self = this;
             //var captureStream = null;
-
+            alert(JSON.stringify(navigator.mediaDevices));
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
