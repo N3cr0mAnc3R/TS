@@ -25,6 +25,9 @@
 				data: { Fio: self.currentFIO },
 				success: function (data) {
 					self.filteredPeople = data;
+					if (data.length == 1) {
+						self.selectHuman(data[0].Id);
+					}
 				}
 			})
 		},

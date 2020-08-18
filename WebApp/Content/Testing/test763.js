@@ -141,7 +141,7 @@
                 async: false,
                 success: function (info) {
                     //self.domain = domain;
-                    alert(JSON.stringify(info));
+                   // alert(JSON.stringify(info));
                     self.TURN = {
                         url: 'turn:turn.ncfu.ru:8443',
                         credential: info.Password,
@@ -193,11 +193,11 @@
                     }
                     self.testing = info.IsForTesting;
                     if (!self.testing) {
-                        alert('start socket');
+                      //  alert('start socket');
                         self.initVideoSocket();
-                        alert('start init webcam');
+                       // alert('start init webcam');
                         self.initWebCam({ video: { facingMode: 'user' }, audio: true });
-                        alert('start capture');
+                       // alert('start capture');
 
                         var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                         if (!is_safari) {
@@ -206,7 +206,7 @@
                         else {
                             self.shownVideos = false;
                         }
-                        alert('start chat');
+                        //alert('start chat');
                         self.initChat();
                     }
                     self.timeAlarm = info.TimeAlarm;
@@ -719,7 +719,7 @@
                         self.cameraRecorder.start(100);
                         if (self.screenRecorder) {
                             self.screenRecorder.ondataavailable = self.recordingScreen;
-                            self.screenRecorder.start(100); \
+                            self.screenRecorder.start(100);
                         }
                     }, self.stepCounter * self.stepNumber);
                     self.stepCounter++;
@@ -1186,7 +1186,7 @@
         startCapture: function (displayMediaOptions) {
             var self = this;
             //var captureStream = null;
-            alert(JSON.stringify(navigator.mediaDevices));
+           // alert(JSON.stringify(navigator.mediaDevices));
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
