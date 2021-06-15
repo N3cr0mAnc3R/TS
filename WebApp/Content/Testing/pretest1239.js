@@ -60,39 +60,64 @@
             if (is_safari || navigator.userAgent.indexOf("Edge") > -1 || (typeof document !== 'undefined' && !!document.documentMode)) {
                 notifier([{ Type: 'error', Body: self.switchLocal(18) }]);
             }
-            $.ajax({
-                url: "/api/account/GetDomain",
-                type: "POST",
-                async: false,
-                success: function (domain) {
-                    self.domain = domain;
-                }
-            });
-
-            $.ajax({
-                url: "/api/account/GetLoginAndPassword",
-                type: "post",
-                async: false,
-                success: function (info) {
-                    //self.domain = domain;
-                    self.TURN = {
-                        url: 'turn:turn.ncfu.ru:8443',
-                        credential: info.Password,
-                        username: info.Login
-                    };
-                }
-            });
             //Загрузка доступных тестов 
             self.loadTests();
 
             if (localStorage['placeConfig']) {
+
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: '/api/account/IsAuthenticated',
+                    success: function (d) {
+                        if (d) {
+                            $.ajax({
+                                url: "/api/account/GetDomain",
+                                type: "POST",
+                                async: false,
+                                success: function (domain) {
+                                    self.domain = domain;
+                                }
+                            });
+
+                            $.ajax({
+                                url: "/api/account/GetLoginAndPassword",
+                                type: "post",
+                                async: false,
+                                success: function (info) {
+                                    //self.domain = domain;
+                                    self.TURN = {
+                                        url: 'turn:turn.ncfu.ru:8443',
+                                        credential: info.Password,
+                                        username: info.Login
+                                    };
+                                }
+                            });
+                        }
+                        else {
+
+                            clearInterval(self.findTestInterval);
+                        }
+                    }
+                });
+
                 setInterval(self.findTestInterval);
                 self.hasPlaceConfig = true;
             }
             else {
                 self.hasPlaceConfig = false;
                 clearInterval(self.findTestInterval);
-                self.startPlaceConfigInterval();
+
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'json',
+                    url: '/api/account/IsAuthenticated',
+                    success: function (d) {
+                        if (d) {
+                            self.startPlaceConfigInterval();
+                        }
+                    }
+                });
             }
             setTimeout(function () {
                 document.title = self.switchLocal(10);
@@ -148,20 +173,23 @@
                             //console.log(window.URL);
                             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
                             min = self.tests.length > 0 ? self.tests[0].Id : 0;
-                            console.log(min);
+                            //console.log(min);
                             self.tests.forEach(function (item) {
                                 min = min > item.Id ? item.Id : min;
                                 if (item.DisciplineName == 'Испытание творческой направленности (Журналистика)') {
                                     self.artFlag = true;
                                 }
                             })
-                            console.log(self.artFlag);
+                            //console.log(self.artFlag);
                             //var min = d[0].Id;
                             //d.forEach(function (item) {
                             //    min = min > item.Id ? item.Id : min;
                             //})
                             self.testingProfileId = min;// d[0].Id;
                             if (min != 0) {
+                                console.log(self.tests);
+                                let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
+                                console.log(founded);
                                 self.initWebCam();
                                 self.initChat();
 
@@ -172,14 +200,14 @@
                             //self.initRTCPeer();
                         }
                         else {
-                            console.log('else', d);
+                            //console.log('else', d);
                             d.forEach(function (test) {
                                 var founded = self.tests.filter(function (atest) { return atest.Id == test.Id; })[0];
-                                console.log('founded', founded);
+                                //console.log('founded', founded);
                                 if (!founded) {
-                                    console.log('!founded', test);
+                                    //console.log('!founded', test);
                                     if (!test.IsForTesting) {
-                                        console.log('flag', test);
+                                        //console.log('flag', test);
                                         self.tests.push(test);
                                         flag = true;
                                     }
@@ -361,7 +389,6 @@
                         }, function (r) { console.log(r); })
                     }
                     else if (message.verified != undefined) {
-                        console.log(message.verified);
                         self.verified = message.verified;
                         if (message.verified == true) {
                             notifier([{ Type: 'success', Body: self.switchLocal(16) }]);
@@ -426,7 +453,6 @@
                     function (er) {/*callback в случае отказа*/
                         alert(self.switchLocal(8));
                         self.enabled = false;
-                        console.log(er);
                     });
             //}
         },
@@ -455,6 +481,9 @@
         },
         sendMessage: function (self1) {
             var self = self1 ? self1 : this;
+            if (self.chat.Message.trim() == "") {
+                return;
+            }
             self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
             self.chat.Message = "";
         },
@@ -489,7 +518,6 @@
                     success: function () {
 
                         clearInterval(self.verifyInterval);
-                        console.log('got');
                         self.verified = true;
                     }
                 });
@@ -533,13 +561,12 @@
                             }
                             else {
                                 self.recognized = res;
-                                console.log(res);
                                 if (!res) {
                                     self.noFace = false;
                                 }
                                 else {
                                     clearInterval(self.verifyInterval);
-                                    console.log('got');
+
                                     self.verified = true;
 
                                 }
@@ -595,7 +622,7 @@
             });
 
             self.pc1.addEventListener('connectionstatechange', function (event) {
-                console.log(self.pc1.connectionState);
+
                 if (self.pc1.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (self.pc1.connectionState == 'connecting') {
@@ -705,14 +732,12 @@
             var str = CryptoJS.AES.encrypt("place-" + placeId, "Secret Passphrase");
             localStorage['placeConfig'] = str.toString();
             var obj = { Id: PlaceProfile, PlaceConfig: str.toString(), PlaceId: placeId };
-            console.log(obj);
             $.ajax({
                 url: "/api/auditory/UpdatePlaceConfig",
                 type: "POST",
                 async: true,
                 data: obj,
                 success: function (data) {
-                    console.log(data);
                     self.hasPlaceConfig = true;
                     //window.open('/account/logout', '_self');
                     //location.reload();

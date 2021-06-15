@@ -22,19 +22,22 @@
                 dataType: 'json',
                 url: '/api/account/IsAuthenticated',
                 success: function (d) {
-                    //self.getLocalization();
-                    self.getLocation();
-                    self.getCurrentUser();
+                    if (d) {
+                        //self.getLocalization();
+                        self.getLocation();
+                        self.getCurrentUser();
+                        $.ajax({
+                            type: 'POST',
+                            dataType: 'json',
+                            url: '/api/account/HasPhoto',
+                            success: function (d) {
+                                self.hasPhoto = d;
+                            }
+                        });
+                    }
                     $('#window-without-loader').css('display', 'block');
                     $('#main-loader').css('display', 'none');
-                }
-            });
-            $.ajax({
-                type: 'POST',
-                dataType: 'json',
-                url: '/api/account/HasPhoto',
-                success: function (d) {
-                    self.hasPhoto = d;
+                    $('#navigation').css('display', 'flex');
                 }
             });
             $.ajax({
@@ -117,7 +120,7 @@
                 self.needShow3 = resp3[0];
                 self.needShow4 = resp4[0];
 
-                console.log(self.forShow[0], self.forShow[1], self.forShow[2], self.forShow[3]);
+                //console.log(self.forShow[0], self.forShow[1], self.forShow[2], self.forShow[3]);
             }, function (err) {
 
             });
@@ -149,8 +152,8 @@
         switchLocal1: function () {
             var self = this;
             //console.log(123);
-           // var checking = (typeof app == 'undefined') ? self : app;
-            $('#nav-4').text(localStorage["localization"] == 1 ? "Все права защищены, 2020, СКФУ" : "All rights reserved, 2020, NCFU");
+            // var checking = (typeof app == 'undefined') ? self : app;
+            $('#nav-4').text(localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU");
             $('#nav-8').text(localStorage["localization"] == 1 ? "Логин" : "UserName");
             $('#nav-9').text(localStorage["localization"] == 1 ? "Пароль" : "Password");
             $('#nav-10').text(localStorage["localization"] == 1 ? "Выполнить вход" : "Log in");
@@ -162,7 +165,7 @@
                 case 1: return localStorage["localization"] == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System";
                 case 2: return localStorage["localization"] == 1 ? "Вход" : "Login";
                 case 3: return localStorage["localization"] == 1 ? "Выход" : "Logout";
-                case 4: return localStorage["localization"] == 1 ? "Все права защищены, 2020, СКФУ" : "All rights reserved, 2020, NCFU";
+                case 4: return localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU";
                 case 5: return localStorage["localization"] == 1 ? "Список аудиторий" : "Auditory list";
                 case 6: return localStorage["localization"] == 1 ? "Проверка ВИ" : "Verification";
                 case 7: return localStorage["localization"] == 1 ? "Используйте учетную запись eCampus для входа." : "Enter Your eCampus Login and password";

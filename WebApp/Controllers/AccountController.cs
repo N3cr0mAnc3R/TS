@@ -64,7 +64,7 @@ namespace WebApp.Controllers
             //SignInManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             if (CurrentUser == null) return Json(false);
             else
-            return Json(CurrentUser.Id != Guid.Empty);
+                return Json(CurrentUser.Id != Guid.Empty);
 
         }
         //[AllowAnonymous]
@@ -89,11 +89,48 @@ namespace WebApp.Controllers
         [AllowAnonymous]
         public ActionResult Logout()
         {
+            TestManager.ResetPlaceRequest(CurrentUser.Id);
 
             Request.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             return RedirectToAction("list", "auditory");
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<JsonResult> ApiLogin(LoginModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                ApplicationUser user = null;
+                user = getLDAPuuid(model);
+                if (user == null)
+                {
+                    user = AccountManager.GetUser(model.Login, null, model.Password);
+                }
+                if (user == null || user.Id == Guid.Empty)
+                {
+                    ModelState.AddModelError("", "Неверный логин или пароль");
+                    return Json(new { Error = "Неверный логин или пароль." });
+                }
+
+                // await AccountManager.LoadNewUserIfNotExists(user.Id);
+
+
+                SignInManager.SignIn(user, false, false);
+                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
+
+
+                ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces(user.Id);
+
+                return Json(new { Data = "Успешно" });
+            }
+            else
+            {
+                ModelState.AddModelError("", "Неудачная попытка входа.");
+                return Json(new { Error = "Неудачная попытка входа."});
+            }
+
+        }
         [HttpPost]
         [AllowAnonymous]
         public async Task<ActionResult> Login(LoginModel model)
@@ -113,14 +150,14 @@ namespace WebApp.Controllers
                     return View(model);
                 }
 
-               // await AccountManager.LoadNewUserIfNotExists(user.Id);
+                // await AccountManager.LoadNewUserIfNotExists(user.Id);
 
 
                 SignInManager.SignIn(user, false, false);
                 await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
 
                 List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
-                if (AccountManager.HasOneOfRoles(roles, new int[4] { 1,2,3,4}))
+                if (AccountManager.HasOneOfRoles(roles, new int[4] { 1, 2, 3, 4 }))
                 {
                     return RedirectToAction("list", "verification");
                 }
@@ -168,19 +205,19 @@ namespace WebApp.Controllers
         //    return Json(new { Login, Password = Convert.ToBase64String(mc.ComputeHash(Encoding.UTF8.GetBytes(Login + ":" + Secret))) }, JsonRequestBehavior.AllowGet);
         //}
 
-//#if DEBUG
-//        [HttpPost]
-//        public JsonResult GetDomain()
-//        {
-//            return Json("ws://localhost");
-//        }
-//#else
-//        [HttpPost]
-//        public JsonResult GetDomain()
-//        {
-//            return Json("wss://de.ncfu.ru");
-//        }
-//#endif
+        //#if DEBUG
+        //        [HttpPost]
+        //        public JsonResult GetDomain()
+        //        {
+        //            return Json("ws://localhost");
+        //        }
+        //#else
+        //        [HttpPost]
+        //        public JsonResult GetDomain()
+        //        {
+        //            return Json("wss://de.ncfu.ru");
+        //        }
+        //#endif
 
 
         public ActionResult UserPic()
@@ -199,6 +236,13 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<AccountManager>();
+            }
+        }
+        protected TestManager TestManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<TestManager>();
             }
         }
         protected AuditoryManager AuditoryManager

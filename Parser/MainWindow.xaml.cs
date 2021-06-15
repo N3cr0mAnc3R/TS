@@ -79,9 +79,9 @@ namespace Parser
                 int i = 1;
                 while (reader.Read())
                 {
-                    //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["QUESTION1"]);
-                    //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
-                    File.WriteAllBytes("D:\\test4" + i + ".doc", (byte[])reader["question"]);
+                    //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["QUESTION1"]);
+                    //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
+                    File.WriteAllBytes("E:\\test4" + i + ".doc", (byte[])reader["question"]);
                     i++;
                 }
             }
@@ -162,7 +162,7 @@ namespace Parser
                     cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
                 }
                 conn.Open();
-                string input = "D:\\test4.pdf", output = "D:\\test";
+                string input = "E:\\test4.pdf", output = "E:\\test";
 
                 //File.WriteAllBytes(input, cmd.ExecuteScalar() as byte[]);
                 int Id = 0;
@@ -173,15 +173,15 @@ namespace Parser
                         Id = (int)reader["ID"];
                         if (IsChecked)
                         {
-                            File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
+                            File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
 
                         }
                         else
                         {
-                            File.WriteAllBytes("D:\\test4.doc", (byte[])reader["answer"]);
+                            File.WriteAllBytes("E:\\test4.doc", (byte[])reader["answer"]);
                         }
-                        //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["QUESTION1"]);
-                        //File.WriteAllBytes("D:\\test4.doc", (byte[])reader["question"]);
+                        //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["QUESTION1"]);
+                        //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
                         //Id1 =(int)reader["questionId"];
                     }
                 }
@@ -191,10 +191,10 @@ namespace Parser
                     return;
                 }
                 Parsing parser = new Parsing();
-                parser.ParseAsync("D:\\test4.doc", input, IsChecked);
+                parser.ParseAsync("E:\\test4.doc", input, IsChecked);
 
 
-                string ghostScriptPath = IsUra? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"D:\Old\gs9.50\bin\gswin64.exe";
+                string ghostScriptPath = IsUra? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
                 //string ghostScriptPath = @"C:\Program Files\gs\gs9.50\bin\gswin64.exe";
                 String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
                 Process proc = new Process();
@@ -282,7 +282,7 @@ namespace Parser
                 }
 
                 File.Delete(input);
-                File.Delete("D:\\test4.doc");
+                File.Delete("E:\\test4.doc");
                 File.Delete(output + ".jpg");
                 bck.ReportProgress(100);
 
@@ -291,7 +291,7 @@ namespace Parser
             catch (IOException exc)
             {
 
-             //   File.Delete("D:\\test4.doc");
+             //   File.Delete("E:\\test4.doc");
                 MessageBox.Show(exc.Message);
                 //Process1(sender, e);
             }

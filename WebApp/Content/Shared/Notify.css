@@ -42,14 +42,19 @@
   right: -10px;
   border-radius: 50%;
   height: 22px;
+  padding: 1px;
+  box-sizing: content-box;
   width: 21px;
   background: #666;
   cursor: pointer;
 }
 .kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper .notification .remove .fa {
   color: #fff;
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 100;
+  position: absolute;
+  top: 0px;
+  right: 2px;
   display: block;
 }
 .kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.type-error .notification {

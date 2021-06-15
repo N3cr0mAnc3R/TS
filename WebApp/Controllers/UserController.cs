@@ -181,7 +181,7 @@ namespace WebApp.Controllers
         //    //}
         //    //Bitmap image1 = ConvertToFormat(second, PixelFormat.Format24bppRgb);
         //    //HaarObjectDetector faceDetector = new HaarObjectDetector(new FaceHaarCascade(), minSize: 25, searchMode: ObjectDetectorSearchMode.NoOverlap);
-        //    //RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
+        RectanglesMarker facesMarker = new RectanglesMarker(Color.Red);
         //    //RectanglesMarker facesMarker1 = new RectanglesMarker(Color.Red);
         //    //facesMarker.Rectangles = faceDetector.ProcessFrame(image);
         //    ////if(facesMarker.Rectangles.Count() == 0)

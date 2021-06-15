@@ -15,7 +15,7 @@
         init: function () {
             var self = this;
            // self.currentDate = new Date();
-            console.log(self.currentDate);
+           // console.log(self.currentDate);
             $.ajax({
                 url: "/api/auditory/GetStatuses",
                 type: "POST",
@@ -127,6 +127,7 @@
             var self = this;
             if (self.isSuperAdmin) {
                 self.users.forEach(function (item) {
+                    console.log(item);
                     self.printTPResult(item.Id);
                 })
             }

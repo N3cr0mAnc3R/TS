@@ -17,6 +17,7 @@ namespace WebApp.Controllers.Api
     {
         [HttpPost]
         [Route("GetOrganizationContacts")]
+        [AllowAnonymous]
         public async Task<IHttpActionResult> GetOrganizationContacts()
         {
             return WrapResponse(await AuditoryManager.GetOrganizationContacts());

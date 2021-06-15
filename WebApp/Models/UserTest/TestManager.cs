@@ -32,6 +32,34 @@ namespace WebApp.Models
                 }
             }
         }
+        public async Task<dynamic> GetTestsByUserId(Guid userUID, string Localization = "RU")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                try
+                {
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet]", new { Localization, userUID }, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception e)
+                {
+                    return new { Error = e.Message };
+                }
+            }
+        }
+        public async Task<dynamic> GetActiveTestsByPlaceConfig(Guid userUID, string Localization = "RU")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                try
+                {
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet]", new { testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                }
+                catch (Exception e)
+                {
+                    return new { Error = e.Message };
+                }
+            }
+        }
         public async Task<dynamic> GetActiveTestsByPlaceConfig(string placeConfig, Guid userUID, string Localization = "RU")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())

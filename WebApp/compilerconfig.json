@@ -42,5 +42,9 @@
   {
     "outputFile": "Content/Statistic/total.css",
     "inputFile": "Content/Statistic/total.less"
+  },
+  {
+    "outputFile": "Content/Testing/Index1236.css",
+    "inputFile": "Content/Testing/Index1236.less"
   }
 ]

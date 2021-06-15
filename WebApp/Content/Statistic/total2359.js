@@ -31,6 +31,9 @@
 				}
 			})
 		},
+		download: function (Id) {
+			window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
+		},
 		selectHuman: function (Id) {
 			var self = this;
 			$.ajax({
@@ -53,6 +56,9 @@
 					self.objectLoading.loading = false;
 				}
 			})
+		},
+		downloadCamera: function (Id, type) {
+			window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
 		},
 		finishTP: function (item) {
 			var self = this;

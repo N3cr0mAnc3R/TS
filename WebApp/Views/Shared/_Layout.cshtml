@@ -13,23 +13,25 @@
     <link href="~/Content/bootstrap.css" rel="stylesheet" />
     <script src="~/Content/vue.min.js"></script>
     @*<script src="~/Content/vue.js"></script>*@
+    <link href="~/Content/font-awesome.css" rel="stylesheet" />
     <script src="~/Content/loader.js"></script>
 </head>
 <body>
     @Html.Partial("~/Views/Shared/Notifier.cshtml")
     <nav @*class="navbar navbar-expand-lg navbar-light bg-light"*@ class="navbar-system">
-        <div class="container" id="navigation">
+        <div class="container" id="navigation" style="display: none;">
             <div class="base-nav">
                 <a class="navbar-brand" href="@Url.Action("waiting", "user")"><span id="nav-1" class="d-none d-lg-block">{{switchLocal(1)}}</span></a>
                 @*<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>*@
-                <button class="navbar-toggler" v-on:click="toggleMenu()">
-                    <span class="navbar-icon">
-                        <svg aria-hidden="true" width="25px" focusable="false" data-prefix="far" data-icon="bars" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-bars fa-w-14"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z" class=""></path></svg>
-                    </span>
-                </button>
-
+            <span class="navbar-toggler-icon"></span>
+        </button>*@
+                @if (Request.IsAuthenticated) { 
+                    <button class="navbar-toggler" v-on:click="toggleMenu()">
+                        <span class="navbar-icon">
+                            <svg aria-hidden="true" width="25px" focusable="false" data-prefix="far" data-icon="bars" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" class="svg-inline--fa fa-bars fa-w-14"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z" class=""></path></svg>
+                        </span>
+                    </button>
+                }
                 <div class="navbar-collapse1" id="navbarSupportedContent">
                     @if (Request.IsAuthenticated)
                     {
@@ -98,6 +100,6 @@
         }
 
     </script>
-    <script src="~/Content/mainVue255.js"></script>
+    <script src="~/Content/mainVue256.js"></script>
 </body>
 </html>

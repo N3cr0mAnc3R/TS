@@ -47,6 +47,21 @@ namespace WebApp.Controllers.Api
                 return WrapResponse(new { Error = e.Message });
             }
         }
+        [Route("gettestsforuser")]
+        [HttpPost]
+        public async Task<IHttpActionResult> GetTestsForUser()
+        {
+            try
+            {
+                List<TestingModel> tests = await TestManager.GetTestsByUserId(CurrentUser.Id);
+                tests.AddRange(await TestManager.GetActiveTestsByPlaceConfig(CurrentUser.Id));
+                return WrapResponse(tests);
+            }
+            catch (Exception e)
+            {
+                return WrapResponse(new { Error = e.Message });
+            }
+        }
         [Route("CheckPIN")]
         [HttpPost]
         public async Task<IHttpActionResult> CheckPIN(int pin)

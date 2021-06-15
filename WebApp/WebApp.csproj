@@ -15,7 +15,7 @@
     <RootNamespace>WebApp</RootNamespace>
     <AssemblyName>WebApp</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -222,7 +222,7 @@
     <Content Include="Content\f-awesome.js" />
     <Content Include="Content\font-awesome.css" />
     <Content Include="Content\loader.js" />
-    <Content Include="Content\mainVue255.js" />
+    <Content Include="Content\mainVue256.js" />
     <Content Include="Content\novideo.png" />
     <Content Include="Content\proctor.css">
       <DependentUpon>proctor.less</DependentUpon>
@@ -271,17 +271,23 @@
     <Content Include="Content\Statistic\total.css">
       <DependentUpon>total.less</DependentUpon>
     </Content>
-    <Content Include="Content\Statistic\total2358.js" />
+    <Content Include="Content\Statistic\total2359.js" />
     <Content Include="Content\Statistic\total.min.css">
       <DependentUpon>total.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.css">
-      <DependentUpon>Index1235.less</DependentUpon>
+      <DependentUpon>Index1236.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.min.css">
       <DependentUpon>Index1235.css</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\pretest1238.js" />
+    <Content Include="Content\Testing\Index1236.css">
+      <DependentUpon>Index1236.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Testing\Index1236.min.css">
+      <DependentUpon>Index1236.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Testing\pretest1239.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner13.js" />
     <Content Include="Content\Testing\scannerlib.js" />
@@ -300,7 +306,7 @@
     <Content Include="Content\font-awesome.less" />
     <Content Include="fonts\fontawesome-webfont.woff" />
     <Content Include="fonts\FontAwesome.otf" />
-    <Content Include="Content\Testing\Index1235.less" />
+    <Content Include="Content\Testing\Index1236.less" />
     <Content Include="Content\site.less" />
     <Content Include="Content\Auditory\moderate.less" />
     <Content Include="Content\proctor.less" />

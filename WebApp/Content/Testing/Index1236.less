@@ -44,14 +44,14 @@
     box-shadow: #a2a2a2 0px 3px 4px;
     border-top: none;
     background-color: #fff;
-    height: 400px;
-    width: 700px;
+    /*height: 400px;*/
+    /*width: 700px;*/
     margin: auto;
     margin-top: 80px;
 
     input {
         width: 100%;
-        min-width: 600px;
+        /*min-width: 600px;*/
 
         &::-webkit-input-placeholder {
             text-align: center;
@@ -76,16 +76,32 @@
 }
 
 .input-pin {
+
+    @width: 100px;
+
+    width: 100%;
+
+    @media(max-width:700px) {
+        /*width: 300px;*/
+        /*height: 300px;*/
+    }
+
+    @media(min-width:1024px) {
+        width: 1024px;
+        /*height: 1024px;*/
+    }
+    /*
     width: 1024px;
     height: 1024px;
-
+*/
     #basic-addon1 {
         font-size: 200px;
     }
 
     input {
-        font-size: 200px;
-        min-width: 600px;
+        min-width: 100%;
+        font-size: @width;
+        /*min-width: 600px;*/
     }
 
     input::-webkit-outer-spin-button,
@@ -1056,6 +1072,7 @@ canvas {
     position: fixed;
     left: 45px;
     bottom: 90px;
+    z-index:3;
     background: #fff;
     border: 1px solid #c4c4c4;
 
@@ -1301,4 +1318,10 @@ canvas {
     font-weight: 600;
     font-size: 16px;
     line-height: 40px;
+}
+
+.justify-content-around{
+    video{
+        width:100%;
+    }
 }

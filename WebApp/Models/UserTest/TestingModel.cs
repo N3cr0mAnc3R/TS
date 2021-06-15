@@ -11,6 +11,7 @@ namespace WebApp.Models.UserTest
         public int TestingStatusId { get; set; }
         public bool NeedShowScore { get; set; }
         public bool IsForTesting { get; set; }
+        public bool IsCameraControl { get; set; }
         public DateTime TestingDate { get; set; }
         public Guid userUID { get; set; }
         public string LastName { get; set; }

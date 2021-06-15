@@ -67,6 +67,10 @@ namespace WebApp
                         {
                             cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
                         }
+                        if (cathing == "")
+                        {
+                            return;
+                        }
                         jsonparsed = Json.Decode<ChatMessage>(cathing);
 
                         if (jsonparsed.ForReset)

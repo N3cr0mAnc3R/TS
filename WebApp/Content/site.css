@@ -265,12 +265,36 @@ body .localization-wrapper .localization-item.active {
   box-shadow: inset #565c72 0px 1px 4px;
 }
 .footer-container {
-  font-size: 18px;
   display: flex;
   justify-content: space-between;
 }
-.footer-container #nav-5 {
-  line-height: 35px;
+@media (min-width: 0) {
+  .footer-container #nav-4 {
+    font-size: 12px;
+    line-height: 28px;
+  }
+  .footer-container #nav-5 {
+    line-height: 19px;
+    font-size: 15px;
+  }
+}
+@media (min-width: 700px) {
+  .footer-container #nav-5 {
+    line-height: 22px;
+    font-size: 18px;
+  }
+}
+@media (min-width: 1024px) {
+  .footer-container {
+    font-size: 18px;
+  }
+  .footer-container #nav-4 {
+    font-size: 18px;
+    line-height: 75px;
+  }
+  .footer-container #nav-5 {
+    line-height: 35px;
+  }
 }
 #nav-7 {
   color: #565C72;

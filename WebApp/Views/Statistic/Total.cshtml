@@ -31,6 +31,8 @@
                     <button v-on:click="finishTP(discipline)"><i class="fa fa-check"></i></button>
                     <button v-on:click="deleteTP(discipline)"><i class="fa fa-times"></i></button>
                     <button v-on:click="nullify(discipline)">0</button>
+                    <button v-on:click="download(discipline.Id)"><i class="fa fa-print"></i></button>
+                    <button v-on:click="downloadCamera(discipline.Id, 1)"><i class="fa fa-video-camera"></i></button>
                     @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
                 </td>
             </tr>
@@ -64,4 +66,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/total2358.js"></script>
+<script src="~/Content/Statistic/total2359.js"></script>

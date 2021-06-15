@@ -32,6 +32,7 @@ namespace WebApp
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
                 LoginPath = new PathString("/Account/Login"),
+                CookieName = "DE",
                 Provider = new CookieAuthenticationProvider
                 {
                     // Позволяет приложению проверять метку безопасности при входе пользователя.
