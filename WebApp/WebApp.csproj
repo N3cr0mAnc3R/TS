@@ -208,7 +208,7 @@
     <Content Include="Content\Auditory\moderate.css">
       <DependentUpon>moderate.less</DependentUpon>
     </Content>
-    <Content Include="Content\Auditory\moderate1236.js" />
+    <Content Include="Content\Auditory\moderate1237.js" />
     <Content Include="Content\Auditory\moderate.min.css">
       <DependentUpon>moderate.css</DependentUpon>
     </Content>
@@ -291,7 +291,7 @@
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner13.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test763.js" />
+    <Content Include="Content\Testing\test764.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />

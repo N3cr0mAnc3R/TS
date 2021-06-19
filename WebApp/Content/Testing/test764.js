@@ -66,8 +66,9 @@
         NameDiscipline: "",
         startedTimeRecording: 0,
         blurReady: false,
-        stepCounter: 0,
-        stepNumber: 240,
+        stepCounter: 1,
+        stepNumber: 320,
+        //stepNumber: 240,
         calculator: {
             rows: [
                 { id: 0, columns: [{ k: 7, size: 1 }, { k: 8, size: 1 }, { k: 9, size: 1 }, { k: '←', size: 1 }, { k: 'C', size: 1 }] },
@@ -141,7 +142,7 @@
                 async: false,
                 success: function (info) {
                     //self.domain = domain;
-                   // alert(JSON.stringify(info));
+                    // alert(JSON.stringify(info));
                     self.TURN = {
                         url: 'turn:turn.ncfu.ru:8443',
                         credential: info.Password,
@@ -193,11 +194,11 @@
                     }
                     self.testing = info.IsForTesting;
                     if (!self.testing) {
-                      //  alert('start socket');
+                        //  alert('start socket');
                         self.initVideoSocket();
-                       // alert('start init webcam');
+                        // alert('start init webcam');
                         self.initWebCam({ video: { facingMode: 'user' }, audio: true });
-                       // alert('start capture');
+                        // alert('start capture');
 
                         var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                         if (!is_safari) {
@@ -317,7 +318,7 @@
                                         url: '/api/user/GetSourceMaterial?Id=' + material.Id,
                                         success: function (data) {
                                             material.Image = data;
-                                            console.log(material);
+                                            //console.log(material);
                                         }
                                     });
                                 }
@@ -501,13 +502,13 @@
                         self.unloadedImage = "";
                     }
                     if (d.indexOf('flag') != -1 && d.indexOf('flag') < 3) {
-                        console.log('agaibn');
+                        //console.log('agaibn');
                         self.unloadedImage += d.substr(4);
                         //self.selectedQuestion.QuestionImage += d.QuestionImage.substr(4);
                         self.askQuestionImagePart(part + 1);
                     }
                     else {
-                        console.log('loaded');
+                        //console.log('loaded');
                         self.unloadedImage += d;
                         self.selectedQuestion.QuestionImage = self.unloadedImage;
                         //После загрузки ставим метку, что загружено
@@ -655,13 +656,13 @@
                     try {
                         self.finishTest();
                     }
-                    catch{
+                    catch {
                         setTimeOut(function () {
                             self.finishTest();
                         }, 5000);
                     }
                 }
-                // console.log(self.startedTimeRecording, self.timeLeft);
+                //console.log(self.startedTimeRecording, self.timeLeft, self.timeRecording);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
                     //console.log('stop recording');
                     setTimeout(function () {
@@ -694,6 +695,7 @@
             formaData2.append('Id', self.testingProfileId);
             formaData2.append('Type', 2);
             formaData2.append('File', self.bufferScreen, self.showTimeLeft().replace(':', '_'));
+            let index = 0;
             $.ajax({
                 url: "/user/SaveVideoFile",
                 type: "POST",
@@ -702,6 +704,10 @@
                 processData: false,
                 success: function () {
                     self.recordedCamera = [];
+                    index++;
+                    if (index == 2) {
+                        self.reInitRecorders();
+                    }
                 }
             });
             $.ajax({
@@ -711,35 +717,35 @@
                 contentType: false,
                 processData: false,
                 success: function () {
-                    self.recordedScreen = [];
-                    setTimeout(function () {
-                        self.flagStopRec = false;
-                        self.startedTimeRecording = self.timeLeft;
-                        self.cameraRecorder.ondataavailable = self.recordingCamera;
-                        self.cameraRecorder.start(100);
-                        if (self.screenRecorder) {
-                            self.screenRecorder.ondataavailable = self.recordingScreen;
-                            self.screenRecorder.start(100);
-                        }
-                    }, self.stepCounter * self.stepNumber);
-                    self.stepCounter++;
+                    index++;
+                    if (index == 2) {
+                        self.reInitRecorders();
+                    }
                 },
                 error: function () {
-                    self.recordedScreen = [];
-                    setTimeout(function () {
-                        self.flagStopRec = false;
-                        self.startedTimeRecording = self.timeLeft;
-                        self.cameraRecorder.ondataavailable = self.recordingCamera;
-                        self.cameraRecorder.start(100);
-                        if (self.screenRecorder) {
-                            self.screenRecorder.ondataavailable = self.recordingScreen;
-                            self.screenRecorder.start(100);
-                        }
-                    }, self.stepCounter * self.stepNumber);
-                    self.stepCounter++;
+                    self.reInitRecorders();
                 }
             });
 
+        },
+        reInitRecorders() {
+            let self = this;
+            //console.log("reInit recording");
+            //console.log(self.stepCounter, self.stepNumber);
+            self.recordedScreen = [];
+            //console.log("Will start after" + (self.stepCounter * self.stepNumber));
+            setTimeout(function () {
+                //console.log("Started timeout", new Date());
+                self.flagStopRec = false;
+                self.startedTimeRecording = self.timeLeft;
+                self.cameraRecorder.ondataavailable = self.recordingCamera;
+                self.cameraRecorder.start(100);
+                if (self.screenRecorder) {
+                    self.screenRecorder.ondataavailable = self.recordingScreen;
+                    self.screenRecorder.start(100);
+                }
+            }, self.stepCounter * 10 * self.stepNumber);
+            self.stepCounter++;
         },
         initChat: function () {
             var self = this;
@@ -792,7 +798,7 @@
             };
             self.chatSocket.onclose = function (event) {
                 self.initChat();
-                console.log('oh-oh');
+                //console.log('oh-oh');
                 // alert('Мы потеряли её. Пожалуйста, обновите страницу');
             };
         },
@@ -823,12 +829,22 @@
             //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
             //}
             if (typeof (WebSocket) !== 'undefined') {
-                self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                try {
+                    self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                }
+                catch {
+                    notifier([{ Type: 'error', Body: self.switchLocal(16) }]);
+                }
             } else {
-                self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                try {
+                    self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                }
+                catch {
+                    notifier([{ Type: 'error', Body: self.switchLocal(16) }]);
+                }
             }
             self.videoSocket.onopen = function () {
-                console.log('init videosocket');
+                //console.log('init videosocket');
                 self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
                 self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: true, startOffer: true }));
             };
@@ -843,11 +859,11 @@
 
 
                         var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                        console.log(queue.candidates);
+                        //console.log(queue.candidates);
                         queue.candidates.push(candidate);
                     }
                     else if (message.requestOffer) {
-                        console.log('start request');
+                        //console.log('start request');
                         // self.reInitPeers();
                         self.initRTCPeer(1, message.uid);
                         self.initRTCPeer(2, message.uid);
@@ -892,7 +908,7 @@
                         //var interval = setInterval(function () {
                         //console.log('start interval');
                         var found = self.peers.filter(function (item) { return item.type == message.type && item.uid == message.uid; })[0];
-                        console.log('found', found);
+                        //console.log('found', found);
                         if (found) {
                             //  clearInterval(interval);
                             var peer = found.peer;
@@ -902,7 +918,7 @@
                                 queue.candidates.forEach(function (candidate) {
                                     peer.addIceCandidate(candidate);
                                 });
-                                console.log(r);
+                                //console.log(r);
                             }, function (r) { console.log(r); });
 
 
@@ -917,7 +933,7 @@
             };
 
             self.videoSocket.onclose = function () {
-                console.log('close video');
+                //console.log('close video');
                 self.initVideoSocket();
             }
         },
@@ -950,6 +966,8 @@
                 self.cameraRecorder = new MediaRecorder(videostream, options);
                 self.cameraRecorder.ondataavailable = self.recordingCamera;
                 self.cameraRecorder.start(100);
+
+                //console.log("Start Recording Camera", new Date());
 
                 //self.initRTCPeer(1, uid);
                 $('#video1')[0].srcObject = videostream;
@@ -1186,7 +1204,7 @@
         startCapture: function (displayMediaOptions) {
             var self = this;
             //var captureStream = null;
-           // alert(JSON.stringify(navigator.mediaDevices));
+            // alert(JSON.stringify(navigator.mediaDevices));
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
@@ -1205,11 +1223,12 @@
                 }
                 //var tracks = Str.getTracks();
                 //track.forE
-                console.log(options);
+                //console.log(options);
                 // self.initRTCPeer(2, uid);
                 self.screenRecorder = new MediaRecorder(Str, options);
                 self.screenRecorder.ondataavailable = self.recordingScreen;
                 self.screenRecorder.start(100);
+                //console.log("Start Recording", new Date());
                 $(window).on('blur', function (e) {
                     if (self.blurReady) {
                         notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
@@ -1396,7 +1415,7 @@
             return date.toLocaleTimeString();
         },
         initRTCPeer: function (type, uid) {
-            console.log('init rtcpeer');
+            //console.log('init rtcpeer');
             var self = this;
             var TURN = {
                 url: 'turn:turn.bistri.com:80',
@@ -1496,8 +1515,8 @@
                     }, function () { });
                 }, function () { });
             }
-            catch{
-                console.log('error');
+            catch {
+                //console.log('error');
             }
 
         },
@@ -1559,10 +1578,11 @@
                 case 13: return localStorage["localization"] == 1 ? "Вы не ответили на " : "Not answered: ";
                 case 14: return localStorage["localization"] == 1 ? "Свернуть" : "Collapse";
                 case 15: return localStorage["localization"] == 1 ? "Развернуть" : "Expand";
-                case 16: return localStorage["localization"] == 1 ? "Потеряна связь с сервером" : "Lost connection to the server";
+                case 16: return localStorage["localization"] == 1 ? "Потеряна связь с сервером. Перезагрузите страницу" : "Lost connection to the server. Reload Your page";
                 case 17: return localStorage["localization"] == 1 ? "Потеряно соединение с сервером. Проверьте Ваше подключение к интернету." : "Lost connection to the server. Check Your internet-connection.";
                 case 18: return localStorage["localization"] == 1 ? "Вступительное испытание завершено." : "Your test is over.";
-                case 19: return localStorage["localization"] == 1 ? "Ваш результат" : "Your score";
+                case 19: return localStorage["localization"] == 1 ? "Результат будет показан в личном кабинете портала eCampus" : "Score will be shown in portal eCampus";
+                //case 19: return localStorage["localization"] == 1 ? "Ваш результат" : "Your score";
                 case 20: return localStorage["localization"] == 1 ? "С результатами ознакомлен" : "I got acquainted with the results";
                 case 21: return localStorage["localization"] == 1 ? "Подтвердить" : "Confirm";
                 case 22: return localStorage["localization"] == 1 ? "Вернуться к списку" : "Back to test list";

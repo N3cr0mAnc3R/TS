@@ -17,8 +17,14 @@ namespace WebApp
     /// </summary>
     public class StreamHandler : IHttpHandler
     {
+        class InnerKey
+        {
+            public int AuditoryId { get; set; }
+            public List<int> TestingProfileIds { get; set; }
+        }
 
         private static Dictionary<int, List<WebSocket>> Clients = new Dictionary<int, List<WebSocket>>();
+        private static Dictionary<InnerKey, List<WebSocket>> MainClients = new Dictionary<InnerKey, List<WebSocket>>();
         private static readonly ReaderWriterLockSlim Locker = new ReaderWriterLockSlim();
         public void ProcessRequest(HttpContext context)
         {
@@ -71,16 +77,120 @@ namespace WebApp
                         string cathing = System.Text.Encoding.UTF8.GetString(mainbuffer);
                         //string cathing = System.Text.Encoding.UTF8.GetString(buffer.Array);
                         int nStrtP = cathing.IndexOf("\0");
-                        if (nStrtP != -1) //вхождение нулевого символ найденj
+                        if (nStrtP != -1) //вхождение нулевого символ найдено
                         {
                             cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
                         }
                         jsonparsed = Json.Decode<Offer>(cathing);
+                        if(jsonparsed == null)
+                        {
+                            return;
+                        }
+                        //if (jsonparsed.IsMaster)
+                        //{
+                        //    if (jsonparsed.ForCreate)
+                        //    {
+                        //        if (jsonparsed.IsAdmin)
+                        //        {
+                        //            if (MainClients.Keys.First(a => a.AuditoryId == jsonparsed.AuditoryId) == null)
+                        //            {
+                        //                MainClients.Add(new InnerKey() { AuditoryId = jsonparsed.AuditoryId }, new List<WebSocket>() { socket });
+                        //            }
+                        //            else
+                        //            {
+                        //                List<WebSocket> foundedClient = MainClients.FirstOrDefault(a => a.Key.AuditoryId == jsonparsed.AuditoryId).Value;
+                        //                if (!foundedClient.Contains(socket))
+                        //                {
+                        //                    foundedClient.Add(socket);
+                        //                }
+                        //            }
+                        //            if(MainClients.Any(a => a.Key.AuditoryId == 0))
+                        //            {
+                        //                foreach (KeyValuePair<InnerKey, List<WebSocket>> dictionary in MainClients.Where(a => a.Key.AuditoryId == 0))
+                        //                {
+
+                        //                    foreach (WebSocket socket1 in dictionary.Value)
+                        //                    {
+
+                        //                    }
+                        //                }
+                        //            }
+                        //            return;
+                        //        }
+                        //        else
+                        //        {
+                        //            //Если это сдающий надо узнать, есть ли в списке Админ
+                        //            bool added = false;
+                        //            foreach (KeyValuePair<InnerKey, List<WebSocket>> item in MainClients)
+                        //            {
+                        //                //Если есть админ, то присоединяемся к нему
+                        //                if (item.Key.TestingProfileIds.Contains(jsonparsed.TestingProfileId))
+                        //                {
+                        //                    item.Value.Add(socket);
+                        //                    added = true;
+                        //                }
+                        //            }
+                        //            //Если админ ещё не добавился, то добавимся в "очередь" к нулевой аудитории
+                        //            if (!added)
+                        //            {
+                        //                //Если нулевая аудитория есть
+                        //                if(MainClients.Any(a => a.Key.AuditoryId == 0))
+                        //                {
+                        //                    //Находим её
+                        //                    MainClients.FirstOrDefault(a => a.Key.AuditoryId == 0).Value.Add(socket);
+                        //                    MainClients.FirstOrDefault(a => a.Key.AuditoryId == 0).Key.TestingProfileIds.Add(jsonparsed.TestingProfileId);
+                        //                }
+                        //                else
+                        //                {
+                        //                    //Создаём нулевую аудиторию
+                        //                    MainClients.Add(new InnerKey() { AuditoryId = 0, TestingProfileIds = new List<int>() { jsonparsed.TestingProfileId } }, new List<WebSocket>() { socket });
+                        //                }
+                        //            }
+                        //        }
+                        //    }
+                        //    else
+                        //    {
+                        //        List<WebSocket> disposedClients = new List<WebSocket>();
+
+                        //        //Передаём сообщение всем клиентам
+                        //        foreach (WebSocket client in MainClients.FirstOrDefault(A => A.Key == jsonparsed.AuditoryId).Value)
+                        //        {
+                        //            try
+                        //            {
+                        //                if (client.State == WebSocketState.Open)
+                        //                {
+                        //                    await client.SendAsync(new ArraySegment<byte>(mainbuffer), WebSocketMessageType.Text, true, CancellationToken.None);
+                        //                }
+                        //            }
+
+                        //            catch (ObjectDisposedException)
+                        //            {
+                        //                Locker.EnterWriteLock();
+                        //                try
+                        //                {
+                        //                    disposedClients.Add(client);
+                        //                }
+                        //                finally
+                        //                {
+                        //                    Locker.ExitWriteLock();
+                        //                }
+                        //            }
+                        //        }
+                        //        int count = disposedClients.Count;
+                        //        for (int i = count; i >= 0; i--)
+                        //        {
+                        //            List<WebSocket> cls = Clients.FirstOrDefault(A => A.Key == jsonparsed.AuditoryId).Value;
+                        //            cls.Remove(disposedClients[i]);
+                        //        }
+                        //    }
+
+                        //    return;
+                        //}
                         if (jsonparsed.ForReset)
                         {
-                            foreach (var client in Clients)
+                            foreach (KeyValuePair<int, List<WebSocket>> client in Clients)
                             {
-                                foreach (var item in client.Value)
+                                foreach (WebSocket item in client.Value)
                                 {
                                     await item.SendAsync(new ArraySegment<byte>(System.Text.Encoding.UTF8.GetBytes("{reloadRequest: true, IsSender: false}")), WebSocketMessageType.Text, true, CancellationToken.None);
                                     await item.CloseAsync(WebSocketCloseStatus.InternalServerError, "Плановый сброс", CancellationToken.None);
@@ -92,10 +202,13 @@ namespace WebApp
                         }
                         if (jsonparsed.ForCreate)
                         {
-                            if (!Clients.ContainsKey(jsonparsed.TestingProfileId)) Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
+                            if (!Clients.ContainsKey(jsonparsed.TestingProfileId))
+                            {
+                                Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
+                            }
                             else
                             {
-                                List<WebSocket> foundedClient = Clients.Where(a => a.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
+                                List<WebSocket> foundedClient = Clients.FirstOrDefault(a => a.Key == jsonparsed.TestingProfileId).Value;
                                 if (!foundedClient.Contains(socket))
                                 {
                                     foundedClient.Add(socket);

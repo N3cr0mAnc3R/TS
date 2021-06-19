@@ -262,18 +262,26 @@
                 <div class="base-info">
                     {{switchLocal(18)}}
                 </div>
-                <div class="score-info" v-if="needShowScore">
-                    {{switchLocal(19)}}: <span>{{score}}</span>
+                <div class="score-info">
+                    {{switchLocal(19)}}
                     <br />
-                    <label>
-                        <input type="checkbox" v-model="confirmed" />
-                        {{switchLocal(20)}}
-                    </label>
                     <br />
                     <div class="control">
                         <button v-bind:disabled="!confirmed" v-on:click="confirm">{{switchLocal(21)}}</button>
                     </div>
                 </div>
+                @*<div class="score-info" v-if="needShowScore">
+                        {{switchLocal(19)}}: <span>{{score}}</span>
+                        <br />
+                        <label>
+                            <input type="checkbox" v-model="confirmed" />
+                            {{switchLocal(20)}}
+                        </label>
+                        <br />
+                        <div class="control">
+                            <button v-bind:disabled="!confirmed" v-on:click="confirm">{{switchLocal(21)}}</button>
+                        </div>
+                    </div>*@
             </div>
             <div class="return-wrapper" v-if="testing">
                 <buton class="back-list" v-on:click="returnToList()">{{switchLocal(22)}}</buton>
@@ -282,4 +290,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test763.js"></script>
+<script src="~/Content/Testing/test764.js"></script>

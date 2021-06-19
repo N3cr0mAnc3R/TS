@@ -18,6 +18,7 @@ const app = new Vue({
         testingProfileId: 0,
         chatSockets: [],
         videoSockets: [],
+        MainSocket: null,
         currentChat: null,
         //pc2: null,
         currentUser: null,
@@ -167,6 +168,7 @@ const app = new Vue({
                                     item.errors = [];
                                     item.Image = "";
                                     item.chat = {};
+                                    console.log(item.UserVerified, [2].indexOf(item.TestingStatusId), );
                                     //Если подтверждён
                                     if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
@@ -238,6 +240,7 @@ const app = new Vue({
                     }
 
 
+                    //self.InitMainSocket();
 
                 },
                 error: function () {
@@ -429,7 +432,7 @@ const app = new Vue({
                 async: false,
                 data: {
                     Id: item.PlaceProfileId,
-                    PlaceConfig: null, 
+                    PlaceConfig: null,
                     PlaceId: item.Id
                 },
                 success: function () {
@@ -580,6 +583,7 @@ const app = new Vue({
                 self.onIceCandidate(peer, e, socket, a.TestingProfileId, type, self.currentUid);
             })
             peer.addEventListener('connectionstatechange', function (event) {
+                console.log(event);
                 if (peer && peer.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (!peer || peer.connectionState == 'connecting') {
@@ -602,6 +606,101 @@ const app = new Vue({
             else {
                 created.peers.push({ type: type, peer: peer });
             }
+        },
+        InitMainSocket: function () {
+            let self = this;
+            let socket;
+            if (typeof (WebSocket) !== 'undefined') {
+                socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            else {
+                socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+            }
+            let created = { socket: socket, peers: [] };
+            let TestingProfileIds = [];
+            self.computerList.forEach(function (a) {
+                if (TestingProfileIds.indexOf(a.TestingProfileId) == -1 && a.TestingProfileId != 0) {
+                    TestingProfileIds.push(a.TestingProfileId);
+                }
+            })
+            console.log(TestingProfileIds);
+            socket.onopen = function () {
+                socket.send(JSON.stringify({ ForCreate: true, IsMaster: true, TestingProfileIds: TestingProfileIds }));
+
+                self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+                //socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid }));
+
+                //if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
+                //    var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
+                //    self.queue.push(queue);
+                //}
+                //self.initRTCPeer(created, socket, a, cam);
+                //self.initRTCPeer(created, socket, a, 2);
+
+            };
+            socket.onmessage = function (msg) {
+                //console.log(msg);
+                let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                console.log(message);
+                //if (message.IsSender && message.uid == self.currentUid) {
+                //    if (message.candidate && message.candidate != '{}') {
+                //        let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
+                //        let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+                //        if (!queue) {
+                //            queue = { type: message.type, Id: a.TestingProfileId, candidates: [] };
+                //        }
+
+                //        if (queue.candidates)
+                //            queue.candidates.push(candidate);
+                //    }
+                //    else if (message.offer) {
+                //        navigator.getUserMedia({ video: true }, function (stream) {
+                //            let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
+                //            let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
+                //            console.log(created, peerObj);
+                //            if (!peerObj) {
+                //                return;
+                //            }
+                //            let peer = peerObj.peer;
+                //            peer.addStream(stream);
+                //            peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                //                peer.createAnswer(function (answer) {
+                //                    peer.setLocalDescription(answer, function () {
+                //                        let obj1 = {};
+                //                        for (let i in answer) {
+                //                            if (typeof answer[i] != 'function')
+                //                                obj1[i] = answer[i];
+                //                        }
+                //                        obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
+                //                        socket.send(JSON.stringify(obj));
+                //                        let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+                //                        if (queue.candidates) queue.candidates.forEach(function (candidate) {
+                //                            peer.addIceCandidate(candidate);
+                //                            console.log('add candidate');
+                //                        });
+                //                        queue.candidates = null;
+
+                //                    }, function (r) { console.log(r); });
+                //                }, function (r) { console.log(r); });
+                //            }, function (r) { console.log(r); });
+                //        }, function (r) { console.log(r); });
+                //    }
+                //    else if (message.startOffer) {
+                //        self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+                //        socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid }));
+                //    }
+                //}
+            };
+
+            socket.onclose = function (event) {
+                console.log('Соединение закрыто:');
+                socket.close();
+                socket = null;
+                self.InitMainSocket();
+                //self.initSocket(type, a, cam);
+            };
+            self.MainSocket = created;
+            // = 
         },
         initSocket: function (type, a, cam) {
             if (a.TestingProfileId == 0) return;

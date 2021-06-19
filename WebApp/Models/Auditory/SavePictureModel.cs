@@ -26,6 +26,9 @@ namespace WebApp.Models
         public int TestingProfileId { get; set; }
         public bool ForCreate { get; set; }
         public bool ForReset { get; set; }
-
+        public bool IsMaster { get; set; }
+        public int AuditoryId { get; set; }
+        public int[] TestingProfileIds { get; set; }
+        public bool IsAdmin { get; set; }
     }
 }
