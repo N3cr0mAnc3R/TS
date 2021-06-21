@@ -90,12 +90,20 @@ namespace Cropper
                         }
                     }
                     right = right > 2100 ? right : 2100;
-                   // right = 2175;
-                  // right = 2400;
+                    // right = 2175;
+                    // right = 2400;
                     //Костыль
                     //top = 56;
-                    Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(left, top, right - left, bottom - top), bmp.PixelFormat);
-
+                    Bitmap cropBmp;
+                    try
+                    {
+                        cropBmp = bmp.Clone(new System.Drawing.Rectangle(left, top, right - left, bottom - top), bmp.PixelFormat);
+                    }
+                    catch
+                    {
+                        int width = right - left > bmp.Width ? bmp.Width : right - left;
+                        cropBmp =  bmp.Clone(new System.Drawing.Rectangle(left, top, width - left, bottom - top), bmp.PixelFormat);
+                    }
                     byte[] bytes;
                     using (var stream1 = new MemoryStream())
                     {

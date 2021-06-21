@@ -47,6 +47,21 @@ namespace WebApp.Controllers.Api
                 return WrapResponse(new { Error = e.Message });
             }
         }
+        [Route("SaveError")]
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> SaveError(ErrorModel Error)
+        {
+            try
+            {
+                await TestManager.SaveError(Error.Content, Error.TestingProfileId);
+                return WrapResponse(new { Content = "Ошибка сохранена" });
+            }
+            catch (Exception e)
+            {
+                return WrapResponse(new { Error = e.Message });
+            }
+        }
         [Route("gettestsforuser")]
         [HttpPost]
         public async Task<IHttpActionResult> GetTestsForUser()

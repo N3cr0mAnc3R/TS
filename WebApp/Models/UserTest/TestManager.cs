@@ -60,6 +60,14 @@ namespace WebApp.Models
                 }
             }
         }
+        public async Task SaveError(string Content, int? TestingProfileId = null)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_SaveLogError]", new { TestingProfileId, Content }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
         public async Task<dynamic> GetActiveTestsByPlaceConfig(string placeConfig, Guid userUID, string Localization = "RU")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -264,7 +272,7 @@ namespace WebApp.Models
                 {
                     IDbTransaction trans = conn.BeginTransaction();
 
-                        //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
+                    //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
                     FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_GetStream", new { testProfileId, UserId, Type }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
 
                     MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
@@ -366,7 +374,7 @@ namespace WebApp.Models
                 return t;
             }
         }
-        public async Task<string> GetUserAnswer(Guid fileId, Guid userUID, string Localization= "RU")
+        public async Task<string> GetUserAnswer(Guid fileId, Guid userUID, string Localization = "RU")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
@@ -447,7 +455,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                var t =  await cnt.QueryFirstOrDefaultAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId, Localization, userUid }, commandType: CommandType.StoredProcedure);
+                var t = await cnt.QueryFirstOrDefaultAsync<SourceMaterial>(sql: "[dbo].[UserPlace_SourceMaterialImageGet]", new { sourceMaterialId, Localization, userUid }, commandType: CommandType.StoredProcedure);
                 return Convert.ToBase64String(t.SourceMaterialImage);
             }
         }

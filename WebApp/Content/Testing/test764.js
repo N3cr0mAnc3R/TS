@@ -163,6 +163,19 @@
             self.selectedQuestion = {};
             var str = window.location.href;
             var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+            window.onerror = function (errorInfo, url, lineNumber) {
+                $.ajax({
+                    url: "/api/user/SaveError",
+                    type: "POST",
+                    async: true,
+                    data: { TestingProfileId: newId, Content: errorInfo.type + ": " + errorInfo.message + " on " + url + " at line " + lineNumber},
+                    success: function () {
+                    },
+                    error: function () {
+                        location.reload();
+                    }
+                });
+            }
             self.startTest(newId);
             self.GetQrHref(newId);
             self.testingProfileId = newId;

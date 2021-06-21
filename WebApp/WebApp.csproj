@@ -498,6 +498,7 @@
     <Compile Include="Models\Statistic\UserStatistic.cs" />
     <Compile Include="Models\TotalModel.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
+    <Compile Include="Models\UserTest\ErrorModel.cs" />
     <Compile Include="Models\UserTest\QuestionAnswer.cs" />
     <Compile Include="Models\UserTest\QuestionModel.cs" />
     <Compile Include="Models\UserTest\ScoreModel.cs" />
