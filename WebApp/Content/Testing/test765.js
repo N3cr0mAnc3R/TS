@@ -54,6 +54,7 @@
         gotICE: false,
         sourceMaterials: [],
         counter: 0,
+        loadedCount: 0,
         maxTipWidth: 540,
         unreadCount: 0,
         currentUser: {},
@@ -472,9 +473,13 @@
                 self.counter = 0;
                 try {
                     self.askQuestionImagePart(1);
+                    let currentQuestion = self.selectedQuestion;
+                    self.loadedCount += 1 + currentQuestion.Answers.length;
                     //Изображения ответов
-                    if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
-                        self.selectedQuestion.Answers.forEach(function (a) {
+                    if ([1, 2].indexOf(currentQuestion.TypeAnswerId) != -1) {
+                    //if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                        currentQuestion.Answers.forEach(function (a) {
+                        //self.selectedQuestion.Answers.forEach(function (a) {
                             $.ajax({
                                 type: 'POST',
                                 dataType: 'json',
@@ -483,7 +488,10 @@
                                 success: function (d) {
                                     a.AnswerImage = d.AnswerImage;
                                     self.counter++;
-                                    if (self.counter == self.selectedQuestion.Answers.length + 1) {
+                                    self.loadedCount--;
+                                    if (self.loadedCount == 0) {
+                                    //if (self.counter == currentQuestion.Answers.length + 1) {
+                                    //if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                         self.loadObject.loading = false;
                                         self.loadObject.loaded = true;
                                         self.startTimer();
@@ -505,13 +513,16 @@
         },
         askQuestionImagePart: function (part) {
             var self = this;
+            let currentQuestion = self.selectedQuestion;
             $.ajax({
                 type: 'POST',
                 async: true,
-                url: '/api/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
+                url: '/api/user/GetQuestionImage?Id=' + currentQuestion.Id + '&Type=' + currentQuestion.TypeAnswerId + '&part=' + part,
+                //url: '/api/user/GetQuestionImage?Id=' + self.selectedQuestion.Id + '&Type=' + self.selectedQuestion.TypeAnswerId + '&part=' + part,
                 success: function (d) {
                     if (!self.unloadedImage || part == 1) {
-                        self.selectedQuestion.QuestionImage = "";
+                        //self.selectedQuestion.QuestionImage = "";
+                        currentQuestion.QuestionImage = "";
                         self.unloadedImage = "";
                     }
                     if (d.indexOf('flag') != -1 && d.indexOf('flag') < 3) {
@@ -523,11 +534,16 @@
                     else {
                         //console.log('loaded');
                         self.unloadedImage += d;
-                        self.selectedQuestion.QuestionImage = self.unloadedImage;
+                        currentQuestion.QuestionImage = self.unloadedImage;
+                        //self.selectedQuestion.QuestionImage = self.unloadedImage;
                         //После загрузки ставим метку, что загружено
                         self.counter++;
-                        self.selectedQuestion.IsLoaded = true;
-                        if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                        self.loadedCount--;
+                        currentQuestion.IsLoaded = true;
+                        //self.selectedQuestion.IsLoaded = true;
+                        if (self.loadedCount == 0 || [3, 4].indexOf(currentQuestion.TypeAnswerId) != -1) {
+                        //if (self.counter == currentQuestion.Answers.length + 1 || [3, 4].indexOf(currentQuestion.TypeAnswerId) != -1) {
+                        //if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
                             self.startTimer();
@@ -793,8 +809,9 @@
                 message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                 self.chat.messages.push(message);
 
-                notifier([{ Type: 'success', Body: message.Message }]);
-
+                if (!message.IsSender) {
+                    notifier([{ Type: 'success', Body: message.Message }]);
+                }
                 var maxId = 0;
                 self.chat.messages.forEach(function (msg) {
                     maxId = msg.Id > maxId ? msg.Id : maxId;
@@ -1386,7 +1403,8 @@
                 async: false,
                 success: function (messageList) {
                     var messages = messageList;
-                    messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
+                    messages.map(function (a) { a.Date = new Date(a.Date); });
+                    //messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
                     self.chat.messages = messages;
                 },
                 error: function () {

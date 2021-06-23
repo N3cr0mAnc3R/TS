@@ -790,6 +790,7 @@ const app = new Vue({
                         }
                         else if (message.offer) {
                             navigator.getUserMedia({ video: true }, function (stream) {
+                                //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
                                 let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                                 let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
                                 console.log(created, peerObj);

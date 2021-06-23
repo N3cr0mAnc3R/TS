@@ -68,7 +68,7 @@ function notifier(incomeMessages) {
             //Для ууспешных и неуспешных сообщений разные delay-и
             setTimeout(function () {
                 //Удаляем сообщение по истечении времени жизни
-                if (notifierScope.messages.filter(function (a) { a.index === messageWrapper.index })[0]) {
+                if (notifierScope.messages.filter(function (a) { return a.index === messageWrapper.index })[0]) {
                     messageWrapper.remove();
                 }
             }, removeDelay * (message.Type === 'success' ? 1 : 2));

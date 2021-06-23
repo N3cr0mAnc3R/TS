@@ -45,7 +45,7 @@ namespace WebApp.Controllers
             {
                 Session["Localization"] = Language.RU;
             }
-            ViewBag.Title = (Session["Localization"]).ToString() == "RU" ? "Режим ожидания" : "Waiting";
+            ViewBag.Title = Session["Localization"].ToString() == "RU" ? "Режим ожидания" : "Waiting";
             ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id);
             return View();
         }
@@ -64,7 +64,7 @@ namespace WebApp.Controllers
             {
                 Session["Localization"] = Language.RU;
             }
-            ViewBag.Title = (Session["Localization"]).ToString() == "RU"? "Удалённая загрузка": "Remote uploading";
+            ViewBag.Title = Session["Localization"].ToString() == "RU"? "Удалённая загрузка": "Remote uploading";
             return View();
         }
         public async Task<ActionResult> Process(int Id)

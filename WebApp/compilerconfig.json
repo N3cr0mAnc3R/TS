@@ -46,5 +46,9 @@
   {
     "outputFile": "Content/Testing/Index1236.css",
     "inputFile": "Content/Testing/Index1236.less"
+  },
+  {
+    "outputFile": "Content/Testing/Index1237.css",
+    "inputFile": "Content/Testing/Index1237.less"
   }
 ]

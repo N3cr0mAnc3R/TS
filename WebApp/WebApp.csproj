@@ -276,22 +276,28 @@
       <DependentUpon>total.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.css">
-      <DependentUpon>Index1236.less</DependentUpon>
+      <DependentUpon>Index1237.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.min.css">
       <DependentUpon>Index1235.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1236.css">
-      <DependentUpon>Index1236.less</DependentUpon>
+      <DependentUpon>Index1237.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1236.min.css">
       <DependentUpon>Index1236.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Testing\Index1237.css">
+      <DependentUpon>Index1237.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Testing\Index1237.min.css">
+      <DependentUpon>Index1237.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\pretest1239.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner13.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test764.js" />
+    <Content Include="Content\Testing\test765.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
@@ -306,7 +312,7 @@
     <Content Include="Content\font-awesome.less" />
     <Content Include="fonts\fontawesome-webfont.woff" />
     <Content Include="fonts\FontAwesome.otf" />
-    <Content Include="Content\Testing\Index1236.less" />
+    <Content Include="Content\Testing\Index1237.less" />
     <Content Include="Content\site.less" />
     <Content Include="Content\Auditory\moderate.less" />
     <Content Include="Content\proctor.less" />
