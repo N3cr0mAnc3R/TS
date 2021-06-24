@@ -46,7 +46,11 @@ const app = new Vue({
         fullInfo: null,
         offset: 1,
         fullComputerList: [],
-        isDebug: true
+        isDebug: true,
+        loadObject: {
+            loading: null,
+            loaded: null
+        }
     },
     methods: {
         init: function () {
@@ -1190,12 +1194,16 @@ const app = new Vue({
         },
         loadPeople: function () {
             var self = this;
+            self.loadObject.loading = true;
+            self.loadObject.loaded = false;
             $.ajax({
                 url: "/api/auditory/GetNewPeople?Id=" + self.auditory,
                 type: "POST",
                 async: true,
                 success: function (result) {
-                    notifier({ Type: 'success', Body: 'Данные загружены' });
+                    notifier([{ Type: 'success', Body: 'Данные загружены' }]);
+                    self.loadObject.loading = false;
+                    self.loadObject.loaded = true;
                 }
             });
 

@@ -1,6 +1,4 @@
-﻿<script src="~/Content/f-awesome.js"></script>
-<link href="~/Content/font-awesome.css" rel="stylesheet" />
-<link href="~/Content/Auditory/moderate.css" rel="stylesheet" />
+﻿<link href="~/Content/Auditory/moderate.css" rel="stylesheet" />
 
 @{
     ViewBag.Title = "Администрирование аудитории";
@@ -148,21 +146,22 @@
                             <div v-on:click="filterSchedule" class="button">Найти</div>
                             <div v-on:click="loadPeople" class="button">Загрузить людей в базу</div>
                         </div>
-
-                        <table class="table table-bordered table-striped">
-                            <thead>
-                                <tr>
-                                    <td></td>
-                                    <td v-for="item in times">{{item.Name}}</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="item1 in filteredPlaceList">
-                                    <td>{{item1}}</td>
-                                    <td v-for="item in times"><div v-for="place in filterScheduleUsers(item1)" v-if="item.Id == place.TestingTime" v-bind:title="place.LastName +' ' + place.Discipline" class="item" v-on:click="consolePlace(place)">{{place.Score}}</div></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div v-loader="loadObject">
+                            <table class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <td></td>
+                                        <td v-for="item in times">{{item.Name}}</td>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="item1 in filteredPlaceList">
+                                        <td>{{item1}}</td>
+                                        <td v-for="item in times"><div v-for="place in filterScheduleUsers(item1)" v-if="item.Id == place.TestingTime" v-bind:title="place.LastName +' ' + place.Discipline" class="item" v-on:click="consolePlace(place)">{{place.Score}}</div></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="modal-footer">
