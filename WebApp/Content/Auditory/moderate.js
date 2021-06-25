@@ -734,7 +734,8 @@ const app = new Vue({
                     else {
                         message = JSON.parse(msg.data);
                     }
-                    message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+                    message.Date = new Date(message.Date);
+                    //message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                     console.log(self.chats);
 
                     //let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
@@ -1240,7 +1241,8 @@ const app = new Vue({
                 async: true,
                 success: function (messageList) {
                     let messages = messageList;
-                    messages.map(a => a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))));
+                    messages.map(a => a.Date = new Date(a.Date));
+                    //messages.map(a => a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))));
                     let chat = self.chats.find(a => a.testingProfileId == newId);
                     chat.messages = messages;
                 }

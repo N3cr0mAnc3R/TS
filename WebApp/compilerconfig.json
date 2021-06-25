@@ -40,15 +40,19 @@
     "inputFile": "Content/Statistic/savescore.less"
   },
   {
-    "outputFile": "Content/Statistic/total.css",
-    "inputFile": "Content/Statistic/total.less"
-  },
-  {
     "outputFile": "Content/Testing/Index1236.css",
     "inputFile": "Content/Testing/Index1236.less"
   },
   {
     "outputFile": "Content/Testing/Index1237.css",
     "inputFile": "Content/Testing/Index1237.less"
+  },
+  {
+    "outputFile": "Content/Statistic/minitotal.css",
+    "inputFile": "Content/Statistic/minitotal.less"
+  },
+  {
+    "outputFile": "Content/Statistic/total.css",
+    "inputFile": "Content/Statistic/total.less"
   }
 ]

@@ -48,7 +48,7 @@
                     self.info = d;
                     var result = "";
                     d.forEach(function (item) {
-                        result += item.Name + ": " + item.Contact + "<br>";
+                        result += (item.Name? item.Name + ": " : "") + item.Contact + "<br>";
                     })
                     $('#nav-5').html(result);
                 }

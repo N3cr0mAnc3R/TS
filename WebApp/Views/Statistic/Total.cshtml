@@ -1,61 +1,35 @@
-﻿<link href="~/Content/Statistic/total.css" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?1" rel="stylesheet" />
+<link href="~/Content/Statistic/total.css?1" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <div class="input-wrapper">
-            <input type="text" v-model="currentFIO" class="form-control" />
-            <input type="submit" value="Найти" v-on:click="findByFIO" class="btn btn-outline-primary">
+            <input type="date" v-model="date" class="form-control" />
+            <select v-model="testingStatusId" class="form-control">
+                <option value="null">Все</option>
+                <option :value="status.Id" v-for="status in statuses">{{status.Name}}</option>
+            </select>
+            <input type="checkbox" v-model="needTime" class="form-control" />
+            <input type="time" v-model="testingTime" class="form-control" />
+            <input type="text" v-model="lastName" class="form-control" />
+            <input type="text" v-model="firstName" class="form-control" />
+            <input type="submit" value="Найти" v-on:click="find" class="btn btn-outline-primary">
         </div>
     </div>
-    <div class="info-wrapper">
-        <table class="table table-bordered table-stripped table-hover">
-            <tr v-for="human in filteredPeople" v-on:click="selectHuman(human.Id)">
-                <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" /></td>
-                <td>{{human.Id}}</td>
-                <td>{{human.Name}}</td>
-                <td>{{human.Guid}}</td>
-            </tr>
-        </table>
-        <table v-if="currentHuman.disciplines.length > 0" class="table table-bordered table-striped">
-            <tr v-for="discipline in currentHuman.disciplines">
-                <td>{{discipline.Id}}</td>
-                <td>{{discipline.Name}}</td>
-                <td>{{(new Date(discipline.testingDate)).toLocaleString()}}</td>
-                <td>{{(new Date(discipline.testingBegin)).toLocaleTimeString()}}</td>
-                <td>{{(new Date(discipline.testingEnd)).toLocaleTimeString()}}</td>
-                <td>{{discipline.Score}}</td>
-                <td>{{discipline.Status}}</td>
-                <td>
-                    <button v-on:click="resetTP(discipline)"><i class="fa fa-sync"></i></button>
-                    <button v-on:click="finishTP(discipline)"><i class="fa fa-check"></i></button>
-                    <button v-on:click="deleteTP(discipline)"><i class="fa fa-times"></i></button>
-                    <button v-on:click="nullify(discipline)">0</button>
-                    <button v-on:click="download(discipline.Id)"><i class="fa fa-print"></i></button>
-                    <button v-on:click="downloadCamera(discipline.Id, 1)"><i class="fa fa-video-camera"></i></button>
-                    @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div class="modal fade" id="place-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="label">Назначить место</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div><div v-for="aud in auditories" v-on:click="getAuditoryInfo(aud.Id)">{{aud.Name}}</div></div>
-                    <div class="place-list">
-                        <div v-for="place in places" class="place-wrapper" v-bind:class="{'current' : currentHuman.placeInfo.Id == place.Id}" v-on:click="setPlaceToUser(place.Id)">{{place.number}}</div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" v-on:click="buildAuditory()" data-dismiss="modal">Сохранить</button>
-                </div>
+    <div v-for="item in people">
+        <div class="row">
+            <div v-for="(value, key) in item" class="tp-item-wrapper">
+                {{key}} : {{value}}
             </div>
+        </div>
+        <br />
+        <div>
+            <button v-on:click="resetTP(item)" title="Сбросить"><i class="fa fa-sync"></i></button>
+            <button v-on:click="finishTP(item)" title="Завершить"><i class="fa fa-check"></i></button>
+            <button v-on:click="deleteTP(item)" title="Удалить"><i class="fa fa-times"></i></button>
+            <button v-on:click="nullify(item)" title="Аннулировать">0</button>
+            <button v-on:click="download(item.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+            <button v-on:click="downloadCamera(item.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+            @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
         </div>
     </div>
     <div id="circleG" v-if="objectLoading.loading">
@@ -64,4 +38,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/total2359.js"></script>
+<script src="~/Content/Statistic/total.js?3"></script>

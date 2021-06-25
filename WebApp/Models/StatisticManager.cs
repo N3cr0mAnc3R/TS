@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using WebApp.Models.Statistic;
 
 namespace WebApp.Models
 {
@@ -100,6 +101,17 @@ namespace WebApp.Models
                 return await cnt.QueryFirstAsync<dynamic>(
                     sql: "[dbo].[SuperAdmin_GetCurrentPlace]",
                     new { userUID, userId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+        public async Task<dynamic> GetTestingProfiles(Guid userUID, FullTestingProfileModel model)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<dynamic>(
+                    sql: "[dbo].[SuperAdmin_GetTestingProfiles]",
+                    new { userUID, model.date, model.structureDisciplineId, model.testingStatusId, model.needTime, model.testingTime, model.lastName, model.firstName, model.auditoriumId },
                     commandType: CommandType.StoredProcedure
                 );
             }

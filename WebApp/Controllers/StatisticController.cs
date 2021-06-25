@@ -19,6 +19,11 @@ namespace WebApp.Controllers
             ViewBag.Title = "Отчёты и статистика";
             return View();
         }
+        public ActionResult MiniTotal()
+        {
+            ViewBag.Title = "Страница полного модерирования";
+            return View();
+        }
         public ActionResult Total()
         {
             ViewBag.Title = "Страница полного модерирования";

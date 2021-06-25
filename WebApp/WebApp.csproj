@@ -197,18 +197,18 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\aes.js" />
-    <Content Include="Content\Auditory\audVue123.js" />
+    <Content Include="Content\Auditory\audVue.js" />
     <Content Include="Content\Auditory\index.css">
       <DependentUpon>index.less</DependentUpon>
     </Content>
     <Content Include="Content\Auditory\index.min.css">
       <DependentUpon>index.css</DependentUpon>
     </Content>
-    <Content Include="Content\Auditory\list123.js" />
+    <Content Include="Content\Auditory\list.js" />
     <Content Include="Content\Auditory\moderate.css">
       <DependentUpon>moderate.less</DependentUpon>
     </Content>
-    <Content Include="Content\Auditory\moderate1237.js" />
+    <Content Include="Content\Auditory\moderate.js" />
     <Content Include="Content\Auditory\moderate.min.css">
       <DependentUpon>moderate.css</DependentUpon>
     </Content>
@@ -222,7 +222,7 @@
     <Content Include="Content\f-awesome.js" />
     <Content Include="Content\font-awesome.css" />
     <Content Include="Content\loader.js" />
-    <Content Include="Content\mainVue256.js" />
+    <Content Include="Content\mainVue.js" />
     <Content Include="Content\novideo.png" />
     <Content Include="Content\proctor.css">
       <DependentUpon>proctor.less</DependentUpon>
@@ -257,11 +257,17 @@
     <Content Include="Content\Statistic\index.css">
       <DependentUpon>index.less</DependentUpon>
     </Content>
-    <Content Include="Content\Statistic\index7593.js" />
+    <Content Include="Content\Statistic\index.js" />
     <Content Include="Content\Statistic\index.min.css">
       <DependentUpon>index.css</DependentUpon>
     </Content>
     <Content Include="Content\Statistic\JavaScript.js" />
+    <Content Include="Content\Statistic\minitotal.css">
+      <DependentUpon>minitotal.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Statistic\minitotal.min.css">
+      <DependentUpon>minitotal.css</DependentUpon>
+    </Content>
     <Content Include="Content\Statistic\savescore.css">
       <DependentUpon>savescore.less</DependentUpon>
     </Content>
@@ -269,35 +275,36 @@
       <DependentUpon>savescore.css</DependentUpon>
     </Content>
     <Content Include="Content\Statistic\total.css">
-      <DependentUpon>total.less</DependentUpon>
+      <DependentUpon>minitotal.less</DependentUpon>
     </Content>
-    <Content Include="Content\Statistic\total2359.js" />
+    <Content Include="Content\Statistic\minitotal.js" />
+    <Content Include="Content\Statistic\total.js" />
     <Content Include="Content\Statistic\total.min.css">
       <DependentUpon>total.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.css">
-      <DependentUpon>Index1237.less</DependentUpon>
+      <DependentUpon>Index.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1235.min.css">
       <DependentUpon>Index1235.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1236.css">
-      <DependentUpon>Index1237.less</DependentUpon>
+      <DependentUpon>Index.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1236.min.css">
       <DependentUpon>Index1236.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1237.css">
-      <DependentUpon>Index1237.less</DependentUpon>
+      <DependentUpon>Index.less</DependentUpon>
     </Content>
     <Content Include="Content\Testing\Index1237.min.css">
       <DependentUpon>Index1237.css</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\pretest1239.js" />
+    <Content Include="Content\Testing\pretest.js" />
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
-    <Content Include="Content\Testing\qrscanner13.js" />
+    <Content Include="Content\Testing\qrscanner.js" />
     <Content Include="Content\Testing\scannerlib.js" />
-    <Content Include="Content\Testing\test765.js" />
+    <Content Include="Content\Testing\test.js" />
     <Content Include="Content\vue.js" />
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
@@ -312,7 +319,7 @@
     <Content Include="Content\font-awesome.less" />
     <Content Include="fonts\fontawesome-webfont.woff" />
     <Content Include="fonts\FontAwesome.otf" />
-    <Content Include="Content\Testing\Index1237.less" />
+    <Content Include="Content\Testing\Index.less" />
     <Content Include="Content\site.less" />
     <Content Include="Content\Auditory\moderate.less" />
     <Content Include="Content\proctor.less" />
@@ -328,6 +335,8 @@
     <Content Include="Content\Shared\Notify.less" />
     <Content Include="Files\Instruction.pdf" />
     <Content Include="Content\Statistic\savescore.less" />
+    <Content Include="Content\Statistic\minitotal.less" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="Content\Statistic\total.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -501,6 +510,7 @@
     <Compile Include="Models\Proctoring\TestResultScore.cs" />
     <Compile Include="Models\Proctoring\ProctorEnrollee.cs" />
     <Compile Include="Models\StatisticManager.cs" />
+    <Compile Include="Models\Statistic\FullTestingProfileModel.cs" />
     <Compile Include="Models\Statistic\UserStatistic.cs" />
     <Compile Include="Models\TotalModel.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
@@ -556,6 +566,7 @@
     <Content Include="Views\User\QRScanner.cshtml" />
     <Content Include="Views\Auditory\FullWindow.cshtml" />
     <Content Include="Views\Verification\SaveResult.cshtml" />
+    <Content Include="Views\Statistic\MiniTotal.cshtml" />
     <Content Include="Views\Statistic\Total.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
