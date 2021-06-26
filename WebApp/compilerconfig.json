@@ -32,20 +32,8 @@
     "inputFile": "Content/Shared/Notify.less"
   },
   {
-    "outputFile": "Content/Testing/Index1235.css",
-    "inputFile": "Content/Testing/Index1235.less"
-  },
-  {
     "outputFile": "Content/Statistic/savescore.css",
     "inputFile": "Content/Statistic/savescore.less"
-  },
-  {
-    "outputFile": "Content/Testing/Index1236.css",
-    "inputFile": "Content/Testing/Index1236.less"
-  },
-  {
-    "outputFile": "Content/Testing/Index1237.css",
-    "inputFile": "Content/Testing/Index1237.less"
   },
   {
     "outputFile": "Content/Statistic/minitotal.css",
@@ -54,5 +42,9 @@
   {
     "outputFile": "Content/Statistic/total.css",
     "inputFile": "Content/Statistic/total.less"
+  },
+  {
+    "outputFile": "Content/Testing/profile.css",
+    "inputFile": "Content/Testing/profile.less"
   }
 ]

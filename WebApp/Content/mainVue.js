@@ -15,8 +15,9 @@
             var self = this;
             if (!localStorage["localization"]) {
                 localStorage["localization"] = 1;
-            }
+            } 
             self.switchLocal1();
+            self.getLocalization();
             $.ajax({
                 type: 'POST',
                 dataType: 'json',
@@ -57,32 +58,41 @@
         },
         getLocalization: function () {
             var self = this;
-            //$.ajax({
-            //    type: 'POST',
-            //    dataType: 'json',
-            //    url: '/api/user/GetLocalization',
-            //    success: function (l) {
-            //        if (l.Localization == 1) {
-            //            if (!$('#litem-1').hasClass('active')) { $('#litem-1').addClass('active'); }
-            //            $('#litem-2').removeClass('active');
-            //            if (typeof app !== 'undefined') {
-            //                app.localization = 1;
-            //            }
-            //            localStorage["localization"] = 1;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/user/GetLocalization',
+                success: function (l) {
+                    console.log(l.Localization );
+                    if (l.Localization == 1) {
+                        $('#litem-1').addClass('active');
+                        $('#litem-2').removeClass('active');
+                    }
+                    else {
+                        $('#litem-2').addClass('active');
+                        $('#litem-1').removeClass('active');
+                    }
+                    //if (l.Localization == 1) {
+                    //    if (!$('#litem-1').hasClass('active')) { $('#litem-1').addClass('active'); }
+                    //    $('#litem-2').removeClass('active');
+                    //    if (typeof app !== 'undefined') {
+                    //        app.localization = 1;
+                    //    }
+                    //    localStorage["localization"] = 1;
 
-            //        }
-            //        else {
-            //            if (!$('#litem-2').hasClass('active')) { $('#litem-2').addClass('active'); }
-            //            $('#litem-1').removeClass('active');
-            //            if (typeof app !== 'undefined') {
-            //                app.localization = 2;
-            //            }
-            //            localStorage["localization"] = 2;
+                    //}
+                    //else {
+                    //    if (!$('#litem-2').hasClass('active')) { $('#litem-2').addClass('active'); }
+                    //    $('#litem-1').removeClass('active');
+                    //    if (typeof app !== 'undefined') {
+                    //        app.localization = 2;
+                    //    }
+                    //    localStorage["localization"] = 2;
 
-            //        }
-            //        self.switchLocal1();
-            //    }
-            //});
+                    //}
+                    //self.switchLocal1();
+                }
+            });
         },
         toggleMenu: function () {
 
@@ -126,16 +136,16 @@
             });
         },
         setLocalization: function (Type) {
-            //Type = Type == 1 ? 'RU' : 'EN';
+            Type1 = Type == 1 ? 'RU' : 'EN';
             localStorage["localization"] = Type;
-            //$.ajax({
-            //    type: 'POST',
-            //    dataType: 'json',
-            //    url: '/api/user/SetLocalization?Type=' + Type,
-            //    success: function (s) {
-            //        location.reload();
-            //    }
-            //});
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/user/SetLocalization?Type=' + Type1,
+                success: function (s) {
+                    location.reload();
+                }
+            });
         },
         getCurrentUser: function () {
             $.ajax({
@@ -151,10 +161,10 @@
         },
         switchLocal1: function () {
             var self = this;
-            //console.log(123);
             // var checking = (typeof app == 'undefined') ? self : app;
             $('#nav-4').text(localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU");
             $('#nav-8').text(localStorage["localization"] == 1 ? "Логин" : "UserName");
+            console.log($('#nav-4').text());
             $('#nav-9').text(localStorage["localization"] == 1 ? "Пароль" : "Password");
             $('#nav-10').text(localStorage["localization"] == 1 ? "Выполнить вход" : "Log in");
 

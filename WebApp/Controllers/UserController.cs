@@ -54,8 +54,12 @@ namespace WebApp.Controllers
         {
             return Json(await AuditoryManager.GetFreePlaces((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));
         }
-        public ActionResult TestList()
+        public ActionResult AccountProfile()
         {
+            if (!Request.IsAuthenticated)
+            {
+                Redirect("/account/login");
+            }
             return View();
         }
         public ActionResult QRScanner()
@@ -121,6 +125,7 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
+        [AllowAnonymous]
         public JsonResult GetLocalization()
         {
             //1 - ru, 2 - en
@@ -131,6 +136,7 @@ namespace WebApp.Controllers
             return Json(new { Localization = (int)Session["Localization"] });
         }
         [HttpPost]
+        [AllowAnonymous]
         public JsonResult SetLocalization(Language Type)
         {
             Session["Localization"] = Type;

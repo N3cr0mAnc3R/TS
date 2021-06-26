@@ -98,6 +98,7 @@ textarea {
 .navbar-system .container .base-nav .userpic,
 .navbar-system .container .nav-item .userpic {
   margin-top: -14px;
+  cursor: pointer;
 }
 .navbar-system .container .base-nav .userpic img,
 .navbar-system .container .nav-item .userpic img {

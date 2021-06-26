@@ -1203,6 +1203,7 @@ const app = new Vue({
                 async: true,
                 success: function (result) {
                     notifier([{ Type: 'success', Body: 'Данные загружены' }]);
+                    self.filterSchedule();
                     self.loadObject.loading = false;
                     self.loadObject.loaded = true;
                 }

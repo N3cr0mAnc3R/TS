@@ -282,25 +282,20 @@
     <Content Include="Content\Statistic\total.min.css">
       <DependentUpon>total.css</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\Index1235.css">
+    <Content Include="Content\Testing\Index.css">
       <DependentUpon>Index.less</DependentUpon>
     </Content>
-    <Content Include="Content\Testing\Index1235.min.css">
-      <DependentUpon>Index1235.css</DependentUpon>
-    </Content>
-    <Content Include="Content\Testing\Index1236.css">
-      <DependentUpon>Index.less</DependentUpon>
-    </Content>
-    <Content Include="Content\Testing\Index1236.min.css">
-      <DependentUpon>Index1236.css</DependentUpon>
-    </Content>
-    <Content Include="Content\Testing\Index1237.css">
-      <DependentUpon>Index.less</DependentUpon>
-    </Content>
-    <Content Include="Content\Testing\Index1237.min.css">
-      <DependentUpon>Index1237.css</DependentUpon>
+    <Content Include="Content\Testing\Index.min.css">
+      <DependentUpon>Index.css</DependentUpon>
     </Content>
     <Content Include="Content\Testing\pretest.js" />
+    <Content Include="Content\Testing\profile.css">
+      <DependentUpon>profile.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Testing\profile.js" />
+    <Content Include="Content\Testing\profile.min.css">
+      <DependentUpon>profile.css</DependentUpon>
+    </Content>
     <Content Include="Content\Testing\qr-scanner-worker.min.js" />
     <Content Include="Content\Testing\qrscanner.js" />
     <Content Include="Content\Testing\scannerlib.js" />
@@ -338,6 +333,7 @@
     <Content Include="Content\Statistic\minitotal.less" />
     <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="Content\Statistic\total.less" />
+    <Content Include="Content\Testing\profile.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -515,6 +511,7 @@
     <Compile Include="Models\TotalModel.cs" />
     <Compile Include="Models\UserTest\AnswerModel.cs" />
     <Compile Include="Models\UserTest\ErrorModel.cs" />
+    <Compile Include="Models\UserTest\ProfileTest.cs" />
     <Compile Include="Models\UserTest\QuestionAnswer.cs" />
     <Compile Include="Models\UserTest\QuestionModel.cs" />
     <Compile Include="Models\UserTest\ScoreModel.cs" />
@@ -541,7 +538,7 @@
     <Content Include="Views\Auditory\List.cshtml" />
     <Content Include="Views\Auditory\Index.cshtml" />
     <Content Include="Views\User\Waiting.cshtml" />
-    <Content Include="Views\User\TestList.cshtml" />
+    <Content Include="Views\User\AccountProfile.cshtml" />
     <Content Include="Views\Auditory\Moderate.cshtml" />
     <Content Include="Views\User\Process.cshtml" />
     <Content Include="Views\User\ProctorProcessList.cshtml" />

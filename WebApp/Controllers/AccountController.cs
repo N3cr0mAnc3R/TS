@@ -117,7 +117,7 @@ namespace WebApp.Controllers
 
 
                 SignInManager.SignIn(user, false, false);
-                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
+                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], ActionType.User_Auth);
 
 
                 ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces(user.Id);
@@ -154,7 +154,7 @@ namespace WebApp.Controllers
 
 
                 SignInManager.SignIn(user, false, false);
-                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], 1);
+                await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], ActionType.User_Auth);
 
                 List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
                 if (AccountManager.HasOneOfRoles(roles, new int[4] { 1, 2, 3, 4 }))

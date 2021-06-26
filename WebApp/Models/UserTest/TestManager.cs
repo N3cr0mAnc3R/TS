@@ -132,6 +132,13 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[UserPlace_TestingEnd]", new { testingProfileId, userUID, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<ProfileTest>> GetUserTests(Guid userUID, string Localization = "RU")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<ProfileTest>(sql: "[dbo].[UserPlace_TestingProfileHistoryGet]", new { userUID, Localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public IEnumerable<TestingPackage> CheckPIN(int pin, string Localization = "RU")
         {
             using (var cnt = Concrete.OpenConnection())

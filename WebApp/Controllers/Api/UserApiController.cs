@@ -150,7 +150,7 @@ namespace WebApp.Controllers.Api
         public async Task<IHttpActionResult> UpdateQuestionAnswer(UpdateAnswerModel model)
         {
             await TestManager.UpdateQuestionAnswer(model.answers);
-            //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
+            await LogManager.SaveLog(CurrentUser.Id, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], ActionType.User_SaveAnswer);
             return WrapResponse(true);
         }
         [Route("UpdateQuestionAnswer1")]
@@ -161,7 +161,7 @@ namespace WebApp.Controllers.Api
             if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
             {
                 await TestManager.UpdateQuestionAnswer1(model.answers, CurrentUser.Id);
-                //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
+                await LogManager.SaveLog(CurrentUser.Id, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], ActionType.User_SaveAnswer);
                 return WrapResponse(true);
             }
             else
@@ -242,10 +242,9 @@ namespace WebApp.Controllers.Api
         {
             try
             {
-                //ToDo Раскомментить 
                 await TestManager.StartTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
 
-                // await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 2);
+                await LogManager.SaveLog(CurrentUser.Id, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], ActionType.User_StartTest);
                 var Answered = await TestManager.GetActiveTestAnswers(Id);
                 return WrapResponse(new { Packages = await TestManager.GetTestPackageById(Id), Date = await TestManager.ToggleTimer(Id, 2, null, localization), Answered });
             }
@@ -259,10 +258,17 @@ namespace WebApp.Controllers.Api
         [Route("FinishTest")]
         public async Task<IHttpActionResult> FinishTest(int Id)
         {
-            //ToDo Раскомментить 
-            // await LogManager.SaveLog(CurrentUser.Id, Request.ServerVariables["REMOTE_ADDR"], 4);
+            await LogManager.SaveLog(CurrentUser.Id, HttpContext.Current.Request.ServerVariables["REMOTE_ADDR"], ActionType.User_FinishTest);
             await TestManager.FinishTest(Id, CurrentUser != null ? CurrentUser.Id : (Guid?)null);
             return WrapResponse(true);
+        }
+
+        [Route("GetUserTests")]
+        public async Task<IHttpActionResult> GetUserTests(string Localization = "RU")
+        {
+            //ToDo Раскомментить 
+            // await LogManager.SaveLog(CurrentUser.Id, Request.ServerVariables["REMOTE_ADDR"], 4);
+            return WrapResponse(await TestManager.GetUserTests(CurrentUser.Id, Localization));
         }
         [HttpPost]
         [Route("GetChatMessages")]
