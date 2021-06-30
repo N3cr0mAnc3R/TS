@@ -196,6 +196,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Administration\administration.css">
+      <DependentUpon>administration.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Administration\administration.js" />
+    <Content Include="Content\Administration\administration.min.css">
+      <DependentUpon>administration.css</DependentUpon>
+    </Content>
     <Content Include="Content\aes.js" />
     <Content Include="Content\Auditory\audVue.js" />
     <Content Include="Content\Auditory\index.css">
@@ -304,6 +311,21 @@
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="Files\Instruction.mp4" />
+    <Content Include="Files\Svg\cogs-auditory.svg" />
+    <Content Include="Files\Svg\eye-auditory.svg" />
+    <Content Include="Files\Svg\layout-burger.svg" />
+    <Content Include="Files\Svg\mini-check-auditory.svg" />
+    <Content Include="Files\Svg\mini-restore-auditory.svg" />
+    <Content Include="Files\Svg\mini-times-auditory.svg" />
+    <Content Include="Files\Svg\print-statistic-black.svg" />
+    <Content Include="Files\Svg\print-statistic-red.svg" />
+    <Content Include="Files\Svg\print-statistic-yellow.svg" />
+    <Content Include="Files\Svg\process-angle-left.svg" />
+    <Content Include="Files\Svg\process-angle-right.svg" />
+    <Content Include="Files\Svg\process-arrow-resize.svg" />
+    <Content Include="Files\Svg\process-question-mark.svg" />
+    <Content Include="Files\Svg\process-toggle-chat.svg" />
+    <Content Include="Files\Svg\zoom-in-auditory.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Auditory\index.less" />
     <Content Include="ChatHandler.ashx" />
@@ -334,6 +356,7 @@
     <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="Content\Statistic\total.less" />
     <Content Include="Content\Testing\profile.less" />
+    <Content Include="Content\Administration\administration.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -452,7 +475,9 @@
       <DependentUpon>ChatHandler.ashx</DependentUpon>
     </Compile>
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AdministrationController.cs" />
     <Compile Include="Controllers\Api\AccountApiController.cs" />
+    <Compile Include="Controllers\Api\AdministrationApiController.cs" />
     <Compile Include="Controllers\Api\AuditoryApiController.cs" />
     <Compile Include="Controllers\Api\BaseApiController.cs" />
     <Compile Include="Controllers\Api\StatisticApiController.cs" />
@@ -469,6 +494,9 @@
     <Compile Include="Models\Account\AccountManager.cs" />
     <Compile Include="Models\Account\IdentityModels.cs" />
     <Compile Include="Models\Account\LoginModel.cs" />
+    <Compile Include="Models\Administration\AccessModel.cs" />
+    <Compile Include="Models\Administration\AdministrationManager.cs" />
+    <Compile Include="Models\Administration\UserTestForTotal.cs" />
     <Compile Include="Models\Auditory\Auditory.cs" />
     <Compile Include="Models\Auditory\AuditoryManager.cs" />
     <Compile Include="Models\Auditory\AuditoryStatistic.cs" />
@@ -565,6 +593,8 @@
     <Content Include="Views\Verification\SaveResult.cshtml" />
     <Content Include="Views\Statistic\MiniTotal.cshtml" />
     <Content Include="Views\Statistic\Total.cshtml" />
+    <Content Include="Views\Administration\Index.cshtml" />
+    <Content Include="Views\Auditory\Error.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

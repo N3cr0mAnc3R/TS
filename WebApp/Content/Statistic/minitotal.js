@@ -7,6 +7,7 @@
         currentHuman: { disciplines: [] },
         auditories: [],
         auditory: {},
+        hasFullAccess: false,
         places: [],
         textForShow: null,
         objectLoading: {
@@ -17,7 +18,31 @@
     methods: {
 
         init: function () {
+            $('#form-1').on("submit", function () {
+                event.preventDefault();
+            });
+            setTimeout(function () {
+                $('#fio').focus();
+            }, 200)
 
+            //$.ajax({
+            //    url: "/api/statistic/findfio",
+            //    type: 'post',
+            //    data: { Fio: self.currentFIO },
+            //    success: function (data) {
+            //        if (data.length == 0) {
+            //            self.textForShow = "Люди не найдены";
+            //            self.filteredPeople = [];
+            //        }
+            //        else { self.textForShow = null; }
+            //        if (data.length == 1) {
+            //            self.selectHuman(data[0].Id);
+            //        }
+            //        self.filteredPeople = data;
+
+            //        self.objectLoading.loading = false;
+            //    }
+            //})
         },
         findByFIO: function () {
             var self = this;
@@ -38,11 +63,35 @@
                     self.filteredPeople = data;
 
                     self.objectLoading.loading = false;
+                },
+                error: function (error) {
+                    notifier([{ Type: 'error', Body: error.responseJSON.ExceptionMessage}]);
                 }
             })
         },
         download: function (Id) {
             window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
+        },
+        initDisciplines(discs) {
+            let self = this;
+            discs.map(a => {
+                a.TestingDate = new Date(a.TestingDate).toLocaleString();
+                if (a.TestingBegin) {
+                    a.TestingBegin = new Date(a.TestingBegin).toLocaleTimeString();
+                }
+                else {
+                    a.TestingBegin = "Не приступал";
+
+                }
+                if (a.TestingEnd) {
+                    a.TestingEnd = new Date(a.TestingEnd).toLocaleTimeString();
+                }
+                else {
+                    a.TestingEnd = "Не завершил";
+
+                }
+            });
+            return discs;
         },
         selectHuman: function (Id) {
             var self = this;
@@ -50,7 +99,7 @@
                 url: "/api/statistic/getById?Id=" + Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    self.currentHuman.disciplines = self.initDisciplines(data);
                     self.currentHuman.placeInfo = {};
                 }
             })
@@ -62,11 +111,12 @@
                 url: "/api/statistic/resetProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    self.currentHuman.disciplines = self.initDisciplines(data);
                     self.objectLoading.loading = false;
                 }
             })
         },
+
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
         },
@@ -76,7 +126,17 @@
                 url: "/api/statistic/finishProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    self.currentHuman.disciplines = self.initDisciplines(data);
+                }
+            })
+        },
+        hasAccess: function (type) {
+            var self = this;
+            $.ajax({
+                url: "/api/statistic/?Id=" + item.Id,
+                type: 'post',
+                success: function (data) {
+                    self.currentHuman.disciplines = self.initDisciplines(data);
                 }
             })
         },
@@ -86,7 +146,7 @@
                 url: "/api/statistic/nullifyProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    self.currentHuman.disciplines = self.initDisciplines(data);
                 }
             })
         },
@@ -160,5 +220,6 @@
         }
     },
     mounted: function () {
+        this.init();
     }
 });

@@ -84,8 +84,13 @@
   left: -8px;
   position: relative;
   top: -3px;
+  /* svg {
+                            position: absolute;
+                            left: 5px;
+                            top: 5px;
+                        }*/
 }
-.auditory .computer-list .place-table .place-row .place-item .configured svg {
+.auditory .computer-list .place-table .place-row .place-item .configured img {
   position: absolute;
   left: 5px;
   top: 5px;
@@ -115,14 +120,23 @@
   border-radius: 11px;
   left: 48px;
   top: -60px;
+  /*
+                        svg {
+                            position: absolute;
+                            left: 6px;
+                            top: 5px;
+                        }*/
 }
 .auditory .computer-list .place-table .place-row .place-item .delete.restore {
   background: #565c72;
+  /* svg {
+                                left: 3px;
+                            }*/
 }
-.auditory .computer-list .place-table .place-row .place-item .delete.restore svg {
+.auditory .computer-list .place-table .place-row .place-item .delete.restore img {
   left: 3px;
 }
-.auditory .computer-list .place-table .place-row .place-item .delete svg {
+.auditory .computer-list .place-table .place-row .place-item .delete img {
   position: absolute;
   left: 6px;
   top: 5px;
@@ -339,14 +353,22 @@
   border-radius: 11px;
   left: 219px;
   top: -365px;
+  /*svg {
+                    position: absolute;
+                    left: 6px;
+                    top: 5px;
+                }*/
 }
 .main-window .auditory-list .auditory-wrapper .delete.restore {
   background: #565c72;
+  /* svg {
+                        left: 3px;
+                    }*/
 }
-.main-window .auditory-list .auditory-wrapper .delete.restore svg {
+.main-window .auditory-list .auditory-wrapper .delete.restore img {
   left: 3px;
 }
-.main-window .auditory-list .auditory-wrapper .delete svg {
+.main-window .auditory-list .auditory-wrapper .delete img {
   position: absolute;
   left: 6px;
   top: 5px;

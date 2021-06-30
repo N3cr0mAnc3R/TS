@@ -32,7 +32,7 @@ namespace WebApp.Controllers.Api
             {
                 case 1: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 4, 6, 7 })) result = true; break;
                 case 2: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1, 2, 3, 4, 7 })) result = true; break;
-                case 3: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 6, 7 })) result = true; break;
+                case 3: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 6, 7, 9 })) result = true; break;
                 case 4: if (AccountManager.HasOneOfRoles(roles, new List<int>() { 1, 2, 3, 4, 6, 7 })) result = true; break;
                 default: break;
             }
@@ -56,7 +56,7 @@ namespace WebApp.Controllers.Api
         {
             return WrapResponse(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651") || CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
         }
-        private string Secret = ConfigurationManager.AppSettings["turn:secret"];
+        private readonly string Secret = ConfigurationManager.AppSettings["turn:secret"];
 
         [HttpPost]
         [Route("GetLoginAndPassword")]

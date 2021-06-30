@@ -39,6 +39,14 @@ namespace WebApp.Models.Account
                 return await cnt.QueryAsync<int>("Administrator_UserRoleGet", new { userUID }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<int>> GetAllUserRoles(Guid userUID)
+        {
+            
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryAsync<int>("Administrator_UserRolesGet", new { userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
 
         public ApplicationUser GetUser(string userName)
         {

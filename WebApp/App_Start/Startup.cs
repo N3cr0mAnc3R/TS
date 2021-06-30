@@ -10,6 +10,7 @@ using System.Linq;
 using System.Web;
 using WebApp.Models;
 using WebApp.Models.Account;
+using WebApp.Models.Administration;
 using WebApp.Models.Logs;
 using WebApp.Models.Proctoring;
 
@@ -66,6 +67,10 @@ namespace WebApp
             app.CreatePerOwinContext((IdentityFactoryOptions<StatisticManager> options, IOwinContext context) =>
             {
                 return new StatisticManager(context.Get<Concrete>());
+            });
+            app.CreatePerOwinContext((IdentityFactoryOptions<AdministrationManager> options, IOwinContext context) =>
+            {
+                return new AdministrationManager(context.Get<Concrete>());
             });
         }
 

@@ -1,41 +1,57 @@
-﻿<link href="~/Content/Statistic/minitotal.css?1" rel="stylesheet" />
-<link href="~/Content/Statistic/total.css?1" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?2" rel="stylesheet" />
+<link href="~/Content/Statistic/total.css?4" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
-        <div class="input-wrapper">
-            <input type="date" v-model="date" class="form-control" />
-            <select v-model="testingStatusId" class="form-control">
+        <form class="input-wrapper" action="" id="form-1">
+            <input type="date" v-model="date" class="form-control" title="Дата проведения" />
+            <select v-model="testingStatusId" class="form-control" title="Статус">
                 <option value="null">Все</option>
                 <option :value="status.Id" v-for="status in statuses">{{status.Name}}</option>
             </select>
-            <input type="checkbox" v-model="needTime" class="form-control" />
-            <input type="time" v-model="testingTime" class="form-control" />
-            <input type="text" v-model="lastName" class="form-control" />
-            <input type="text" v-model="firstName" class="form-control" />
-            <input type="submit" value="Найти" v-on:click="find" class="btn btn-outline-primary">
-        </div>
+            <input type="checkbox" v-model="needTime" class="form-control" title="Вкупе, нужно ли обозначать, что до какого-то времени" />
+            <input type="time" v-model="testingTime" class="form-control" title="До какого времени" />
+            <input type="text" v-model="lastName" class="form-control" title="Фамилия" placeholder="Фамилия" />
+            <input type="text" v-model="firstName" class="form-control" placeholder="Имя" title="Имя" />
+            <input type="submit" value="Найти" v-on:submit="find" v-on:click="find" class="btn btn-outline-primary">
+        </form>
+        <button v-on:click="resetFilters"><i class="fa fa-refresh"></i></button>
     </div>
-    <div v-for="item in people">
-        <div class="row">
-            <div v-for="(value, key) in item" class="tp-item-wrapper">
-                {{key}} : {{value}}
-            </div>
+    <div v-loader="objectLoading">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered table-sm">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>ФИО</th>
+                        <th>Дисциплина</th>
+                        <th>Балл</th>
+                        <th>Даты</th>
+                        <th>Статус</th>
+                        <th>Место</th>
+                        <th>Кнопки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="test in people">
+                        <td>{{test.ID}}</td>
+                        <td>{{test.lastName}} {{test.firstName}}</td>
+                        <td class="col-5" :title="test.name"><div style="max-height: 120px; overflow:hidden;">{{test.name}}</div></td>
+                        <td>{{test.score}}</td>
+                        <td>{{test.testingDate.toLocaleString()}} ({{test.testingBegin.toLocaleTimeString()}} - {{test.testingEnd.toLocaleTimeString()}}) @*Даты: {{test.testingDate.toLocaleString()}} ({{test.testingBegin.toLocaleTimeString()}} - {{test.testingEnd.toLocaleTimeString()}})*@</td>
+                        <td>{{test.Status}}</td>
+                        <td>{{test.placeId}}</td>
+                        <td>
+                            <button v-on:click="resetTP(test)" title="Сбросить"><i class="fa fa-sync"></i></button>
+                            <button v-on:click="finishTP(test)" title="Завершить"><i class="fa fa-check"></i></button>
+                            <button v-on:click="deleteTP(test)" title="Удалить"><i class="fa fa-times"></i></button>
+                            <button v-on:click="nullify(test)" title="Аннулировать">0</button>
+                            @*<button v-on:click="download(item.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+        <button v-on:click="downloadCamera(item.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>*@
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <br />
-        <div>
-            <button v-on:click="resetTP(item)" title="Сбросить"><i class="fa fa-sync"></i></button>
-            <button v-on:click="finishTP(item)" title="Завершить"><i class="fa fa-check"></i></button>
-            <button v-on:click="deleteTP(item)" title="Удалить"><i class="fa fa-times"></i></button>
-            <button v-on:click="nullify(item)" title="Аннулировать">0</button>
-            <button v-on:click="download(item.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
-            <button v-on:click="downloadCamera(item.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
-            @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
-        </div>
-    </div>
-    <div id="circleG" v-if="objectLoading.loading">
-        <div id="circleG_1" class="circleG"></div>
-        <div id="circleG_2" class="circleG"></div>
-        <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/total.js?3"></script>
+<script src="~/Content/Statistic/total.js?5"></script>

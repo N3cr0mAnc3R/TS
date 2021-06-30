@@ -7,6 +7,7 @@
         needShow2: false,
         needShow3: false,
         needShow4: false,
+        needShow5: false,
         hasPhoto: false,
         info: []
     },
@@ -63,7 +64,6 @@
                 dataType: 'json',
                 url: '/user/GetLocalization',
                 success: function (l) {
-                    console.log(l.Localization );
                     if (l.Localization == 1) {
                         $('#litem-1').addClass('active');
                         $('#litem-2').removeClass('active');
@@ -109,26 +109,31 @@
         showUrl: function () {
             var self = this;
             $.when($.ajax({
-                url: "/api/account/HasAccess?url=" + 1,
+                url: "/api/Administration/HasAccess?url=" + 1,
                 type: "POST",
                 async: true
             }), $.ajax({
-                url: "/api/account/HasAccess?url=" + 2,
+                url: "/api/Administration/HasAccess?url=" + 2,
                 type: "POST",
                 async: true
             }), $.ajax({
-                url: "/api/account/HasAccess?url=" + 3,
+                url: "/api/Administration/HasAccess?url=" + 3,
                 type: "POST",
                 async: true
             }), $.ajax({
-                url: "/api/account/HasAccess?url=" + 4,
+                url: "/api/Administration/HasAccess?url=" + 4,
                 type: "POST",
                 async: true
-            })).then(function (resp1, resp2, resp3, resp4) {
+            }), $.ajax({
+                url: "/api/Administration/HasAccess?url=" + 5,
+                type: "POST",
+                async: true
+            })).then(function (resp1, resp2, resp3, resp4, resp5) {
                 self.needShow1 = resp1[0];
                 self.needShow2 = resp2[0];
                 self.needShow3 = resp3[0];
                 self.needShow4 = resp4[0];
+                self.needShow5 = resp5[0];
 
                 //console.log(self.forShow[0], self.forShow[1], self.forShow[2], self.forShow[3]);
             }, function (err) {
@@ -164,7 +169,6 @@
             // var checking = (typeof app == 'undefined') ? self : app;
             $('#nav-4').text(localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU");
             $('#nav-8').text(localStorage["localization"] == 1 ? "Логин" : "UserName");
-            console.log($('#nav-4').text());
             $('#nav-9').text(localStorage["localization"] == 1 ? "Пароль" : "Password");
             $('#nav-10').text(localStorage["localization"] == 1 ? "Выполнить вход" : "Log in");
 
@@ -172,11 +176,11 @@
         switchLocal: function (id) {
             var self = this;
             switch (id) {
-                case 1: return localStorage["localization"] == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System";
+                case 1: {return localStorage["localization"] == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System";}
                 case 2: return localStorage["localization"] == 1 ? "Вход" : "Login";
                 case 3: return localStorage["localization"] == 1 ? "Выход" : "Logout";
                 case 4: return localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU";
-                case 5: return localStorage["localization"] == 1 ? "Список аудиторий" : "Auditory list";
+                case 5: return localStorage["localization"] == 1 ? "Аудитории" : "Auditory list";
                 case 6: return localStorage["localization"] == 1 ? "Проверка ВИ" : "Verification";
                 case 7: return localStorage["localization"] == 1 ? "Используйте учетную запись eCampus для входа." : "Enter Your eCampus Login and password";
                 case 8: return localStorage["localization"] == 1 ? "Логин" : "UserName";
@@ -184,6 +188,8 @@
                 case 10: return localStorage["localization"] == 1 ? "Выполнить вход" : "Log in";
                 case 11: return localStorage["localization"] == 1 ? "Выход" : "Logout";
                 case 12: return localStorage["localization"] == 1 ? "Отчёты" : "Reports";
+                case 13: return localStorage["localization"] == 1 ? "Мои ВИ" : "My tests";
+                case 14: return localStorage["localization"] == 1 ? "Администрирование" : "Moderating";
             }
 
         }

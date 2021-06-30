@@ -1,23 +1,25 @@
 ﻿.panel-list {
   margin-top: 80px;
   display: flex;
-  display: -webkit-box;
+  /*display: -webkit-box;*/
   display: -ms-flexbox;
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
   font-family: Montserrat;
   font-style: normal;
+  /*justify-content: space-between;*/
 }
 .panel-list .panel-wrapper {
   background: #a6acbc;
   border-bottom: 1px solid #A6ACBC;
   min-height: 35px;
   color: #fff;
-  margin-right: 20px;
+  /*margin-right: 20px;*/
   padding: 0 20px;
   font-size: 16px;
   line-height: 32px;
   cursor: pointer;
+  margin: 0 10px;
 }
 .panel-list .panel-wrapper:hover {
   color: #ddd;

@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using WebApp.Models.Administration;
 using WebApp.Models.Statistic;
 
 namespace WebApp.Models
@@ -24,11 +25,11 @@ namespace WebApp.Models
                 );
             }
         }
-        public async Task<IEnumerable<dynamic>> GetUserById(int UserId, Guid? userUID)
+        public async Task<IEnumerable<UserTestForTotal>> GetUserById(int UserId, Guid? userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryAsync<dynamic>(
+                return await cnt.QueryAsync<UserTestForTotal>(
                     sql: "[dbo].[SuperAdmin_GetUserById]",
                     new { userUID, UserId },
                     commandType: CommandType.StoredProcedure
@@ -51,6 +52,22 @@ namespace WebApp.Models
                 );
             }
         }
+        public async Task<dynamic> resetProfileTotal(int testingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(
+                    sql: "[dbo].[Administrator_TestingProfileReset]",
+                    new { userUID, testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return await cnt.QueryFirstAsync<dynamic>(
+                    sql: "[dbo].[SuperAdmin_GetTestingProfileById]",
+                    new { userUID, Id = testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
         public async Task<IEnumerable<dynamic>> FinishProfile(int testingProfileId, Guid? userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -67,6 +84,22 @@ namespace WebApp.Models
                 );
             }
         }
+        public async Task<dynamic> FinishProfileTotal(int testingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(
+                    sql: "[dbo].[UserPlace_TestingEnd]",
+                    new { userUID, testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return await cnt.QueryFirstAsync<dynamic>(
+                    sql: "[dbo].[SuperAdmin_GetTestingProfileById]",
+                    new { userUID, Id = testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
         public async Task<IEnumerable<dynamic>> NullifyProfile(int testingProfileId, Guid? userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
@@ -78,6 +111,22 @@ namespace WebApp.Models
                 );
                 return await cnt.QueryAsync<dynamic>(
                     sql: "[dbo].[SuperAdmin_GetUserByTPId]",
+                    new { userUID, Id = testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+        public async Task<dynamic> NullifyProfileTotal(int testingProfileId, Guid? userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(
+                    sql: "[dbo].[SuperAdmin_NullifyProfile]",
+                    new { userUID, testingProfileId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return await cnt.QueryFirstAsync<dynamic>(
+                    sql: "[dbo].[SuperAdmin_GetTestingProfileById]",
                     new { userUID, Id = testingProfileId },
                     commandType: CommandType.StoredProcedure
                 );

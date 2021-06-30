@@ -46,5 +46,9 @@
   {
     "outputFile": "Content/Testing/profile.css",
     "inputFile": "Content/Testing/profile.less"
+  },
+  {
+    "outputFile": "Content/Administration/administration.css",
+    "inputFile": "Content/Administration/administration.less"
   }
 ]

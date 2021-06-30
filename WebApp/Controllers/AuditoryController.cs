@@ -80,7 +80,7 @@ namespace WebApp.Controllers
                         TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
                         if (t == null)
                         {
-                            return JavaScript("window.close();");
+                            return View("Error");
                         }
                         fileName = t.LastName + " " + t.FirstName + " " + t.MiddleName + ".pdf";
                         render = new ReportRender(
@@ -95,9 +95,9 @@ namespace WebApp.Controllers
                 case 3:
                     {
                         TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
-                        if (t == null)
+                        if (t == null || report.TestingTitle == null)
                         {
-                            return JavaScript("window.close();");
+                            return View("Error");
                         }
                         fileName = t.LastName + " " + t.FirstName + " " + t.MiddleName + " title.pdf";
                         render = new ReportRender(
@@ -112,9 +112,9 @@ namespace WebApp.Controllers
                 case 4:
                     {
                         TestUser t = await AuditoryManager.GetInfoForReport(Id, CurrentUser.Id);
-                        if (t == null)
+                        if (t == null || report.TestingProtocol == null)
                         {
-                            return JavaScript("window.close();");
+                            return View("Error");
                         }
                         fileName = t.LastName + " " + t.FirstName + " " + t.MiddleName + " protocol.pdf";
                         render = new ReportRender(
@@ -140,7 +140,7 @@ namespace WebApp.Controllers
                             int[] DateSplit = Date.Split('-').Select(a => int.Parse(a)).ToArray();
                             dt = new DateTime(DateSplit[0], DateSplit[1], DateSplit[2]);
                         }
-                        result = File(render.Render("xls", new { auditoriumId = Id, testingStatusId = StatusId, date = dt == null ? (DateTime?)null : dt }), "xls");
+                        result = File(render.Render("excel", new { auditoriumId = Id, date = dt == null ? (DateTime?)null : dt }), "excel");
                         fileName = "Аудитория_" + dt == null ? DateTime.Now.ToString("dd.MM.yyyy") : ((DateTime)dt).ToString("dd.MM.yyyy") + ".xls";
                         break;
                     }

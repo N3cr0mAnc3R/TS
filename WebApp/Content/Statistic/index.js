@@ -6,6 +6,7 @@
         currentStatus: 0,
         currentDate: new Date().toISOString().slice(0, 10),
         filterFIO: "",
+        hasAccess: false,
         statuses: [],
         auditoryList: [],
         currentAud: null,
@@ -14,15 +15,23 @@
     methods: {
         init: function () {
             var self = this;
-           // self.currentDate = new Date();
-           // console.log(self.currentDate);
+            // self.currentDate = new Date();
+            // console.log(self.currentDate);
             $.ajax({
                 url: "/api/auditory/GetStatuses",
                 type: "POST",
                 async: false,
                 success: function (statuses) {
                     self.statuses = statuses;
-                    self.currentStatus = statuses[0].Id;
+                    //self.currentStatus = statuses[0].Id;
+                }
+            });
+            $.ajax({
+                url: "/api/Administration/HasAccess?url=" + 3,
+                type: "POST",
+                async: true,
+                success: function (data) {
+                    self.hasAccess = data;
                 }
             });
             $.ajax({
@@ -35,11 +44,13 @@
             });
 
             $.ajax({
-                url: "/api/auditory/GetAuditoryList",
+                url: "/api/Administration/GetAuditoryList",
                 type: "POST",
-                async: false,
+                async: true,
                 success: function (auditories) {
                     self.auditoryList = auditories;
+                    self.selectAud(auditories[0].Id);
+
                 }
             });
         },

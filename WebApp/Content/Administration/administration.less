@@ -1,0 +1,35 @@
+﻿.auditory-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+
+    .auditory-wrapper {
+        height: 40px;
+        width: auto;
+        margin: 10px;
+        cursor: pointer;
+        background: #ddd;
+        padding: 0 5px;
+
+        .auditory {
+            margin: auto;
+            line-height: 40px;
+        }
+
+        &.current {
+            background: #888;
+        }
+    }
+}
+
+.user-list {
+    button {
+        height: 30px;
+        width: 30px;
+        color: #fff;
+        background: #565c72;
+        border-radius: 6px;
+        border: none;
+        margin-bottom: 10px;
+    }
+}

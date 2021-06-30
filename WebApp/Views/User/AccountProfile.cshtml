@@ -3,7 +3,7 @@
     ViewBag.Title = "Личный кабинет абитуриента";
 }
 
-<link href="~/Content/Testing/profile.css?1" rel="stylesheet" />
+<link href="~/Content/Testing/profile.css?2" rel="stylesheet" />
 
 <div id="main-window">
     <div v-if="tests.length == 0">
@@ -16,15 +16,17 @@
                     <th class="col-8">{{switchLocal(2)}}</th>
                     <th class="col-2">{{switchLocal(3)}}</th>
                     <th class="col-2">{{switchLocal(4)}}</th>
-                    <th class="col-2"></th>
+                    <th class="col-2">{{switchLocal(5)}}</th>
+                    @*<th class="col-2"></th>*@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="test in tests">
+                <tr v-for="test in tests" :class="{'table-primary': isToday(test)}">
                     <td class="col-8">{{test.Discipline}}</td>
                     <td class="col-2">{{getDateFormat(test.TestingDate)}}</td>
                     <td class="col-2">{{test.Score}}</td>
-                    <td class="col-2"><button v-if="isPossible(test)"><i class="fa fa-play-circle"></i></button></td>
+                    <td class="col-2">{{test.Status}}</td>
+                    @*<td class="col-2"><button v-if="isPossible(test)"><i class="fa fa-play-circle"></i></button></td>*@
                 </tr>
             </tbody>
         </table>

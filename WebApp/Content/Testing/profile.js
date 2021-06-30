@@ -22,12 +22,17 @@
                 case 2: return localStorage["localization"] == 1 ? "Предмет" : "Discipline";
                 case 3: return localStorage["localization"] == 1 ? "Дата проведения" : "Date of the test";
                 case 4: return localStorage["localization"] == 1 ? "Набранный балл" : "Score";
+                case 5: return localStorage["localization"] == 1 ? "Статус" : "State";
             }
         },
         isPossible: function (test) {
             let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
             return isToday && test.TestingDate < new Date() && [1,5].indexOf(test.StatusId) != -1;
             return true;
+        },
+        isToday: function (test) {
+            let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
+            return isToday;
         },
         getDateFormat: function (date) {
             var t = new Date();

@@ -15,3 +15,39 @@ button {
     border: none;
     margin-bottom: 10px;
 }
+
+.base-control {
+    margin-top: 40px;
+    display: flex;
+    margin-bottom: 25px;
+    justify-content: space-between;
+
+    .input-wrapper {
+        display: flex;
+
+        input {
+            margin: 12px 12px;
+
+            &[type="checkbox"] {
+                max-width: 60px;
+            }
+
+
+            &:first-child {
+                margin-left: 0 !important;
+            }
+        }
+
+        select {
+            margin: 12px 12px;
+        }
+    }
+
+    button {
+        margin: auto;
+
+        &:last-child {
+            margin-right: 0 !important;
+        }
+    }
+}

@@ -35,16 +35,34 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await StatisticManager.ResetProfile(Id, CurrentUser.Id));
         }
         [HttpPost]
+        [Route("resetProfileTotal")]
+        public async Task<IHttpActionResult> resetProfileTotal(int Id)
+        {
+            return WrapResponse(await StatisticManager.resetProfileTotal(Id, CurrentUser.Id));
+        }
+        [HttpPost]
         [Route("finishProfile")]
         public async Task<IHttpActionResult> FinishProfile(int Id)
         {
             return WrapResponse(await StatisticManager.FinishProfile(Id, CurrentUser.Id));
         }
         [HttpPost]
+        [Route("finishProfileTotal")]
+        public async Task<IHttpActionResult> FinishProfileTotal(int Id)
+        {
+            return WrapResponse(await StatisticManager.FinishProfileTotal(Id, CurrentUser.Id));
+        }
+        [HttpPost]
         [Route("nullifyProfile")]
         public async Task<IHttpActionResult> NullifyProfile(int Id)
         {
             return WrapResponse(await StatisticManager.NullifyProfile(Id, CurrentUser.Id));
+        }
+        [HttpPost]
+        [Route("nullifyProfileTotal")]
+        public async Task<IHttpActionResult> NullifyProfileTotal(int Id)
+        {
+            return WrapResponse(await StatisticManager.NullifyProfileTotal(Id, CurrentUser.Id));
         }
         [HttpPost]
         [Route("deleteProfile")]

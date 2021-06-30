@@ -87,9 +87,9 @@ namespace WebApp.Controllers
 
         //}
         [AllowAnonymous]
-        public ActionResult Logout()
+        public async Task<ActionResult> Logout()
         {
-            TestManager.ResetPlaceRequest(CurrentUser.Id);
+            await TestManager.ResetPlaceRequest(CurrentUser.Id);
 
             Request.GetOwinContext().Authentication.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             return RedirectToAction("list", "auditory");
@@ -231,13 +231,6 @@ namespace WebApp.Controllers
             return Json(CurrentUser.Picture != null);
         }
 
-        protected AccountManager AccountManager
-        {
-            get
-            {
-                return Request.GetOwinContext().Get<AccountManager>();
-            }
-        }
         protected TestManager TestManager
         {
             get

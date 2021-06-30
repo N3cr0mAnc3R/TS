@@ -12,7 +12,6 @@
         firstName: null,
         auditoriumId: null,
         statuses: [],
-        countOfKeys: 0,
         objectLoading: {
             loading: false,
             loaded: false
@@ -22,6 +21,9 @@
 
         init: function () {
             let self = this;
+            $('#form-1').on("submit", function () {
+                event.preventDefault();
+            });
             self.getStatuses();
         },
         find: function () {
@@ -41,15 +43,14 @@
                     auditoriumId: self.auditoriumId
                 },
                 success: function (data) {
+                    data.map(a => {
+                        a.testingDate = new Date(a.testingDate);
+                        a.testingBegin = new Date(a.testingBegin);
+                        a.testingEnd = new Date(a.testingEnd);
+                    });
                     self.people = data;
-                    self.countOfKeys = 0;
-                    for (let i in data[0]) {
-                        self.countOfKeys++;
-                    }
-                    if (data.length == 1) {
-                        self.selectHuman(data[0].Id);
-                    }
                     self.objectLoading.loading = false;
+                    self.objectLoading.loaded = true;
                 }
             })
         },
@@ -73,20 +74,38 @@
                 url: "/api/auditory/GetStatuses",
                 type: 'post',
                 success: function (data) {
-                    console.log(data);
                     self.statuses = data;
                 }
             })
         },
-        resetTP: function (item) {
+        resetFilters: function() {
+            console.log(1);
+            let self = this;
+            self.date = null;
+            self.structureDisciplineId = null;
+            self.testingStatusId = null;
+            self.needTime = null;
+            self.testingTime = null;
+            self.lastName = null;
+            self.firstName = null;
+            self.auditoriumId = null;
+        },
+        resetTP: function (test) {
             var self = this;
+            let item = self.people.find(a => a.ID == test.ID);
             self.objectLoading.loading = true;
+
             $.ajax({
-                url: "/api/statistic/resetProfile?Id=" + item.Id,
+                url: "/api/statistic/resetProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    item.testingStatusId = data.testingStatusId;
+                    item.score = data.Score;
+                    item.testingDate = new Date(data.testingDate);
+                    item.testingBegin = new Date(data.testingBegin);
+                    item.testingEnd = new Date(data.testingEnd);
                     self.objectLoading.loading = false;
+                    self.objectLoading.loaded = true;
                 }
             })
         },
@@ -95,36 +114,53 @@
         },
         finishTP: function (item) {
             var self = this;
+            self.objectLoading.loading = true;
             $.ajax({
-                url: "/api/statistic/finishProfile?Id=" + item.Id,
+                url: "/api/statistic/finishProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    item.testingStatusId = data.testingStatusId;
+                    item.score = data.Score;
+                    item.testingDate = new Date(data.testingDate);
+                    item.testingBegin = new Date(data.testingBegin);
+                    item.testingEnd = new Date(data.testingEnd);
+                    self.objectLoading.loading = false;
+                    self.objectLoading.loaded = true;
                 }
             })
         },
         nullify: function (item) {
             var self = this;
+            self.objectLoading.loading = true;
             $.ajax({
-                url: "/api/statistic/nullifyProfile?Id=" + item.Id,
+                url: "/api/statistic/nullifyProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = data;
+                    item.testingStatusId = data.testingStatusId;
+                    item.score = data.Score;
+                    item.testingDate = new Date(data.testingDate);
+                    item.testingBegin = new Date(data.testingBegin);
+                    item.testingEnd = new Date(data.testingEnd);
+                    self.objectLoading.loading = false;
+                    self.objectLoading.loaded = true;
                 }
             })
         },
         deleteTP: function (item) {
             var self = this;
+            self.objectLoading.loading = true;
             $.ajax({
-                url: "/api/statistic/deleteProfile?Id=" + item.Id,
+                url: "/api/statistic/deleteProfile?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
                     if (data == 1) {
-                        self.currentHuman.disciplines = self.currentHuman.disciplines.filter(function (item1) { return item1.Id != item.Id });
+                        self.people = self.people.filter(function (item1) { return item1.ID != item.ID });
                     }
                     else {
                         notifier([{ Type: 'error', Body: 'Сперва нужно сбросить' }]);
                     }
+                    self.objectLoading.loading = false;
+                    self.objectLoading.loaded = true;
                 }
             })
         },

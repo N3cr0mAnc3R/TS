@@ -1,12 +1,12 @@
-﻿<link href="~/Content/Statistic/minitotal.css?1" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?2" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
-        <div class="input-wrapper">
-            <input type="text" v-model="currentFIO" class="form-control" />
+        <form id="form-1" class="row">
+            <input type="text" v-model="currentFIO" class="form-control mr-3 ml-1" id="fio" />
             <input type="submit" value="Найти" v-on:click="findByFIO" class="btn btn-outline-primary">
-        </div>
+        </form>
     </div>
-    <a href="/statistic/total">Полная версия</a>
+    @*<a href="/statistic/total">Полная версия</a>*@
     <div v-if="textForShow">
         {{textForShow}}
     </div>
@@ -20,21 +20,34 @@
             </tr>
         </table>
         <table v-if="currentHuman.disciplines.length > 0" class="table table-bordered table-striped">
+            <tr>
+                <th>Дисциплина</th>
+                <th>Назначен на</th>
+                <th>Дата начала выполнения</th>
+                <th>Дата окончания выполнения</th>
+                <th>Результат</th>
+                <th>Текущий статус</th>
+                <th>Управление</th>
+            </tr>
             <tr v-for="discipline in currentHuman.disciplines">
-                <td>{{discipline.Id}}</td>
+                @*<td>{{discipline.Id}}</td>*@
                 <td>{{discipline.Name}}</td>
-                <td>{{(new Date(discipline.testingDate)).toLocaleString()}}</td>
-                <td>{{(new Date(discipline.testingBegin)).toLocaleTimeString()}}</td>
-                <td>{{(new Date(discipline.testingEnd)).toLocaleTimeString()}}</td>
+                <td>{{discipline.TestingDate}}</td>
+                <td>{{discipline.TestingBegin}}</td>
+                <td>{{discipline.TestingEnd}}</td>
                 <td>{{discipline.Score}}</td>
                 <td>{{discipline.Status}}</td>
                 <td>
-                    <button v-on:click="resetTP(discipline)" title="Сбросить"><i class="fa fa-sync"></i></button>
-                    <button v-on:click="finishTP(discipline)" title="Завершить"><i class="fa fa-check"></i></button>
-                    <button v-on:click="deleteTP(discipline)" title="Удалить"><i class="fa fa-times"></i></button>
-                    <button v-on:click="nullify(discipline)" title="Аннулировать">0</button>
-                    <button v-on:click="download(discipline.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
-                    <button v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+                    <template v-if="discipline.IsAdmin">
+                        <button v-on:click="resetTP(discipline)" title="Сбросить"><i class="fa fa-sync"></i></button>
+                        <button v-on:click="finishTP(discipline)" title="Завершить"><i class="fa fa-check"></i></button>
+                        <button v-on:click="deleteTP(discipline)" title="Удалить"><i class="fa fa-times"></i></button>
+                        <button v-on:click="nullify(discipline)" title="Аннулировать">0</button>
+                    </template>
+                    <template v-if="(discipline.IsReport || discipline.IsAdmin) && [3,4, 6].indexOf(discipline.StatusId) != -1">
+                        <button v-on:click="download(discipline.Id)" title="Скачать отчёт" v-if=""><i class="fa fa-print"></i></button>
+                        <button v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+                    </template>
                     @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
                 </td>
             </tr>
@@ -68,4 +81,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?1"></script>
+<script src="~/Content/Statistic/minitotal.js?2"></script>
