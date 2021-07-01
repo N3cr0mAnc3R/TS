@@ -188,6 +188,23 @@
   font-size: 12px;
   display: block;
 }
+.auditory .computer-list .place-table .place-row .place-item .info-wrapper .control-place .chat-msg-wrapper {
+  position: absolute;
+  top: 180px;
+  left: 82px;
+  background: #d6d6d6;
+  width: 10px;
+  height: 10px;
+  text-align: center;
+  border-radius: 10px;
+  color: #fff;
+}
+.auditory .computer-list .place-table .place-row .place-item .info-wrapper .control-place .chat-msg-wrapper span {
+  margin-left: 0px;
+  margin-top: -1px;
+  font-size: 12px;
+  display: block;
+}
 .control-wrapper {
   display: -webkit-box;
   display: -ms-flexbox;

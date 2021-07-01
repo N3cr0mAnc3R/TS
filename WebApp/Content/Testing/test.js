@@ -1543,8 +1543,8 @@
                         if (app.videoSocket && app.videoSocket.readyState == 1) {
                             app.videoSocket.send(JSON.stringify(obj));
                         }
-                    }, function () { });
-                }, function () { });
+                    }, function (r) { console.log(r); });
+                }, function (r) { console.log(r); });
             }
             catch {
                 //console.log('error');

@@ -63,7 +63,8 @@ const app = new Vue({
                 async: false,
                 success: function (domain) {
                     self.domain = domain;
-                    self.isDebug = domain.indexOf('wss') == -1;
+                    self.isDebug = false;
+                    //self.isDebug = domain.indexOf('wss') == -1;
                 }
             });
             $.ajax({
@@ -172,7 +173,7 @@ const app = new Vue({
                                     item.errors = [];
                                     item.Image = "";
                                     item.chat = {};
-                                    console.log(item.UserVerified, [2].indexOf(item.TestingStatusId), );
+                                    console.log(item.UserVerified, [2].indexOf(item.TestingStatusId),);
                                     //Если подтверждён
                                     if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
@@ -587,7 +588,6 @@ const app = new Vue({
                 self.onIceCandidate(peer, e, socket, a.TestingProfileId, type, self.currentUid);
             })
             peer.addEventListener('connectionstatechange', function (event) {
-                console.log(event);
                 if (peer && peer.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (!peer || peer.connectionState == 'connecting') {
@@ -734,8 +734,8 @@ const app = new Vue({
                     else {
                         message = JSON.parse(msg.data);
                     }
-                    message.Date = new Date(message.Date);
-                    //message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+                    //message.Date = new Date(message.Date);
+                    message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
                     console.log(self.chats);
 
                     //let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
@@ -790,15 +790,17 @@ const app = new Vue({
                                 queue = { type: message.type, Id: a.TestingProfileId, candidates: [] };
                             }
 
-                            if (queue.candidates)
+                            if (queue.candidates) {
                                 queue.candidates.push(candidate);
+                            }
                         }
                         else if (message.offer) {
                             navigator.getUserMedia({ video: true }, function (stream) {
                                 //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
                                 let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                                 let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
-                                console.log(created, peerObj);
+                                //if (peerObj.peer.)
+                                console.log(created, peerObj.peer.connectionState);
                                 if (!peerObj) {
                                     return;
                                 }
@@ -815,11 +817,19 @@ const app = new Vue({
                                             obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
                                             socket.send(JSON.stringify(obj));
                                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
-                                            if (queue.candidates) queue.candidates.forEach(function (candidate) {
-                                                peer.addIceCandidate(candidate);
-                                                console.log('add candidate');
-                                            });
-                                            queue.candidates = null;
+
+                                            //if (queue.candidates.length > 0) {
+                                            //    queue.candidates.forEach(function (candidate) {
+                                            //        peer.addIceCandidate(candidate);
+                                            //        console.log('add candidate');
+                                            //    });
+                                            //}
+                                            //else {
+                                                let inter = setInterval(function () {
+                                                    self.addIceCandidateToPeer(peer, self, message, a, inter);
+                                                }, 300);
+                                            //}
+                                            queue.candidates = [];
 
                                         }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); });
@@ -840,6 +850,17 @@ const app = new Vue({
                 socket = null;
                 self.initSocket(type, a, cam);
             };
+        },
+        addIceCandidateToPeer(peer, self, message, a, inter) {
+            let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+            console.log(peer.connectionState);
+            if (queue.candidates.length > 0) {
+                clearInterval(inter);
+                queue.candidates.forEach(function (candidate) {
+                    peer.addIceCandidate(candidate);
+                    console.log('add candidate');
+                });
+            }
         },
         onIceCandidate: function (pc, e, socket, tpid, type, uid) {
             let obj1 = {};
@@ -1133,7 +1154,7 @@ const app = new Vue({
                 return v.toString(16);
             });
         },
-        reconnect: function () {
+        reconnect1: function () {
             let self = this;
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
             self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
@@ -1144,9 +1165,18 @@ const app = new Vue({
                 if (found[0]) {
                     $('#full-video-camera')[0].srcObject = found[0].stream;
                 }
+            }, 2000);
+        },
+        reconnect2: function () {
+            let self = this;
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false, uid: self.currentUid }));
+
+            setTimeout(function () {
+                let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
                 if (found[1])
                     $('#full-video-screen')[0].srcObject = found[1].stream;
-                // $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
             }, 2000);
         },
         toggleChat: function (id) {
@@ -1246,6 +1276,7 @@ const app = new Vue({
                     //messages.map(a => a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))));
                     let chat = self.chats.find(a => a.testingProfileId == newId);
                     chat.messages = messages;
+                    console.log(chat.messages);
                 }
             });
         },
@@ -1281,7 +1312,8 @@ const app = new Vue({
                 case 11: return localStorage["localization"] == 1 ? "Список пользователей" : "User list";
                 case 12: return localStorage["localization"] == 1 ? "Отклонить" : "Decline";
                 case 13: return localStorage["localization"] == 1 ? "Подтвердить" : "Verify";
-                case 14: return localStorage["localization"] == 1 ? "Переподключиться" : "Reconnect";
+                case 14: return localStorage["localization"] == 1 ? "Переподключиться1" : "Reconnect1";
+                case 15: return localStorage["localization"] == 1 ? "Переподключиться2" : "Reconnect2";
             }
         },
         getDateFormat: function (date) {

@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Auditory/moderate.css?1" rel="stylesheet" />
+﻿<link href="~/Content/Auditory/moderate.css?2" rel="stylesheet" />
 
 @{
     ViewBag.Title = "Администрирование аудитории";
@@ -48,6 +48,10 @@
                                         <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
                                             <span>
                                                 {{item.chat.unreadCount}}
+                                            </span>
+                                        </div>
+                                        <div class="chat-msg-wrapper" v-if="item.chat.messages.length > 0">
+                                            <span>
                                             </span>
                                         </div>
                                     </button>
@@ -229,9 +233,10 @@
                     <button class="verify-user" v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
                     <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(5)}}</button>
                     <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
-                    <button class="reconnect" v-on:click="reconnect()">{{switchLocal(14)}}</button>
+                    <button class="reconnect" v-on:click="reconnect1()">{{switchLocal(14)}}</button>
+                    <button class="reconnect" v-on:click="reconnect2()">{{switchLocal(15)}}</button>
                     <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin">Перезагрузить</button>
-                    <button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>
+                    @*<button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>*@
                     <button class="reload" data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
@@ -244,4 +249,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?2"></script>
+<script src="~/Content/Auditory/moderate.js?3"></script>

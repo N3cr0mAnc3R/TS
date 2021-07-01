@@ -220,14 +220,14 @@ namespace WebApp
 
                             List<WebSocket> disposedClients = new List<WebSocket>();
                             //Передаём сообщение всем клиентам
-                            foreach (var client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
+                            foreach (WebSocket client in Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value)
                             {
 
                                 // WebSocket client = client1;
 
                                 try
                                 {
-                                    if (client.State == WebSocketState.Open)
+                                    if (client.State == WebSocketState.Open && client != socket)
                                     {
                                         await client.SendAsync(new ArraySegment<byte>(mainbuffer), WebSocketMessageType.Text, true, CancellationToken.None);
                                     }
