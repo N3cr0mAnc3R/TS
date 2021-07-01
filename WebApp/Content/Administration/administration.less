@@ -1,7 +1,7 @@
 ﻿.auditory-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-between;
+    /*justify-content: space-between;*/
 
     .auditory-wrapper {
         height: 40px;
@@ -31,5 +31,18 @@
         border-radius: 6px;
         border: none;
         margin-bottom: 10px;
+    }
+}
+
+.administration-rights {
+    list-style: square;
+    width: 380px;
+
+    li {
+        cursor: pointer;
+
+        &:hover {
+            background: #ddd;
+        }
     }
 }

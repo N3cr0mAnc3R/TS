@@ -104,3 +104,42 @@ table button {
     background-color: #000000;
   }
 }
+.auditory-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+.auditory-list .auditory {
+  background: #ddd;
+  margin: 10px 5px;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 5px;
+  height: 35px;
+  text-align: center;
+  min-width: 170px;
+}
+.auditory-list .auditory.current {
+  background: #565c72;
+}
+.place-list {
+  display: flex;
+  flex-wrap: wrap;
+}
+.place-list .place-wrapper {
+  width: 33px;
+  height: 33px;
+  font-size: 15px;
+  line-height: 24px;
+  padding: 3px;
+  text-align: center;
+  margin: 2px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+}
+.place-list .place-wrapper.current {
+  background: #565c72;
+}
+.place-list .place-wrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

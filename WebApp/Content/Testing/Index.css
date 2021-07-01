@@ -446,7 +446,7 @@
   opacity: 0.7;
 }
 .open-chat-wrapper {
-  position: absolute;
+  position: fixed;
   left: 5%;
   top: 90px;
   cursor: pointer;

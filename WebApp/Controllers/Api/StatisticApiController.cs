@@ -104,9 +104,9 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("setPlaceToUser")]
-        public async Task<IHttpActionResult> SetPlaceToUser(TotalModel model)
+        public async Task SetPlaceToUser(TotalModel model)
         {
-            return WrapResponse(await StatisticManager.SetPlaceToUser(model.PlaceId, model.UserId, CurrentUser.Id));
+            await StatisticManager.SetPlaceToUser(model.TestingProfileId, model.PlaceId, CurrentUser.Id);
         }
         protected StatisticManager StatisticManager
         {

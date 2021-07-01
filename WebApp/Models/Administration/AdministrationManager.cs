@@ -40,6 +40,14 @@ namespace WebApp.Models.Administration
                 return await cnt.QueryFirstAsync<bool>("Administrator_HasAccessToReport", new { userUid, AuditoriumId = AuditoryId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<Place>> GetAuditoryPlacesById(Guid userUid, int AuditoryId)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return await cnt.QueryAsync<Place>("Administrator_AuditoriumPlacesGet", new { userUid, AuditoriumId = AuditoryId }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<bool> HasFullAccess(Guid userUid)
         {
 

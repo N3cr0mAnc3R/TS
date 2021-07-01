@@ -8,10 +8,11 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using WebApp.Models;
+using WebApp.Models.Administration;
 
 namespace WebApp.Controllers
 {
-    public class StatisticController : Controller
+    public class StatisticController : BaseController
     {
         // GET: Statistic
         public ActionResult Index()
@@ -24,8 +25,9 @@ namespace WebApp.Controllers
             ViewBag.Title = "Страница полного модерирования";
             return View();
         }
-        public ActionResult Total()
+        public async Task<ActionResult> Total()
         {
+            if(await AdministrationManager.HasFullAccess(CurrentUser.Id))
             ViewBag.Title = "Страница полного модерирования";
             return View();
         }
@@ -57,6 +59,14 @@ namespace WebApp.Controllers
             get
             {
                 return Request.GetOwinContext().Get<TestManager>();
+
+            }
+        }
+        protected AdministrationManager AdministrationManager
+        {
+            get
+            {
+                return Request.GetOwinContext().Get<AdministrationManager>();
 
             }
         }

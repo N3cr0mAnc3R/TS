@@ -8,6 +8,7 @@
         auditories: [],
         auditory: {},
         hasFullAccess: false,
+        currentTest: {},
         places: [],
         textForShow: null,
         objectLoading: {
@@ -25,24 +26,7 @@
                 $('#fio').focus();
             }, 200)
 
-            //$.ajax({
-            //    url: "/api/statistic/findfio",
-            //    type: 'post',
-            //    data: { Fio: self.currentFIO },
-            //    success: function (data) {
-            //        if (data.length == 0) {
-            //            self.textForShow = "Люди не найдены";
-            //            self.filteredPeople = [];
-            //        }
-            //        else { self.textForShow = null; }
-            //        if (data.length == 1) {
-            //            self.selectHuman(data[0].Id);
-            //        }
-            //        self.filteredPeople = data;
-
-            //        self.objectLoading.loading = false;
-            //    }
-            //})
+            this.getAuditoriums();
         },
         findByFIO: function () {
             var self = this;
@@ -58,14 +42,14 @@
                     }
                     else { self.textForShow = null; }
                     if (data.length == 1) {
-                        self.selectHuman(data[0].Id);
+                        self.selectHuman(data[0]);
                     }
                     self.filteredPeople = data;
 
                     self.objectLoading.loading = false;
                 },
                 error: function (error) {
-                    notifier([{ Type: 'error', Body: error.responseJSON.ExceptionMessage}]);
+                    notifier([{ Type: 'error', Body: error.responseJSON.ExceptionMessage }]);
                 }
             })
         },
@@ -75,7 +59,7 @@
         initDisciplines(discs) {
             let self = this;
             discs.map(a => {
-                a.TestingDate = new Date(a.TestingDate).toLocaleString();
+                a.TestingDate = new Date(a.TestingDate);
                 if (a.TestingBegin) {
                     a.TestingBegin = new Date(a.TestingBegin).toLocaleTimeString();
                 }
@@ -87,20 +71,32 @@
                     a.TestingEnd = new Date(a.TestingEnd).toLocaleTimeString();
                 }
                 else {
-                    a.TestingEnd = "Не завершил";
+                    if (a.StatusId == 2) {
+                        a.TestingEnd = "Не завершил";
+                    }
+                    else {
+                        a.TestingEnd = null;
+                    }
 
                 }
             });
             return discs;
         },
-        selectHuman: function (Id) {
+        isToday: function (test) {
+            let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
+            return isToday;
+        },
+        selectHuman: function (human) {
             var self = this;
             $.ajax({
-                url: "/api/statistic/getById?Id=" + Id,
+                url: "/api/statistic/getById?Id=" + human.Id,
                 type: 'post',
                 success: function (data) {
+                    self.currentHuman = {};
+                    self.currentHuman = human;
+                    self.currentHuman.disciplines = [];
                     self.currentHuman.disciplines = self.initDisciplines(data);
-                    self.currentHuman.placeInfo = {};
+
                 }
             })
         },
@@ -116,7 +112,6 @@
                 }
             })
         },
-
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
         },
@@ -165,10 +160,11 @@
                 }
             })
         },
-        openNewPlaceWindow: function () {
+        openNewPlaceWindow: function (disc) {
             $('#place-window').modal('show');
-            this.getCurrentPlace();
-            this.getAuditoriums();
+            this.currentTest = disc;
+            console.log(this.currentTest.PlaceId);
+            //this.getCurrentPlace();
         },
         getCurrentPlace: function () {
             var self = this;
@@ -183,38 +179,54 @@
         getAuditoriums: function () {
             var self = this;
             $.ajax({
-                url: "/api/statistic/getAuditoryList",
+                url: "/api/administration/getAuditoryList",
                 type: 'post',
                 success: function (data) {
                     self.auditories = data;
                 }
             })
         },
-        getAuditoryInfo: function (Id) {
+        getAuditoryInfo: function (aud) {
             var self = this;
             $.ajax({
-                url: "/api/statistic/getAuditoryById?Id=" + Id,
+                url: "/api/administration/getAuditoryById?Id=" + aud.Id,
                 type: 'post',
                 success: function (data) {
                     self.places = data;
+                    self.auditory = aud;
                 }
             })
         },
+        closeModal() {
+            let self = this;
+            $('#place-window').modal('hide');
+            self.currentTest = {};
+            self.auditory = {};
+            self.places = [];
+        },
         setPlaceToUser: function (Id) {
             var self = this;
+            if (self.places.find(a => a.Id == Id).IsUsed) {
+                notifier([{ Type: 'error', Body: 'Место занято' }]);
+                return;
+            }
             $.ajax({
                 url: "/api/statistic/setPlacetouser",
                 type: 'post',
                 data: {
                     PlaceId: Id,
+                    TestingProfileId: self.currentTest.Id,
                     UserId: self.currentHuman.Id
                 },
-                success: function (data) {
-                    self.currentHuman.placeInfo = data;
+                success: function () {
+                    notifier([{ Type: 'success', Body: 'Место обновлено' }]);
+                    self.selectHuman(self.currentHuman);
+                    self.closeModal();
                 },
                 error: function () {
                     //notifier('');
                     notifier([{ Type: 'error', Body: 'Место занято' }]);
+                    self.closeModal();
                 }
             })
         }

@@ -9,7 +9,7 @@ namespace WebApp.Models.Administration
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public double Score { get; set; }
+        public double? Score { get; set; }
         public string Status { get; set; }
         public int StatusId { get; set; }
         public DateTime? TestingDate { get; set; }
@@ -17,5 +17,10 @@ namespace WebApp.Models.Administration
         public DateTime? TestingEnd{ get; set; }
         public bool IsReport { get; set; }
         public bool IsAdmin { get; set; }
+        public int AuditoriumId { get; set; }
+        public int PlaceId { get; set; }
+        public string PlaceNumber { get; set; }
+
     }
+
 }

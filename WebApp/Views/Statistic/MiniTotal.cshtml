@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Statistic/minitotal.css?2" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?3" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <form id="form-1" class="row">
@@ -12,7 +12,7 @@
     </div>
     <div class="info-wrapper">
         <table class="table table-bordered table-stripped table-hover">
-            <tr v-for="human in filteredPeople" v-on:click="selectHuman(human.Id)">
+            <tr v-for="human in filteredPeople" v-on:click="selectHuman(human)">
                 <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" /></td>
                 <td>{{human.Id}}</td>
                 <td>{{human.Name}}</td>
@@ -27,34 +27,36 @@
                 <th>Дата окончания выполнения</th>
                 <th>Результат</th>
                 <th>Текущий статус</th>
+                <th>Место</th>
                 <th>Управление</th>
             </tr>
             <tr v-for="discipline in currentHuman.disciplines">
                 @*<td>{{discipline.Id}}</td>*@
                 <td>{{discipline.Name}}</td>
-                <td>{{discipline.TestingDate}}</td>
+                <td>{{discipline.TestingDate.toLocaleString()}}</td>
                 <td>{{discipline.TestingBegin}}</td>
                 <td>{{discipline.TestingEnd}}</td>
                 <td>{{discipline.Score}}</td>
                 <td>{{discipline.Status}}</td>
+                <td>{{discipline.PlaceNumber}}</td>
                 <td>
                     <template v-if="discipline.IsAdmin">
                         <button v-on:click="resetTP(discipline)" title="Сбросить"><i class="fa fa-sync"></i></button>
                         <button v-on:click="finishTP(discipline)" title="Завершить"><i class="fa fa-check"></i></button>
                         <button v-on:click="deleteTP(discipline)" title="Удалить"><i class="fa fa-times"></i></button>
                         <button v-on:click="nullify(discipline)" title="Аннулировать">0</button>
+                        <button v-on:click="openNewPlaceWindow(discipline)" title="Пересадить" v-if="isToday(discipline)"><i class="fa fa-pencil-alt"></i></button>
                     </template>
-                    <template v-if="(discipline.IsReport || discipline.IsAdmin) && [3,4, 6].indexOf(discipline.StatusId) != -1">
+                    <template v-if="(discipline.IsReport || discipline.IsAdmin) && [3, 4, 6].indexOf(discipline.StatusId) != -1">
                         <button v-on:click="download(discipline.Id)" title="Скачать отчёт" v-if=""><i class="fa fa-print"></i></button>
                         <button v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
                     </template>
-                    @*<button v-on:click="openNewPlaceWindow()"><i class="fa fa-expand"></i></button>*@
                 </td>
             </tr>
         </table>
     </div>
     <div class="modal fade" id="place-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="label">Назначить место</h5>
@@ -63,14 +65,10 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div><div v-for="aud in auditories" v-on:click="getAuditoryInfo(aud.Id)">{{aud.Name}}</div></div>
+                    <div class="auditory-list"><div v-for="aud in auditories" v-on:click="getAuditoryInfo(aud)" class="auditory"  v-bind:class="{'current' : auditory.Id == aud.Id}">{{aud.Name}}</div></div>
                     <div class="place-list">
-                        <div v-for="place in places" class="place-wrapper" v-bind:class="{'current' : currentHuman.placeInfo.Id == place.Id}" v-on:click="setPlaceToUser(place.Id)">{{place.number}}</div>
+                        <div v-for="place in places" class="place-wrapper" :disabled="place.IsUsed" v-bind:class="{'current' : currentTest.PlaceId == place.Id, 'disabled': place.IsUsed}" v-on:click="setPlaceToUser(place.Id)">{{place.Number}}</div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
-                    <button type="button" class="btn btn-primary" v-on:click="buildAuditory()" data-dismiss="modal">Сохранить</button>
                 </div>
             </div>
         </div>
@@ -81,4 +79,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?2"></script>
+<script src="~/Content/Statistic/minitotal.js?3"></script>

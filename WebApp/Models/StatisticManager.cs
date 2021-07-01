@@ -187,13 +187,13 @@ namespace WebApp.Models
                 );
             }
         }
-        public async Task<dynamic> SetPlaceToUser(int UserId, int PlaceId, Guid? userUID)
+        public async Task SetPlaceToUser(int TestingProfileId, int PlaceId, Guid userUID)
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstAsync<dynamic>(
+                await cnt.ExecuteAsync(
                     sql: "[dbo].[SuperAdmin_SetPlaceToUser]",
-                    new { userUID, UserId, PlaceId },
+                    new { userUID, TestingProfileId, PlaceId },
                     commandType: CommandType.StoredProcedure
                 );
             }

@@ -1,11 +1,11 @@
-﻿<link href="~/Content/administration/administration.css?1" rel="stylesheet" />
-<div id="main-window">
-    <div>Вам доступен следующий функционал:</div>
-    <ul>
-        <li v-on:click="setAuditoryManagement">Назначить администратора аудитории</li>
-        <li v-on:click="setReportManagement">Назначить ответственного за отчёты</li>
+﻿<link href="~/Content/administration/administration.css?3" rel="stylesheet" />
+<div id="main-window" class="container">
+    <div class="container mt-5">Вам доступен следующий функционал:</div>
+    <ul class="administration-rights">
+        <li v-on:click="setAuditoryManagement" v-if="hasFullAccess">Назначить администратора аудитории</li>
+        <li v-on:click="setReportManagement()">Назначить ответственного за отчёты</li>
         <li><a href="/statistic/minitotal">Перейти к поиску</a></li>
-        <li><a href="/statistic/total">Открыть модерирование</a></li>
+        <li v-if="hasFullAccess"><a href="/statistic/total">Открыть модерирование</a></li>
     </ul>
     <br />
     <div class="auditory-list" v-if="auditories.length > 0 && (auditoryManagement || reportManagement)">
@@ -197,4 +197,4 @@
     </div>
 </div>
 
-<script src="~/Content/administration/administration.js?2"></script>
+<script src="~/Content/administration/administration.js?4"></script>

@@ -45,6 +45,13 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.HasFullAccess(CurrentUser.Id));
         }
         [HttpPost]
+        [Route("getAuditoryById")]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> GetAuditoryById(int Id)
+        {
+            return WrapResponse(await AdministrationManager.GetAuditoryPlacesById(CurrentUser.Id, Id));
+        }
+        [HttpPost]
         [Route("GetAuditoryList")]
         public async Task<IHttpActionResult> GetAuditoryList()
         {

@@ -8,6 +8,7 @@
         people: [],
         surname: "",
         userForAdd: {},
+        hasFullAccess: false,
         searched: false,
         foundedUsers: [],
         objForLoading: {
@@ -29,6 +30,14 @@
                 success: function (auditories) {
                     self.auditories = auditories;
                     self.selectAud(auditories[0].Id);
+                }
+            });
+            $.ajax({
+                url: "/api/administration/HasFullAccess",
+                type: "POST",
+                async: false,
+                success: function (data) {
+                    self.hasFullAccess = data;
                 }
             });
 
