@@ -45,8 +45,9 @@
                             <button v-on:click="finishTP(test)" title="Завершить"><i class="fa fa-check"></i></button>
                             <button v-on:click="deleteTP(test)" title="Удалить"><i class="fa fa-times"></i></button>
                             <button v-on:click="nullify(test)" title="Аннулировать">0</button>
-                            @*<button v-on:click="download(item.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
-        <button v-on:click="downloadCamera(item.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>*@
+                            <button v-on:click="download(test)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+                            <button v-on:click="downloadCamera(test.ID, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+                            <button v-on:click="downloadCamera(test.ID, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                         </td>
                     </tr>
                 </tbody>

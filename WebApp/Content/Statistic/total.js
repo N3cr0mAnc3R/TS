@@ -54,8 +54,8 @@
                 }
             })
         },
-        download: function (Id) {
-            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
+        download: function (test) {
+            window.open('/auditory/DownloadReport?Id=' + test.ID + '&Type=' + 1, '_blank');
         },
         selectHuman: function (Id) {
             var self = this;

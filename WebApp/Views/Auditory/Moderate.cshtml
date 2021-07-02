@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Auditory/moderate.css?2" rel="stylesheet" />
+﻿<link href="~/Content/Auditory/moderate.css?3" rel="stylesheet" />
 
 @{
     ViewBag.Title = "Администрирование аудитории";
@@ -187,8 +187,8 @@
                                 <td>{{test.FullName}}</td>
                                 <td>{{test.Discipline}}</td>
                                 <td>{{test.Status}}</td>
-                                <td><button class="reload" v-on:click="resetTest(test.TestingProfileId)" v-if="isSuperAdmin" title="Сбросить тест"><i class="fa fa-retweet"></i></button></td>
-                                <td> <button class="reload" v-on:click="finishTest(test.TestingProfileId)" v-if="isSuperAdmin" title="завершить тест"><i class="fa fa-check"></i></button></td>
+                                <td><button class="reload btn btn-secondary" v-on:click="resetTest(test.TestingProfileId)" v-if="isSuperAdmin" title="Сбросить тест"><i class="fa fa-retweet"></i></button></td>
+                                <td> <button class="reload btn btn-secondary" v-on:click="finishTest(test.TestingProfileId)" v-if="isSuperAdmin" title="завершить тест"><i class="fa fa-check"></i></button></td>
                             </tr>
                         </tbody>
                     </table>
@@ -226,16 +226,16 @@
                         <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
                         <button v-on:click="sendError" class="save-error">{{switchLocal(3)}}</button>
                     </div>
-                    <button class="add-error" v-on:click="showError()">{{switchLocal(4)}}</button>
+                    <button class="add-error" v-on:click="showError()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(4)}}</button>
 
-                    <button class="pause-btn" v-on:click="togglePause()"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
+                    <button class="pause-btn" v-on:click="togglePause()" v-if="currentUser.TestingStatusId == 2"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
                     <button class="verify-user" v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
                     <button class="verify-user" v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
-                    <button class="resetConfig" v-on:click="finishTest()">{{switchLocal(5)}}</button>
+                    <button class="resetConfig" v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(5)}}</button>
                     <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
-                    <button class="reconnect" v-on:click="reconnect1()">{{switchLocal(14)}}</button>
-                    <button class="reconnect" v-on:click="reconnect2()">{{switchLocal(15)}}</button>
-                    <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin">Перезагрузить</button>
+                    <button class="reconnect" v-on:click="reconnect1()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
+                    <button class="reconnect" v-on:click="reconnect2()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
+                    <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin && currentUser.TestingStatusId == 2">Перезагрузить</button>
                     @*<button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>*@
                     <button class="reload" data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
 
@@ -249,4 +249,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?3"></script>
+<script src="~/Content/Auditory/moderate.js?4"></script>

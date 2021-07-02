@@ -895,8 +895,10 @@
                     else if (message.requestOffer) {
                         //console.log('start request');
                         // self.reInitPeers();
-                        self.initRTCPeer(1, message.uid);
-                        self.initRTCPeer(2, message.uid);
+                        console.log(message.typeOffer);
+                        self.initRTCPeer(message.typeOffer, message.uid);
+                        /*self.initRTCPeer(1, message.uid);*/
+                        //self.initRTCPeer(2, message.uid);
                     }
                     else if (message.reloadRequest) {
                         location.href = location.href;
@@ -1446,6 +1448,7 @@
             return date.toLocaleTimeString();
         },
         initRTCPeer: function (type, uid) {
+            console.log(type, uid);
             //console.log('init rtcpeer');
             var self = this;
             var TURN = {

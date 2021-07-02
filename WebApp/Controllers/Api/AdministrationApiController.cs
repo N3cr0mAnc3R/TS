@@ -59,9 +59,15 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("HasAccess")]
+        [AllowAnonymous]
         public async Task<IHttpActionResult> HasAccess(int url)
         {
             bool result = false;
+
+            if (!HttpContext.Current.Request.IsAuthenticated)
+            {
+                return WrapResponse(result);
+            }
 
             List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
 

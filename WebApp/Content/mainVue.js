@@ -16,7 +16,7 @@
             var self = this;
             if (!localStorage["localization"]) {
                 localStorage["localization"] = 1;
-            } 
+            }
             self.switchLocal1();
             self.getLocalization();
             $.ajax({
@@ -50,7 +50,7 @@
                     self.info = d;
                     var result = "";
                     d.forEach(function (item) {
-                        result += (item.Name? item.Name + ": " : "") + item.Contact + "<br>";
+                        result += (item.Name ? item.Name + ": " : "") + item.Contact + "<br>";
                     })
                     $('#nav-5').html(result);
                 }
@@ -137,8 +137,9 @@
 
                 //console.log(self.forShow[0], self.forShow[1], self.forShow[2], self.forShow[3]);
             }, function (err) {
-
             });
+
+
         },
         setLocalization: function (Type) {
             Type1 = Type == 1 ? 'RU' : 'EN';
@@ -176,7 +177,7 @@
         switchLocal: function (id) {
             var self = this;
             switch (id) {
-                case 1: {return localStorage["localization"] == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System";}
+                case 1: { return localStorage["localization"] == 1 ? "Система вступительных испытаний СКФУ" : "NCFU Enrolling System"; }
                 case 2: return localStorage["localization"] == 1 ? "Вход" : "Login";
                 case 3: return localStorage["localization"] == 1 ? "Выход" : "Logout";
                 case 4: return localStorage["localization"] == 1 ? "Все права защищены, 2021, СКФУ" : "All rights reserved, 2020, NCFU";

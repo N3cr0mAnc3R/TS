@@ -320,6 +320,7 @@ const app = new Vue({
         getInfoForAdmin: function () {
             var self = this;
 
+            $('#full-wrapper').modal('hide');
             $('#user-info-wrapper').modal('show');
             if (self.isSuperAdmin) {
                 $.ajax({
@@ -769,7 +770,8 @@ const app = new Vue({
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
-                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, IsSender: false, uid: self.currentUid }));
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 1,  IsSender: false, uid: self.currentUid }));
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 2,  IsSender: false, uid: self.currentUid }));
 
                     if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
                         var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
@@ -780,8 +782,8 @@ const app = new Vue({
 
                 };
                 socket.onmessage = function (msg) {
-                    //console.log(msg);
                     let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                    //console.log(message, self.currentUid);
                     if (message.IsSender && message.uid == self.currentUid) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
@@ -799,14 +801,16 @@ const app = new Vue({
                                 //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
                                 let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                                 let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
+                                //console.log(created.peers, message.type);
                                 //if (peerObj.peer.)
-                                console.log(created, peerObj.peer.connectionState);
+                                //console.log(created, peerObj.peer.connectionState);
                                 if (!peerObj) {
                                     return;
                                 }
                                 let peer = peerObj.peer;
-                                peer.addStream(stream);
+                                //peer.addStream(stream);
                                 peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                                    console.log('got desc');
                                     peer.createAnswer(function (answer) {
                                         peer.setLocalDescription(answer, function () {
                                             let obj1 = {};
@@ -818,17 +822,17 @@ const app = new Vue({
                                             socket.send(JSON.stringify(obj));
                                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
 
-                                            //if (queue.candidates.length > 0) {
-                                            //    queue.candidates.forEach(function (candidate) {
-                                            //        peer.addIceCandidate(candidate);
-                                            //        console.log('add candidate');
-                                            //    });
-                                            //}
-                                            //else {
+                                            if (queue.candidates.length > 0) {
+                                                queue.candidates.forEach(function (candidate) {
+                                                    peer.addIceCandidate(candidate);
+                                                    console.log('add candidate');
+                                                });
+                                            }
+                                            else {
                                                 let inter = setInterval(function () {
                                                     self.addIceCandidateToPeer(peer, self, message, a, inter);
                                                 }, 300);
-                                            //}
+                                            }
                                             queue.candidates = [];
 
                                         }, function (r) { console.log(r); });
@@ -1065,6 +1069,7 @@ const app = new Vue({
                 }
             });
             $('#full-wrapper').modal('toggle');
+            //console.log(self.currentUser);
             setTimeout(function () {
                 $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-1')[0].srcObject;
                 $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
@@ -1158,7 +1163,7 @@ const app = new Vue({
             let self = this;
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
             self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
-            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false, uid: self.currentUid }));
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, typeOffer: 1, IsSender: false, uid: self.currentUid }));
 
             setTimeout(function () {
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
@@ -1171,7 +1176,7 @@ const app = new Vue({
             let self = this;
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
             self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
-            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, IsSender: false, uid: self.currentUid }));
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestOffer: true, typeOffer: 2, IsSender: false, uid: self.currentUid }));
 
             setTimeout(function () {
                 let found = self.streamObjects.filter(function (item) { return item.Id == self.currentUser.TestingProfileId; });
