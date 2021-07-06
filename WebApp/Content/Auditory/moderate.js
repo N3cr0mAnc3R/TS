@@ -173,7 +173,6 @@ const app = new Vue({
                                     item.errors = [];
                                     item.Image = "";
                                     item.chat = {};
-                                    console.log(item.UserVerified, [2].indexOf(item.TestingStatusId),);
                                     //Если подтверждён
                                     if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
@@ -253,70 +252,6 @@ const app = new Vue({
                 }
             });
         },
-
-        //setOffset: function (offset) {
-        //    var self = this;
-        //    self.computerList = [];
-        //    //Смотрим то, что пришло
-        //    if (self.fullComputerList.length > 0) {
-        //        self.fullComputerList.forEach(function (item) {
-        //            //Если уже есть в списке, находим
-        //            let found = self.computerList.filter(function (comp) {
-        //                return comp.Id == item.Id;
-        //            })[0];
-        //            //Если нет, то инициализируем
-        //            if (!found && +item.Name > (offset - 1) * 50 && item.Name < offset * 50) {
-        //                item.errors = [];
-        //                item.Image = "";
-        //                item.chat = {};
-        //                //Если подтверждён
-        //                if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1) {
-        //                    //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
-        //                    //Сокет на экран
-        //                    self.initSocket(2, item, 2);
-        //                    self.initSocket(2, item, 1);
-        //                }
-        //                //Сокет на вебку
-        //                //В любом случае нужно добавить в список
-
-        //                self.computerList.push(item);
-        //                if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-        //                    //console.log('socket: ' + item.TestingProfileId, item.LastName);
-        //                    self.initSocket(1, item);
-        //                }
-        //            }
-        //            else {
-        //                if (item.TestingStatusId == 2 && item.TestingStatusId == 5) {
-        //                    found = item;
-        //                    var foundedSocket = self.videoSockets.filter(function (item1) { return item1.id == found.TestingProfileId; })[0];
-        //                    if (foundedSocket) {
-        //                        foundedSocket.socket.close();
-        //                        foundedSocket = null;
-        //                        // console.log('socket: ' + found.TestingProfileId, found.LastName);
-        //                    }
-
-        //                    self.initSocket(2, found, 1);
-        //                    if ([2].indexOf(found.TestingStatusId) != -1) {
-        //                        console.log('socket: ' + found.TestingProfileId, found.LastName);
-        //                        self.initSocket(1, found);
-        //                    }
-        //                    if (found.UserVerified != item.UserVerified) {
-        //                        if (item.UserVerified) {
-        //                            self.initSocket(2, found, 2);
-        //                            self.initSocket(2, item, 1);
-        //                            console.log('socket: ' + item.TestingProfileId, item.LastName);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        });
-
-        //        self.initAud();
-        //    }
-
-
-        //},
-
         getInfoForAdmin: function () {
             var self = this;
 
@@ -331,20 +266,6 @@ const app = new Vue({
                         self.fullInfo = {};
                         self.fullInfo.tests = [];
                         info.forEach(function (item) {
-                            var obj = {};
-                            //item.forEach(function (keyValuePair) {
-                            //    if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
-                            //        if (keyValuePair.Value != null) {
-                            //            obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
-
-                            //        }
-                            //        else {
-                            //        }
-                            //    }
-                            //    else {
-                            //        obj[keyValuePair.Key] = keyValuePair.Value;
-                            //    }
-                            //})
                             self.fullInfo.tests.push(item);
                         });
                     }
@@ -405,26 +326,8 @@ const app = new Vue({
                     async: true,
                     success: function (info) {
                         info.forEach(function (item) {
-                            var obj = {};
-                            //item.forEach(function (keyValuePair) {
-                            //    if (keyValuePair.Key.toLowerCase().indexOf('date') != -1) {
-                            //        if (keyValuePair.Value != null) {
-                            //            obj[keyValuePair.Key] = new Date(Number(keyValuePair.Value.substr(keyValuePair.Value.indexOf('(') + 1, keyValuePair.Value.indexOf(')') - keyValuePair.Value.indexOf('(') - 1)));
-                            //            console.log(obj[keyValuePair.Key].toLocaleDateString() + ' ' + obj[keyValuePair.Key].toLocaleTimeString());
-
-                            //        }
-                            //        else {
-                            //            console.log(keyValuePair.Key + ' is null');
-                            //        }
-                            //    }
-                            //    else {
-                            //        obj[keyValuePair.Key] = keyValuePair.Value;
-                            //        console.log(obj[keyValuePair.Key]);
-                            //    }
-                            //})
                             console.log(item);
                             console.log('----------------------------');
-                            // console.log(JSON.stringify(obj));
                         });
                     }
                 });
@@ -453,27 +356,6 @@ const app = new Vue({
                 console.log(item, 1);
             }
         },
-        //filterComps: function (position) {
-        //    let self = this;
-        //    let items = self.computerList.filter((item) => item.PositionX == position);
-
-        //    if (items.length > 0 && items.length < self.maxY + 1) {
-        //        let maxId = 0;
-        //        self.computerList.forEach(a => maxId = a.Id > maxId ? a.Id : maxId);
-        //        maxId++;
-        //        let length = self.maxY + 1 - items.length;
-        //        for (let i = 0; i < length; i++) {
-        //            items.sort((a, b) => a.PositionY - b.PositionY);
-        //            //if (items.length == 0) console.log(position);
-        //            let newObj = { Id: maxId, IsNew: true, Name: '', PositionX: position, PositionY: self.findIndex(items) };
-        //            items.push(newObj);
-        //            self.computerList.push(newObj);
-        //            maxId++;
-        //        }
-        //    }
-        //    items.sort((a, b) => a.PositionY - b.PositionY);
-        //    return items;
-        //},
         initAud: function () {
             let self = this;
             self.maxX = 0, self.maxY = 0;
@@ -580,7 +462,8 @@ const app = new Vue({
                     credential: 'webrtc',
                     username: 'webrtc'
                 },
-                self.TURN
+                    self.TURN,
+                    TURN
                 ]
             };
             let peer = new RTCPeerConnection(configuration);
@@ -808,9 +691,8 @@ const app = new Vue({
                                     return;
                                 }
                                 let peer = peerObj.peer;
-                                //peer.addStream(stream);
+                                peer.addStream(stream);
                                 peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
-                                    console.log('got desc');
                                     peer.createAnswer(function (answer) {
                                         peer.setLocalDescription(answer, function () {
                                             let obj1 = {};
@@ -825,7 +707,6 @@ const app = new Vue({
                                             if (queue.candidates.length > 0) {
                                                 queue.candidates.forEach(function (candidate) {
                                                     peer.addIceCandidate(candidate);
-                                                    console.log('add candidate');
                                                 });
                                             }
                                             else {
@@ -1281,7 +1162,6 @@ const app = new Vue({
                     //messages.map(a => a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))));
                     let chat = self.chats.find(a => a.testingProfileId == newId);
                     chat.messages = messages;
-                    console.log(chat.messages);
                 }
             });
         },

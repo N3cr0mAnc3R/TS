@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Testing/Index.css?2" rel="stylesheet" />
+﻿<link href="~/Content/Testing/Index.css?3" rel="stylesheet" />
 
 
 <div id="main-window">
@@ -135,7 +135,7 @@
             </div>
         </div>
         <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}" v-if="!testing">
-            <div class="control"><span v-if="!shownVideos" v-on:click="shownVideos = true"></span><span v-on:click="shownVideos = !shownVideos"><span v-if="shownVideos">{{switchLocal(14)}}</span><span v-if="!shownVideos">{{switchLocal(15)}}</span><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-plus' : !shownVideos }"></i></span></div>
+            <div :class="{'text-center': !shownVideos, 'text-right': shownVideos}" class="control" v-on:click="shownVideos = !shownVideos"><span v-if="!shownVideos"></span><span><span v-if="shownVideos">{{switchLocal(14)}}</span><span v-if="!shownVideos">@*{{switchLocal(15)}}*@</span><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-angle-up' : !shownVideos }"></i></span></div>
             <div class="video">
                 <div class="camera-wrapper">
                     <video id="video1" autoplay="autoplay" muted></video>
@@ -264,4 +264,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test.js?3"></script>
+<script src="~/Content/Testing/test.js?4"></script>

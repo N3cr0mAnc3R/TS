@@ -121,6 +121,10 @@ table button {
 .auditory-list .auditory.current {
   background: #565c72;
 }
+.human-table-wrapper {
+  max-height: 500px;
+  overflow: auto;
+}
 .place-list {
   display: flex;
   flex-wrap: wrap;

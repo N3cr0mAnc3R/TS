@@ -243,6 +243,7 @@ namespace WebApp.Controllers.Api
             return WrapResponse(true);
         }
 
+        [Route("DownloadFile")]
         public async Task<IHttpActionResult> DownloadFile(Guid? Id)
         {
             //FileStreamDownload dwnl = TestManager.DownloadFileById(Id, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id));

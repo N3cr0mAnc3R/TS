@@ -82,7 +82,7 @@ namespace WebApp
                             cathing = cathing.Substring(0, nStrtP); //выбираем ограниченный символами текст                
                         }
                         jsonparsed = Json.Decode<Offer>(cathing);
-                        if(jsonparsed == null)
+                        if (jsonparsed == null)
                         {
                             return;
                         }
@@ -253,7 +253,7 @@ namespace WebApp
                                 }
                             }
                             var count = disposedClients.Count;
-                            for (int i = count; i >= 0; i--)
+                            for (int i = count - 1; i >= 0; i--)
                             {
                                 List<WebSocket> cls = Clients.Where(A => A.Key == jsonparsed.TestingProfileId).FirstOrDefault().Value;
                                 cls.Remove(disposedClients[i]);

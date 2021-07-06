@@ -114,6 +114,7 @@
             formaData.append('Id', self.bestResult.TestingPackageId);
             formaData.append('File', e.target.files[0]);
             formaData.append('AnswerFileExtension', extension);
+            alert("Попытка загрузки " + Id + " " + extension);
             $.ajax({
                 type: 'POST',
                 url: '/user/SaveAnswerFile',
@@ -125,6 +126,7 @@
                     self.loadObject.loading = false;
                     self.loadObject.loaded = true;
                     self.fileId = data;
+                    alert("Файл загружен: " + data);
                     var reader = new FileReader();
                     reader.onload = function () {
                         self.answerImage = reader.result.substr(reader.result.indexOf(',') + 1);
@@ -149,6 +151,7 @@
                 async: true,
                 data: { answers: answers },
                 success: function () {
+                    alert("Попытка отправки в сокет " + self.socket.readyState + " " + JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                     self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                 },
                 error: function (er) {

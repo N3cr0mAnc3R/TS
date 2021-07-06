@@ -252,7 +252,8 @@ namespace WebApp.Models
                 }
                 catch (Exception e)
                 {
-                    return new { State = 1, e.Message };
+                    return new PlaceConfigModel();
+                    //return new { State = 1, e.Message };
                 }
             }
         }

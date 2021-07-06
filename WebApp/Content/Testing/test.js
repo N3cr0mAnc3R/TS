@@ -693,7 +693,9 @@
                 }
                 //console.log(self.startedTimeRecording, self.timeLeft, self.timeRecording);
                 if (self.startedTimeRecording - self.timeLeft >= self.timeRecording) {
-                    //console.log('stop recording');
+                    if (self.flagStopRec) {
+                        return;
+                    }
                     setTimeout(function () {
                         if (self.cameraRecorder) self.cameraRecorder.ondataavailable = null;
                         if (self.screenRecorder) self.screenRecorder.ondataavailable = null;
@@ -1523,7 +1525,7 @@
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
             });
-            app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, uid: uid }));
+            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, uid: uid }));
             var found = self.peers.filter(function (item) { return item.type == type && item.uid == uid; })[0];
             if (found) {
                 found.peer.close();

@@ -7,7 +7,7 @@
         currentHuman: { disciplines: [] },
         auditories: [],
         auditory: {},
-        hasFullAccess: false,
+        hasFullAccess: null,
         currentTest: {},
         places: [],
         textForShow: null,
@@ -19,6 +19,7 @@
     methods: {
 
         init: function () {
+            let self = this;
             $('#form-1').on("submit", function () {
                 event.preventDefault();
             });
@@ -26,10 +27,21 @@
                 $('#fio').focus();
             }, 200)
 
+            $.ajax({
+                url: '/api/administration/HasFullAccess',
+                method: 'post',
+                async: true,
+                success: function (data) {
+                    self.hasFullAccess = data;
+                    console.log(self.hasFullAccess);
+
+                }
+            })
             this.getAuditoriums();
         },
         findByFIO: function () {
             var self = this;
+            console.log(self.hasFullAccess);
             self.objectLoading.loading = true;
             $.ajax({
                 url: "/api/statistic/findfio",
@@ -46,6 +58,7 @@
                     }
                     self.filteredPeople = data;
 
+                    console.log(self.hasFullAccess);
                     self.objectLoading.loading = false;
                 },
                 error: function (error) {
@@ -59,7 +72,9 @@
         initDisciplines(discs) {
             let self = this;
             discs.map(a => {
+                console.log(a.TestingDate);
                 a.TestingDate = new Date(a.TestingDate);
+                console.log(a.TestingDate);
                 if (a.TestingBegin) {
                     a.TestingBegin = new Date(a.TestingBegin).toLocaleTimeString();
                 }
@@ -107,7 +122,11 @@
                 url: "/api/statistic/resetProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = self.initDisciplines(data);
+                    //console.log(self.currentHuman.disciplines);
+                    //console.log(data);
+                    //self.currentHuman.disciplines = self.initDisciplines(data);
+
+                    self.selectHuman(self.currentHuman);
                     self.objectLoading.loading = false;
                 }
             })
@@ -121,17 +140,9 @@
                 url: "/api/statistic/finishProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = self.initDisciplines(data);
-                }
-            })
-        },
-        hasAccess: function (type) {
-            var self = this;
-            $.ajax({
-                url: "/api/statistic/?Id=" + item.Id,
-                type: 'post',
-                success: function (data) {
-                    self.currentHuman.disciplines = self.initDisciplines(data);
+                    //self.currentHuman.disciplines = self.initDisciplines(data);
+
+                    self.selectHuman(self.currentHuman);
                 }
             })
         },
@@ -141,7 +152,9 @@
                 url: "/api/statistic/nullifyProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    self.currentHuman.disciplines = self.initDisciplines(data);
+                    //self.currentHuman.disciplines = self.initDisciplines(data);
+
+                    self.selectHuman(self.currentHuman);
                 }
             })
         },
@@ -165,6 +178,23 @@
             this.currentTest = disc;
             console.log(this.currentTest.PlaceId);
             //this.getCurrentPlace();
+        },
+        unload: function (item) {
+            var self = this;
+            $.ajax({
+                url: "/api/auditory/UpdateStatus?Id=" + item.Id + '&StatusId=4',
+                type: "POST",
+                async: true,
+                success: function (newStatus) {
+                    if (newStatus.Error) {
+                        notifier([{ Type: 'error', Body: newStatus.Error }]);
+                    }
+                    else
+                        notifier([{ Type: 'success', Body: "Результат успешно выгружен" }]);
+
+                    self.selectHuman(self.currentHuman);
+                }
+            });
         },
         getCurrentPlace: function () {
             var self = this;

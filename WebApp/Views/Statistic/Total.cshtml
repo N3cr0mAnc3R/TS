@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Statistic/minitotal.css?2" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?3" rel="stylesheet" />
 <link href="~/Content/Statistic/total.css?4" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
@@ -37,17 +37,17 @@
                         <td>{{test.lastName}} {{test.firstName}}</td>
                         <td class="col-5" :title="test.name"><div style="max-height: 120px; overflow:hidden;">{{test.name}}</div></td>
                         <td>{{test.score}}</td>
-                        <td>{{test.testingDate.toLocaleString()}} ({{test.testingBegin.toLocaleTimeString()}} - {{test.testingEnd.toLocaleTimeString()}}) @*Даты: {{test.testingDate.toLocaleString()}} ({{test.testingBegin.toLocaleTimeString()}} - {{test.testingEnd.toLocaleTimeString()}})*@</td>
+                        <td>{{test.testingDate}} <span v-if="test.testingBegin != '' && test.testingEnd != ''">({{test.testingBegin}} - {{test.testingEnd}})</span> </td>
                         <td>{{test.Status}}</td>
-                        <td>{{test.placeId}}</td>
+                        <td>{{test.placeId}}@*<pre>{{test}}</pre>*@</td>
                         <td>
-                            <button v-on:click="resetTP(test)" title="Сбросить"><i class="fa fa-sync"></i></button>
+                            <button v-on:click="resetTP(test)" class="text-warning" title="Сбросить"><i class="fa fa-sync"></i></button>
                             <button v-on:click="finishTP(test)" title="Завершить"><i class="fa fa-check"></i></button>
-                            <button v-on:click="deleteTP(test)" title="Удалить"><i class="fa fa-times"></i></button>
+                            <button v-on:click="deleteTP(test)"class="text-danger" title="Удалить" v-if="test.testingStatusId == 1"><i class="fa fa-times"></i></button>
                             <button v-on:click="nullify(test)" title="Аннулировать">0</button>
-                            <button v-on:click="download(test)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
-                            <button v-on:click="downloadCamera(test.ID, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
-                            <button v-on:click="downloadCamera(test.ID, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
+                            <button v-if="[3,4].indexOf(test.testingStatusId) != -1" v-on:click="download(test)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+                            <button v-if="[3,4].indexOf(test.testingStatusId) != -1" v-on:click="downloadCamera(test.ID, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+                            <button v-if="[3,4].indexOf(test.testingStatusId) != -1" v-on:click="downloadCamera(test.ID, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                         </td>
                     </tr>
                 </tbody>
@@ -55,4 +55,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Statistic/total.js?5"></script>
+<script src="~/Content/Statistic/total.js?6"></script>

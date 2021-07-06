@@ -44,9 +44,9 @@
                 },
                 success: function (data) {
                     data.map(a => {
-                        a.testingDate = new Date(a.testingDate);
-                        a.testingBegin = new Date(a.testingBegin);
-                        a.testingEnd = new Date(a.testingEnd);
+                        a.testingDate = (new Date(a.testingDate)).toLocaleString();
+                        a.testingBegin = a.testingBegin ? (new Date(a.testingBegin)).toLocaleTimeString() : "";
+                        a.testingEnd = a.testingEnd ? (new Date(a.testingEnd)).toLocaleTimeString() : "";
                     });
                     self.people = data;
                     self.objectLoading.loading = false;
@@ -56,17 +56,6 @@
         },
         download: function (test) {
             window.open('/auditory/DownloadReport?Id=' + test.ID + '&Type=' + 1, '_blank');
-        },
-        selectHuman: function (Id) {
-            var self = this;
-            $.ajax({
-                url: "/api/statistic/getById?Id=" + Id,
-                type: 'post',
-                success: function (data) {
-                    self.currentHuman.disciplines = data;
-                    self.currentHuman.placeInfo = {};
-                }
-            })
         },
         getStatuses: function () {
             var self = this;
@@ -90,6 +79,15 @@
             self.firstName = null;
             self.auditoriumId = null;
         },
+        initItem: function (item, data) {
+            item.testingStatusId = data.testingStatusId;
+            item.score = data.Score;
+
+            item.testingDate = (new Date(data.testingDate)).toLocaleString();
+            item.testingBegin = data.testingBegin ? (new Date(data.testingBegin)).toLocaleTimeString() : "";
+            item.testingEnd = data.testingEnd ? (new Date(data.testingEnd)).toLocaleTimeString() : "";
+            return item;;
+        },
         resetTP: function (test) {
             var self = this;
             let item = self.people.find(a => a.ID == test.ID);
@@ -99,13 +97,7 @@
                 url: "/api/statistic/resetProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    item.testingStatusId = data.testingStatusId;
-                    item.score = data.Score;
-                    item.testingDate = new Date(data.testingDate);
-                    item.testingBegin = new Date(data.testingBegin);
-                    item.testingEnd = new Date(data.testingEnd);
-                    self.objectLoading.loading = false;
-                    self.objectLoading.loaded = true;
+                    self.find();
                 }
             })
         },
@@ -119,13 +111,7 @@
                 url: "/api/statistic/finishProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    item.testingStatusId = data.testingStatusId;
-                    item.score = data.Score;
-                    item.testingDate = new Date(data.testingDate);
-                    item.testingBegin = new Date(data.testingBegin);
-                    item.testingEnd = new Date(data.testingEnd);
-                    self.objectLoading.loading = false;
-                    self.objectLoading.loaded = true;
+                    self.find();
                 }
             })
         },
@@ -136,13 +122,7 @@
                 url: "/api/statistic/nullifyProfileTotal?Id=" + item.ID,
                 type: 'post',
                 success: function (data) {
-                    item.testingStatusId = data.testingStatusId;
-                    item.score = data.Score;
-                    item.testingDate = new Date(data.testingDate);
-                    item.testingBegin = new Date(data.testingBegin);
-                    item.testingEnd = new Date(data.testingEnd);
-                    self.objectLoading.loading = false;
-                    self.objectLoading.loaded = true;
+                    self.find();
                 }
             })
         },
@@ -154,7 +134,7 @@
                 type: 'post',
                 success: function (data) {
                     if (data == 1) {
-                        self.people = self.people.filter(function (item1) { return item1.ID != item.ID });
+                        self.find();
                     }
                     else {
                         notifier([{ Type: 'error', Body: 'Сперва нужно сбросить' }]);
