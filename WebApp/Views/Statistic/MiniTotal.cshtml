@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Statistic/minitotal.css?4" rel="stylesheet" />
+﻿<link href="~/Content/Statistic/minitotal.css?5" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <form id="form-1" class="row">
@@ -58,6 +58,7 @@
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                     </template>
+                    <button v-if="hasFullAccess" title="Посмотреть логи" v-on:click="openUserAnswerLogMWindow(discipline)"> <i class="fa fa-clipboard-list"></i></button>
                 </td>
             </tr>
         </table>
@@ -80,10 +81,50 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="user-answer-log-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label">История ответов</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" v-loader="modalLoading">
+                    <div v-for="item in userAnswerLog" class="user-log-wrapper">
+                        <div class="question-wrapper">
+                            <div class="rank">
+                                {{item.Question.Rank}}
+                            </div>
+                            <div class="image-wrapper">
+                                <img :src="'data:image/png;base64, ' + item.Question.QuestionImage" />
+                            </div>
+                        </div>
+                        <div class="answer-list-wrapper mb-1" v-for="answer in item.Answers">
+                            <span class="icon-check border">
+                                <i class="fa fa-check" v-if="answer.IsRight"></i>
+                            </span>
+                            <span class="icon-check border border-left-0" v-for="userAnswer in answer.UserAnswers">
+                                <i class="fa fa-check" :title="(new Date(userAnswer.Time)).toLocaleTimeString()" v-if="userAnswer.UserAnswer == 1"></i>
+                            </span>
+                            <!--<div class="user-answer-wrapper" v-for="userAnswer in answer.UserAnswers">
+                                <span class="icon-check border">
+                                    <i class="fa fa-check" :title="(new Date(userAnswer.Time)).toLocaleTimeString()" v-if="userAnswer.UserAnswer == 1"></i>
+                                </span>
+                                <div class="timestamp-wrapper small text-muted">{{(new Date(userAnswer.Time)).toLocaleTimeString()}}</div>
+                            </div>-->
+                            <div class="correct-answer-wrapper"> <img :src="'data:image/png;base64, ' + answer.Answer.Name" /></div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="circleG" v-if="objectLoading.loading">
         <div id="circleG_1" class="circleG"></div>
         <div id="circleG_2" class="circleG"></div>
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?4"></script>
+<script src="~/Content/Statistic/minitotal.js?5"></script>

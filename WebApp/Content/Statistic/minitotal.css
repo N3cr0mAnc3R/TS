@@ -147,3 +147,24 @@ table button {
   cursor: not-allowed;
   opacity: 0.5;
 }
+.modal-body .user-log-wrapper img {
+  width: 700px;
+}
+.modal-body .user-log-wrapper .question-wrapper .rank {
+  width: 10px;
+}
+.modal-body .user-log-wrapper .question-wrapper .image-wrapper {
+  width: 1100px;
+}
+.modal-body .user-log-wrapper .answer-list-wrapper {
+  width: 1100px;
+  display: flex;
+}
+.modal-body .user-log-wrapper .answer-list-wrapper .correct-answer-wrapper {
+  display: flex;
+}
+.modal-body .user-log-wrapper .answer-list-wrapper .icon-check {
+  width: 25px;
+  height: 25px;
+  text-align: center;
+}

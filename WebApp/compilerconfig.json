@@ -1,54 +1,67 @@
-﻿[
+[
   {
     "outputFile": "Content/Auditory/index.css",
-    "inputFile": "Content/Auditory/index.less"
+    "inputFile": "Content/Auditory/index.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/proctor.css",
-    "inputFile": "Content/proctor.less"
+    "inputFile": "Content/proctor.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/site.css",
-    "inputFile": "Content/site.less"
+    "inputFile": "Content/site.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Testing/Index.css",
-    "inputFile": "Content/Testing/Index.less"
+    "inputFile": "Content/Testing/Index.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Proctoring/index.css",
-    "inputFile": "Content/Proctoring/index.less"
+    "inputFile": "Content/Proctoring/index.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Statistic/index.css",
-    "inputFile": "Content/Statistic/index.less"
+    "inputFile": "Content/Statistic/index.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Auditory/moderate.css",
-    "inputFile": "Content/Auditory/moderate.less"
+    "inputFile": "Content/Auditory/moderate.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Shared/Notify.css",
-    "inputFile": "Content/Shared/Notify.less"
+    "inputFile": "Content/Shared/Notify.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Statistic/savescore.css",
-    "inputFile": "Content/Statistic/savescore.less"
+    "inputFile": "Content/Statistic/savescore.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Statistic/minitotal.css",
-    "inputFile": "Content/Statistic/minitotal.less"
+    "inputFile": "Content/Statistic/minitotal.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Statistic/total.css",
-    "inputFile": "Content/Statistic/total.less"
+    "inputFile": "Content/Statistic/total.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Testing/profile.css",
-    "inputFile": "Content/Testing/profile.less"
+    "inputFile": "Content/Testing/profile.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/Administration/administration.css",
-    "inputFile": "Content/Administration/administration.less"
+    "inputFile": "Content/Administration/administration.less",
+    "sourceMap": false
   }
 ]

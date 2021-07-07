@@ -15,7 +15,7 @@ namespace WebApp.Controllers
         // GET: Administration
         public async Task<ActionResult> Index()
         {
-            List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
+            List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
             if (AccountManager.HasOneOfRoles(roles, new int[] { 6, 7 }))
             {
                 return View();

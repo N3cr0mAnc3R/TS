@@ -7,6 +7,7 @@
         currentHuman: { disciplines: [] },
         auditories: [],
         auditory: {},
+        userAnswerLog: [],
         hasFullAccess: null,
         currentTest: {},
         places: [],
@@ -14,7 +15,12 @@
         objectLoading: {
             loading: false,
             loaded: false
-        }
+        },
+        modalLoading: {
+            loading: false,
+            loaded: false
+        },
+
     },
     methods: {
 
@@ -33,7 +39,6 @@
                 async: true,
                 success: function (data) {
                     self.hasFullAccess = data;
-                    console.log(self.hasFullAccess);
 
                 }
             })
@@ -41,7 +46,6 @@
         },
         findByFIO: function () {
             var self = this;
-            console.log(self.hasFullAccess);
             self.objectLoading.loading = true;
             $.ajax({
                 url: "/api/statistic/findfio",
@@ -58,7 +62,6 @@
                     }
                     self.filteredPeople = data;
 
-                    console.log(self.hasFullAccess);
                     self.objectLoading.loading = false;
                 },
                 error: function (error) {
@@ -72,9 +75,7 @@
         initDisciplines(discs) {
             let self = this;
             discs.map(a => {
-                console.log(a.TestingDate);
                 a.TestingDate = new Date(a.TestingDate);
-                console.log(a.TestingDate);
                 if (a.TestingBegin) {
                     a.TestingBegin = new Date(a.TestingBegin).toLocaleTimeString();
                 }
@@ -131,6 +132,24 @@
                 }
             })
         },
+        openUserAnswerLogMWindow: function (item) {
+            let self = this;
+            self.modalLoading.loading = true;
+            self.modalLoading.loaded = false;
+            //console.log(item);
+            $('#user-answer-log-window').modal('show');
+
+            $.ajax({
+                url: "/api/Administration/GetUserAnswerLog?Id=" + item.Id,
+                type: 'post',
+                success: function (data) {
+                    self.userAnswerLog = data;
+                    self.modalLoading.loading = false;
+                    self.modalLoading.loaded = true;
+                }
+            })
+
+        },
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
         },
@@ -176,7 +195,7 @@
         openNewPlaceWindow: function (disc) {
             $('#place-window').modal('show');
             this.currentTest = disc;
-            console.log(this.currentTest.PlaceId);
+            //console.log(this.currentTest.PlaceId);
             //this.getCurrentPlace();
         },
         unload: function (item) {

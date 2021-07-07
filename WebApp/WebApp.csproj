@@ -496,6 +496,7 @@
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Administration\AccessModel.cs" />
     <Compile Include="Models\Administration\AdministrationManager.cs" />
+    <Compile Include="Models\Administration\UserAnswerLogModel.cs" />
     <Compile Include="Models\Administration\UserTestForTotal.cs" />
     <Compile Include="Models\Auditory\Auditory.cs" />
     <Compile Include="Models\Auditory\AuditoryManager.cs" />

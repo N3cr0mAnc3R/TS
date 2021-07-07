@@ -58,6 +58,12 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetAuditoryList(CurrentUser.Id));
         }
         [HttpPost]
+        [Route("GetUserAnswerLog")]
+        public async Task<IHttpActionResult> GetUserAnswerLog(int Id)
+        {
+            return WrapResponse(await AdministrationManager.GetUserAnswerLog(CurrentUser.Id, Id));
+        }
+        [HttpPost]
         [Route("HasAccess")]
         [AllowAnonymous]
         public async Task<IHttpActionResult> HasAccess(int url)
