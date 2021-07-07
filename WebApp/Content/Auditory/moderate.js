@@ -712,7 +712,7 @@ const app = new Vue({
                                             else {
                                                 let inter = setInterval(function () {
                                                     self.addIceCandidateToPeer(peer, self, message, a, inter);
-                                                }, 300);
+                                                }, 1000);
                                             }
                                             queue.candidates = [];
 
@@ -743,7 +743,7 @@ const app = new Vue({
                 clearInterval(inter);
                 queue.candidates.forEach(function (candidate) {
                     peer.addIceCandidate(candidate);
-                    console.log('add candidate');
+                    //console.log('add candidate');
                 });
             }
         },

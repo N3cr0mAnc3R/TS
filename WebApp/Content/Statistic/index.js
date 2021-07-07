@@ -3,12 +3,14 @@
     data: {
         shownTable: false,
         users: [],
+        filteredUsers: [],
         currentStatus: 0,
         currentDate: new Date().toISOString().slice(0, 10),
         filterFIO: "",
         hasAccess: false,
         statuses: [],
         auditoryList: [],
+        isFilterDownload: false,
         currentAud: null,
         isSuperAdmin: false
     },
@@ -57,6 +59,7 @@
         selectAud: function (id) {
             var self = this;
             self.currentAud = id;
+            self.getUsers();
         },
         loadPeople: function () {
             $.ajax({
@@ -115,6 +118,13 @@
                 }
             });
         },
+        filterDownload: function () {
+            let self = this;
+            self.isFilterDownload = !self.isFilterDownload;
+
+            self.filteredUsers = self.users.filter(a => (a.Count == 0 && self.isFilterDownload) || (!self.isFilterDownload));
+
+        },
         getUsers: function () {
             var self = this;
             $.ajax({
@@ -128,6 +138,7 @@
                 async: false,
                 success: function (users) {
                     self.users = users;
+                    self.filteredUsers = users;
                     //self.users.forEach(function (user) {
                     //    user.TestingDate = new Date(Number(user.TestingDate.substr(user.TestingDate.indexOf('(') + 1, user.TestingDate.indexOf(')') - user.TestingDate.indexOf('(') - 1))).toLocaleString();
                     //})
@@ -140,6 +151,16 @@
                 self.users.forEach(function (item) {
                     console.log(item);
                     self.printTPResult(item.Id);
+                })
+            }
+        },
+        downloadAllWithTitle: function () {
+            var self = this;
+            if (self.isSuperAdmin) {
+                self.filteredUsers.forEach(function (item) {
+                    self.printTPResult(item.Id);
+                    self.printTitleResult(item.Id);
+                    self.printProtocolResult(item.Id);
                 })
             }
         },

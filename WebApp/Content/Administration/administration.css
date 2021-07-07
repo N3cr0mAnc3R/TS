@@ -31,9 +31,9 @@
   list-style: square;
   width: 380px;
 }
-.administration-rights li {
+.administration-rights li.clickable {
   cursor: pointer;
 }
-.administration-rights li:hover {
+.administration-rights li.clickable:hover {
   background: #ddd;
 }

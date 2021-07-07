@@ -16,6 +16,7 @@ namespace WebApp.Models.Common
         public DateTime TestingDate { get; set; }
         public float Score { get; set; }
         public string Discipline { get; set; }
+        public int Count { get; set; }
 
     }
 }

@@ -289,6 +289,14 @@ namespace WebApp.Models
 
             }
         }
+        public async Task SetDownloadTPCount(int TestingProfileId, Guid userUID)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                await cnt.ExecuteAsync(sql: "[dbo].[Administration_SetDownloadTPCount]", new { TestingProfileId, userUID }, commandType: CommandType.StoredProcedure);
+
+            }
+        }
         public async Task<IEnumerable<dynamic>> GetUserInfo(int TestingProfileId, Guid? userUID, string localization = "")
         {
             using (var cnt = await Concrete.OpenConnectionAsync())

@@ -90,6 +90,7 @@ namespace WebApp.Controllers
                           "44xwkm8y8c",
                           "st9-dbe-reports");
                         result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+                        await AuditoryManager.SetDownloadTPCount(Id, CurrentUser.Id);
                         break;
                     }
                 case 3:
@@ -107,6 +108,7 @@ namespace WebApp.Controllers
                           "44xwkm8y8c",
                           "st9-dbe-reports");
                         result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+                        await AuditoryManager.SetDownloadTPCount(Id, CurrentUser.Id);
                         break;
                     }
                 case 4:
@@ -124,6 +126,7 @@ namespace WebApp.Controllers
                           "44xwkm8y8c",
                           "st9-dbe-reports");
                         result = File(render.Render("pdf", new { testingProfileId = Id }), "pdf");
+                        await AuditoryManager.SetDownloadTPCount(Id, CurrentUser.Id);
                         break;
                     }
                 case 2:

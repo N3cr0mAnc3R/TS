@@ -23,15 +23,19 @@
     <div class="full-table-wrapper">
         @*<div class="filter-name">ФИО</div>
             <input type="text" class="form-control" v-model="filterFIO" />*@
-        <div class="filter-name">Дата</div>
-        <input type="date" class="form-control" v-model="currentDate" v-on:change="getUsers()" />
-        @*<div class="filter-name">Оценка</div>*@
-        <div class="filter-name">Статус</div>
-        <select class="form-control" v-model="currentStatus" v-on:change="getUsers"> <option v-for="item of statuses" v-bind:value="item.Id">{{item.Name}}</option></select>
-
-        <div v-if="isSuperAdmin">
-            <button v-on:click="donwloadAll()" v-if="[4].indexOf(currentStatus) != -1">Скачать всё</button>
-            <button v-on:click="uploadAll()" v-if="[3].indexOf(currentStatus) != -1">убрать всё</button>
+        <div class="row mt-2 mb-2">
+            <div class="filter-name mr-2 ml-3">Дата</div>
+            <input type="date" class="form-control mr-2" style="width: 170px;" v-model="currentDate" v-on:change="getUsers()" />
+            @*<div class="filter-name">Оценка</div>*@
+            <div class="filter-name mr-2">Статус</div>
+            <select class="form-control mr-2" v-model="currentStatus" style="width: 200px;" v-on:change="getUsers"> <option v-for="item of statuses" v-bind:value="item.Id">{{item.Name}}</option></select>
+            <template v-if="isSuperAdmin" >
+                <input class="form-control mr-2" style="width: 80px" type="checkbox" v-on:change="filterDownload" />
+                <span class="mr-3">Количество ВИ: {{filteredUsers.length}}</span>
+                <button v-on:click="donwloadAll()" class="btn btn-outline-dark" v-if="[4].indexOf(currentStatus) != -1">Скачать всё</button>
+                <button v-on:click="uploadAll()" class="btn btn-outline-dark" v-if="[3].indexOf(currentStatus) != -1">убрать всё</button>
+                <button v-on:click="downloadAllWithTitle()" class="btn btn-outline-dark ml-2"><i class="fa fa-print"></i></button>
+            </template>
         </div>
         <table class="table table-striped">
             <thead>
@@ -43,7 +47,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="user in users">
+                <tr v-for="user in filteredUsers">
                     <td>{{user.LastName}} {{user.FirstName}} {{user.MiddleName}}</td>
                     <td>{{user.TestingDate}}</td>
                     <td>{{user.Score}}</td>
@@ -86,4 +90,4 @@
         </table>
     </div>
 </div>
-<script src="~/Content/Statistic/index.js?3"></script>
+<script src="~/Content/Statistic/index.js?4"></script>

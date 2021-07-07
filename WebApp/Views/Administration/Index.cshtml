@@ -1,9 +1,9 @@
-﻿<link href="~/Content/administration/administration.css?3" rel="stylesheet" />
+﻿<link href="~/Content/administration/administration.css?4" rel="stylesheet" />
 <div id="main-window" class="container">
     <div class="container mt-5">Вам доступен следующий функционал:</div>
     <ul class="administration-rights">
-        <li v-on:click="setAuditoryManagement" v-if="hasFullAccess">Назначить администратора аудитории</li>
-        <li v-on:click="setReportManagement()">Назначить ответственного за отчёты</li>
+        <li class="clickable" v-on:click="setAuditoryManagement" v-if="hasFullAccess">Назначить администратора аудитории</li>
+        <li class="clickable" v-on:click="setReportManagement()">Назначить ответственного за отчёты</li>
         <li><a href="/statistic/minitotal">Перейти к поиску</a></li>
         <li v-if="hasFullAccess"><a href="/statistic/total">Открыть модерирование</a></li>
     </ul>

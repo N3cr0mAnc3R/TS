@@ -7,7 +7,8 @@
             </tr>
         </table>
     </div>
-    <div v-if="listOpened">
+    <div v-if="listOpened" class="container mt-4">
+        <button class="btn btn-outline-secondary mb-3" v-on:click="backToList()">Назад к списку</button>
         <h1>
             {{currentDiscipline}}
         </h1>
@@ -18,10 +19,10 @@
             <tr v-for="item in items">
                 @*<td><input type="checkbox" v-model="item.checked" class="form-control" /></td>*@
                 <td>{{item.Name}}</td>
-                <td><input type="number" max="100" v-model="item.Score" class="form-control" /></td>
+                <td><input type="number" max="100" min="0" v-model="item.Score" class="form-control" /></td>
                 <td><button v-on:click="saveMark(item)">Сохранить</button></td>
             </tr>
         </table>
     </div>
 </div>
-<script src="~/Content/Statistic/JavaScript.js"></script>
+<script src="~/Content/Statistic/JavaScript.js?1"></script>

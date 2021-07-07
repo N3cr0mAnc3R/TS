@@ -34,7 +34,14 @@
                 }
             });
         },
+        backToList: function () {
+            this.listOpened = false;
+        },
         saveMark: function (item) {
+            if (item.Score < 0 || item.Score > 100) {
+                notifier([{ Type: 'error', Body: 'Некорректная оценка' }]);
+                return;
+            }
             $.ajax({
                 type: 'POST',
                 url: '/api/verification/SaveMark',
@@ -47,7 +54,7 @@
                     notifier([{ Type: 'success', Body: 'Сохранено' }]);
                 },
                 error: function () {
-                    notifier([{ Type: 'success', Body: 'Произошла ошибка. Обновите страницу' }]);
+                    notifier([{ Type: 'error', Body: 'Произошла ошибка. Обновите страницу' }]);
                 }
             });
         },
