@@ -64,6 +64,26 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetUserAnswerLog(CurrentUser.Id, Id));
         }
         [HttpPost]
+        [Route("GetDisciplines")]
+        public async Task<IHttpActionResult> GetDisciplines()
+        {
+            return WrapResponse(await AdministrationManager.GetDisciplines());
+        }
+        [HttpPost]
+        [Route("AssignDisciplineToUser")]
+        public async Task<IHttpActionResult> AssignDisciplineToUser(AssignDisciplineModel model)
+        {
+            try
+            {
+                await AdministrationManager.AssignDisciplineToUser(model);
+                return WrapResponse(1);
+            }
+            catch
+            {
+                return WrapResponse(0);
+            }
+        }
+        [HttpPost]
         [Route("HasAccess")]
         [AllowAnonymous]
         public async Task<IHttpActionResult> HasAccess(int url)

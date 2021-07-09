@@ -7,3 +7,17 @@
   border: none;
   margin-bottom: 10px;
 }
+.info-panel ul {
+  list-style: none;
+}
+.info-panel ul li.secondary {
+  list-style: square;
+  color: #d6d8db;
+}
+.info-panel ul li.danger {
+  list-style: square;
+  color: #f5c6cb;
+}
+.info-panel ul li span {
+  color: #000;
+}

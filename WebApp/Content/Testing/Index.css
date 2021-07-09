@@ -116,6 +116,7 @@
   bottom: 75px;
   background-color: #fff;
   border: 1px solid #ddd;
+  transition: all 0.3s ease;
 }
 .videos-wrapper.collapsed {
   top: unset;
@@ -145,7 +146,15 @@
   z-index: 2;
 }
 .videos-wrapper.collapsed .video {
-  display: none;
+  /*display: none;*/
+}
+.videos-wrapper.collapsed .video #video1 {
+  width: 0 !important;
+  height: 0 !important;
+}
+.videos-wrapper.collapsed .video #video2 {
+  width: 0 !important;
+  height: 0 !important;
 }
 .videos-wrapper .video {
   display: -webkit-box;
@@ -155,6 +164,7 @@
   -webkit-box-direction: normal;
   -ms-flex-flow: column;
   flex-flow: column;
+  transition: all 0.3s ease;
 }
 .videos-wrapper .video .camera-wrapper #video1 {
   width: 320px;
@@ -162,6 +172,7 @@
                 -ms-transform: scale(-1,1);
                 transform: scale(-1,1);*/
   height: 230px;
+  transition: all 0.3s ease;
 }
 .videos-wrapper .video .screen-wrapper #video2 {
   width: 320px;
@@ -169,6 +180,7 @@
   height: 210px;
   position: relative;
   top: 20px;
+  transition: all 0.3s ease;
 }
 .videos-wrapper .control {
   /*text-align: center;*/
@@ -511,8 +523,9 @@
 }
 .panel-right {
   right: -100%;
-  position: fixed;
-  height: 100%;
+  position: absolute;
+  /*position: fixed;*/
+  /*height: 100%;*/
   width: 100%;
   background: #C4C4C4;
   -webkit-box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -525,6 +538,8 @@
 }
 .panel-right.opened {
   right: 0;
+  position: fixed;
+  overflow-y: visible;
 }
 .panel-right.opened .control-btn {
   opacity: 1;
@@ -534,24 +549,30 @@
   -webkit-transition: opacity ease 0.5s;
   -o-transition: opacity ease 0.5s;
   transition: opacity ease 0.5s;
-  position: relative;
-  top: 50%;
+  position: fixed;
+  top: 50vh;
   cursor: e-resize;
-  width: 18px;
+  /* width: 18px; */
+  border-radius: 50%;
+  margin-left: -18px;
+  width: 36px;
+  background: #565c72;
 }
-.panel-right .control-btn svg {
+.panel-right .control-btn img {
   color: #fff;
   width: 35px;
   height: 35px;
-  background: #565c72;
+  /*background: #565c72;*/
   border-radius: 50%;
   padding: 4px;
-  margin-left: -18px;
+  /*margin-left: -18px;*/
 }
 .panel-right .tip-wrapper {
-  overflow: auto;
   margin-bottom: 135px;
   margin-left: -10px;
+  height: 80vh;
+  overflow: auto;
+  overflow-x: hidden;
 }
 .panel-right .tip-wrapper .top-panel {
   width: 100%;
@@ -616,7 +637,7 @@
     left: 50px;
   }
   .videos-wrapper.collapsed {
-    right: 170px;
+    /*right: 170px;*/
     bottom: 75px;
   }
   .videos-wrapper .video {

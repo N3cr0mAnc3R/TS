@@ -9,3 +9,24 @@ button {
     border: none;
     margin-bottom: 10px;
 }
+
+.info-panel {
+    ul {
+        list-style: none;
+
+        li {
+            &.secondary {
+                list-style: square;
+                color: #d6d8db;
+            }
+
+            &.danger {
+                list-style: square;
+                color: #f5c6cb;
+            }
+            span{
+                color: #000;
+            }
+        }
+    }
+}

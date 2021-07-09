@@ -89,6 +89,22 @@ namespace WebApp.Models.Administration
                 await cnt.ExecuteAsync("Administrator_SetAuditoriumAccess", new { userUid, model.AuditoriumId, model.UserId, model.IsActive }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IEnumerable<IndexItem>> GetDisciplines()
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return await cnt.QueryAsync<IndexItem>("SuperAdmin_DisciplinesGet", new {  }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task AssignDisciplineToUser(AssignDisciplineModel model)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("SuperAdmin_AssignTestToUser", new { model.UserId, structureDisciplineId = model.DisciplineId, model.PlaceId, testingDate = model.Date }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<IEnumerable<UserAnswer>> GetUserAnswerLog(Guid userUid, int TestingProfileId)
         {
 
@@ -104,10 +120,6 @@ namespace WebApp.Models.Administration
                     {
                         item.QuestionImage = Cropper.Cropper.CropImageWithFix(item.QuestionImage);
                     }
-                    foreach (var item in Answers)
-                    {
-                        item.Name = Cropper.Cropper.CropImageWithFix(item.Name);
-                    }
                     foreach (QuestionModel question in Questions)
                     {
                         UserAnswer ua = new UserAnswer() { Question = question };
@@ -122,15 +134,20 @@ namespace WebApp.Models.Administration
                         List<AnswerModel> answers = new List<AnswerModel>();
                         foreach (UserAnswerLogModel item in LocalLogs)
                         {
-                            if(answers.Any(a => a.Answer.Id == item.AnswerId))
+                            if (answers.Any(a => a.Answer.Id == item.AnswerId))
                             {
                                 continue;
                             }
-                            answers.Add(new AnswerModel() { Answer = Answers.First(a => a.Id == item.AnswerId), IsRight = item.IsRight, UserAnswers = model.Where(b => b.Id == item.AnswerId)  });
+                            answers.Add(new AnswerModel() { Answer = Answers.First(a => a.Id == item.AnswerId), IsRight = item.IsRight, UserAnswers = model.Where(b => b.Id == item.AnswerId) });
+                        }
+                        foreach (var item in answers)
+                        {
+                            item.Answer.Name = Cropper.Cropper.CropImageWithFix(item.Answer.Name);
                         }
                         ua.Answers = answers;
                         Result.Add(ua);
                     }
+                    Result = Result.Where(a => a.Answers.Any()).ToList();
                     return Result;
                 }
 

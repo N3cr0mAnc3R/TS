@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Testing/Index.css?3" rel="stylesheet" />
+﻿<link href="~/Content/Testing/Index.css?5" rel="stylesheet" />
 
 
 <div id="main-window">
@@ -97,10 +97,11 @@
         </div>
         <div class="panel-right" v-bind:class="{'opened': IsTipOpened}" id="panel-right">
             <div class="control-btn" v-on:mousedown="startResize" v-on:touchstart="startResizeTouch">
+                @*<button><i class="fa fa-arrows-alt-h" /></button>*@
                 <img src="~/Files/svg/process-arrow-resize.svg" />
             </div>
             <div class="tip-wrapper">
-                <div class="top-panel">
+                <div class="top-panel mt-3">
                     <span class="close-btn" v-on:click="openTip()">
                         <img src="~/Files/svg/process-question-mark.svg" />
                     </span>
@@ -264,4 +265,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test.js?4"></script>
+<script src="~/Content/Testing/test.js?6"></script>

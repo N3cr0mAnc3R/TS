@@ -10,6 +10,15 @@
         {{switchLocal(1)}}
     </div>
     <div v-if="tests.length > 0">
+        <div class="mt-5 info-panel">
+            <h3 class="mb-3 mt-2">{{switchLocal(6)}}</h3>
+            <ul>
+                <li class="secondary"><span>{{switchLocal(7)}}</span></li>
+                <li class="danger"><span>{{switchLocal(8)}}</span></li>
+                <li>{{switchLocal(9)}}</li>
+                <li>{{switchLocal(10)}}</li>
+            </ul>
+        </div>
         <table class="table table-bordered table-striped mt-5 table-hover">
             <thead>
                 <tr>
@@ -21,7 +30,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="test in tests" :class="{'table-secondary': isToday(test)}">
+                <tr v-for="test in tests" :class="{'table-secondary': isToday(test), 'table-danger': test.Passed == false}">
                     <td class="col-8">{{test.Discipline}}</td>
                     <td class="col-2">{{getDateFormat(test.TestingDate)}}</td>
                     <td class="col-2">{{test.Score}}</td>

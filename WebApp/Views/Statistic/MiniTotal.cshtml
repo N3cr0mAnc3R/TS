@@ -2,6 +2,7 @@
 <div id="main-window">
     <div class="base-control">
         <form id="form-1" class="row">
+            <label class="mr-3 mt-auto">Введите фамилию:</label>
             <input type="text" v-model="currentFIO" class="form-control mr-3 ml-1" id="fio" />
             <input type="submit" value="Найти" v-on:click="findByFIO" class="btn btn-outline-primary">
         </form>
@@ -14,10 +15,11 @@
         <div class="human-table-wrapper">
             <table class="table table-bordered table-stripped table-hover">
                 <tr v-for="human in filteredPeople" v-on:click="selectHuman(human)" :class="{'table-secondary': human.Id == currentHuman.Id}">
-                    <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" /></td>
+                    <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" v-if="human.picture" /><img src="~/Files/no-photo.png" v-if="!human.picture" height="75" /></td>
                     <td>{{human.Id}}</td>
                     <td>{{human.Name}}</td>
                     <td>{{human.Guid}}</td>
+                    <td v-if="hasFullAccess"> <button title="Назначить ВИ" v-on:click="openNewTestWindow(human)"> <i class="fa fa-calendar-check"></i></button></td>
                 </tr>
             </table>
         </div>
@@ -26,9 +28,9 @@
                 <th v-if="hasFullAccess">Ид</th>
                 <th>Дисциплина</th>
                 <th>Назначен на</th>
-                <th>Дата начала выполнения</th>
-                <th>Дата окончания выполнения</th>
-                <th>Результат</th>
+                <th>Время начала выполнения</th>
+                <th>Время окончания выполнения</th>
+                <th>Балл</th>
                 <th>Текущий статус</th>
                 <th>Место</th>
                 <th>Управление</th>
@@ -81,6 +83,30 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="user-new-test-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label">Назначить ВИ</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <select class="form-control ml-3" v-model="assignedModel.DisciplineId"><option v-for="disc in disciplines" :value="disc.Id">{{disc.Name}}</option></select>
+                        <input class="form-control ml-3" type="datetime-local" v-model="assignedModel.Date" />
+                    </div>
+                    <div class="auditory-list"><div v-for="aud in auditories" v-on:click="getAuditoryInfo(aud)" class="auditory" v-bind:class="{'current' : auditory.Id == aud.Id}">{{aud.Name}}</div></div>
+                    <div class="place-list">
+                        <div v-for="place in places" class="place-wrapper" v-bind:class="{'current' : assignedModel.PlaceId == place.Id}" v-on:click="selectPlace(place.Id)">{{place.Number}}</div>
+                    </div>
+                    <button class="btn btn-outline-dark float-right mr-5 mt-3" v-on:click="assignTest()">Назначить</button>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="user-answer-log-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
             <div class="modal-content">
@@ -116,6 +142,7 @@
                             <div class="correct-answer-wrapper"> <img :src="'data:image/png;base64, ' + answer.Answer.Name" /></div>
 
                         </div>
+                        <hr />
                     </div>
                 </div>
             </div>
@@ -127,4 +154,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?5"></script>
+<script src="~/Content/Statistic/minitotal.js?6"></script>

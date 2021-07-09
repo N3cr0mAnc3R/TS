@@ -13,5 +13,6 @@ namespace WebApp.Models.UserTest
         public double? Score { get; set; }
         public DateTime TestingDate { get; set; }
         public string Discipline { get; set; }
+        public bool? Passed { get; set; }
     }
 }

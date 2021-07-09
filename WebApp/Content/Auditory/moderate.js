@@ -50,6 +50,10 @@ const app = new Vue({
         loadObject: {
             loading: null,
             loaded: null
+        },
+        auditoryLoader: {
+            loading: null,
+            loaded: null
         }
     },
     methods: {
@@ -139,6 +143,7 @@ const app = new Vue({
             });
         },
         getAuditories: function (newId, self) {
+            self.auditoryLoader.loading = true;
             $.ajax({
                 url: "/api/auditory/GetAuditoryInfoForModerate?Id=" + newId,
                 type: "POST",
@@ -230,6 +235,9 @@ const app = new Vue({
                                         }
                                     }
                                 }
+                                self.auditoryLoader.loading = false;
+                                self.auditoryLoader.loaded = true;
+
                             });
 
                             //auditory.ComputerList.map(function (a) { a.errors = []; a.Image = ""; });
@@ -462,7 +470,7 @@ const app = new Vue({
                     credential: 'webrtc',
                     username: 'webrtc'
                 },
-                    self.TURN,
+                self.TURN,
                     TURN
                 ]
             };
@@ -653,8 +661,8 @@ const app = new Vue({
                 socket.onopen = function () {
                     socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: a.TestingProfileId }));
                     self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
-                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 1,  IsSender: false, uid: self.currentUid }));
-                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 2,  IsSender: false, uid: self.currentUid }));
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 1, IsSender: false, uid: self.currentUid }));
+                    socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 2, IsSender: false, uid: self.currentUid }));
 
                     if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
                         var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
@@ -1033,6 +1041,12 @@ const app = new Vue({
                     socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestFinish: true, IsSender: false }));
                 }
             });
+        },
+        collapseVideo: function () {
+            let self = this;
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestCollapse: true, IsSender: false }));
+
         },
         uuidv4: function () {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

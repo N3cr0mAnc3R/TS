@@ -137,6 +137,7 @@
     bottom: 75px;
     background-color: #fff;
     border: 1px solid #ddd;
+    transition: all 0.3s ease;
 
     &.collapsed {
         top: unset;
@@ -167,7 +168,17 @@
         }
 
         .video {
-            display: none;
+            /*display: none;*/
+
+            #video1 {
+                width: 0 !important;
+                height: 0 !important;
+            }
+
+            #video2 {
+                width: 0 !important;
+                height: 0 !important;
+            }
         }
     }
 
@@ -179,6 +190,7 @@
         -webkit-box-direction: normal;
         -ms-flex-flow: column;
         flex-flow: column;
+        transition: all 0.3s ease;
 
         .camera-wrapper {
 
@@ -188,6 +200,7 @@
                 -ms-transform: scale(-1,1);
                 transform: scale(-1,1);*/
                 height: 230px;
+                transition: all 0.3s ease;
             }
         }
 
@@ -198,6 +211,7 @@
                 height: 210px;
                 position: relative;
                 top: 20px;
+                transition: all 0.3s ease;
             }
         }
     }
@@ -485,8 +499,8 @@
                     max-width: initial;
                 }
 
-                .image-preview-wrapper{
-                    img{
+                .image-preview-wrapper {
+                    img {
                         width: 400px;
                     }
                 }
@@ -603,19 +617,22 @@
         }
     }
 }
+
 .instruction-wrapper {
     margin-top: 30px;
-    text-align:center;
+    text-align: center;
     font-family: Montserrat;
     font-style: normal;
     font-weight: 600;
     font-size: 16px;
     line-height: 33px;
 }
+
 .panel-right {
     right: -100%;
-    position: fixed;
-    height: 100%;
+    position: absolute;
+    /*position: fixed;*/
+    /*height: 100%;*/
     width: 100%;
     background: #C4C4C4;
     -webkit-box-shadow: -2px 2px 4px rgba(0, 0, 0, 0.5);
@@ -628,6 +645,9 @@
 
     &.opened {
         right: 0;
+        position: fixed;
+        overflow-y: visible;
+
 
         .control-btn {
             opacity: 1;
@@ -639,19 +659,23 @@
         -webkit-transition: opacity ease 0.5s;
         -o-transition: opacity ease 0.5s;
         transition: opacity ease 0.5s;
-        position: relative;
-        top: 50%;
+        position: fixed;
+        top: 50vh;
         cursor: e-resize;
-        width: 18px;
+        /* width: 18px; */
+        border-radius: 50%;
+        margin-left: -18px;
+        width: 36px;
+        background: #565c72;
 
-        svg {
+        img {
             color: #fff;
             width: 35px;
             height: 35px;
-            background: #565c72;
+            /*background: #565c72;*/
             border-radius: 50%;
             padding: 4px;
-            margin-left: -18px;
+            /*margin-left: -18px;*/
         }
     }
 
@@ -659,6 +683,9 @@
         overflow: auto;
         margin-bottom: 135px;
         margin-left: -10px;
+        height: 80vh;
+        overflow: auto;
+        overflow-x: hidden;
 
         .top-panel {
             width: 100%;
@@ -777,7 +804,7 @@
         left: 50px;
 
         &.collapsed {
-            right: 170px;
+            /*right: 170px;*/
             bottom: 75px;
 
             .video {
@@ -971,6 +998,7 @@
     margin-top: 80px;
     text-align: center;
 }
+
 .return-wrapper {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -996,6 +1024,7 @@
         border-radius: 3px;
     }
 }
+
 .finish-game {
     display: -webkit-box;
     display: -ms-flexbox;
@@ -1058,6 +1087,7 @@
     margin-top: 40px;
     margin-left: 40px;
 }
+
 .pre-video-wrapper {
     video {
         &.error {
@@ -1086,7 +1116,7 @@ canvas {
     position: fixed;
     left: 45px;
     bottom: 90px;
-    z-index:3;
+    z-index: 3;
     background: #fff;
     border: 1px solid #c4c4c4;
 
@@ -1322,9 +1352,11 @@ canvas {
 #flash-toggle {
     display: none;
 }
+
 .wrapper {
     margin-top: 30px;
 }
+
 .request-qr-wrapper {
     font-family: montserrat;
     font-style: normal;
@@ -1333,8 +1365,8 @@ canvas {
     line-height: 40px;
 }
 
-.justify-content-around{
-    video{
-        width:100%;
+.justify-content-around {
+    video {
+        width: 100%;
     }
 }

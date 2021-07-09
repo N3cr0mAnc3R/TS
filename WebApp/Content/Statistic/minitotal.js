@@ -11,7 +11,14 @@
         hasFullAccess: null,
         currentTest: {},
         places: [],
+        disciplines: [],
         textForShow: null,
+        assignedModel: {
+            DisciplineId: null,
+            UserId: null,
+            Date: new Date(),
+            PlaceId: null
+        },
         objectLoading: {
             loading: false,
             loaded: false
@@ -135,7 +142,6 @@
         openUserAnswerLogMWindow: function (item) {
             let self = this;
             self.modalLoading.loading = true;
-            self.modalLoading.loaded = false;
             //console.log(item);
             $('#user-answer-log-window').modal('show');
 
@@ -149,6 +155,55 @@
                 }
             })
 
+        },
+        openNewTestWindow: function (item) {
+            let self = this;
+            self.modalLoading.loading = true;
+            self.assignedModel.UserId = item.Id
+            //console.log(item);
+            $('#user-new-test-window').modal('show');
+
+            if (self.disciplines.length == 0) {
+                $.ajax({
+                    url: "/api/Administration/GetDisciplines",
+                    type: 'post',
+                    success: function (data) {
+                        self.disciplines = data;
+                        self.modalLoading.loading = false;
+                        self.modalLoading.loaded = true;
+                    }
+                });
+            }
+
+        },
+        selectPlace(place) {
+            let self = this;
+            self.assignedModel.PlaceId = place;
+        },
+        assignTest() {
+            let self = this;
+            console.log(self.assignedModel);//AssignDisciplineToUser
+            if (!(self.assignedModel.DisciplineId && self.assignedModel.PlaceId)) {
+                notifier([{ Type: 'error', Body: 'Заполните все поля' }]);
+                return
+            }
+            //$.ajax({
+            //    url: "/api/Administration/AssignDisciplineToUser",
+            //    type: 'post',
+            //    data: self.assignedModel,
+            //    success: function (data) {
+            //        if (data == 1) {
+            //            self.selectHuman(self.currentHuman);
+            //            $('#user-new-test-window').modal('hide');
+            //            notifier([{ Type: 'success', Body: 'Успешно назначено' }]);
+            //        }
+            //        else {
+            //            notifier([{ Type: 'error', Body: 'Во время соохранения произошла ошибка' }]);
+            //        }
+            //        self.modalLoading.loading = false;
+            //        self.modalLoading.loaded = true;
+            //    }
+            //})
         },
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
@@ -184,7 +239,8 @@
                 type: 'post',
                 success: function (data) {
                     if (data == 1) {
-                        self.currentHuman.disciplines = self.currentHuman.disciplines.filter(function (item1) { return item1.Id != item.Id });
+                        //self.currentHuman.disciplines = self.currentHuman.disciplines.filter(function (item1) { return item1.Id != item.Id });
+                        self.selectHuman(self.currentHuman);
                     }
                     else {
                         notifier([{ Type: 'error', Body: 'Сперва нужно сбросить' }]);

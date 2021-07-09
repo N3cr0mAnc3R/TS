@@ -311,6 +311,7 @@
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="Files\Instruction.mp4" />
+    <Content Include="Files\no-photo.png" />
     <Content Include="Files\Svg\cogs-auditory.svg" />
     <Content Include="Files\Svg\eye-auditory.svg" />
     <Content Include="Files\Svg\layout-burger.svg" />
@@ -496,6 +497,7 @@
     <Compile Include="Models\Account\LoginModel.cs" />
     <Compile Include="Models\Administration\AccessModel.cs" />
     <Compile Include="Models\Administration\AdministrationManager.cs" />
+    <Compile Include="Models\Administration\AssignDisciplineModel.cs" />
     <Compile Include="Models\Administration\UserAnswerLogModel.cs" />
     <Compile Include="Models\Administration\UserTestForTotal.cs" />
     <Compile Include="Models\Auditory\Auditory.cs" />

@@ -910,6 +910,9 @@
                         notifier([{ Type: 'error', Body: self.switchLocal(28) }]);
                         self.finishTest();
                     }
+                    else if (message.requestCollapse) {
+                        self.shownVideos = !self.shownVideos;
+                    }
                     else if (message.requestLoadFile) {
                         self.saveQrCode();
                         self.openedQRPage = true;
@@ -1153,7 +1156,7 @@
                 else if (char == 'C') {
 
                     self.calculator.result = 0;
-                    self.calculator.resultText = '0';
+                    self.calculator.resultText = '';
                     self.calculator.first = '';
                     self.calculator.second = '';
                     self.calculator.isExpr = false;
@@ -1269,6 +1272,9 @@
                     }
                     self.blurReady = true;
                 });
+                setTimeout(function () {
+                    self.shownVideos = false;
+                }, 5000)
                 //   console.log(Str);
             })
                 .catch(function (err) {
@@ -1337,7 +1343,11 @@
         },
         startResize: function () {
             var self = this;
-            $(document).on('mousemove', function () { self.resizing(self); });
+            event.preventDefault();
+            $(document).on('mousemove', function () {
+
+                self.resizing(self);
+            });
             self.tipPosition.width = $('#panel-right').width();
             self.tipPosition.start = $(document).width();// - $('#panel-right').width();
             //  console.log(self.tipPosition);

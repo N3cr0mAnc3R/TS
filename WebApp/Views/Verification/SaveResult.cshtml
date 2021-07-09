@@ -13,10 +13,11 @@
             {{currentDiscipline}}
         </h1>
         <br />
-        {{items.length}} работ, из них {{getZeroInfo()}} пустых
+        <div>{{items.length}} {{getNormalJobName(items.length)}},  {{getZeroInfo()}} {{getNormalEmptyName(getZeroInfo())}}</div>
+        <label><input type="checkbox" v-on:change="toggleFilter()" />Фильтр нулевых работ</label>
         <br />
         <table class="table table-bordered table-striped">
-            <tr v-for="item in items">
+            <tr v-for="item in filteredItems">
                 @*<td><input type="checkbox" v-model="item.checked" class="form-control" /></td>*@
                 <td>{{item.Name}}</td>
                 <td><input type="number" max="100" min="0" v-model="item.Score" class="form-control" /></td>
@@ -25,4 +26,4 @@
         </table>
     </div>
 </div>
-<script src="~/Content/Statistic/JavaScript.js?1"></script>
+<script src="~/Content/Statistic/JavaScript.js?2"></script>
