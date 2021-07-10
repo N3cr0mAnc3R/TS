@@ -61,6 +61,7 @@
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                     </template>
                     <button v-if="hasFullAccess" title="Посмотреть логи" v-on:click="openUserAnswerLogMWindow(discipline)"> <i class="fa fa-clipboard-list"></i></button>
+                    <button v-if="hasFullAccess" title="Изменить время" v-on:click="openChangeTimeMWindow(discipline)"> <i class="fa fa-calendar-alt"></i></button>
                 </td>
             </tr>
         </table>
@@ -79,6 +80,27 @@
                     <div class="place-list">
                         <div v-for="place in places" class="place-wrapper" :disabled="place.IsUsed" v-bind:class="{'current' : currentTest.PlaceId == place.Id, 'disabled': place.IsUsed}" v-on:click="setPlaceToUser(place.Id)">{{place.Number}}</div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="user-new-time-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label">Назначить другую дату</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div>
+                        <input type="datetime-local" v-model="newDate" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" v-on:click="saveNewDate()" class="btn btn-secondary" data-dismiss="modal">Сохранить</button>
                 </div>
             </div>
         </div>
@@ -154,4 +176,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?6"></script>
+<script src="~/Content/Statistic/minitotal.js?8"></script>

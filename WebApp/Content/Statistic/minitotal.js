@@ -12,6 +12,7 @@
         currentTest: {},
         places: [],
         disciplines: [],
+        newDate: null,
         textForShow: null,
         assignedModel: {
             DisciplineId: null,
@@ -27,7 +28,7 @@
             loading: false,
             loaded: false
         },
-
+        answerRequest: null
     },
     methods: {
 
@@ -144,12 +145,15 @@
             self.modalLoading.loading = true;
             //console.log(item);
             $('#user-answer-log-window').modal('show');
-
-            $.ajax({
+            if (self.answerRequest) {
+                self.answerRequest.abort();
+            }
+            self.answerRequest = $.ajax({
                 url: "/api/Administration/GetUserAnswerLog?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
                     self.userAnswerLog = data;
+                    self.answerRequest = null;
                     self.modalLoading.loading = false;
                     self.modalLoading.loaded = true;
                 }
@@ -176,9 +180,45 @@
             }
 
         },
+        openChangeTimeMWindow: function (item) {
+            let self = this;
+
+            self.currentTest = item;
+            console.log(item);
+            $('#user-new-time-window').modal('show');
+        },
         selectPlace(place) {
             let self = this;
             self.assignedModel.PlaceId = place;
+        },
+        saveNewDate() {
+            let self = this;
+            if (!self.newDate) {
+                let t = new Date();
+                self.newDate = t.getFullYear() + '-' +(t.getMonth() + 1) + '-' + t.getDate() + 'T' + t.toLocaleTimeString();
+            }
+            //self.modalLoading.loading = true;
+            console.log(self.newDate);
+            $.ajax({
+                url: "/api/Administration/ChangeTestingDate",
+                type: 'post',
+                data: {
+                    Id: self.currentTest.Id,
+                    TestingDate: self.newDate
+                },
+                success: function (data) {
+                    if (data == 1) {
+                        notifier([{ Type: 'success', Body: 'Успешно сохранено' }]);
+                        self.selectHuman(self.currentHuman);
+                    }
+                    else {
+                        notifier([{ Type: 'error', Body: 'Произошла ошибка при сохранении даты' }]);
+                    }
+                    self.modalLoading.loading = false;
+                    self.modalLoading.loaded = true;
+                }
+            });
+
         },
         assignTest() {
             let self = this;
@@ -187,23 +227,23 @@
                 notifier([{ Type: 'error', Body: 'Заполните все поля' }]);
                 return
             }
-            //$.ajax({
-            //    url: "/api/Administration/AssignDisciplineToUser",
-            //    type: 'post',
-            //    data: self.assignedModel,
-            //    success: function (data) {
-            //        if (data == 1) {
-            //            self.selectHuman(self.currentHuman);
-            //            $('#user-new-test-window').modal('hide');
-            //            notifier([{ Type: 'success', Body: 'Успешно назначено' }]);
-            //        }
-            //        else {
-            //            notifier([{ Type: 'error', Body: 'Во время соохранения произошла ошибка' }]);
-            //        }
-            //        self.modalLoading.loading = false;
-            //        self.modalLoading.loaded = true;
-            //    }
-            //})
+            $.ajax({
+                url: "/api/Administration/AssignDisciplineToUser",
+                type: 'post',
+                data: self.assignedModel,
+                success: function (data) {
+                    if (data == 1) {
+                        self.selectHuman(self.currentHuman);
+                        $('#user-new-test-window').modal('hide');
+                        notifier([{ Type: 'success', Body: 'Успешно назначено' }]);
+                    }
+                    else {
+                        notifier([{ Type: 'error', Body: 'Во время соохранения произошла ошибка' }]);
+                    }
+                    self.modalLoading.loading = false;
+                    self.modalLoading.loaded = true;
+                }
+            })
         },
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');

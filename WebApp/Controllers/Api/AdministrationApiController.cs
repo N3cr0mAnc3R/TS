@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Http;
 using WebApp.Models.Administration;
 using WebApp.Models.Common;
+using WebApp.Models.UserTest;
 
 namespace WebApp.Controllers.Api
 {
@@ -76,6 +77,20 @@ namespace WebApp.Controllers.Api
             try
             {
                 await AdministrationManager.AssignDisciplineToUser(model);
+                return WrapResponse(1);
+            }
+            catch
+            {
+                return WrapResponse(0);
+            }
+        }
+        [HttpPost]
+        [Route("ChangeTestingDate")]
+        public async Task<IHttpActionResult> ChangeTestingDate(TestingModel model)
+        {
+            try
+            {
+                await AdministrationManager.ChangeTestingDate(CurrentUser.Id, model);
                 return WrapResponse(1);
             }
             catch

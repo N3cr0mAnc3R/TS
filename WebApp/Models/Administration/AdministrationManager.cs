@@ -105,6 +105,14 @@ namespace WebApp.Models.Administration
                 await cnt.ExecuteAsync("SuperAdmin_AssignTestToUser", new { model.UserId, structureDisciplineId = model.DisciplineId, model.PlaceId, testingDate = model.Date }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task ChangeTestingDate(Guid userUid, TestingModel model)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("SuperAdmin_UpdateTestingDate", new { UserUid = userUid, TestingDate = model.TestingDate, TestingProfileId = model.Id }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<IEnumerable<UserAnswer>> GetUserAnswerLog(Guid userUid, int TestingProfileId)
         {
 
