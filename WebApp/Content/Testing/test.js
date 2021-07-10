@@ -769,9 +769,11 @@
                 //console.log("Started timeout", new Date());
                 self.flagStopRec = false;
                 self.startedTimeRecording = self.timeLeft;
+                self.cameraRecorder.stop();
                 self.cameraRecorder.ondataavailable = self.recordingCamera;
                 self.cameraRecorder.start(100);
                 if (self.screenRecorder) {
+                    self.screenRecorder.stop();
                     self.screenRecorder.ondataavailable = self.recordingScreen;
                     self.screenRecorder.start(100);
                 }
@@ -1530,7 +1532,9 @@
             var stream = type == 1 ? self.cameraStream : self.screenStream;
             if (!stream) {
                 peer.close();
-                self.initRTCPeer(type, uid);
+                peer = null;
+                setTimeout(function () { self.initRTCPeer(type, uid) }, 500);
+                return;
             }
             stream.getTracks().forEach(function (track) {
                 peer.addTrack(track, stream);
@@ -1562,7 +1566,7 @@
                 }, function (r) { console.log(r); });
             }
             catch {
-                //console.log('error');
+                console.log('error');
             }
 
         },

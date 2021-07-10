@@ -651,10 +651,18 @@ const app = new Vue({
                     self.videoSockets.push(created);
                 }
                 else {
-                    socket = created.socket;
+                    let socket;
+                    if (typeof (WebSocket) !== 'undefined') {
+                        socket = new WebSocket(self.domain + "/StreamHandler.ashx");
+                    }
+                    else {
+                        socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
+                    }
+                    created.socket = socket;
                     console.log('Второй поток: ' + a.TestingProfileId);
-                    var queue = { type: 2, Id: a.TestingProfileId, candidates: [] };
+                    var queue = { type: cam, Id: a.TestingProfileId, candidates: [] };
                     self.queue.push(queue);
+                    console.log(self.queue);
                     self.initRTCPeer(created, socket, a, cam);
                     return;
                 }
@@ -665,7 +673,7 @@ const app = new Vue({
                     socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 2, IsSender: false, uid: self.currentUid }));
 
                     if (!self.queue.filter(function (item) { item.type == cam && item.Id == a.TestingProfileId; })[0]) {
-                        var queue = { type: 1, Id: a.TestingProfileId, candidates: [] };
+                        var queue = { type: cam, Id: a.TestingProfileId, candidates: [] };
                         self.queue.push(queue);
                     }
                     self.initRTCPeer(created, socket, a, cam);
