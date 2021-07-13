@@ -651,18 +651,10 @@ const app = new Vue({
                     self.videoSockets.push(created);
                 }
                 else {
-                    let socket;
-                    if (typeof (WebSocket) !== 'undefined') {
-                        socket = new WebSocket(self.domain + "/StreamHandler.ashx");
-                    }
-                    else {
-                        socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
-                    }
-                    created.socket = socket;
+                    socket = created.socket;
                     console.log('Второй поток: ' + a.TestingProfileId);
                     var queue = { type: cam, Id: a.TestingProfileId, candidates: [] };
                     self.queue.push(queue);
-                    console.log(self.queue);
                     self.initRTCPeer(created, socket, a, cam);
                     return;
                 }

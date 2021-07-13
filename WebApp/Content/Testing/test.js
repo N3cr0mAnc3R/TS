@@ -67,8 +67,8 @@
         NameDiscipline: "",
         startedTimeRecording: 0,
         blurReady: false,
-        stepCounter: 1,
-        stepNumber: 320,
+        stepCounter: 0,
+        stepNumber: 5,
         //stepNumber: 240,
         calculator: {
             rows: [
@@ -769,16 +769,17 @@
                 //console.log("Started timeout", new Date());
                 self.flagStopRec = false;
                 self.startedTimeRecording = self.timeLeft;
-                self.cameraRecorder.stop();
+                //self.cameraRecorder.stop();
                 self.cameraRecorder.ondataavailable = self.recordingCamera;
                 self.cameraRecorder.start(100);
                 if (self.screenRecorder) {
-                    self.screenRecorder.stop();
+                    //self.screenRecorder.stop();
                     self.screenRecorder.ondataavailable = self.recordingScreen;
                     self.screenRecorder.start(100);
                 }
-            }, self.stepCounter * 10 * self.stepNumber);
+            }, (self.stepCounter * 5 + self.stepNumber) * 1000 * 60);
             self.stepCounter++;
+            self.stepNumber += (self.stepCounter * 5);
         },
         initChat: function () {
             var self = this;
