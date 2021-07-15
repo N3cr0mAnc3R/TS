@@ -1,4 +1,9 @@
-﻿<link href="~/Content/administration/administration.css?4" rel="stylesheet" />
+﻿
+@{
+    ViewBag.Title = "Администрирование";
+}
+
+<link href="~/Content/administration/administration.css?4" rel="stylesheet" />
 <div id="main-window" class="container">
     <div class="container mt-5">Вам доступен следующий функционал:</div>
     <ul class="administration-rights">
@@ -101,7 +106,7 @@
                 </div>
                 <div class="modal-body" v-loader="modalLoader">
                     <form class="row" id="form-2">
-                        <input type="text" v-model="surname" class="form-control mr-3 ml-3"/>
+                        <input type="text" v-model="surname" class="form-control mr-3 ml-3" />
                         <input type="submit" v-on:click="findUsersByFio()" class="btn btn-outline-primary" value="Поиск" />
                     </form>
                     <table class="table table-bordered table-striped table-hover mt-3">
@@ -155,7 +160,7 @@
                 </div>
                 <div class="modal-body" v-loader="modalLoader">
                     <form class="row" id="form-1">
-                        <input type="text" v-model="surname" class="form-control mr-3 ml-3"/>
+                        <input type="text" v-model="surname" class="form-control mr-3 ml-3" />
                         <input type="submit" v-on:click="findUsersByFio()" class="btn btn-outline-primary" value="Поиск" />
                     </form>
                     <table class="table table-bordered table-striped table-hover mt-3">

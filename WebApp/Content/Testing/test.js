@@ -68,6 +68,7 @@
         startedTimeRecording: 0,
         blurReady: false,
         stepCounter: 0,
+        countOfAttemptScreen: 0,
         stepNumber: 5,
         //stepNumber: 240,
         calculator: {
@@ -1463,7 +1464,10 @@
             return date.toLocaleTimeString();
         },
         initRTCPeer: function (type, uid) {
-            console.log(type, uid);
+            this.countOfAttemptScreen++;
+            if (this.countOfAttemptScreen == 100) {
+                return;
+            }
             //console.log('init rtcpeer');
             var self = this;
             var TURN = {

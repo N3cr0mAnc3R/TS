@@ -521,9 +521,14 @@
   font-size: 16px;
   line-height: 33px;
 }
+@media (max-width: 375px) {
+  .panel-right {
+    position: absolute;
+  }
+}
 .panel-right {
   right: -100%;
-  position: absolute;
+  /*position: absolute;*/
   /*position: fixed;*/
   /*height: 100%;*/
   width: 100%;
@@ -615,7 +620,7 @@
   }
   .panel-center {
     padding: 30px 30px 50px 70px;
-    width: 100vh;
+    min-width: 85vw;
   }
   .panel-center .answer-list .answer-wrapper img {
     width: auto;

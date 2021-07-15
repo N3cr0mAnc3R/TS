@@ -1,4 +1,9 @@
-﻿<link href="~/Content/Statistic/minitotal.css?5" rel="stylesheet" />
+﻿
+@{
+    ViewBag.Title = "Быстрый поиск";
+}
+
+<link href="~/Content/Statistic/minitotal.css?5" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <form id="form-1" class="row">
@@ -124,7 +129,7 @@
                         <div v-for="place in places" class="place-wrapper" v-bind:class="{'current' : assignedModel.PlaceId == place.Id}" v-on:click="selectPlace(place.Id)">{{place.Number}}</div>
                     </div>
                     <button class="btn btn-outline-dark float-right mr-5 mt-3" v-on:click="assignTest()">Назначить</button>
-                    
+
                 </div>
             </div>
         </div>
