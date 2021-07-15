@@ -615,6 +615,7 @@
   }
   .panel-center {
     padding: 30px 30px 50px 70px;
+    width: 100vh;
   }
   .panel-center .answer-list .answer-wrapper img {
     width: auto;
