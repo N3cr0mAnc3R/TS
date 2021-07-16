@@ -929,6 +929,7 @@
                             success: function (data) {
                                 self.selectedQuestion.fileId = message.Id;
                                 self.selectedQuestion.answerImage = data;
+                                self.selectQuestion.answered = true;
                             }
                         });
                     }
