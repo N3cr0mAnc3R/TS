@@ -971,6 +971,10 @@
                         self.adminPaused = !self.adminPaused;
 
                     }
+                    else if (message.requestCloseChat) {
+                        self.chat.IsOpened = !self.chat.IsOpened;
+
+                    }
                 }
             };
 

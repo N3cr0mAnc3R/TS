@@ -250,7 +250,7 @@ namespace WebApp.Models
                 {
                     return await cnt.QueryFirstAsync<PlaceConfigModel>(sql: "[dbo].[UserPlace_PlaceFreeGet]", new { userUID, localization }, commandType: CommandType.StoredProcedure);
                 }
-                catch (Exception e)
+                catch
                 {
                     return new PlaceConfigModel();
                     //return new { State = 1, e.Message };

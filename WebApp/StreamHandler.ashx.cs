@@ -260,7 +260,7 @@ namespace WebApp
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
 
                     }

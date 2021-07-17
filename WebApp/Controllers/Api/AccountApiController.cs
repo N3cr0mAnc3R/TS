@@ -52,7 +52,7 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("IsPaul")]
-        public async Task<IHttpActionResult> IsPaul()
+        public IHttpActionResult IsPaul()
         {
             return WrapResponse(CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651") || CurrentUser.Id == new Guid("0c8345b1-9a81-4424-a788-dd2f2ab069d7"));
         }
@@ -94,16 +94,15 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("HasPhoto")]
-        public async Task<IHttpActionResult> HasPhoto()
+        public IHttpActionResult HasPhoto()
         {
             return WrapResponse(CurrentUser.Picture != null);
         }
         [AllowAnonymous]
         [HttpPost]
         [Route("IsAuthenticated")]
-        public async Task<IHttpActionResult> IsAuthenticated()
+        public IHttpActionResult IsAuthenticated()
         {
-            //SignInManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
             if (CurrentUser == null) return WrapResponse(false);
             else
                 return WrapResponse(CurrentUser.Id != Guid.Empty);

@@ -15,7 +15,7 @@ namespace WebApp.Controllers.Api
     {
 
         private ApplicationUserManager _userManager;
-        private ApplicationSignInManager _signInManager;
+        //private ApplicationSignInManager _signInManager;
         protected string GetCurrentDomain()
         {
             return Request.RequestUri.Authority;

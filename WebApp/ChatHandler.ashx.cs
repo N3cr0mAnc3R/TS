@@ -40,7 +40,7 @@ namespace WebApp
                 //ToDo change
                 //if (!Clients.ContainsKey(1)) Clients.Add(1, socket);
             }
-            catch(Exception e)
+            catch
             {
 
             }
@@ -153,7 +153,7 @@ namespace WebApp
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch
                     {
                         socket.Dispose();
                     }

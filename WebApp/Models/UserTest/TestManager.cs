@@ -210,7 +210,7 @@ namespace WebApp.Models
                         //}
                         //return JsonConvert.SerializeObject(new { name = filestreamResult.Name, success = true });
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         return Guid.Empty;
                         // return JsonConvert.SerializeObject(new { errorMsg = ex.Message, success = false });
@@ -250,7 +250,7 @@ namespace WebApp.Models
                         //}
                         //return JsonConvert.SerializeObject(new { name = filestreamResult.Name, success = true });
                     }
-                    catch (Exception ex)
+                    catch 
                     {
                         // return JsonConvert.SerializeObject(new { errorMsg = ex.Message, success = false });
                     }
@@ -299,7 +299,7 @@ namespace WebApp.Models
                     return filestream;
 
                 }
-                catch (Exception e)
+                catch
                 {
                     return null;
                 }
@@ -336,7 +336,7 @@ namespace WebApp.Models
                     //return filestream;
 
                 }
-                catch (Exception e)
+                catch
                 {
                     return null;
                 }

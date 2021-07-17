@@ -89,16 +89,16 @@ namespace WebApp.Controllers
             bool HasAccess = await TestManager.GetSecurity(Id, (Guid?)null, PlaceConfig);
             return Json(new { HasAccess });
         }
-        public async Task ReconnectToSocket()
-        {
-            if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
-            {
-                foreach (var item in timers)
-                {
-                    requestList.Add(item.Key);
-                }
-            }
-        }
+        //public async Task ReconnectToSocket()
+        //{
+        //    if (CurrentUser.Id == new Guid("9d193281-bf65-4002-ab0a-41a25b2b4651"))
+        //    {
+        //        foreach (var item in timers)
+        //        {
+        //            requestList.Add(item.Key);
+        //        }
+        //    }
+        //}
         public async Task<ActionResult> ProctorProcessList()
         {
             List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
@@ -240,7 +240,7 @@ namespace WebApp.Controllers
                 }
                 else return false;
             }
-            catch (Exception e)
+            catch
             {
                 return Compare(image2, image1, comparisionLevel);
             }
@@ -381,55 +381,55 @@ namespace WebApp.Controllers
 
         #endregion
         #region Соединение
-        [HttpPost]
-        public async Task<JsonResult> HasConnection(SavePictureModel model)
-        {
-            if (timers == null)
-            {
-                timers = new Dictionary<int, Timer>();
-            }
-            if (requestList == null)
-            {
-                requestList = new List<int>();
-            }
-            if (!model.NeedDispose)
-            {
-                if (timers.ContainsKey(model.TestingProfileId))
-                {
-                    timers[model.TestingProfileId].Stop();
-                    timers[model.TestingProfileId].Start();
-                }
-                else
-                {
-                    var timer = new Timer(60000);
-                    timer.Enabled = true;
-                    timer.Elapsed += Timer_Elapsed;
-                    timer.Start();
-                    timers.Add(model.TestingProfileId, timer);
-                }
-            }
-            else
-            {
-                if (timers.ContainsKey(model.TestingProfileId))
-                {
-                    timers[model.TestingProfileId].Stop();
-                    timers[model.TestingProfileId].Dispose();
-                    timers.Remove(model.TestingProfileId);
-                }
-                //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
-                //await FinishTest(model.TestingProfileId);
-            }
-            if (requestList.Count > 0)
-            {
-                if (requestList.Contains(model.TestingProfileId))
-                {
-                    requestList.Remove(model.TestingProfileId);
-                    return Json(true);
-                }
-            }
-            return Json(false);
-            //await TestManager.SaveImage(model);
-        }
+        //[HttpPost]
+        //public async Task<JsonResult> HasConnection(SavePictureModel model)
+        //{
+        //    if (timers == null)
+        //    {
+        //        timers = new Dictionary<int, Timer>();
+        //    }
+        //    if (requestList == null)
+        //    {
+        //        requestList = new List<int>();
+        //    }
+        //    if (!model.NeedDispose)
+        //    {
+        //        if (timers.ContainsKey(model.TestingProfileId))
+        //        {
+        //            timers[model.TestingProfileId].Stop();
+        //            timers[model.TestingProfileId].Start();
+        //        }
+        //        else
+        //        {
+        //            var timer = new Timer(60000);
+        //            timer.Enabled = true;
+        //            timer.Elapsed += Timer_Elapsed;
+        //            timer.Start();
+        //            timers.Add(model.TestingProfileId, timer);
+        //        }
+        //    }
+        //    else
+        //    {
+        //        if (timers.ContainsKey(model.TestingProfileId))
+        //        {
+        //            timers[model.TestingProfileId].Stop();
+        //            timers[model.TestingProfileId].Dispose();
+        //            timers.Remove(model.TestingProfileId);
+        //        }
+        //        //await LogManager.SaveLog(CurrentUser.Id, Request.UserHostAddress, 3);
+        //        //await FinishTest(model.TestingProfileId);
+        //    }
+        //    if (requestList.Count > 0)
+        //    {
+        //        if (requestList.Contains(model.TestingProfileId))
+        //        {
+        //            requestList.Remove(model.TestingProfileId);
+        //            return Json(true);
+        //        }
+        //    }
+        //    return Json(false);
+        //    //await TestManager.SaveImage(model);
+        //}
 
         [HttpPost]
         public async Task<JsonResult> SaveVideoFile(SavePictureModel model)
@@ -554,7 +554,7 @@ namespace WebApp.Controllers
         //}
 
         [HttpPost]
-        public async Task<JsonResult> GetFileBase(int Id)
+        public JsonResult GetFileBase(int Id)
         {
             return Json(TestManager.GetFileBase(Id));
         }

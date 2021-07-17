@@ -79,7 +79,7 @@ namespace WebApp.Controllers.Api
         }
         [Route("CheckPIN")]
         [HttpPost]
-        public async Task<IHttpActionResult> CheckPIN(int pin)
+        public IHttpActionResult CheckPIN(int pin)
         {
             return WrapResponse(TestManager.CheckPIN(pin));
         }
@@ -278,7 +278,7 @@ namespace WebApp.Controllers.Api
         }
         [HttpPost]
         [Route("GetQrCode")]
-        public async Task<IHttpActionResult> GetQrCode(int Id)
+        public IHttpActionResult GetQrCode(int Id)
         {
             QRCodeEncoder encoder = new QRCodeEncoder();
             Bitmap qrCode = encoder.Encode("https://de.ncfu.ru/user/qrscanner?Id=" + Id);
@@ -314,7 +314,7 @@ namespace WebApp.Controllers.Api
                 await TestManager.ResetPlaceRequest(CurrentUser.Id);
                 return WrapResponse(1);
             }
-            catch (Exception e)
+            catch
             {
                 return WrapResponse(0);
             }
