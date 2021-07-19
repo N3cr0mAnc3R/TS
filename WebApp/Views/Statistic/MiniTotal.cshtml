@@ -23,7 +23,7 @@
                     <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" v-if="human.picture" /><img src="~/Files/no-photo.png" v-if="!human.picture" height="75" /></td>
                     <td>{{human.Id}}</td>
                     <td>{{human.Name}}</td>
-                    <td>{{human.Guid}}</td>
+                    <td class="user-select-all">{{human.Guid}}</td>
                     <td v-if="hasFullAccess"> <button title="Назначить ВИ" v-on:click="openNewTestWindow(human)"> <i class="fa fa-calendar-check"></i></button></td>
                 </tr>
             </table>
@@ -41,7 +41,7 @@
                 <th>Управление</th>
             </tr>
             <tr v-for="discipline in currentHuman.disciplines">
-                <td v-if="hasFullAccess">{{discipline.Id}}</td>
+                <td v-if="hasFullAccess" class="user-select-all">{{discipline.Id}}</td>
                 <td>{{discipline.Name}}</td>
                 <td>{{discipline.TestingDate.toLocaleString()}}</td>
                 <td>{{discipline.TestingBegin}}</td>
@@ -181,4 +181,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?8"></script>
+<script src="~/Content/Statistic/minitotal.js?9"></script>

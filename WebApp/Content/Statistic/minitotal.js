@@ -68,6 +68,9 @@
                     if (data.length == 1) {
                         self.selectHuman(data[0]);
                     }
+                    else {
+                        document.title = "Результаты поиска по " + self.currentFIO;
+                    }
                     self.filteredPeople = data;
 
                     self.objectLoading.loading = false;
@@ -120,6 +123,7 @@
                     self.currentHuman = human;
                     self.currentHuman.disciplines = [];
                     self.currentHuman.disciplines = self.initDisciplines(data);
+                    document.title = self.currentHuman.Name;
 
                 }
             })
