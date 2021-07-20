@@ -117,6 +117,7 @@
   background-color: #fff;
   border: 1px solid #ddd;
   transition: all 0.3s ease;
+  z-index: 2;
 }
 .videos-wrapper.collapsed {
   top: unset;
@@ -281,6 +282,11 @@
   border-top: none;
   border: 1px solid #ddd;
   background: #fff;
+}
+.panel-center.camera-missing {
+  min-width: 1024px;
+  font-size: 33px;
+  font-family: 'Montserrat';
 }
 .panel-center .question-wrapper img {
   width: 100%;

@@ -125,6 +125,9 @@ table button {
   max-height: 500px;
   overflow: auto;
 }
+.human-table-wrapper table {
+  cursor: pointer;
+}
 .place-list {
   display: flex;
   flex-wrap: wrap;

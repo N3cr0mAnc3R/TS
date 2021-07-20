@@ -39,6 +39,7 @@
         finishScreen: false,
         pause: false,
         testing: false,
+        hasCameraConnection: false,
         chat: {
             IsOpened: false,
             participants: [],
@@ -581,7 +582,7 @@
                 answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: self.selectedQuestion.answer, FileId: self.selectedQuestion.Answers[0].fileId });
             }
             else if (self.selectedQuestion.TypeAnswerId == 4) {
-                answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: null, FileId: self.selectedQuestion.Answers[0].fileId });
+                answers.push({ TestingPackageId: self.selectedQuestion.Answers[0].TestingPackage.Id, TestingTime: 3, UserAnswer: null, FileId: self.selectedQuestion.fileId });
             }
             $.ajax({
                 type: 'POST',
@@ -1000,9 +1001,11 @@
                     self.initWebCam(params);
                     self.cameraStream = null;
                     self.cameraRecorder = null;
+                    self.hasCameraConnection = false;
                     $('#video1')[0].srcObject = null;
                 };
                 self.cameraStream = videostream;
+                self.hasCameraConnection = true;
                 var options;
                 if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
                     options = { mimeType: 'video/webm; codecs=vp9' };
@@ -1667,6 +1670,7 @@
                 case 43: return localStorage["localization"] == 1 ? "Покидать окно тестов запрещено" : "You not allowed leave the window";
                 case 44: return localStorage["localization"] == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
                 case 45: return localStorage["localization"] == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
+                case 46: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к камере. Прохождение ВИ без камеры запрещено" : "Permission for camera denied. Grant access for camera, or the test won't be passed";
 
             }
         }

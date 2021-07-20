@@ -138,6 +138,7 @@
     background-color: #fff;
     border: 1px solid #ddd;
     transition: all 0.3s ease;
+    z-index: 2;
 
     &.collapsed {
         top: unset;
@@ -336,6 +337,12 @@
     border-top: none;
     border: 1px solid #ddd;
     background: #fff;
+
+    &.camera-missing {
+        min-width: 1024px;
+        font-size: 33px;
+        font-family: 'Montserrat';
+    }
 
     .question-wrapper {
         img {
@@ -808,6 +815,7 @@
         /*height: 260px;*/
         height: 235px;
         left: 50px;
+
 
         &.collapsed {
             /*right: 170px;*/
