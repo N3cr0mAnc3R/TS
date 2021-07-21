@@ -20,7 +20,8 @@
             </div>
             <div class="empty-list">
                 {{switchLocal(12)}}
-                <button v-on:click="askReset()" class="btn-reset">{{switchLocal(13)}}</button>
+                @*<button v-on:click="askReset()" class="btn-reset">{{switchLocal(13)}}</button>*@
+                <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#confirm-reset">{{switchLocal(13)}}</button></div>
             </div>
         </div>
     }
@@ -196,8 +197,27 @@
     <div class="justify-content-around">
         <video controls src="~/Files/Instruction.mp4" type="video/mp4" />
     </div>
+
+    <div class="modal fade" id="confirm-reset" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title"> {{switchLocal(12)}}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {{switchLocal(22)}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal" v-on:click="askReset()">{{switchLocal(13)}}</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 </div>
 
 <script src="~/Content/aes.js"></script>
-<script src="~/Content/Testing/pretest.js?1"></script>
+<script src="~/Content/Testing/pretest.js?2"></script>

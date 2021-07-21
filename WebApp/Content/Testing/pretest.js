@@ -720,6 +720,7 @@
                 case 19: return localStorage["localization"] == 1 ? "До окончания процедуры идентификации осталось: " : "Until the end of identification left: ";
                 case 20: return localStorage["localization"] == 1 ? "секунд" : "seconds";
                 case 21: return localStorage["localization"] == 1 ? "Тесты не назначены. Можете покинуть страницу" : "Tests not found. You may leave this page now";
+                case 22: return localStorage["localization"] == 1 ? "Сброс предыдущих устройств завершит все незаконченные тесты. Вы уверены, что хотите продолжить?" : "Reset will automatically finish all the started tests. Are You sure to continue?";
             }
         },
         isMe: function (message) {

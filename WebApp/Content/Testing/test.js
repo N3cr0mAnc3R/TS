@@ -15,6 +15,7 @@
         needShowScore: false,
         score: null,
         timeRecording: -1,
+        answerInterval: null,
         testingTime: 0,
         loadObject: {
             loading: null,
@@ -387,7 +388,10 @@
             this.selectedQuestion.changed = true;
             this.selectedQuestion.answered = true;
             var self = this;
-            setInterval(function () {
+            if (self.answerInterval) {
+                return;
+            }
+            self.answerInterval = setInterval(function () {
                 self.answerQuestion();
             }, 30000);
         },
@@ -594,7 +598,7 @@
                     self.selectedQuestion.changed = false;
                     //Для подсветки решённых заданий
                     self.selectedQuestion.answered = true;
-                    if (self.selectedQuestion.TypeAnswerId == 3 || self.selectedQuestion.TypeAnswerId == 4) {
+                    if (/*self.selectedQuestion.TypeAnswerId == 3 ||*/ self.selectedQuestion.TypeAnswerId == 4) {
                         if (!self.selectedQuestion.Answers[0].fileId) {
                             self.selectedQuestion.answered = false;
                         }
