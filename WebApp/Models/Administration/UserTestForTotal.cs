@@ -20,6 +20,7 @@ namespace WebApp.Models.Administration
         public int AuditoriumId { get; set; }
         public int PlaceId { get; set; }
         public string PlaceNumber { get; set; }
+        public bool IsArt { get; set; }
 
     }
 

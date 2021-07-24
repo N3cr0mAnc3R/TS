@@ -81,8 +81,16 @@
                 }
             })
         },
-        download: function (Id) {
-            window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
+        download: function (item) {
+            let self = this;
+            self.download1(item, 1);
+            if (item.IsArt) {
+                self.download1(item, 3);
+                self.download1(item, 4);
+            }
+        },
+        download1: function (item, Id) {
+            window.open('/auditory/DownloadReport?Id=' + item.Id + '&Type=' + Id, '_blank');
         },
         openFullPhoto(human) {
             $('#user-photo-window').modal('show');
@@ -208,7 +216,7 @@
             let self = this;
             if (!self.newDate) {
                 let t = new Date();
-                self.newDate = t.getFullYear() + '-' +(t.getMonth() + 1) + '-' + t.getDate() + 'T' + t.toLocaleTimeString();
+                self.newDate = t.getFullYear() + '-' + (t.getMonth() + 1) + '-' + t.getDate() + 'T' + t.toLocaleTimeString();
             }
             //self.modalLoading.loading = true;
             console.log(self.newDate);

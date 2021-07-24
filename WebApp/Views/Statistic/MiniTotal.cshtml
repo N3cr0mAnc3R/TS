@@ -61,7 +61,7 @@
                         <button v-on:click="openNewPlaceWindow(discipline)" title="Пересадить" v-if="isToday(discipline)"><i class="fa fa-pencil-alt"></i></button>
                     </template>
                     <template v-if="(discipline.IsReport || discipline.IsAdmin) && [3, 4, 6].indexOf(discipline.StatusId) != -1">
-                        <button v-on:click="download(discipline.Id)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+                        <button v-on:click="download(discipline)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                     </template>
@@ -200,4 +200,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?9"></script>
+<script src="~/Content/Statistic/minitotal.js?10"></script>
