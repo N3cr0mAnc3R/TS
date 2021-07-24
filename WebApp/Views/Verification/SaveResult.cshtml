@@ -1,5 +1,8 @@
-﻿<link href="~/Content/Statistic/savescore.css" rel="stylesheet" />
-<div id="main-window">
+﻿@{ 
+    ViewBag.Title = "Сохранение результатов";
+}
+<link href="~/Content/Statistic/savescore.css" rel="stylesheet" />
+<div id="main-window" class="mb-5">
     <div v-if="!listOpened">
         <table class="table table-bordered table-striped table-hover">
             <tr v-for="discipline in disciplines" v-on:click="selectDiscipline(discipline.Id)">
@@ -17,9 +20,10 @@
         <label><input type="checkbox" v-on:change="toggleFilter()" />Фильтр нулевых работ</label>
         <br />
         <table class="table table-bordered table-striped">
-            <tr v-for="item in filteredItems">
+            <tr v-for="item in filteredItems" v-if="item.Score > 0">
                 @*<td><input type="checkbox" v-model="item.checked" class="form-control" /></td>*@
                 <td>{{item.Name}}</td>
+                @*<td>{{item.Score}}</td>*@
                 <td><input type="number" max="100" min="0" v-model="item.Score" class="form-control" /></td>
                 <td><button v-on:click="saveMark(item)">Сохранить</button></td>
             </tr>

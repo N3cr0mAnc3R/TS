@@ -151,6 +151,7 @@ const app = new Vue({
                 success: function (auditory) {
                     self.auditory = auditory.Id;
                     self.auditoryName = auditory.Name;
+                    document.title = self.auditoryName;
                     self.NeedPin = auditory.NeedPin;
                     if (self.artArray.indexOf(self.auditory) == -1) {
                         self.computerList.forEach(function (item) {
@@ -1205,7 +1206,7 @@ const app = new Vue({
             let self = this;
             switch (id) {
                 case 1: return localStorage["localization"] == 1 ? "Аудитория" : "Auditory";
-                case 2: return localStorage["localization"] == 1 ? "Выдано: " + self.getErrorCount() + " предупреждений" : self.getErrorCount() + "warnings issued";
+                case 2: return localStorage["localization"] == 1 ? "Выдано предупреждений: " + self.getErrorCount() + ". " : self.getErrorCount() + " warnings issued";
                 case 3: return localStorage["localization"] == 1 ? "Сохранить" : "Save";
                 case 4: return localStorage["localization"] == 1 ? "Сообщить о нарушении" : "Issue a warning";
                 case 5: return localStorage["localization"] == 1 ? "Завершить вступительное испытание" : "Finish test";

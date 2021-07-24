@@ -20,7 +20,7 @@
         <div class="human-table-wrapper">
             <table class="table table-bordered table-stripped table-hover">
                 <tr v-for="human in filteredPeople" v-on:click="selectHuman(human)" :class="{'table-secondary': human.Id == currentHuman.Id}">
-                    <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" v-if="human.picture" /><img src="~/Files/no-photo.png" v-if="!human.picture" height="75" /></td>
+                    <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" v-if="human.picture" class="photo" v-on:click="openFullPhoto(human)" /><img src="~/Files/no-photo.png" v-if="!human.picture" height="75" /></td>
                     <td>{{human.Id}}</td>
                     <td>{{human.Name}}</td>
                     <td class="user-select-all">{{human.Guid}}</td>
@@ -106,6 +106,25 @@
 
                 <div class="modal-footer">
                     <button type="button" v-on:click="saveNewDate()" class="btn btn-secondary" data-dismiss="modal">Сохранить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="user-photo-window" tabindex="-1" role="dialog" aria-labelledby="label" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="label"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <img class="photo" v-bind:src="'data:image/png;base64, ' + currentPhoto" />
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"  v-on:click="closePhoto()" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                 </div>
             </div>
         </div>

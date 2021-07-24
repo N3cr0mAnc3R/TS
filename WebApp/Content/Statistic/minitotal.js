@@ -7,6 +7,7 @@
         currentHuman: { disciplines: [] },
         auditories: [],
         auditory: {},
+        currentPhoto: null,
         userAnswerLog: [],
         hasFullAccess: null,
         currentTest: {},
@@ -82,6 +83,14 @@
         },
         download: function (Id) {
             window.open('/auditory/DownloadReport?Id=' + Id + '&Type=' + 1, '_blank');
+        },
+        openFullPhoto(human) {
+            $('#user-photo-window').modal('show');
+            event.stopPropagation();
+            this.currentPhoto = human.picture;
+        },
+        closePhoto() {
+            this.currentPhoto = null;
         },
         initDisciplines(discs) {
             let self = this;

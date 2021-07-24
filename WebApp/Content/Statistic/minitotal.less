@@ -176,8 +176,19 @@ table {
     max-height: 500px;
     overflow: auto;
 
-    table{
+    table {
         cursor: pointer;
+
+        .photo {
+            cursor: zoom-in;
+        }
+    }
+}
+.modal {
+    .modal-body {
+        .photo {
+            max-width: 450px;
+        }
     }
 }
 

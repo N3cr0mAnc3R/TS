@@ -16,7 +16,7 @@
         testingProfileId: 0,
         isSuperAdmin: false,
         error: {},
-        testingProfileId: 0,
+        //testingProfileId: 0,
         testingPackageId: 0
     },
     methods: {

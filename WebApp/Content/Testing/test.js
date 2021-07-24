@@ -1648,7 +1648,7 @@
                 case 16: return localStorage["localization"] == 1 ? "Потеряна связь с сервером. Перезагрузите страницу" : "Lost connection to the server. Reload Your page";
                 case 17: return localStorage["localization"] == 1 ? "Потеряно соединение с сервером. Проверьте Ваше подключение к интернету." : "Lost connection to the server. Check Your internet-connection.";
                 case 18: return localStorage["localization"] == 1 ? "Вступительное испытание завершено." : "Your test is over.";
-                case 19: return localStorage["localization"] == 1 ? "Результат будет показан в личном кабинете портала eCampus" : "Score will be shown in portal eCampus";
+                case 19: return localStorage["localization"] == 1 ? "Результат будет показан в личном кабинете портала eCampus на следующий день" : "Score will be shown in portal eCampus tomorrow";
                 //case 19: return localStorage["localization"] == 1 ? "Ваш результат" : "Your score";
                 case 20: return localStorage["localization"] == 1 ? "С результатами ознакомлен" : "I got acquainted with the results";
                 case 21: return localStorage["localization"] == 1 ? "Подтвердить" : "Confirm";

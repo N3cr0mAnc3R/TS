@@ -204,7 +204,9 @@ namespace WebApp
                         {
                             if (!Clients.ContainsKey(jsonparsed.TestingProfileId))
                             {
-                                Clients.Add(jsonparsed.TestingProfileId, new List<WebSocket>() { socket });
+                                List<WebSocket> sockets = new List<WebSocket>();
+                                sockets.Add(socket);
+                                Clients.Add(jsonparsed.TestingProfileId, sockets);
                             }
                             else
                             {
