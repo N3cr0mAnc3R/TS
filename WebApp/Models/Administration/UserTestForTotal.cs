@@ -21,6 +21,7 @@ namespace WebApp.Models.Administration
         public int PlaceId { get; set; }
         public string PlaceNumber { get; set; }
         public bool IsArt { get; set; }
+        public string AnsweredInfo { get; set; }
 
     }
 

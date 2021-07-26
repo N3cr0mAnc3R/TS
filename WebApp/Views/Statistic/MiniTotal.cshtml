@@ -38,6 +38,7 @@
                 <th>Балл</th>
                 <th>Текущий статус</th>
                 <th>Место</th>
+                <th>Отвечено</th>
                 <th>Управление</th>
             </tr>
             <tr v-for="discipline in currentHuman.disciplines">
@@ -49,6 +50,7 @@
                 <td>{{discipline.Score}}</td>
                 <td>{{discipline.Status}}</td>
                 <td>{{discipline.PlaceNumber}}</td>
+                <td>{{discipline.AnsweredInfo}}</td>
                 <td>
                     <template v-if="discipline.IsAdmin">
                         <button v-on:click="resetTP(discipline)" title="Сбросить"><i class="fa fa-sync"></i></button>
@@ -200,4 +202,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?10"></script>
+<script src="~/Content/Statistic/minitotal.js?11"></script>

@@ -20,7 +20,7 @@
         <label><input type="checkbox" v-on:change="toggleFilter()" />Фильтр нулевых работ</label>
         <br />
         <table class="table table-bordered table-striped">
-            <tr v-for="item in filteredItems" v-if="item.Score > 0">
+            <tr v-for="item in filteredItems">
                 @*<td><input type="checkbox" v-model="item.checked" class="form-control" /></td>*@
                 <td>{{item.Name}}</td>
                 @*<td>{{item.Score}}</td>*@

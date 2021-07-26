@@ -64,6 +64,8 @@
                     if (data.length == 0) {
                         self.textForShow = "Люди не найдены";
                         self.filteredPeople = [];
+                        self.currentHuman = {};
+                        self.currentHuman.disciplines = [];
                     }
                     else { self.textForShow = null; }
                     if (data.length == 1) {
