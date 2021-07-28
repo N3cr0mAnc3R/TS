@@ -1,7 +1,7 @@
 ﻿<link href="~/Content/Testing/Index.css?8" rel="stylesheet" />
 
 
-<div id="main-window">
+<div id="main-window" class="user-select-none">
     <div class="test-process" v-if="!finishScreen && !(lostConnection || adminPaused)">
         <div class="main-wrapper" v-if="hasCameraConnection">
             <div class="panel-top"><span class="discipline-title">{{NameDiscipline}}</span><span v-if="pause" class="paused">{{switchLocal(16)}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
@@ -278,4 +278,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test.js?14"></script>
+<script src="~/Content/Testing/test.js?17"></script>

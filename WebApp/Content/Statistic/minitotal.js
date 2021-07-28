@@ -144,6 +144,7 @@
                     self.currentHuman.disciplines = self.initDisciplines(data);
                     document.title = self.currentHuman.Name;
 
+                    notifier([{ Type: 'success', Body: 'Загружено' }]);
                 }
             })
         },

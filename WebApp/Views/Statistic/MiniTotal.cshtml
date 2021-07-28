@@ -3,7 +3,7 @@
     ViewBag.Title = "Быстрый поиск";
 }
 
-<link href="~/Content/Statistic/minitotal.css?7" rel="stylesheet" />
+<link href="~/Content/Statistic/minitotal.css?8" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <form id="form-1" class="row">
@@ -16,6 +16,11 @@
     <div v-if="textForShow">
         {{textForShow}}
     </div>
+    <template v-if="currentHuman.disciplines.length > 0">
+        <button class="btn refresh-btn" v-on:click="selectHuman(currentHuman)" title="Получить заново">
+            <i class="fa fa-refresh"></i>
+        </button>
+    </template>
     <div class="info-wrapper">
         <div class="human-table-wrapper">
             <table class="table table-bordered table-stripped table-hover">
@@ -202,4 +207,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?11"></script>
+<script src="~/Content/Statistic/minitotal.js?12"></script>

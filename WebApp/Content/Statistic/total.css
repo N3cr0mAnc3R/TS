@@ -22,9 +22,10 @@ button {
 }
 .base-control .input-wrapper {
   display: flex;
+  flex-wrap: wrap;
 }
 .base-control .input-wrapper input {
-  margin: 12px 12px;
+  margin: 12px 10px 12px 0;
 }
 .base-control .input-wrapper input[type="checkbox"] {
   max-width: 60px;
@@ -33,7 +34,7 @@ button {
   margin-left: 0 !important;
 }
 .base-control .input-wrapper select {
-  margin: 12px 12px;
+  margin: 12px 10px 12px 0;
 }
 .base-control button {
   margin: auto;

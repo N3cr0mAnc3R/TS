@@ -121,6 +121,21 @@ table button {
 .auditory-list .auditory.current {
   background: #565c72;
 }
+.refresh-btn {
+  position: fixed;
+  top: calc(50vh - 20px);
+  left: 10px;
+  background: #888;
+  border-radius: 3px;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  color: #fff;
+  display: flex;
+}
+.refresh-btn i {
+  margin: auto;
+}
 .human-table-wrapper {
   max-height: 500px;
   overflow: auto;

@@ -10,6 +10,8 @@ namespace WebApp.Models.Statistic
         public int Id { get; set; }
         public string Name { get; set; }
         public Guid Guid { get; set; }
+        public DateTime DateFrom { get; set; }
+        public DateTime DateTo { get; set; }
         public byte[] Picture { get; set; }
         public string PictureImage
         {

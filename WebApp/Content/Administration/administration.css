@@ -6,10 +6,11 @@
 .auditory-list .auditory-wrapper {
   height: 40px;
   width: auto;
-  margin: 10px;
+  margin: 5px;
   cursor: pointer;
   background: #ddd;
-  padding: 0 5px;
+  padding: 0px 12px;
+  border-radius: 5px;
 }
 .auditory-list .auditory-wrapper .auditory {
   margin: auto;
@@ -31,9 +32,22 @@
   list-style: square;
   width: 380px;
 }
+.administration-rights li {
+  height: 30px;
+  line-height: 30px;
+  padding: 0 8px;
+}
 .administration-rights li.clickable {
   cursor: pointer;
+  border-radius: 2px;
+}
+.administration-rights li.clickable.current {
+  background: #888;
 }
 .administration-rights li.clickable:hover {
   background: #ddd;
+}
+#main-window {
+  font-family: 'Montserrat';
+  font-size: 11pt;
 }

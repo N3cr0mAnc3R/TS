@@ -24,7 +24,7 @@
             var self = this;
             self.isFiltered = !self.isFiltered;
             if (self.isFiltered) {
-                self.filteredItems = self.items.filter(function (item) { return item.Score == null || item.Score == 0 });
+                self.filteredItems = self.items.filter(function (item) { return item.Score == null });
             }
             else {
                 self.filteredItems = self.items;

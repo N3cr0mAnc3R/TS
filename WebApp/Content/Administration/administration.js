@@ -11,6 +11,7 @@
         hasFullAccess: false,
         searched: false,
         foundedUsers: [],
+        minDate: null,
         objForLoading: {
             loading: false,
             loaded: true
@@ -21,8 +22,12 @@
         }
     },
     methods: {
+        addZero(number){
+            return number < 10?  '0' + number: number;
+        },
         init() {
             let self = this;
+            self.minDate = new Date().getFullYear() + '-' + self.addZero(new Date().getMonth() + 1) + '-' + self.addZero(new Date().getDate());
             $.ajax({
                 url: "/api/auditory/GetAuditoryList",
                 type: "POST",
@@ -129,12 +134,19 @@
                 type: "POST",
                 async: false,
                 success: function (data) {
+                    data.forEach(item => {
+                        item.DateFromString = (new Date(item.DateFrom)).toLocaleDateString();
+                        item.DateFrom = (new Date(item.DateFrom));
+                        item.DateToString = (new Date(item.DateTo)).toLocaleDateString();
+                        item.DateTo = (new Date(item.DateTo));
+                    });
                     self.people = data;
                     self.objForLoading.loading = false;
                     self.objForLoading.loaded = true;
                 }
             });
         },
+
         removeUserFromAud(user) {
             let self = this;
             if (!self.currentAuditory) {

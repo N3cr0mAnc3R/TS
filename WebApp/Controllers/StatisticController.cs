@@ -15,15 +15,33 @@ namespace WebApp.Controllers
     public class StatisticController : BaseController
     {
         // GET: Statistic
-        public ActionResult Index()
+        public async Task<ActionResult> Index()
         {
+
+            List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
             ViewBag.Title = "Отчёты и статистика";
-            return View();
+            if (AccountManager.HasOneOfRoles(roles, new int[3] { 6, 7, 9 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
-        public ActionResult MiniTotal()
+        public async Task<ActionResult> MiniTotal()
         {
+            List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
+
             ViewBag.Title = "Страница полного модерирования";
-            return View();
+            if (AccountManager.HasOneOfRoles(roles, new int[3] { 6, 7, 9 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
         }
         public async Task<ActionResult> Total()
         {

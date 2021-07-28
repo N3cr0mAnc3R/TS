@@ -99,7 +99,6 @@
         init: function () {
             //alert('start init');
             var self = this;
-
             var ctrlDown = false,
                 ctrlKey = 17,
                 cmdKey = 91,
@@ -108,9 +107,9 @@
                 cKey = 67;
 
             $(document).keydown(function (e) {
-                if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = true;
+                if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = true;
             }).keyup(function (e) {
-                if (e.keyCode == ctrlKey || e.keyCode == cmdKey || e.keyCode == shiftKey) ctrlDown = false;
+                if (e.keyCode == ctrlKey || e.keyCode == cmdKey) ctrlDown = false;
             });
 
             //alert('subscription');
@@ -172,7 +171,7 @@
                     url: "/api/user/SaveError",
                     type: "POST",
                     async: true,
-                    data: { TestingProfileId: newId, Content: errorInfo.type + ": " + errorInfo.message + " on " + url + " at line " + lineNumber},
+                    data: { TestingProfileId: newId, Content: errorInfo.type + ": " + errorInfo.message + " on " + url + " at line " + lineNumber },
                     success: function () {
                     },
                     error: function () {
@@ -434,7 +433,7 @@
                     self.selectedQuestion.changed = false;
                     //Для подсветки решённых заданий
                     self.selectedQuestion.answered = true;
-                    self.selectedQuestion.Answers[0].fileId = data;
+                    self.selectedQuestion.fileId = data;
 
                     var reader = new FileReader();
                     reader.onload = function () {
@@ -483,9 +482,9 @@
                     self.loadedCount += 1 + currentQuestion.Answers.length;
                     //Изображения ответов
                     if ([1, 2].indexOf(currentQuestion.TypeAnswerId) != -1) {
-                    //if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                        //if ([1, 2].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                         currentQuestion.Answers.forEach(function (a) {
-                        //self.selectedQuestion.Answers.forEach(function (a) {
+                            //self.selectedQuestion.Answers.forEach(function (a) {
                             $.ajax({
                                 type: 'POST',
                                 dataType: 'json',
@@ -496,8 +495,8 @@
                                     self.counter++;
                                     self.loadedCount--;
                                     if (self.loadedCount == 0) {
-                                    //if (self.counter == currentQuestion.Answers.length + 1) {
-                                    //if (self.counter == self.selectedQuestion.Answers.length + 1) {
+                                        //if (self.counter == currentQuestion.Answers.length + 1) {
+                                        //if (self.counter == self.selectedQuestion.Answers.length + 1) {
                                         self.loadObject.loading = false;
                                         self.loadObject.loaded = true;
                                         self.startTimer();
@@ -548,8 +547,8 @@
                         currentQuestion.IsLoaded = true;
                         //self.selectedQuestion.IsLoaded = true;
                         if (self.loadedCount == 0 || [3, 4].indexOf(currentQuestion.TypeAnswerId) != -1) {
-                        //if (self.counter == currentQuestion.Answers.length + 1 || [3, 4].indexOf(currentQuestion.TypeAnswerId) != -1) {
-                        //if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
+                            //if (self.counter == currentQuestion.Answers.length + 1 || [3, 4].indexOf(currentQuestion.TypeAnswerId) != -1) {
+                            //if (self.counter == self.selectedQuestion.Answers.length + 1 || [3, 4].indexOf(self.selectedQuestion.TypeAnswerId) != -1) {
                             self.loadObject.loading = false;
                             self.loadObject.loaded = true;
                             self.startTimer();
@@ -938,6 +937,10 @@
                             }
                         });
                     }
+                    else if (message.requestTimeLeft) {
+                        //message.uid
+                        self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: true, TimeLeft: self.timeLeft }));
+                    }
                     else if (message.requestViolation) {
                         var errorBody = "";
                         switch (message.violation) {
@@ -1082,6 +1085,9 @@
             var self = this;
             var isFirst = self.calculator.second == '' && !self.calculator.isExpr;
             var middle = isFirst ? self.calculator.first : self.calculator.second;
+            if (self.calculator.resultText.length > 19 && typeof char == "number" ) {
+                return;
+            }
             //if(self.calculator.first )
             self.calculator.resultText += char;
             if (typeof char == "number") {
@@ -1214,7 +1220,8 @@
             self.finishRecord(self);
             self.finishScreen = true;
 
-
+            $(document).off('click', self.goToFullScreen);
+            document.exitFullscreen();
             $.ajax({
                 url: "/api/user/FinishTest?Id=" + self.testingProfileId,
                 type: "POST",
@@ -1254,6 +1261,14 @@
             clearTimeout(self.intervalConnection);
             //self.init();
         },
+        goToFullScreen() {
+            if ((!document.mozFullScreen && !document.webkitIsFullScreen)) {
+                var element = $('html')[0];
+                console.log(element);
+                var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
+                requestMethod.call(element);
+            }
+        },
         startCapture: function (displayMediaOptions) {
             var self = this;
             //var captureStream = null;
@@ -1261,6 +1276,8 @@
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
                 $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
+
+                $(document).on('click', self.goToFullScreen);
 
                 Str.oninactive = function (er) {
                     console.log(er);

@@ -389,6 +389,7 @@ const app = new Vue({
                 },
                 success: function (users) {
                     self.scheduleUsers = users;
+                    notifier([{ Type: 'success', Body: "Запланировано " + users.length + " ВИ" }]);
                     console.log(users);
                     users.forEach(function (item) {
                         if (self.filteredPlaceList.indexOf(item.PlaceId) == -1) {
@@ -675,8 +676,14 @@ const app = new Vue({
                 };
                 socket.onmessage = function (msg) {
                     let message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
+                    if (message.IsSender && message.TimeLeft) {
+                        if (self.currentUser) {
+                            self.currentUser.TimeLeft = message.TimeLeft;
+                            console.log(self.currentUser.TimeLeft);
+                        }
+                    }
                     //console.log(message, self.currentUid);
-                    if (message.IsSender && message.uid == self.currentUid) {
+                    else if (message.IsSender && message.uid == self.currentUid) {
                         if (message.candidate && message.candidate != '{}') {
                             let candidate = new RTCIceCandidate(JSON.parse(message.candidate));
                             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
@@ -780,6 +787,15 @@ const app = new Vue({
             let self = this;
             $('#' + partId + '-1').css('z-index', $('#' + partId + '-1').css('z-index') == 1 ? 2 : 1);
             $('#' + partId + '-2').css('z-index', $('#' + partId + '-2').css('z-index') == 1 ? 2 : 1);
+        },
+        showTimeLeft: function () {
+            var self = this;
+            return Math.floor(self.currentUser.TimeLeft / 60) + ':' + self.isZeroNeed(self.currentUser.TimeLeft % 60);
+        },
+        isZeroNeed: function (value) {
+            if (value < 10)
+                return '0' + value;
+            else return value;
         },
         ResetServer: function () {
             //  var socket = null, socket1 = null;
@@ -948,6 +964,8 @@ const app = new Vue({
                 let found = self.computerList.filter(function (item) { return item.TestingProfileId == self.currentChat.testingProfileId; })[0];
                 self.currentUser = found;
             }
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestTimeLeft: true, IsSender: false}));
             self.getErrors();
             //GetUserPicture
             $.ajax({
