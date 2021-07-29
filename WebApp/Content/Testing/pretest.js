@@ -11,6 +11,7 @@
         interval: null,
         findTestInterval: null,
         findPlaceInterval: null,
+        hasTestsToday: false,
         PIN: null,
         loadObject: {
             loading: null,
@@ -124,8 +125,25 @@
             }, 600);
             //self.startCapture({ video: { cursor: 'always', logicalSurface: true }, audio: true });
         },
+        isToday: function (test) {
+            test.TestingDate = new Date(test.TestingDate);
+            let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
+            return isToday && test.TestingDate < new Date() && [1, 5].indexOf(test.StatusId) != -1;
+        },
         loadTests: function () {
             var self = this;
+
+            $.ajax({
+                url: "/api/user/GetUserTests?Localization=" + (localStorage["localization"] == 1 ? 'Ru' : 'En'),
+                method: "get",
+                success: function (data) {
+                    if (data.length > 0) {
+                        data.forEach(function (test) {
+                            self.hasTestsToday = self.isToday(test) || self.hasTestsToday;
+                        })
+                    }
+                }
+            })
             self.findTestInterval = setInterval(function () {
                 $.ajax({
                     type: 'POST',
@@ -189,8 +207,13 @@
                             if (min != 0) {
                                 console.log(self.tests);
                                 let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
-                                console.log(founded);
-                                self.initWebCam();
+                                if (founded) {
+                                    console.log(founded);
+                                    self.initWebCam();
+                                }
+                                else {
+                                    self.verified = true;
+                                }
                                 self.initChat();
 
                                 clearInterval(self.findTestInterval);
@@ -224,7 +247,14 @@
                             })
                             self.testingProfileId = min;// d[0].Id;
                             if (min != 0) {
-                                self.initWebCam();
+                                let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
+                                if (founded) {
+                                    console.log(founded);
+                                    self.initWebCam();
+                                }
+                                else {
+                                    self.verified = true;
+                                }
                                 self.initChat();
 
                                 clearInterval(self.findTestInterval);
@@ -237,7 +267,7 @@
 
                     }
                 });
-            }, 1000);
+            }, 5000);
         },
         //startCapture: function (displayMediaOptions) {
         //    var self = this;
@@ -721,6 +751,7 @@
                 case 20: return localStorage["localization"] == 1 ? "секунд" : "seconds";
                 case 21: return localStorage["localization"] == 1 ? "Тесты не назначены. Можете покинуть страницу" : "Tests not found. You may leave this page now";
                 case 22: return localStorage["localization"] == 1 ? "Сброс предыдущих устройств завершит все незаконченные тесты. Вы уверены, что хотите продолжить?" : "Reset will automatically finish all the started tests. Are You sure to continue?";
+                case 23: return localStorage["localization"] == 1 ? "На сегодня ВИ не назначено. Вы можете покинуть страницу" : "There are no tests today. You may close the page";
             }
         },
         isMe: function (message) {

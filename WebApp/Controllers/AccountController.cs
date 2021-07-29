@@ -156,19 +156,20 @@ namespace WebApp.Controllers
                 SignInManager.SignIn(user, false, false);
                 await LogManager.SaveLog(user.Id, Request.ServerVariables["REMOTE_ADDR"], ActionType.User_Auth);
 
-                List<int> roles = (await AccountManager.GetUserRoles((CurrentUser == null) ? (Guid?)null : CurrentUser.Id)).ToList();
-                if (AccountManager.HasOneOfRoles(roles, new int[4] { 1, 2, 3, 4 }))
+                List<int> roles = (await AccountManager.GetAllUserRoles(user.Id)).ToList();
+                //if (AccountManager.HasOneOfRoles(roles, new int[4] { 1, 2, 3, 4 }))
+                //{
+                //    return Redirect("/verification/list");
+                //}
+              //  else 
+                if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
                 {
-                    return RedirectToAction("list", "verification");
-                }
-                else if (AccountManager.HasOneOfRoles(roles, new int[2] { 6, 7 }))
-                {
-                    return RedirectToAction("list", "auditory");
+                    return Redirect("/auditory/list");
                 }
                 else
                 {
                     ViewBag.PlaceInfo = await AuditoryManager.GetFreePlaces(user.Id);
-                    return RedirectToAction("waiting", "user");
+                    return Redirect("/user/waiting");
                 }
             }
             else

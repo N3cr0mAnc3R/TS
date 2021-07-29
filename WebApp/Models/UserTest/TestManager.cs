@@ -24,7 +24,7 @@ namespace WebApp.Models
             {
                 try
                 {
-                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet1]", new { placeConfig, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -38,7 +38,7 @@ namespace WebApp.Models
             {
                 try
                 {
-                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet]", new { Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet1]", new { Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -52,7 +52,7 @@ namespace WebApp.Models
             {
                 try
                 {
-                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet]", new { testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesGet1]", new { testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -74,7 +74,7 @@ namespace WebApp.Models
             {
                 try
                 {
-                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet]", new { placeConfig, testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
+                    return await cnt.QueryAsync<TestingModel>(sql: "[dbo].[UserPlace_TestingProfilesPlaceConfigGet1]", new { placeConfig, testingStatusId = 2, Localization, userUID }, commandType: CommandType.StoredProcedure);
                 }
                 catch (Exception e)
                 {
@@ -477,7 +477,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                return await cnt.QueryFirstAsync<TestComputer>(sql: "[dbo].[Administrator_TestingProfileInfoGet]", new { testingProfileId, userUID, Localization }, commandType: CommandType.StoredProcedure);
+                return await cnt.QueryFirstAsync<TestComputer>(sql: "[dbo].[Administrator_TestingProfileInfoGet1]", new { testingProfileId, userUID, Localization }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task<int> GetScore(int testingProfileId, Guid? userUID, string Localization = "RU")
