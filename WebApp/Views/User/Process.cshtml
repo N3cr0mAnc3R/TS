@@ -148,7 +148,7 @@
                 </span>
             </div>
         </div>
-        <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}" v-if="!testing">
+        <div class="videos-wrapper" v-bind:class="{'collapsed' : !shownVideos}" v-if="!testing && isCameraControl">
             <div :class="{'text-center': !shownVideos, 'text-right': shownVideos}" class="control" v-on:click="shownVideos = !shownVideos"><span v-if="!shownVideos"></span><span><span v-if="shownVideos">{{switchLocal(14)}}</span><span v-if="!shownVideos">@*{{switchLocal(15)}}*@</span><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-angle-up' : !shownVideos }"></i></span></div>
             <div class="video">
                 <div class="camera-wrapper">
@@ -278,4 +278,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test.js?17"></script>
+<script src="~/Content/Testing/test.js?18"></script>
