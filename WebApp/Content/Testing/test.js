@@ -41,7 +41,6 @@
         pause: false,
         testing: false,
         hasCameraConnection: false,
-        isCameraControl: true,
         chat: {
             IsOpened: false,
             participants: [],
@@ -214,17 +213,10 @@
                         //  alert('start socket');
                         self.initVideoSocket();
                         // alert('start init webcam');
-                        if (info.IsCameraControl) {
-                            self.initWebCam({ video: { facingMode: 'user' }, audio: true });
-                        }
-                        else {
-                            self.hasCameraConnection = true;
-                            self.isCameraControl = false;
-                        }
+                        self.initWebCam({ video: { facingMode: 'user' }, audio: true });
                         // alert('start capture');
 
-                        var is_safari = false;///^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-                        console.log(is_safari);
+                        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                         if (!is_safari) {
                             self.startCapture({ video: { cursor: 'always' }, audio: true });
                         }
@@ -989,10 +981,7 @@
                     }
                     else if (message.requestCloseChat) {
                         self.chat.IsOpened = !self.chat.IsOpened;
-                        setTimeout(function () {
-                            $('#full-chat-wrapper')[0].scrollIntoView();
-                        }, 300)
-                        //#full-chat-wrapper
+
                     }
                 }
             };
@@ -1231,13 +1220,8 @@
             self.finishRecord(self);
             self.finishScreen = true;
 
-            try {
-                $(document).off('click', self.goToFullScreen);
-                document.exitFullscreen();
-            }
-            catch {
-
-            }
+            $(document).off('click', self.goToFullScreen);
+            document.exitFullscreen();
             $.ajax({
                 url: "/api/user/FinishTest?Id=" + self.testingProfileId,
                 type: "POST",
@@ -1280,6 +1264,7 @@
         goToFullScreen() {
             if ((!document.mozFullScreen && !document.webkitIsFullScreen)) {
                 var element = $('html')[0];
+                console.log(element);
                 var requestMethod = element.requestFullScreen || element.webkitRequestFullScreen || element.mozRequestFullScreen || element.msRequestFullScreen;
                 requestMethod.call(element);
             }
@@ -1289,9 +1274,7 @@
             //var captureStream = null;
             // alert(JSON.stringify(navigator.mediaDevices));
             navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
-                if (self.isCameraControl) {
-                    $('#video2')[0].srcObject = Str;
-                }
+                $('#video2')[0].srcObject = Str;
                 self.screenStream = Str;
 
                 $(document).on('click', self.goToFullScreen);

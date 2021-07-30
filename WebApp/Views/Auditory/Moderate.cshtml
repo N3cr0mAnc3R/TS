@@ -199,7 +199,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content" v-if="currentUser">
                 <div class="modal-header text-center">
-                    <h5 class="modal-title" id="title">{{currentUser.Name}} - {{currentUser.LastName}} {{currentUser.FirstName}} {{currentUser.MiddleName}} <span v-if="currentUser.TimeLeft"> ({{showTimeLeft()}})</span></h5>
+                    <h5 class="modal-title" id="title">{{currentUser.Name}} - {{currentUser.LastName}} {{currentUser.FirstName}} {{currentUser.MiddleName}} ({{showTimeLeft()}})</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -247,4 +247,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?11"></script>
+<script src="~/Content/Auditory/moderate.js?10"></script>

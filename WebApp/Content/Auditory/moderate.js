@@ -389,7 +389,7 @@ const app = new Vue({
                 },
                 success: function (users) {
                     self.scheduleUsers = users;
-                    notifier([{ Type: 'success', Body: "Запланировано " + users.length + " ВИ. Завершено " + users.filter(a => { return a.Score != null; } ).length  }]);
+                    notifier([{ Type: 'success', Body: "Запланировано " + users.length + " ВИ" }]);
                     console.log(users);
                     users.forEach(function (item) {
                         if (self.filteredPlaceList.indexOf(item.PlaceId) == -1) {
@@ -679,6 +679,7 @@ const app = new Vue({
                     if (message.IsSender && message.TimeLeft) {
                         if (self.currentUser) {
                             self.currentUser.TimeLeft = message.TimeLeft;
+                            console.log(self.currentUser.TimeLeft);
                         }
                     }
                     //console.log(message, self.currentUid);
@@ -963,10 +964,8 @@ const app = new Vue({
                 let found = self.computerList.filter(function (item) { return item.TestingProfileId == self.currentChat.testingProfileId; })[0];
                 self.currentUser = found;
             }
-            if (self.currentUser.TestingStatusId == 2) {
-                let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
-                socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestTimeLeft: true, IsSender: false }));
-            }
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestTimeLeft: true, IsSender: false}));
             self.getErrors();
             //GetUserPicture
             $.ajax({
