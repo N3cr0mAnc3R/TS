@@ -81,6 +81,7 @@
             self.lastName = null;
             self.firstName = null;
             self.auditoriumId = null;
+            self.asc = null;
         },
         initItem: function (item, data) {
             item.testingStatusId = data.testingStatusId;

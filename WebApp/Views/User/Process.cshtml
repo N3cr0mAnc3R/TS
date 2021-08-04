@@ -3,7 +3,7 @@
 
 <div id="main-window" class="user-select-none">
     <div class="test-process" v-if="!finishScreen && !(lostConnection || adminPaused)">
-        <div class="main-wrapper" v-if="hasCameraConnection">
+        <div class="main-wrapper" v-if="hasCameraConnection  && !isFireFox">
             <div class="panel-top"><span class="discipline-title">{{NameDiscipline}}</span><span v-if="pause" class="paused">{{switchLocal(16)}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
                 <div v-loader="loadObject">
@@ -45,13 +45,13 @@
 
                                 <div class="input-group">
                                     <div class="custom-file">
-                                        <input type="file"  v-on:change="changeFile" class="custom-file-input" id="input-file">
+                                        <input type="file" v-on:change="changeFile" class="custom-file-input" id="input-file">
                                         <label class="custom-file-label" for="input-file">{{switchLocal(8)}}</label>
                                     </div>
                                 </div>
                                 @*<div v-if="!selectedQuestion.fileId">
-                                        <input v-on:change="changeFile" type="file" accept="image/*" />
-                                    </div>*@
+                                    <input v-on:change="changeFile" type="file" accept="image/*" />
+                                </div>*@
                                 <div class="request-qr-wrapper">
                                     <div class="qr-info-wrapper">
                                         {{switchLocal(30)}}
@@ -102,10 +102,17 @@
             </div>
             <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">{{switchLocal(5)}}</button></div>
         </div>
-        <div class="main-wrapper" v-if="!hasCameraConnection" v-loader="loadObject">
+        <div class="main-wrapper" v-if="!hasCameraConnection && !isFireFox" v-loader="loadObject">
             <div class="panel-top"></div>
             <div class="panel-center camera-missing">
                 {{switchLocal(46)}}
+            </div>
+        </div>
+        <div class="main-wrapper" v-if="isFireFox" >
+            <div class="panel-top"></div>
+            <div class="panel-center camera-missing">
+                {{switchLocal(47)}}
+                <button v-on:click="startIfMozilla()" class="btn btn-secondary">{{switchLocal(48)}}</button>
             </div>
         </div>
         <div class="panel-right" v-bind:class="{'opened': IsTipOpened}" id="panel-right">
@@ -171,17 +178,17 @@
                 </div>
             </div>
             @*<div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
-                <div v-for="participant in chat.participants">
-                    <div id="video-wrapper">
-                        <video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>
-                </div>
+            <div v-for="participant in chat.participants">
+                <div id="video-wrapper">
+                    <video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>
+            </div>
+                    </div>
+                    <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
+                        <div class="participant-wrapper" v-for="participant in chat.participants">
+                            <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
                         </div>
-                        <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
-                            <div class="participant-wrapper" v-for="participant in chat.participants">
-                                <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
-                            </div>
-                        </div>
-                    </div>*@
+                    </div>
+                </div>*@
             <div class="text-chat-wrapper">
                 <ul class="chat-wrapper">
                     <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id">
@@ -278,4 +285,4 @@
     </div>
 </div>
 
-<script src="~/Content/Testing/test.js?19"></script>
+<script src="~/Content/Testing/test.js?20"></script>

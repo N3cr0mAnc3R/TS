@@ -49,6 +49,7 @@
             Message: "",
             testingProfileId: 0
         },
+        isFireFox: false,
         flagStopRec: false,
         chatSocket: null,
         videoSocket: null,
@@ -100,6 +101,7 @@
         init: function () {
             //alert('start init');
             var self = this;
+            self.isFireFox = navigator.userAgent.indexOf('Firefox') != -1;
             var ctrlDown = false,
                 ctrlKey = 17,
                 cmdKey = 91,
@@ -213,23 +215,26 @@
                     if (!self.testing) {
                         //  alert('start socket');
                         self.initVideoSocket();
-                        // alert('start init webcam');
-                        if (info.IsCameraControl) {
-                            self.initWebCam({ video: { facingMode: 'user' }, audio: true });
-                        }
-                        else {
-                            self.hasCameraConnection = true;
-                            self.isCameraControl = false;
-                        }
-                        // alert('start capture');
+                        self.isCameraControl = info.IsCameraControl;
+                        if (!self.isFireFox) {
+                            // alert('start init webcam');
+                            if (info.IsCameraControl) {
+                                self.initWebCam({ video: { facingMode: 'user' }, audio: true });
+                            }
+                            else {
+                                self.hasCameraConnection = true;
+                                self.isCameraControl = false;
+                            }
+                            // alert('start capture');
 
-                        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-                        console.log(is_safari);
-                        if (!is_safari) {
-                            self.startCapture({ video: { cursor: 'always' }, audio: true });
-                        }
-                        else {
-                            self.shownVideos = false;
+                            var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+                            if (!is_safari) {
+                                self.startCapture({ video: { cursor: 'always' }, audio: true });
+                            }
+                            else {
+                                self.shownVideos = false;
+                            }
                         }
                         //alert('start chat');
                         self.initChat();
@@ -244,6 +249,26 @@
                     }, 600);
                 }
             });
+        },
+        startIfMozilla() {
+            let self = this;
+            if (self.IsCameraControl) {
+                self.initWebCam({ video: { facingMode: 'user' }, audio: true });
+            }
+            else {
+                self.hasCameraConnection = true;
+                self.isCameraControl = false;
+            }
+            // alert('start capture');
+
+            var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
+            if (!is_safari) {
+                self.startCapture({ video: { cursor: 'always' }, audio: true });
+            }
+            else {
+                self.shownVideos = false;
+            }
         },
         startTest: function (id) {
             var self = this;
@@ -1102,7 +1127,7 @@
             var self = this;
             var isFirst = self.calculator.second == '' && !self.calculator.isExpr;
             var middle = isFirst ? self.calculator.first : self.calculator.second;
-            if (self.calculator.resultText.length > 19 && typeof char == "number" ) {
+            if (self.calculator.resultText.length > 19 && typeof char == "number") {
                 return;
             }
             //if(self.calculator.first )
@@ -1300,6 +1325,7 @@
                 }
                 self.screenStream = Str;
 
+                self.isFireFox = false;
                 $(document).on('click', self.goToFullScreen);
 
                 Str.oninactive = function (er) {
@@ -1715,6 +1741,8 @@
                 case 44: return localStorage["localization"] == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
                 case 45: return localStorage["localization"] == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
                 case 46: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к камере. Прохождение ВИ без камеры запрещено" : "Permission for camera denied. Grant access for camera, or the test won't be passed";
+                case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\"" : "Permission for screen capture is necessary. Click \"Grant\"";
+                case 48: return localStorage["localization"] == 1 ? "Разрешить" : "Grant";
 
             }
         }
