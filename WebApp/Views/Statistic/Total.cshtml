@@ -1,5 +1,5 @@
 ﻿<link href="~/Content/Statistic/minitotal.css?3" rel="stylesheet" />
-<link href="~/Content/Statistic/total.css?5" rel="stylesheet" />
+<link href="~/Content/Statistic/total.css?6" rel="stylesheet" />
 <div id="main-window">
     <div class="base-control">
         <form class="input-wrapper" action="" id="form-1">
@@ -12,9 +12,14 @@
             <input type="time" v-model="testingTime" class="form-control" title="До какого времени" />
             <input type="text" v-model="lastName" class="form-control" title="Фамилия" placeholder="Фамилия" />
             <input type="text" v-model="firstName" class="form-control" placeholder="Имя" title="Имя" />
+            <select v-model="auditoriumId" class="form-control" title="Аудитория">
+                <option value="null">Все</option>
+                <option :value="auditory.Id" v-for="auditory in auditories">{{auditory.Name}}</option>
+            </select>
             <input type="submit" value="Найти" v-on:submit="find" v-on:click="find" class="btn btn-outline-primary">
         </form>
         <button v-on:click="resetFilters"><i class="fa fa-refresh"></i></button>
+        <button v-on:click="findLongTerm"><i class="fa fa-search"></i></button>
     </div>
     <div v-loader="objectLoading">
         <div class="mt-3 mb-3" v-if="people.length > 0">{{people.length}}</div>
@@ -25,7 +30,7 @@
                         <th>Id</th>
                         <th>ФИО</th>
                         <th>Дисциплина</th>
-                        <th>Балл</th>
+                        <th v-on:click="sortByScore()" class="pointer">Балл <span v-if="asc == true"><i class="fa fa-arrow-down"></i></span><span v-if="asc == false"><i class="fa fa-arrow-up"></i></span></th>
                         <th>Даты</th>
                         <th>Статус</th>
                         <th>Место</th>
@@ -38,7 +43,7 @@
                         <td>{{test.lastName}} {{test.firstName}}</td>
                         <td class="col-5" :title="test.name"><div style="max-height: 120px; overflow:hidden;">{{test.name}}</div></td>
                         <td>{{test.score}}</td>
-                        <td>{{test.testingDate}} <span v-if="test.testingBegin != '' && test.testingEnd != ''">({{test.testingBegin}} - {{test.testingEnd}})</span> </td>
+                        <td>{{test.testingDate}} <span v-if="test.testingBegin != '' && test.testingEnd != '' && test.testingStatusId != 2">({{test.testingBegin}} - {{test.testingEnd}})</span> </td>
                         <td>{{test.Status}}</td>
                         <td>{{test.placeId}}@*<pre>{{test}}</pre>*@</td>
                         <td>
@@ -56,4 +61,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Statistic/total.js?6"></script>
+<script src="~/Content/Statistic/total.js?7"></script>

@@ -236,6 +236,8 @@
                     <button class="reload" data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
                     <button class="reload" v-on:click="collapseVideo()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-minus-square"></i></button>
                     <button class="reload" v-on:click="toggleUserChat()" v-if="isSuperAdmin" title="открыть его чат"><i class="fa fa-comment-dots"></i></button>
+                    <button class="reload" v-on:click="setCameraTrue()" v-if="isSuperAdmin" title="Убрать доступ к камере"><i class="fa fa-camera"></i></button>
+                    <button class="reload" v-on:click="resetCapture()" v-if="isSuperAdmin" title="Перезапустить доступ к экрану"><i class="fa fa-desktop"></i></button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
                         <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
@@ -247,4 +249,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?11"></script>
+<script src="~/Content/Auditory/moderate.js?12"></script>

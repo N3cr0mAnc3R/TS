@@ -42,3 +42,6 @@ button {
 .base-control button:last-child {
   margin-right: 0 !important;
 }
+.pointer {
+  cursor: pointer;
+}

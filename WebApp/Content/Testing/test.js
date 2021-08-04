@@ -223,7 +223,7 @@
                         }
                         // alert('start capture');
 
-                        var is_safari = false;///^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                        var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
                         console.log(is_safari);
                         if (!is_safari) {
                             self.startCapture({ video: { cursor: 'always' }, audio: true });
@@ -921,6 +921,12 @@
                     else if (message.reloadRequest) {
                         location.href = location.href;
                         //window.reload(true);
+                    }
+                    else if (message.requestScreenOff) {
+                        self.hasCameraConnection = true;
+                    }
+                    else if (message.requestCapture) {
+                        self.startCapture({ video: { cursor: 'always' }, audio: true });
                     }
                     else if (message.requestFinish) {
                         notifier([{ Type: 'error', Body: self.switchLocal(28) }]);

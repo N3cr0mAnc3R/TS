@@ -11,6 +11,8 @@
         lastName: null,
         firstName: null,
         auditoriumId: null,
+        asc: null,
+        auditories: [],
         statuses: [],
         objectLoading: {
             loading: false,
@@ -25,6 +27,7 @@
                 event.preventDefault();
             });
             self.getStatuses();
+            self.getAuditoriums();
         },
         find: function () {
             var self = this;
@@ -49,6 +52,7 @@
                         a.testingEnd = a.testingEnd ? (new Date(a.testingEnd)).toLocaleTimeString() : "";
                     });
                     self.people = data;
+                    self.setSort();
                     self.objectLoading.loading = false;
                     self.objectLoading.loaded = true;
                 }
@@ -68,7 +72,6 @@
             })
         },
         resetFilters: function() {
-            console.log(1);
             let self = this;
             self.date = null;
             self.structureDisciplineId = null;
@@ -144,11 +147,6 @@
                 }
             })
         },
-        openNewPlaceWindow: function () {
-            $('#place-window').modal('show');
-            this.getCurrentPlace();
-            this.getAuditoriums();
-        },
         getCurrentPlace: function () {
             var self = this;
             $.ajax({
@@ -162,7 +160,7 @@
         getAuditoriums: function () {
             var self = this;
             $.ajax({
-                url: "/api/statistic/getAuditoryList",
+                url: "/api/administration/getAuditoryList",
                 type: 'post',
                 success: function (data) {
                     self.auditories = data;
@@ -178,6 +176,32 @@
                     self.places = data;
                 }
             })
+        },
+        sortByScore: function () {
+            var self = this;
+            self.asc = self.asc == null ? true : self.asc == true ? false : true;
+            self.setSort();
+        },
+        findLongTerm: function () {
+            var self = this;
+            self.people = self.people.filter(a => {
+                let splits = a.testingBegin.split(':');
+                let currentSplits = [new Date().getHours(), new Date().getMinutes(), new Date().getSeconds()];
+                return (currentSplits[0] - splits[0]) > 1;
+            })
+        },
+        setSort() {
+            let self = this;
+            if (self.asc == true) {
+                self.people.sort(function (a, b) {
+                    return a.score - b.score
+                });
+            }
+            else if(self.asc == false){
+                self.people.sort(function (a, b) {
+                    return b.score - a.score
+                });
+            }
         },
         setPlaceToUser: function (Id) {
             var self = this;

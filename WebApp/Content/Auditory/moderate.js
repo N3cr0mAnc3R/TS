@@ -64,7 +64,6 @@ const app = new Vue({
             $.ajax({
                 url: "/api/account/GetDomain",
                 type: "POST",
-                async: false,
                 success: function (domain) {
                     self.domain = domain;
                     self.isDebug = false;
@@ -1073,6 +1072,16 @@ const app = new Vue({
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
             socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestCloseChat: true, IsSender: false }));
 
+        },
+        setCameraTrue: function () {
+            let self = this;
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestScreenOff: true, IsSender: false }));
+        },
+        resetCapture: function () {
+            let self = this;
+            let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestCapture: true, IsSender: false }));
         },
         uuidv4: function () {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {

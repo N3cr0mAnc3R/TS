@@ -28,6 +28,7 @@
                 case 8: return localStorage["localization"] == 1 ? "Красным выделены вступительные испытания, по которым не был набран минимальный проходной балл" : "Red cells inform about failed tests";
                 case 9: return localStorage["localization"] == 1 ? "Результаты будут отображены в личном кабинете портала eCampus и на данной странице на следующий день после проведения ВИ" : "Results will be shown in portal eCampus and in here the very next day after complete";
                 case 10: return localStorage["localization"] == 1 ? "В случае возникновения вопросов по поводу проведения ВИ следует обращаться в техническую поддержку по телефону, указанному внизу страницы" : "For any questions call the Support phone at page below";
+                case 11: return localStorage["localization"] == 1 ? "Перейти к ВИ" : "Go to tests";
             }
         },
         isPossible: function (test) {

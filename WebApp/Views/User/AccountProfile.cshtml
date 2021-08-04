@@ -3,7 +3,7 @@
     ViewBag.Title = "Личный кабинет абитуриента";
 }
 
-<link href="~/Content/Testing/profile.css?3" rel="stylesheet" />
+<link href="~/Content/Testing/profile.css?4" rel="stylesheet" />
 
 <div id="main-window">
     <div v-if="tests.length == 0">
@@ -22,24 +22,24 @@
         <table class="table table-bordered table-striped mt-5 table-hover">
             <thead>
                 <tr>
-                    <th class="col-8">{{switchLocal(2)}}</th>
+                    <th class="col-4">{{switchLocal(2)}}</th>
                     <th class="col-2">{{switchLocal(3)}}</th>
                     <th class="col-2">{{switchLocal(4)}}</th>
                     <th class="col-2">{{switchLocal(5)}}</th>
-                    @*<th class="col-2"></th>*@
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
                 <tr v-for="test in tests" :class="{'table-secondary': isToday(test), 'table-danger': test.Passed == false}">
-                    <td class="col-8">{{test.Discipline}}</td>
+                    <td class="col-4">{{test.Discipline}}</td>
                     <td class="col-2">{{getDateFormat(test.TestingDate)}}</td>
                     <td class="col-2">{{test.Score}}</td>
                     <td class="col-2">{{test.Status}}</td>
-                    @*<td class="col-2"><button v-if="isPossible(test)"><i class="fa fa-play-circle"></i></button></td>*@
+                    <td><a href="/user/waiting" class="btn btn-secondary text-center" v-if="isPossible(test)">{{switchLocal(11)}}</a></td>
                 </tr>
             </tbody>
         </table>
     </div>
 </div>
 
-<script src="~/Content/Testing/profile.js?2"></script>
+<script src="~/Content/Testing/profile.js?3"></script>
