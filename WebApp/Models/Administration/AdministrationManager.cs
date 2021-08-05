@@ -49,6 +49,14 @@ namespace WebApp.Models.Administration
                 return await cnt.QueryAsync<Place>("Administrator_AuditoriumPlacesGet", new { userUid, AuditoriumId = AuditoryId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task ResetStatus(Guid userUid, int TestingProfileId)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("SuperAdmin_ResetTestingStatus", new { userUid, TestingProfileId}, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<bool> HasFullAccess(Guid userUid)
         {
 
@@ -103,6 +111,14 @@ namespace WebApp.Models.Administration
             using (var cnt = Concrete.OpenConnection())
             {
                 await cnt.ExecuteAsync("SuperAdmin_AssignTestToUser", new { model.UserId, structureDisciplineId = model.DisciplineId, model.PlaceId, testingDate = model.Date }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task DoubleNullified(Guid userUid, int TestingProfileId)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("SuperAdmin_ResetNullified", new { userUid, TestingProfileId }, commandType: CommandType.StoredProcedure);
             }
         }
         public async Task ChangeTestingDate(Guid userUid, TestingModel model)

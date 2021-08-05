@@ -53,6 +53,21 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetAuditoryPlacesById(CurrentUser.Id, Id));
         }
         [HttpPost]
+        [Route("ResetStatus")]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> ResetStatus(int Id)
+        {
+            try
+            {
+                await AdministrationManager.ResetStatus(CurrentUser.Id, Id);
+                return WrapResponse(1);
+            }
+            catch (Exception exc)
+            {
+                return WrapResponse(exc.Message);
+            }
+        }
+        [HttpPost]
         [Route("GetAuditoryList")]
         public async Task<IHttpActionResult> GetAuditoryList()
         {
@@ -77,6 +92,20 @@ namespace WebApp.Controllers.Api
             try
             {
                 await AdministrationManager.AssignDisciplineToUser(model);
+                return WrapResponse(1);
+            }
+            catch
+            {
+                return WrapResponse(0);
+            }
+        }
+        [HttpPost]
+        [Route("DoubleNullified")]
+        public async Task<IHttpActionResult> DoubleNullified(int Id)
+        {
+            try
+            {
+                await AdministrationManager.DoubleNullified(CurrentUser.Id,Id);
                 return WrapResponse(1);
             }
             catch

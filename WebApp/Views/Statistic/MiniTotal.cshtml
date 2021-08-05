@@ -62,6 +62,7 @@
                         <button v-on:click="finishTP(discipline)" title="Завершить"><i class="fa fa-check"></i></button>
                         <button v-on:click="deleteTP(discipline)" title="Удалить"><i class="fa fa-times"></i></button>
                         <button v-on:click="nullify(discipline)" title="Аннулировать">0</button>
+                        <button v-on:click="DoubleNullified(discipline)" title="Перенести аннулированный"><i class="fa fa-angle-double-right"></i></button>
                         <button v-on:click="unload(discipline)" title="Выгрузить">
                             <i class="fa fa-share"></i>
                         </button>
@@ -69,6 +70,10 @@
                     </template>
                     <template v-if="(discipline.IsReport || discipline.IsAdmin) && [3, 4, 6].indexOf(discipline.StatusId) != -1">
                         <button v-on:click="download(discipline)" title="Скачать отчёт"><i class="fa fa-print"></i></button>
+                        <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
+                        <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
+                    </template>
+                    <template v-if="(discipline.IsReport || discipline.IsAdmin) && discipline.StatusId == 2">
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 1)" title="Скачать изображение с камеры"><i class="fa fa-video-camera"></i></button>
                         <button v-if="discipline.IsAdmin" v-on:click="downloadCamera(discipline.Id, 2)" title="Скачать изображение с экрана"><i class="fa fa-desktop"></i></button>
                     </template>
@@ -207,4 +212,4 @@
         <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?12"></script>
+<script src="~/Content/Statistic/minitotal.js?13"></script>

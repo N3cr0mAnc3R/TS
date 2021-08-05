@@ -41,7 +41,7 @@
   top: -11px;
   right: -10px;
   border-radius: 50%;
-  height: 22px;
+  height: 21px;
   padding: 1px;
   box-sizing: content-box;
   width: 21px;
@@ -54,7 +54,7 @@
   font-weight: 100;
   position: absolute;
   top: 0px;
-  right: 2px;
+  right: 0;
   display: block;
 }
 .kernel-system .kernel-system-notifications-overlay .kernel-system-notifications-wrapper .notification-wrapper.type-error .notification {

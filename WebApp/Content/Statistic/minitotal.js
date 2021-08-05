@@ -164,6 +164,19 @@
                 }
             })
         },
+        DoubleNullified: function (item) {
+            var self = this;
+            self.objectLoading.loading = true;
+            $.ajax({
+                url: "/api/Administration/DoubleNullified?Id=" + item.Id,
+                type: 'post',
+                success: function (data) {
+
+                    self.selectHuman(self.currentHuman);
+                    self.objectLoading.loading = false;
+                }
+            })
+        },
         openUserAnswerLogMWindow: function (item) {
             let self = this;
             self.modalLoading.loading = true;

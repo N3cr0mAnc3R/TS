@@ -1741,7 +1741,7 @@
                 case 44: return localStorage["localization"] == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
                 case 45: return localStorage["localization"] == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
                 case 46: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к камере. Прохождение ВИ без камеры запрещено" : "Permission for camera denied. Grant access for camera, or the test won't be passed";
-                case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\"" : "Permission for screen capture is necessary. Click \"Grant\"";
+                case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\"  ивыберите из списка \"Весь экран\"" : "Permission for screen capture is necessary. Click \"Grant\"";
                 case 48: return localStorage["localization"] == 1 ? "Разрешить" : "Grant";
 
             }

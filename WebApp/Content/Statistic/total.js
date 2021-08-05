@@ -96,7 +96,16 @@
             var self = this;
             let item = self.people.find(a => a.ID == test.ID);
             self.objectLoading.loading = true;
-
+            //$.ajax({
+            //    url: "/api/administration/ResetStatus?Id=" + test.ID,
+            //    type: 'post',
+            //    success: function (data) {
+            //        if (data != 1) {
+            //            notifier([{ Type: 'error', Body: data} ]);
+            //        }
+            //        self.find();
+            //    }
+            //})
             $.ajax({
                 url: "/api/statistic/resetProfileTotal?Id=" + item.ID,
                 type: 'post',
