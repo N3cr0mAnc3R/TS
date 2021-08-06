@@ -4,6 +4,9 @@
     <div class="auditory-header">
         {{switchLocal(1)}} {{auditoryName}}
     </div>
+    <div class="empty-seat-wrapper">
+        <button v-on:click="emptySeats">Освободить места</button>
+    </div>
     @*<div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
         <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
     </div>*@

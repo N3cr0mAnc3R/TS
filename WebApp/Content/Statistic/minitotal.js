@@ -56,6 +56,7 @@
         findByFIO: function () {
             var self = this;
             self.objectLoading.loading = true;
+            self.currentFIO = self.currentFIO.trim()
             $.ajax({
                 url: "/api/statistic/findfio",
                 type: 'post',

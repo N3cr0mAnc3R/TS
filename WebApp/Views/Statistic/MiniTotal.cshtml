@@ -62,7 +62,7 @@
                         <button v-on:click="finishTP(discipline)" title="Завершить"><i class="fa fa-check"></i></button>
                         <button v-on:click="deleteTP(discipline)" title="Удалить"><i class="fa fa-times"></i></button>
                         <button v-on:click="nullify(discipline)" title="Аннулировать">0</button>
-                        <button v-on:click="DoubleNullified(discipline)" title="Перенести аннулированный"><i class="fa fa-angle-double-right"></i></button>
+                        <button v-on:click="DoubleNullified(discipline)" title="Перенести аннулированный" v-if="discipline.StatusId == 6"><i class="fa fa-angle-double-right"></i></button>
                         <button v-on:click="unload(discipline)" title="Выгрузить">
                             <i class="fa fa-share"></i>
                         </button>

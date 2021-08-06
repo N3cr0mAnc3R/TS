@@ -987,6 +987,17 @@ const app = new Vue({
         openModal: function () {
             $('#user-modal').modal('toggle');
         },
+        emptySeats() {
+            let self = this;
+            let i = 0;
+            self.computerList.forEach((item) => {
+                if (item.IsUsed && !item.TestingProfileId) {
+                    i++;
+                    self.resetIpConfig(item);
+                }
+            });
+            notifier([{ Type: 'success', Body: 'Освобождено: ' + i }]);
+        },
         getErrors: function () {
             let self = this;
             $.ajax({
