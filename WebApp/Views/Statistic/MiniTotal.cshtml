@@ -20,6 +20,9 @@
         <button class="btn refresh-btn" v-on:click="selectHuman(currentHuman)" title="Получить заново">
             <i class="fa fa-refresh"></i>
         </button>
+        <button class="btn top-btn" v-on:click="goToTop" title="Наверх">
+            <i class="fa fa-arrow-up"></i>
+        </button>
     </template>
     <div class="info-wrapper">
         <div class="human-table-wrapper">
@@ -205,11 +208,6 @@
                 </div>
             </div>
         </div>
-    </div>
-    <div id="circleG" v-if="objectLoading.loading">
-        <div id="circleG_1" class="circleG"></div>
-        <div id="circleG_2" class="circleG"></div>
-        <div id="circleG_3" class="circleG"></div>
     </div>
 </div>
 <script src="~/Content/Statistic/minitotal.js?13"></script>

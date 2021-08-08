@@ -121,9 +121,10 @@ table button {
 .auditory-list .auditory.current {
   background: #565c72;
 }
-.refresh-btn {
+.refresh-btn,
+.top-btn {
   position: fixed;
-  top: calc(50vh - 20px);
+  top: calc(50vh - 60px);
   left: 10px;
   background: #888;
   border-radius: 3px;
@@ -133,8 +134,12 @@ table button {
   color: #fff;
   display: flex;
 }
-.refresh-btn i {
+.refresh-btn i,
+.top-btn i {
   margin: auto;
+}
+.top-btn {
+  top: calc(50vh + 40px);
 }
 .human-table-wrapper {
   max-height: 500px;

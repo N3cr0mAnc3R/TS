@@ -125,6 +125,11 @@
             }, 600);
             //self.startCapture({ video: { cursor: 'always', logicalSurface: true }, audio: true });
         },
+        isTodayLater: function (test) {
+            test.TestingDate = new Date(test.TestingDate);
+            let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
+            return isToday && test.TestingDate > new Date() && [1, 5].indexOf(test.StatusId) != -1;
+        },
         isToday: function (test) {
             test.TestingDate = new Date(test.TestingDate);
             let isToday = test.TestingDate.getDate() == new Date().getDate() && test.TestingDate.getMonth() == new Date().getMonth() && test.TestingDate.getFullYear() == new Date().getFullYear();
@@ -139,7 +144,7 @@
                 success: function (data) {
                     if (data.length > 0) {
                         data.forEach(function (test) {
-                            self.hasTestsToday = self.isToday(test) || self.hasTestsToday;
+                            self.hasTestsToday = self.isTodayLater(test) || self.hasTestsToday;
                         })
                     }
                 }

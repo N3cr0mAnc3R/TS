@@ -38,9 +38,6 @@
             $('#form-1').on("submit", function () {
                 event.preventDefault();
             });
-            setTimeout(function () {
-                $('#fio').focus();
-            }, 200)
 
             $.ajax({
                 url: '/api/administration/HasFullAccess',
@@ -52,6 +49,17 @@
                 }
             })
             this.getAuditoriums();
+
+            let foreignQuery = location.href.split('=');
+            if (foreignQuery.length > 1) {
+                self.selectHuman({});
+                return;
+            }
+
+            setTimeout(function () {
+                $('#fio').focus();
+            }, 200)
+
         },
         findByFIO: function () {
             var self = this;
@@ -83,6 +91,9 @@
                     notifier([{ Type: 'error', Body: error.responseJSON.ExceptionMessage }]);
                 }
             })
+        },
+        goToTop() {
+            $('#navigation')[0].scrollIntoView();
         },
         download: function (item) {
             let self = this;
@@ -146,6 +157,15 @@
                     document.title = self.currentHuman.Name;
 
                     notifier([{ Type: 'success', Body: 'Загружено' }]);
+                }
+            })
+        },
+        getHumanInfo(id) {
+            $.ajax({
+                url: "/api/statistic/getById?Id=" + id,
+                type: 'post',
+                success: function (data) {
+
                 }
             })
         },
