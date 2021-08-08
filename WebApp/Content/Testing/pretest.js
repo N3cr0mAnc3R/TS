@@ -318,7 +318,7 @@
                         }
                     }
                 });
-            }, 5000);
+            }, 3000);
         },
         initChat: function () {
             var self = this;
