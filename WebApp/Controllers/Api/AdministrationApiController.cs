@@ -105,7 +105,7 @@ namespace WebApp.Controllers.Api
         {
             try
             {
-                await AdministrationManager.DoubleNullified(CurrentUser.Id,Id);
+                await AdministrationManager.DoubleNullified(CurrentUser.Id, Id);
                 return WrapResponse(1);
             }
             catch
@@ -161,6 +161,14 @@ namespace WebApp.Controllers.Api
         {
             return WrapResponse(await AdministrationManager.HasAccessToTestingProfile(CurrentUser.Id, Id));
         }
+
+        [HttpPost]
+        [Route("GetUserFamilyById")]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> GetUserFamilyById(int Id)
+        {
+            return WrapResponse(await AdministrationManager.GetUserFamilyById(Id));
+        }
         [HttpPost]
         [Route("SetUserToReport")]
         [AllowAnonymous]
@@ -176,7 +184,7 @@ namespace WebApp.Controllers.Api
                 return 0;
             }
         }
-        
+
         [HttpPost]
         [Route("SetUserToAuditory")]
         [AllowAnonymous]

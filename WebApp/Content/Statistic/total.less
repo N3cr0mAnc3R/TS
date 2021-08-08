@@ -52,6 +52,30 @@ button {
         }
     }
 }
-.pointer{
+
+.pointer {
     cursor: pointer;
+}
+
+
+#discipline-select {
+    position: absolute;
+    z-index: 1;
+    max-height: 400px;
+    overflow: auto;
+
+    .element-wrapper {
+        max-width: 400px;
+        padding: 0 5px;
+        background-color: #fff;
+        cursor: pointer;
+
+        &:hover {
+            background: #ddd;
+        }
+
+        .element {
+            margin-top: 2px;
+        }
+    }
 }

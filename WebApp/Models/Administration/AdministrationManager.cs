@@ -81,6 +81,14 @@ namespace WebApp.Models.Administration
                 return await cnt.QueryFirstAsync<bool>("Administrator_HasAccessToTestingProfile", new { userUid, TestingProfileId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<IndexItem> GetUserFamilyById(int UserId)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return await cnt.QueryFirstAsync<IndexItem>("Administrator_GetUserFamilyNameById", new { UserId }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task SetUserToReport(Guid userUid, AccessModel model)
         {
 

@@ -24,10 +24,10 @@
             <i class="fa fa-arrow-up"></i>
         </button>
     </template>
-    <div class="info-wrapper">
+    <div class="info-wrapper" v-loader="humanLoader">
         <div class="human-table-wrapper">
             <table class="table table-bordered table-stripped table-hover">
-                <tr v-for="human in filteredPeople" v-on:click="selectHuman(human)" :class="{'table-secondary': human.Id == currentHuman.Id}">
+                <tr v-for="human in filteredPeople" v-on:click="selectHuman(human)" :class="{'table-secondary': human.Id == currentHuman.Id}" :id="'user-' + human.Id">
                     <td><img v-bind:src="'data:image/png;base64, ' + human.picture" height="75" v-if="human.picture" class="photo" v-on:click="openFullPhoto(human)" /><img src="~/Files/no-photo.png" v-if="!human.picture" height="75" /></td>
                     <td>{{human.Id}}</td>
                     <td>{{human.Name}}</td>
@@ -210,4 +210,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Statistic/minitotal.js?13"></script>
+<script src="~/Content/Statistic/minitotal.js?14"></script>

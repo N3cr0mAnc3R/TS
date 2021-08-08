@@ -121,7 +121,7 @@
 }
 .videos-wrapper.collapsed {
   top: unset;
-  left: unset;
+  /*left: unset;*/
   width: 50px;
   position: fixed;
   height: 20px;

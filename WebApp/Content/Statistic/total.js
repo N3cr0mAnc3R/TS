@@ -11,7 +11,10 @@
         lastName: null,
         firstName: null,
         auditoriumId: null,
+        disciplines: [],
+        filteredDisciplines: [],
         asc: null,
+        disciplinePattern: null,
         auditories: [],
         statuses: [],
         objectLoading: {
@@ -28,6 +31,13 @@
             });
             self.getStatuses();
             self.getAuditoriums();
+            self.getDisciplines();
+            setTimeout(function () {
+                console.log($('#disc-auto')[0].offsetLeft);
+                $('#discipline-select').css('left', $('#disc-auto')[0].offsetLeft + 'px');
+                $('#discipline-select').css('top', $('#disc-auto')[0].offsetTop + 40 + 'px');
+                $('#discipline-select').css('width', $('#disc-auto').width + 'px');
+            }, 500)
         },
         find: function () {
             var self = this;
@@ -61,6 +71,20 @@
         download: function (test) {
             window.open('/auditory/DownloadReport?Id=' + test.ID + '&Type=' + 1, '_blank');
         },
+        filterDisciplines() {
+            let self = this;
+            self.filteredDisciplines = self.disciplines.filter(a => {
+                return a.Name.toLowerCase().indexOf(self.disciplinePattern) != -1;
+            });
+
+        },
+        selectDiscipline(item) {
+            let self = this;
+            self.structureDisciplineId = item.Id;
+            self.filteredDisciplines = [];
+            self.disciplinePattern = item.Name;
+
+        },
         getStatuses: function () {
             var self = this;
             $.ajax({
@@ -71,7 +95,18 @@
                 }
             })
         },
-        resetFilters: function() {
+        getDisciplines: function () {
+            var self = this;
+            $.ajax({
+                url: "/api/Administration/GetDisciplines",
+                type: 'post',
+                success: function (data) {
+                    self.disciplines = data;
+                    console.log(self.disciplines);
+                }
+            });
+        },
+        resetFilters: function () {
             let self = this;
             self.date = null;
             self.structureDisciplineId = null;
@@ -101,7 +136,7 @@
                 type: 'post',
                 success: function (data) {
                     if (data != 1) {
-                        notifier([{ Type: 'error', Body: data} ]);
+                        notifier([{ Type: 'error', Body: data }]);
                     }
                     self.find();
                 }
@@ -113,6 +148,9 @@
             //        self.find();
             //    }
             //})
+        },
+        openMini(Id) {
+            window.open('/statistic/minitotal?Id=' + Id), '_blank';
         },
         downloadCamera: function (Id, type) {
             window.open('/statistic/Download?Id=' + Id + '&Type=' + type, '_blank');
@@ -207,7 +245,7 @@
                     return a.score - b.score
                 });
             }
-            else if(self.asc == false){
+            else if (self.asc == false) {
                 self.people.sort(function (a, b) {
                     return b.score - a.score
                 });

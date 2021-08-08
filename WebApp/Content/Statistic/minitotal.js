@@ -25,6 +25,10 @@
             loading: false,
             loaded: false
         },
+        humanLoader: {
+            loading: false,
+            loaded: false
+        },
         modalLoading: {
             loading: false,
             loaded: false
@@ -52,7 +56,17 @@
 
             let foreignQuery = location.href.split('=');
             if (foreignQuery.length > 1) {
-                self.selectHuman({});
+                self.humanLoader.loaded = false;
+                self.humanLoader.loading = true;
+
+                $.ajax({
+                    url: "/api/administration/GetUserFamilyById?Id=" + foreignQuery[1],
+                    type: 'post',
+                    success: function (data) {
+                        self.currentFIO = data.Name;
+                        self.findByFIO(data.Id);
+                    }
+                })
                 return;
             }
 
@@ -61,15 +75,23 @@
             }, 200)
 
         },
-        findByFIO: function () {
+        findByFIO: function (Id) {
             var self = this;
             self.objectLoading.loading = true;
-            self.currentFIO = self.currentFIO.trim()
+            self.currentFIO = self.currentFIO.trim();
             $.ajax({
                 url: "/api/statistic/findfio",
                 type: 'post',
                 data: { Fio: self.currentFIO },
                 success: function (data) {
+                    if (Id != 0 && typeof Id == 'number') {
+                        console.log(321);
+                        self.filteredPeople = data;
+                        self.humanLoader.loaded = true;
+                        self.humanLoader.loading = false;
+                        self.selectHuman(data.find(a => { return a.Id == Id; }));
+                        return;
+                    }
                     if (data.length == 0) {
                         self.textForShow = "Люди не найдены";
                         self.filteredPeople = [];
@@ -156,16 +178,8 @@
                     self.currentHuman.disciplines = self.initDisciplines(data);
                     document.title = self.currentHuman.Name;
 
+                    $('#user-' + human.Id)[0].scrollIntoView();
                     notifier([{ Type: 'success', Body: 'Загружено' }]);
-                }
-            })
-        },
-        getHumanInfo(id) {
-            $.ajax({
-                url: "/api/statistic/getById?Id=" + id,
-                type: 'post',
-                success: function (data) {
-
                 }
             })
         },
@@ -176,10 +190,6 @@
                 url: "/api/statistic/resetProfile?Id=" + item.Id,
                 type: 'post',
                 success: function (data) {
-                    //console.log(self.currentHuman.disciplines);
-                    //console.log(data);
-                    //self.currentHuman.disciplines = self.initDisciplines(data);
-
                     self.selectHuman(self.currentHuman);
                     self.objectLoading.loading = false;
                 }
