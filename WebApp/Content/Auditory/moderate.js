@@ -694,7 +694,7 @@ const app = new Vue({
                             }
                         }
                         else if (message.offer) {
-                            navigator.getUserMedia({ video: true }, function (stream) {
+                           // navigator.getUserMedia({ video: true }, function (stream) {
                                 //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
                                 let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                                 let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
@@ -705,7 +705,7 @@ const app = new Vue({
                                     return;
                                 }
                                 let peer = peerObj.peer;
-                                peer.addStream(stream);
+                              //  peer.addStream(stream);
                                 peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
                                     peer.createAnswer(function (answer) {
                                         peer.setLocalDescription(answer, function () {
@@ -733,7 +733,7 @@ const app = new Vue({
                                         }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); });
                                 }, function (r) { console.log(r); });
-                            }, function (r) { console.log(r); });
+                           // }, function (r) { console.log(r); });
                         }
                         else if (message.startOffer) {
                             self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;

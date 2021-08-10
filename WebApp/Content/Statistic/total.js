@@ -166,6 +166,20 @@
                 }
             })
         },
+        FastUserLoad: function (item) {
+            var self = this;
+            $.ajax({
+                url: "/api/administration/FastUserLoad?Id=" + item.UID,
+                type: 'post',
+                success: function (data) {
+                    if (data == 1)
+                        notifier([{ Type: 'success', Body: 'Загружен' }]);
+                    else {
+                        notifier([{ Type: 'error', Body: 'Ошибка' }]);
+                    }
+                }
+            })
+        },
         nullify: function (item) {
             var self = this;
             self.objectLoading.loading = true;

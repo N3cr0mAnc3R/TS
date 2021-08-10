@@ -170,6 +170,21 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetUserFamilyById(Id));
         }
         [HttpPost]
+        [Route("FastUserLoad")]
+        [AllowAnonymous]
+        public async Task<IHttpActionResult> FastUserLoad(Guid Id)
+        {
+            try
+            {
+                await AdministrationManager.FastUserLoad(Id);
+                return WrapResponse(1);
+            }
+            catch
+            {
+                return WrapResponse(0);
+            }
+        }
+        [HttpPost]
         [Route("SetUserToReport")]
         [AllowAnonymous]
         public async Task<int> SetUserToReport(AccessModel model)

@@ -89,6 +89,15 @@ namespace WebApp.Models.Administration
                 return await cnt.QueryFirstAsync<IndexItem>("Administrator_GetUserFamilyNameById", new { UserId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task FastUserLoad(Guid userUID)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("SuperAdmin_FastUserLoad", new { userUID }, commandType: CommandType.StoredProcedure);
+            }
+            
+        }
         public async Task SetUserToReport(Guid userUid, AccessModel model)
         {
 

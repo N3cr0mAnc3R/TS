@@ -17,6 +17,10 @@ namespace WebApp.Controllers
         // GET: Statistic
         public async Task<ActionResult> Index()
         {
+            if (!Request.IsAuthenticated)
+            {
+                return Redirect("/user/waiting");
+            }
 
             List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
             ViewBag.Title = "Отчёты и статистика";
@@ -31,6 +35,10 @@ namespace WebApp.Controllers
         }
         public async Task<ActionResult> MiniTotal()
         {
+            if (!Request.IsAuthenticated)
+            {
+                return Redirect("/user/waiting");
+            }
             List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
 
             ViewBag.Title = "Страница полного модерирования";
@@ -45,7 +53,11 @@ namespace WebApp.Controllers
         }
         public async Task<ActionResult> Total()
         {
-            if(await AdministrationManager.HasFullAccess(CurrentUser.Id))
+            if (!Request.IsAuthenticated)
+            {
+                return Redirect("/user/waiting");
+            }
+            if (await AdministrationManager.HasFullAccess(CurrentUser.Id))
             ViewBag.Title = "Страница полного модерирования";
             return View();
         }

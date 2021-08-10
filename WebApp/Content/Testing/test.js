@@ -1646,7 +1646,7 @@
                             app.videoSocket.send(JSON.stringify(obj));
                         }
                     }, function (r) { console.log(r); });
-                }, function (r) { console.log(r); });
+                }, function (r) { console.log(r); }, { 'mandatory': { 'OfferToReceiveAudio': false, 'OfferToReceiveVideo': false } });
             }
             catch {
                 console.log('error');

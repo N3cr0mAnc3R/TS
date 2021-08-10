@@ -48,7 +48,7 @@
                 <tbody>
                     <tr v-for="test in people">
                         <td v-on:click="openMini(test.UserId)" class="pointer">{{test.ID}}</td>
-                        <td>{{test.lastName}} {{test.firstName}}</td>
+                        <td v-on:click="FastUserLoad(test)">{{test.lastName}} {{test.firstName}}</td>
                         <td class="col-5" :title="test.name"><div style="max-height: 120px; overflow:hidden;">{{test.name}}</div></td>
                         <td>{{test.score}}</td>
                         <td>{{test.testingDate}} <span v-if="test.testingBegin != '' && test.testingEnd != '' && test.testingStatusId != 2">({{test.testingBegin}} - {{test.testingEnd}})</span> <span v-if="test.testingStatusId == 2">({{test.testingBegin}})</span></td>

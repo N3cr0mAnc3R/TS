@@ -689,7 +689,7 @@
                             app.videoSocket.send(JSON.stringify(obj));
                         }
                     }, function () { });
-                }, function () { });
+                }, function () { }, { 'mandatory': { 'OfferToReceiveAudio': false, 'OfferToReceiveVideo': false } });
                 self.loadTestObject.loading = false;
                 self.loadTestObject.loaded = true;
             }

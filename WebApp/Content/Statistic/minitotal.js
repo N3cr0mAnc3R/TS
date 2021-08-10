@@ -21,6 +21,7 @@
             Date: new Date(),
             PlaceId: null
         },
+        fromExternal: false,
         objectLoading: {
             loading: false,
             loaded: false
@@ -56,6 +57,7 @@
 
             let foreignQuery = location.href.split('=');
             if (foreignQuery.length > 1) {
+                self.fromExternal = true;
                 self.humanLoader.loaded = false;
                 self.humanLoader.loading = true;
 
@@ -168,6 +170,9 @@
         },
         selectHuman: function (human) {
             var self = this;
+            if (!human.Id) {
+                notifier([{ Type: 'error', Body: 'Необходимо загрузить' }]);
+            }
             $.ajax({
                 url: "/api/statistic/getById?Id=" + human.Id,
                 type: 'post',
@@ -178,7 +183,10 @@
                     self.currentHuman.disciplines = self.initDisciplines(data);
                     document.title = self.currentHuman.Name;
 
-                    $('#user-' + human.Id)[0].scrollIntoView();
+                    if (self.fromExternal) {
+                        $('#user-' + human.Id)[0].scrollIntoView();
+                        self.fromExternal = false;
+                    }
                     notifier([{ Type: 'success', Body: 'Загружено' }]);
                 }
             })
