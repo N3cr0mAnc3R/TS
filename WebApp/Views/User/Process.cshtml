@@ -50,8 +50,8 @@
                                     </div>
                                 </div>
                                 @*<div v-if="!selectedQuestion.fileId">
-                                    <input v-on:change="changeFile" type="file" accept="image/*" />
-                                </div>*@
+                                        <input v-on:change="changeFile" type="file" accept="image/*" />
+                                    </div>*@
                                 <div class="request-qr-wrapper">
                                     <div class="qr-info-wrapper">
                                         {{switchLocal(30)}}
@@ -108,7 +108,7 @@
                 {{switchLocal(46)}}
             </div>
         </div>
-        <div class="main-wrapper" v-if="isFireFox" >
+        <div class="main-wrapper" v-if="isFireFox">
             <div class="panel-top"></div>
             <div class="panel-center camera-missing">
                 {{switchLocal(47)}}
@@ -178,17 +178,17 @@
                 </div>
             </div>
             @*<div class="video-chat-wrapper" v-if="chat.IsChatVOpened">
-            <div v-for="participant in chat.participants">
-                <div id="video-wrapper">
-                    <video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>
-            </div>
-                    </div>
-                    <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
-                        <div class="participant-wrapper" v-for="participant in chat.participants">
-                            <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                <div v-for="participant in chat.participants">
+                    <div id="video-wrapper">
+                        <video v-bind:id="'video-' + participant.Id" autoplay="autoplay" muted></video>
+                </div>
                         </div>
-                    </div>
-                </div>*@
+                        <div class="participant-list-wrapper" v-if="chat.isChatVOpened">
+                            <div class="participant-wrapper" v-for="participant in chat.participants">
+                                <span class="avatar"></span><span class="participant-name">{{participant.Name}}</span><span class="micro-toggle"></span><span class="video-toggle"></span>
+                            </div>
+                        </div>
+                    </div>*@
             <div class="text-chat-wrapper">
                 <ul class="chat-wrapper">
                     <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id">
@@ -283,6 +283,7 @@
             </div>
         </div>
     </div>
+    <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
 </div>
 
-<script src="~/Content/Testing/test.js?21"></script>
+<script src="~/Content/Testing/test.js?22"></script>

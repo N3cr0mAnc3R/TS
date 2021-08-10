@@ -311,6 +311,7 @@
     <Content Include="Content\vue.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="Files\Instruction.mp4" />
+    <Content Include="Files\msg.mp3" />
     <Content Include="Files\no-photo.png" />
     <Content Include="Files\Svg\cogs-auditory.svg" />
     <Content Include="Files\Svg\eye-auditory.svg" />

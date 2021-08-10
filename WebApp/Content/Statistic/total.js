@@ -116,6 +116,7 @@
             self.lastName = null;
             self.firstName = null;
             self.auditoriumId = null;
+            self.disciplinePattern = null;
             self.asc = null;
         },
         initItem: function (item, data) {

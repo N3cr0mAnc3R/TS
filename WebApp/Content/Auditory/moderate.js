@@ -635,6 +635,8 @@ const app = new Vue({
                     if (!chat.isChatOpened && !self.isMe(message)) {
                         chat.unreadCount++;
                     }
+
+                    $('#msg-audio')[0].play();
                     chat.messages.push(message);
                 };
             }
@@ -1024,14 +1026,16 @@ const app = new Vue({
             //window.open('/auditory/DownloadVideoFile?Id=' + self.currentUser.TestingProfileId + '&Type=' + type, '_blank');
             window.open('/auditory/DownloadVideoFile?Id=' + 227 + '&Type=' + type, '_blank');
         },
-        sendError: function () {
+        sendError: function (errorId) {
             let self = this;
 
             let socketObj = self.videoSockets.filter(function (sock) { return sock.id == self.currentUser.TestingProfileId; })[0];
-            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestViolation: true, IsSender: false, violation: self.currentError }));
+            //socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestViolation: true, IsSender: false, violation: self.currentError }));
+            socketObj.socket.send(JSON.stringify({ TestingProfileId: socketObj.id, requestViolation: true, IsSender: false, violation: errorId }));
 
             $.ajax({
-                url: "/api/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
+                url: "/api/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + errorId,
+                //url: "/api/user/SetUserErrors?Id=" + self.currentUser.TestingProfileId + "&Type=" + self.currentError,
                 type: "POST",
                 async: true,
                 success: function (errors) {

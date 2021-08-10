@@ -17,6 +17,7 @@
         timeRecording: -1,
         answerInterval: null,
         testingTime: 0,
+        hasPermissions:true,
         loadObject: {
             loading: null,
             loaded: null
@@ -227,7 +228,7 @@
                             }
                             // alert('start capture');
 
-                            var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+                            var is_safari = false;///^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
                             if (!is_safari) {
                                 self.startCapture({ video: { cursor: 'always' }, audio: true });
@@ -261,7 +262,7 @@
             }
             // alert('start capture');
 
-            var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var is_safari = false;///^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
             if (!is_safari) {
                 self.startCapture({ video: { cursor: 'always' }, audio: true });
@@ -708,7 +709,7 @@
         },
         startTimer: function () {
             var self = this;
-            if (self.timerStarted) return;
+            if (self.timerStarted || !self.hasPermissions || !self.hasCameraConnection) return;
             self.timerStarted = true;
             self.timeLeft = self.timeStart ? self.timeStart : 1800;
             self.startedTimeRecording = self.timeLeft;
@@ -808,8 +809,10 @@
                 self.flagStopRec = false;
                 self.startedTimeRecording = self.timeLeft;
                 //self.cameraRecorder.stop();
-                self.cameraRecorder.ondataavailable = self.recordingCamera;
-                self.cameraRecorder.start(100);
+                if (self.cameraRecorder) {
+                    self.cameraRecorder.ondataavailable = self.recordingCamera;
+                    self.cameraRecorder.start(100);
+                }
                 if (self.screenRecorder) {
                     //self.screenRecorder.stop();
                     self.screenRecorder.ondataavailable = self.recordingScreen;
@@ -850,6 +853,8 @@
                     message = JSON.parse(msg.data);
                 }
                 message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
+
+                $('#msg-audio')[0].play();
                 self.chat.messages.push(message);
 
                 if (!message.IsSender) {
@@ -1056,6 +1061,7 @@
                 self.cameraStream = videostream;
                 self.hasCameraConnection = true;
                 var options;
+                self.startTimer();
                 if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9')) {
                     options = { mimeType: 'video/webm; codecs=vp9' };
                 } else if (MediaRecorder.isTypeSupported('video/webm;codecs=vp8')) {
@@ -1323,8 +1329,10 @@
                 if (self.isCameraControl) {
                     $('#video2')[0].srcObject = Str;
                 }
-                self.screenStream = Str;
 
+                self.startTimer();
+                self.screenStream = Str;
+                self.hasPermissions = true;
                 self.isFireFox = false;
                 $(document).on('click', self.goToFullScreen);
 
@@ -1362,7 +1370,7 @@
                 .catch(function (err) {
                     console.error("Error:" + err);
                     self.startCapture(displayMediaOptions);
-                    return null;
+                    return;
                 });
         },
         //download: function () {

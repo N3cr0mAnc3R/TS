@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Auditory/moderate.css?5" rel="stylesheet" />
+﻿<link href="~/Content/Auditory/moderate.css?6" rel="stylesheet" />
 
 <div id="main-window">
     <div class="auditory-header">
@@ -8,8 +8,8 @@
         <button v-on:click="emptySeats">Освободить места</button>
     </div>
     @*<div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
-        <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
-    </div>*@
+            <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
+        </div>*@
     <div class="auditory row">
         <div class="computer-list" v-loader="auditoryLoader">
             <div class="place-table">
@@ -66,6 +66,7 @@
             <br />
         </div>
     </div>
+    <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
     <div class="left-schedule">
         <div class="wrapper">
             <div v-on:click="openSchedule" class="button"><span><i class="fa fa-calendar-alt"></i></span></div>
@@ -221,26 +222,31 @@
                         {{switchLocal(2)}}
                         <span class="tip" data-placement="right" :title="tipError()" data-toggle="tooltip"><i class="fa fa-question-circle"></i></span>
                     </div>
-                    <div v-if="shownError" class="select-error">
-                        <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
-                        <button v-on:click="sendError" class="save-error">{{switchLocal(3)}}</button>
+                    <div v-if="currentUser.TestingStatusId == 2" class="error-list-hover mb-2">
+                        <div class="error-list-head text-center">{{switchLocal(4)}}</div>
+                        <div class="error-list-body"><div v-for="err in errorTypes" class="error-item-wrapper" v-on:click="sendError(err.Id)"><span class="error-item">{{err.Name}}</span></div></div>
                     </div>
-                    <button class="add-error" v-on:click="showError()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(4)}}</button>
 
-                    <button class="pause-btn" v-on:click="togglePause()" v-if="currentUser.TestingStatusId == 2"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
-                    <button class="verify-user" v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
-                    <button class="verify-user" v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
-                    <button class="resetConfig" v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(5)}}</button>
-                    <button class="finish-test" v-on:click="resetPlace()">{{switchLocal(8)}}</button>
-                    <button class="reconnect" v-on:click="reconnect1()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
-                    <button class="reconnect" v-on:click="reconnect2()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
+                    @*<div v-if="shownError" class="select-error">
+                            <select v-model="currentError" class="form-control"><option :value="err.Id" v-for="err in errorTypes">{{err.Name}}</option></select>
+                            <button v-on:click="sendError" class="save-error">{{switchLocal(3)}}</button>
+                        </div>
+                        <button v-on:click="showError()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(4)}}</button>*@
+
+                    <button v-on:click="togglePause()" v-if="currentUser.TestingStatusId == 2"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
+                    <button v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
+                    <button v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
+                    <button v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(5)}}</button>
+                    <button v-on:click="resetPlace()">{{switchLocal(8)}}</button>
+                    <button v-on:click="reconnect1()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
+                    <button v-on:click="reconnect2()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
                     <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin && currentUser.TestingStatusId == 2">Перезагрузить</button>
                     @*<button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>*@
-                    <button class="reload" data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
-                    <button class="reload" v-on:click="collapseVideo()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-minus-square"></i></button>
-                    <button class="reload" v-on:click="toggleUserChat()" v-if="isSuperAdmin" title="открыть его чат"><i class="fa fa-comment-dots"></i></button>
-                    <button class="reload" v-on:click="setCameraTrue()" v-if="isSuperAdmin" title="Убрать доступ к камере"><i class="fa fa-camera"></i></button>
-                    <button class="reload" v-on:click="resetCapture()" v-if="isSuperAdmin" title="Перезапустить доступ к экрану"><i class="fa fa-desktop"></i></button>
+                    <button data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
+                    <button v-on:click="collapseVideo()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-minus-square"></i></button>
+                    <button v-on:click="toggleUserChat()" v-if="isSuperAdmin" title="открыть его чат"><i class="fa fa-comment-dots"></i></button>
+                    <button v-on:click="setCameraTrue()" v-if="isSuperAdmin" title="Убрать доступ к камере"><i class="fa fa-camera"></i></button>
+                    <button v-on:click="resetCapture()" v-if="isSuperAdmin" title="Перезапустить доступ к экрану"><i class="fa fa-desktop"></i></button>
 
                     @*<button class="finish-test" v-on:click="download(1)">Скачать 1</button>
                         <button class="finish-test" v-on:click="download(2)">Скачать 2</button>*@
@@ -252,4 +258,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?13"></script>
+<script src="~/Content/Auditory/moderate.js?14"></script>

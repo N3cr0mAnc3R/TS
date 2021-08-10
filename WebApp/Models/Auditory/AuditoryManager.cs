@@ -261,7 +261,7 @@ namespace WebApp.Models
         {
             using (var cnt = await Concrete.OpenConnectionAsync())
             {
-                await cnt.ExecuteAsync(sql: "[dbo].Administrator_UsersAndTestingPofilesForTypeTesting1Load", new { auditoriumId = Id, userUID }, commandType: CommandType.StoredProcedure);
+                await cnt.ExecuteAsync(sql: "[dbo].Administrator_UsersAndTestingPofilesForTypeTesting1Load", commandTimeout: 120, param: new { auditoriumId = Id, userUID }, commandType: CommandType.StoredProcedure);
 
             }
         }
