@@ -1,9 +1,9 @@
-﻿<link href="~/Content/Testing/Index.css?9" rel="stylesheet" />
+﻿<link href="~/Content/Testing/Index.css?10" rel="stylesheet" />
 
 
 <div id="main-window" class="user-select-none">
     <div class="test-process" v-if="!finishScreen && !(lostConnection || adminPaused)">
-        <div class="main-wrapper" v-if="hasCameraConnection  && !isFireFox">
+        <div class="main-wrapper" v-if="hasCameraConnection && hasPermissions  && !isFireFox">
             <div class="panel-top"><span class="discipline-title">{{NameDiscipline}}</span><span v-if="pause" class="paused">{{switchLocal(16)}}</span><div class="right-panel"><span class="timer" v-bind:class="{'finishing': needAlarm}">{{switchLocal(1)}}: {{showTimeLeft()}}</span><span class="ref" v-on:click="openTip()" v-if="sourceMaterials.length > 0"><i class="fa fa-question"></i></span></div></div>
             <div class="panel-center">
                 <div v-loader="loadObject">
@@ -286,4 +286,4 @@
     <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
 </div>
 
-<script src="~/Content/Testing/test.js?22"></script>
+<script src="~/Content/Testing/test.js?23"></script>

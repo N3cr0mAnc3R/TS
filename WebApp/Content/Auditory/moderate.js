@@ -179,7 +179,7 @@ const app = new Vue({
                                     item.Image = "";
                                     item.chat = {};
                                     //Если подтверждён
-                                    if (item.UserVerified && [2].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
+                                    if ([2, 5].indexOf(item.TestingStatusId) != -1 && !self.isDebug) {
                                         //self.socketQueue.push({ socketType: 2, item: item, videoType: 2 });
                                         //Сокет на экран
                                         self.initSocket(2, item, 2);
@@ -388,7 +388,7 @@ const app = new Vue({
                 },
                 success: function (users) {
                     self.scheduleUsers = users;
-                    notifier([{ Type: 'success', Body: "Запланировано " + users.length + " ВИ. Завершено " + users.filter(a => { return a.Score != null; } ).length  }]);
+                    notifier([{ Type: 'success', Body: "Запланировано " + users.length + " ВИ. Завершено " + users.filter(a => { return a.Score != null; }).length }]);
                     console.log(users);
                     users.forEach(function (item) {
                         if (self.filteredPlaceList.indexOf(item.PlaceId) == -1) {
@@ -422,45 +422,45 @@ const app = new Vue({
 
             let configuration = {
                 iceServers: [{ url: 'stun:stun01.sipphone.com' },
-                { url: 'stun:stun.ekiga.net' },
-                { url: 'stun:stun.fwdnet.net' },
-                { url: 'stun:stun.ideasip.com' },
-                { url: 'stun:stun.iptel.org' },
-                { url: 'stun:stun.rixtelecom.se' },
-                { url: 'stun:stun.schlund.de' },
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' },
+                //{ url: 'stun:stun.ekiga.net' },
+                //{ url: 'stun:stun.fwdnet.net' },
+                //{ url: 'stun:stun.ideasip.com' },
+                //{ url: 'stun:stun.iptel.org' },
+                //{ url: 'stun:stun.rixtelecom.se' },
+                //{ url: 'stun:stun.schlund.de' },
+                //{ url: 'stun:stun.l.google.com:19302' },
+                //{ url: 'stun:stun1.l.google.com:19302' },
                 { url: 'stun:stun2.l.google.com:19302' },
                 { url: 'stun:stun3.l.google.com:19302' },
                 { url: 'stun:stun4.l.google.com:19302' },
-                { url: 'stun:stunserver.org' },
-                { url: 'stun:stun.softjoys.com' },
-                { url: 'stun:stun.voiparound.com' },
-                { url: 'stun:stun.voipbuster.com' },
-                { url: 'stun:stun.voipstunt.com' },
-                { url: 'stun:stun.voxgratia.org' },
-                { url: 'stun:stun.xten.com' },
-                { url: 'STUN:turn.ncfu.ru:9003' },
-                {
-                    url: 'turn:numb.viagenie.ca',
-                    credential: 'muazkh',
-                    username: 'webrtc@live.com'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=udp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=tcp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:turn.bistri.com:80',
-                    credential: 'homeo',
-                    username: 'homeo'
-                },
+                //{ url: 'stun:stunserver.org' },
+                //{ url: 'stun:stun.softjoys.com' },
+                //{ url: 'stun:stun.voiparound.com' },
+                //{ url: 'stun:stun.voipbuster.com' },
+                //{ url: 'stun:stun.voipstunt.com' },
+                //{ url: 'stun:stun.voxgratia.org' },
+                //{ url: 'stun:stun.xten.com' },
+                //{ url: 'STUN:turn.ncfu.ru:9003' },
+                //{
+                //    url: 'turn:numb.viagenie.ca',
+                //    credential: 'muazkh',
+                //    username: 'webrtc@live.com'
+                //},
+                //{
+                //    url: 'turn:192.158.29.39:3478?transport=udp',
+                //    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                //    username: '28224511:1379330808'
+                //},
+                //{
+                //    url: 'turn:192.158.29.39:3478?transport=tcp',
+                //    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                //    username: '28224511:1379330808'
+                //},
+                //{
+                //    url: 'turn:turn.bistri.com:80',
+                //    credential: 'homeo',
+                //    username: 'homeo'
+                //},
                 //{
                 //    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
                 //    credential: 'webrtc',
@@ -629,14 +629,19 @@ const app = new Vue({
                     }
                     //message.Date = new Date(message.Date);
                     message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
-                    console.log(self.chats);
 
                     //let chat = self.chats.filter(a => a.TestingProfileId == msg.data.testingProfileId)[0];
                     if (!chat.isChatOpened && !self.isMe(message)) {
                         chat.unreadCount++;
                     }
 
-                    $('#msg-audio')[0].play();
+                    if (!self.isMe(message)) {
+                        $('#msg-audio')[0].play();
+
+                        let found = self.computerList.find(function (item) { return item.TestingProfileId == a.TestingProfileId; });
+                        
+                        notifier([{ Type: 'success', Body: found.LastName + " " + found.FirstName + " " + found.MiddleName +": " + message.Message }]);
+                    }
                     chat.messages.push(message);
                 };
             }
@@ -696,46 +701,46 @@ const app = new Vue({
                             }
                         }
                         else if (message.offer) {
-                           // navigator.getUserMedia({ video: true }, function (stream) {
-                                //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
-                                let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
-                                let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
-                                //console.log(created.peers, message.type);
-                                //if (peerObj.peer.)
-                                //console.log(created, peerObj.peer.connectionState);
-                                if (!peerObj) {
-                                    return;
-                                }
-                                let peer = peerObj.peer;
-                              //  peer.addStream(stream);
-                                peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
-                                    peer.createAnswer(function (answer) {
-                                        peer.setLocalDescription(answer, function () {
-                                            let obj1 = {};
-                                            for (let i in answer) {
-                                                if (typeof answer[i] != 'function')
-                                                    obj1[i] = answer[i];
-                                            }
-                                            obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
-                                            socket.send(JSON.stringify(obj));
-                                            let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+                            // navigator.getUserMedia({ video: true }, function (stream) {
+                            //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
+                            let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
+                            let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
+                            //console.log(created.peers, message.type);
+                            //if (peerObj.peer.)
+                            //console.log(created, peerObj.peer.connectionState);
+                            if (!peerObj) {
+                                return;
+                            }
+                            let peer = peerObj.peer;
+                            //  peer.addStream(stream);
+                            peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.offer)), function () {
+                                peer.createAnswer(function (answer) {
+                                    peer.setLocalDescription(answer, function () {
+                                        let obj1 = {};
+                                        for (let i in answer) {
+                                            if (typeof answer[i] != 'function')
+                                                obj1[i] = answer[i];
+                                        }
+                                        obj = { answer: JSON.stringify(obj1), IsSender: false, TestingProfileId: a.TestingProfileId, type: message.type, uid: self.currentUid };
+                                        socket.send(JSON.stringify(obj));
+                                        let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
 
-                                            if (queue.candidates.length > 0) {
-                                                queue.candidates.forEach(function (candidate) {
-                                                    peer.addIceCandidate(candidate);
-                                                });
-                                            }
-                                            else {
-                                                let inter = setInterval(function () {
-                                                    self.addIceCandidateToPeer(peer, self, message, a, inter);
-                                                }, 1000);
-                                            }
-                                            queue.candidates = [];
+                                        if (queue.candidates.length > 0) {
+                                            queue.candidates.forEach(function (candidate) {
+                                                peer.addIceCandidate(candidate);
+                                            });
+                                        }
+                                        else {
+                                            let inter = setInterval(function () {
+                                                self.addIceCandidateToPeer(peer, self, message, a, inter);
+                                            }, 1000);
+                                        }
+                                        queue.candidates = [];
 
-                                        }, function (r) { console.log(r); });
                                     }, function (r) { console.log(r); });
                                 }, function (r) { console.log(r); });
-                           // }, function (r) { console.log(r); });
+                            }, function (r) { console.log(r); });
+                            // }, function (r) { console.log(r); });
                         }
                         else if (message.startOffer) {
                             self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
@@ -1040,6 +1045,7 @@ const app = new Vue({
                 async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
+                    notifier([{ Type: 'success', Body: 'Отправлено'}]);
                     self.shownError = !self.shownError;
                 }
             });
@@ -1145,6 +1151,8 @@ const app = new Vue({
                 if (!self.currentChat) {
                     self.currentChat = founded;
                     self.isChatOpened = true;
+
+                    $(document).on('keydown', self.subscribeExc);
                 }
                 else {
                     self.currentChat = founded;
@@ -1154,6 +1162,12 @@ const app = new Vue({
             //if (!flagClose) {
             // self.isChatOpened = !self.isChatOpened;
             //}
+        },
+        subscribeExc() {
+            if (event.keyCode == 27) {
+                app.toggleChat(app.currentChat.testingProfileId);
+                $(document).off('keydown', app.subscribeExc);
+            }
         },
         resetPlace: function () {
             let self = this;

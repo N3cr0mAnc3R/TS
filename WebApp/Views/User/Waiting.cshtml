@@ -1,5 +1,5 @@
 ﻿
-<link href="~/Content/Testing/Index.css?1" rel="stylesheet" />
+<link href="~/Content/Testing/Index.css?2" rel="stylesheet" />
 <div id="main-window">
     @if (ViewBag.PlaceInfo != null)
     {
@@ -131,14 +131,14 @@
                 </div>
                 <button v-on:click="tryVerify" class="btn-verify" v-bind:disabled="!enabled" v-bind:class="{'disabled': !enabled}">{{switchLocal(7)}}</button>
             </div>
-            <div class="not-test" v-loader="loadObject" v-if="testingTests.length > 0">
+            <!--<div class="not-test" v-loader="loadObject" v-if="testingTests.length > 0">
                 <div class="user-info">
                     <div class="user-either">{{switchLocal(9)}}:</div>
                 </div>
                 <div class="test-list" v-if="activeTests.length == 0">
-                    <div v-for="test in testingTests" class="test-wrapper">
+                    <div v-for="test in testingTests" class="test-wrapper">-->
                         @*- {{test.TestingDate}}*@
-                        <div class="test-item" v-on:click="startTest(test.Id)">
+                        <!--<div class="test-item" v-on:click="startTest(test.Id)">
                             <span class="test-name">{{test.DisciplineName}}</span>
                             <span class="test-icon">
                                 <i class="far fa-play-circle"></i>
@@ -146,7 +146,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
         </div>
 
 
@@ -228,4 +228,4 @@
 </div>
 
 <script src="~/Content/aes.js"></script>
-<script src="~/Content/Testing/pretest.js?5"></script>
+<script src="~/Content/Testing/pretest.js?1"></script>

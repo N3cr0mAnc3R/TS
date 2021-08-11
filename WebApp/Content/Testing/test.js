@@ -17,7 +17,7 @@
         timeRecording: -1,
         answerInterval: null,
         testingTime: 0,
-        hasPermissions:true,
+        hasPermissions: false,
         loadObject: {
             loading: null,
             loaded: null
@@ -997,6 +997,11 @@
                             default: errorBody = self.switchLocal(45);
                         }
                         notifier([{ Type: 'error', Body: errorBody }]);
+                        console.log($('.main-wrapper'));
+                        $('.main-wrapper').addClass('shaker-shaker');
+                        setTimeout(function () {
+                            $('.main-wrapper').removeClass('shaker-shaker');
+                        }, 2000)
                     }
                     else if (message.answer) {
                         //var interval = setInterval(function () {
@@ -1330,9 +1335,9 @@
                     $('#video2')[0].srcObject = Str;
                 }
 
+                self.hasPermissions = true;
                 self.startTimer();
                 self.screenStream = Str;
-                self.hasPermissions = true;
                 self.isFireFox = false;
                 $(document).on('click', self.goToFullScreen);
 
@@ -1359,6 +1364,13 @@
                 $(window).on('blur', function (e) {
                     if (self.blurReady) {
                         notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
+                        document.title = "!!!!";
+                    }
+                    self.blurReady = true;
+                });
+                $(window).on('focus', function (e) {
+                    if (self.blurReady) {
+                        document.title = self.switchLocal(26);
                     }
                     self.blurReady = true;
                 });
@@ -1372,6 +1384,14 @@
                     self.startCapture(displayMediaOptions);
                     return;
                 });
+        },
+        subscribeExc() {
+            event.stopPropagation();
+            event.preventDefault();
+            if (event.keyCode == 27) {
+                app.toggleChat();
+                $(document).off('keydown', app.subscribeExc);
+            }
         },
         //download: function () {
         //    $.ajax({
@@ -1485,6 +1505,7 @@
                     maxId = msg.Id > maxId ? msg.Id : maxId;
                 });
                 if (maxId != 0) {
+                    $(document).on('keydown', self.subscribeExc);
                     setTimeout(function () {
                         $('#message-' + maxId)[0].scrollIntoView();
                     }, 20);
@@ -1741,7 +1762,7 @@
                 case 35: return localStorage["localization"] == 1 ? "5. Наведите камеру на QR-код" : "5. Point camera on the screen";
                 case 36: return localStorage["localization"] == 1 ? "6. Загрузите фотографию с помощью устройства." : "6. Choose picture or make one and upload it.";
                 case 37: return localStorage["localization"] == 1 ? "7. По окончании загрузки Вы увидете загруженное изображение и на телефоне, и на компьютере" : "7. After picture upload, You will see on both: smartphone and PC";
-                case 39: return localStorage["localization"] == 1 ? "Пользователь не идентфицирован" : "User is undefined";
+                case 39: return localStorage["localization"] == 1 ? "Пользователь не идентифицирован" : "User is undefined";
                 case 40: return localStorage["localization"] == 1 ? "В кадре обнаружен посторонний. Попросите его покинуть комнату" : "There are someone else int he room. Please, let him leave";
                 case 41: return localStorage["localization"] == 1 ? "Присутствуют посторонние звуки" : "There are undefined sounds";
                 case 42: return localStorage["localization"] == 1 ? "Сворачивание окна запрещено!" : "You not allowed collapse the window";
@@ -1749,7 +1770,7 @@
                 case 44: return localStorage["localization"] == 1 ? "Вы должны всё время находиться в поле зрения веб-камеры!" : "You must always be visible in camera vision";
                 case 45: return localStorage["localization"] == 1 ? "Вы нарушаете правила проведения ВИ!!" : "You breaking the rules!!";
                 case 46: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к камере. Прохождение ВИ без камеры запрещено" : "Permission for camera denied. Grant access for camera, or the test won't be passed";
-                case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\"  ивыберите из списка \"Весь экран\"" : "Permission for screen capture is necessary. Click \"Grant\"";
+                case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\" и выберите из списка \"Весь экран\"" : "Permission for screen capture is necessary. Click \"Grant\"";
                 case 48: return localStorage["localization"] == 1 ? "Разрешить" : "Grant";
 
             }

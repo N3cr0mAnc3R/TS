@@ -110,11 +110,13 @@ textarea {
   border-color: rgba(0, 0, 0, 0.1);
   font-size: 30px;
   line-height: 24px;
+  height: 35px;
+  width: 35px;
   padding: 0;
 }
 .navbar-system .container .base-nav .navbar-toggler .navbar-icon,
 .navbar-system .container .nav-item .navbar-toggler .navbar-icon {
-  display: inline-block;
+  /*display: inline-block;*/
   width: 1.5em;
   vertical-align: middle;
   content: "";

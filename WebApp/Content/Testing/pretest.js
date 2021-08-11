@@ -403,7 +403,7 @@
             }
             socket.onopen = function () {
                 socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: id }));
-                self.initRTCPeer();
+               // self.initRTCPeer();
             };
 
             socket.onmessage = function (msg) {
@@ -455,6 +455,7 @@
         },
         initWebCam: function () {
             var self = this;
+            self.initSocket(self.testingProfileId);
             //if (!self.stream) {
             navigator.mediaDevices.getUserMedia(
                 {
@@ -476,7 +477,6 @@
                     //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
                     //}
 
-                    self.initSocket(self.testingProfileId);
 
                     //self.tests.forEach(function (item) {
                     //    self.initSocket(item.Id);
