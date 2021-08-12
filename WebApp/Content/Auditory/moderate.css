@@ -455,6 +455,9 @@ button:focus {
   border: none;
   margin-bottom: 10px;
 }
+#full-wrapper .modal-dialog .modal-body button:active {
+  box-shadow: 0 -3px 17px 0 #2e3246 inset;
+}
 #full-wrapper .video-list-wrapper {
   display: -webkit-box;
   display: -ms-flexbox;

@@ -414,22 +414,23 @@ const app = new Vue({
             //    'stun3.l.google.com: 19302',
             //    'stun4.l.google.com: 19302']
             //};
-            let TURN = {
-                url: 'turn:turn.bistri.com:80',
-                credential: 'homeo',
-                username: 'homeo'
-            };
+            //let TURN = {
+            //    url: 'turn:turn.bistri.com:80',
+            //    credential: 'homeo',
+            //    username: 'homeo'
+            //};
 
             let configuration = {
-                iceServers: [{ url: 'stun:stun01.sipphone.com' },
+                iceServers: [
+                { url: 'stun:stun01.sipphone.com' },
                 //{ url: 'stun:stun.ekiga.net' },
                 //{ url: 'stun:stun.fwdnet.net' },
                 //{ url: 'stun:stun.ideasip.com' },
                 //{ url: 'stun:stun.iptel.org' },
                 //{ url: 'stun:stun.rixtelecom.se' },
                 //{ url: 'stun:stun.schlund.de' },
-                //{ url: 'stun:stun.l.google.com:19302' },
-                //{ url: 'stun:stun1.l.google.com:19302' },
+                { url: 'stun:stun.l.google.com:19302' },
+                { url: 'stun:stun1.l.google.com:19302' },
                 { url: 'stun:stun2.l.google.com:19302' },
                 { url: 'stun:stun3.l.google.com:19302' },
                 { url: 'stun:stun4.l.google.com:19302' },
@@ -441,7 +442,7 @@ const app = new Vue({
                 //{ url: 'stun:stun.voxgratia.org' },
                 //{ url: 'stun:stun.xten.com' },
                 //{ url: 'STUN:turn.ncfu.ru:9003' },
-                //{
+                ////{
                 //    url: 'turn:numb.viagenie.ca',
                 //    credential: 'muazkh',
                 //    username: 'webrtc@live.com'
@@ -466,13 +467,13 @@ const app = new Vue({
                 //    credential: 'webrtc',
                 //    username: 'webrtc'
                 //},
-                {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                    credential: 'webrtc',
-                    username: 'webrtc'
-                },
+                //{
+                //    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                //    credential: 'webrtc',
+                //    username: 'webrtc'
+                //},
                 self.TURN,
-                    TURN
+                    //TURN
                 ]
             };
             let peer = new RTCPeerConnection(configuration);
