@@ -325,21 +325,26 @@ const app = new Vue({
                 console.log(item);
             }
         },
+        goToTop() {
+            $('#navigation')[0].scrollIntoView();
+        },
         consoleUser: function (item) {
             var self = this;
-            if (self.isSuperAdmin) {
-                $.ajax({
-                    url: "/api/auditory/GetUserInfo?Id=" + item.TestingProfileId,
-                    type: "POST",
-                    async: true,
-                    success: function (info) {
-                        info.forEach(function (item) {
-                            console.log(item);
-                            console.log('----------------------------');
-                        });
-                    }
-                });
-            }
+            console.log(item);
+            window.open('/statistic/minitotal?Id=' + item.TestingProfileId), '_blank';
+            //if (self.isSuperAdmin) {
+            //    $.ajax({
+            //        url: "/api/auditory/GetUserInfo?Id=" + item.TestingProfileId,
+            //        type: "POST",
+            //        async: true,
+            //        success: function (info) {
+            //            info.forEach(function (item) {
+            //                console.log(item);
+            //                console.log('----------------------------');
+            //            });
+            //        }
+            //    });
+            //}
         },
         resetIpConfig: function (item) {
             let self = this;
@@ -423,55 +428,55 @@ const app = new Vue({
             let configuration = {
                 iceServers: [
                 { url: 'stun:stun01.sipphone.com' },
-                //{ url: 'stun:stun.ekiga.net' },
-                //{ url: 'stun:stun.fwdnet.net' },
-                //{ url: 'stun:stun.ideasip.com' },
-                //{ url: 'stun:stun.iptel.org' },
-                //{ url: 'stun:stun.rixtelecom.se' },
-                //{ url: 'stun:stun.schlund.de' },
+                { url: 'stun:stun.ekiga.net' },
+                { url: 'stun:stun.fwdnet.net' },
+                { url: 'stun:stun.ideasip.com' },
+                { url: 'stun:stun.iptel.org' },
+                { url: 'stun:stun.rixtelecom.se' },
+                { url: 'stun:stun.schlund.de' },
                 { url: 'stun:stun.l.google.com:19302' },
                 { url: 'stun:stun1.l.google.com:19302' },
                 { url: 'stun:stun2.l.google.com:19302' },
                 { url: 'stun:stun3.l.google.com:19302' },
                 { url: 'stun:stun4.l.google.com:19302' },
-                //{ url: 'stun:stunserver.org' },
-                //{ url: 'stun:stun.softjoys.com' },
-                //{ url: 'stun:stun.voiparound.com' },
-                //{ url: 'stun:stun.voipbuster.com' },
-                //{ url: 'stun:stun.voipstunt.com' },
-                //{ url: 'stun:stun.voxgratia.org' },
-                //{ url: 'stun:stun.xten.com' },
-                //{ url: 'STUN:turn.ncfu.ru:9003' },
-                ////{
-                //    url: 'turn:numb.viagenie.ca',
-                //    credential: 'muazkh',
-                //    username: 'webrtc@live.com'
-                //},
-                //{
-                //    url: 'turn:192.158.29.39:3478?transport=udp',
-                //    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                //    username: '28224511:1379330808'
-                //},
-                //{
-                //    url: 'turn:192.158.29.39:3478?transport=tcp',
-                //    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                //    username: '28224511:1379330808'
-                //},
-                //{
-                //    url: 'turn:turn.bistri.com:80',
-                //    credential: 'homeo',
-                //    username: 'homeo'
-                //},
-                //{
-                //    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                //    credential: 'webrtc',
-                //    username: 'webrtc'
-                //},
-                //{
-                //    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                //    credential: 'webrtc',
-                //    username: 'webrtc'
-                //},
+                { url: 'stun:stunserver.org' },
+                { url: 'stun:stun.softjoys.com' },
+                { url: 'stun:stun.voiparound.com' },
+                { url: 'stun:stun.voipbuster.com' },
+                { url: 'stun:stun.voipstunt.com' },
+                { url: 'stun:stun.voxgratia.org' },
+                { url: 'stun:stun.xten.com' },
+                { url: 'STUN:turn.ncfu.ru:9003' },
+                {
+                    url: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:turn.bistri.com:80',
+                    credential: 'homeo',
+                    username: 'homeo'
+                },
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
+                },
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
+                },
                 self.TURN,
                     //TURN
                 ]
@@ -704,6 +709,9 @@ const app = new Vue({
                         else if (message.offer) {
                             // navigator.getUserMedia({ video: true }, function (stream) {
                             //navigator.getUserMedia({ video: false, audio: true }, function (stream) {
+
+                            let lqueue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
+                            lqueue.candidates = [];
                             let created = self.videoSockets.filter(function (item) { return item.id == message.TestingProfileId; })[0];
                             let peerObj = created.peers.filter(function (item) { return item.type == message.type; })[0];
                             //console.log(created.peers, message.type);

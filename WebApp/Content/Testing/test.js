@@ -229,12 +229,16 @@
                             // alert('start capture');
 
                             var is_safari = false;///^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
-                            if (!is_safari) {
-                                self.startCapture({ video: { cursor: 'always' }, audio: true });
+                            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+                                self.hasPermissions = true;
                             }
                             else {
-                                self.shownVideos = false;
+                                if (!is_safari) {
+                                    self.startCapture({ video: { cursor: 'always' }, audio: true });
+                                }
+                                else {
+                                    self.shownVideos = false;
+                                }
                             }
                         }
                         //alert('start chat');
@@ -954,6 +958,7 @@
                     }
                     else if (message.requestScreenOff) {
                         self.hasCameraConnection = true;
+                        self.hasPermissions = true;
                     }
                     else if (message.requestCapture) {
                         self.startCapture({ video: { cursor: 'always' }, audio: true });
