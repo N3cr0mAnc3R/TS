@@ -331,7 +331,7 @@ const app = new Vue({
         consoleUser: function (item) {
             var self = this;
             console.log(item);
-            window.open('/statistic/minitotal?Id=' + item.TestingProfileId), '_blank';
+            window.open('/statistic/minitotal?Id=' + item.UserId), '_blank';
             //if (self.isSuperAdmin) {
             //    $.ajax({
             //        url: "/api/auditory/GetUserInfo?Id=" + item.TestingProfileId,
@@ -427,57 +427,32 @@ const app = new Vue({
 
             let configuration = {
                 iceServers: [
-                { url: 'stun:stun01.sipphone.com' },
-                { url: 'stun:stun.ekiga.net' },
-                { url: 'stun:stun.fwdnet.net' },
-                { url: 'stun:stun.ideasip.com' },
-                { url: 'stun:stun.iptel.org' },
-                { url: 'stun:stun.rixtelecom.se' },
-                { url: 'stun:stun.schlund.de' },
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' },
-                { url: 'stun:stun2.l.google.com:19302' },
-                { url: 'stun:stun3.l.google.com:19302' },
-                { url: 'stun:stun4.l.google.com:19302' },
-                { url: 'stun:stunserver.org' },
-                { url: 'stun:stun.softjoys.com' },
-                { url: 'stun:stun.voiparound.com' },
-                { url: 'stun:stun.voipbuster.com' },
-                { url: 'stun:stun.voipstunt.com' },
-                { url: 'stun:stun.voxgratia.org' },
-                { url: 'stun:stun.xten.com' },
-                { url: 'STUN:turn.ncfu.ru:9003' },
-                {
-                    url: 'turn:numb.viagenie.ca',
-                    credential: 'muazkh',
-                    username: 'webrtc@live.com'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=udp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:192.158.29.39:3478?transport=tcp',
-                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-                    username: '28224511:1379330808'
-                },
-                {
-                    url: 'turn:turn.bistri.com:80',
-                    credential: 'homeo',
-                    username: 'homeo'
-                },
-                {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                    credential: 'webrtc',
-                    username: 'webrtc'
-                },
-                {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                    credential: 'webrtc',
-                    username: 'webrtc'
-                },
-                self.TURN,
+                    { url: 'stun:stun01.sipphone.com' },
+                    { url: 'stun:stun.ekiga.net' },
+                    ////////////////{ url: 'stun:stun.fwdnet.net' },
+                    ////////////////{ url: 'stun:stun.ideasip.com' },
+                    ////////////////{ url: 'stun:stun.iptel.org' },
+                    ////////////////{ url: 'stun:stun.rixtelecom.se' },
+                    ////////////////{ url: 'stun:stun.schlund.de' },
+                    ////////////////{ url: 'stun:stun.l.google.com:19302' },
+                    ////////////////{ url: 'stun:stun1.l.google.com:19302' },
+                    ////////////////{ url: 'stun:stun2.l.google.com:19302' },
+                    { url: 'stun:stun3.l.google.com:19302' },
+                    ////////////////{ url: 'stun:stun4.l.google.com:19302' },
+                    { url: 'stun:stunserver.org' },
+                    ////////////////{ url: 'stun:stun.softjoys.com' },
+                    { url: 'stun:stun.voiparound.com' },
+                    ////////////////{ url: 'stun:stun.voipbuster.com' },
+                    ////////////////{ url: 'stun:stun.voipstunt.com' },
+                    ////////////////{ url: 'stun:stun.voxgratia.org' },
+                    ////////////////{ url: 'stun:stun.xten.com' },
+                    ////////////////{ url: 'STUN:turn.ncfu.ru:9003' },
+                    {
+                        url: 'turn:numb.viagenie.ca',
+                        credential: 'muazkh',
+                        username: 'webrtc@live.com'
+                    },
+                    self.TURN,
                     //TURN
                 ]
             };
@@ -645,8 +620,8 @@ const app = new Vue({
                         $('#msg-audio')[0].play();
 
                         let found = self.computerList.find(function (item) { return item.TestingProfileId == a.TestingProfileId; });
-                        
-                        notifier([{ Type: 'success', Body: found.LastName + " " + found.FirstName + " " + found.MiddleName +": " + message.Message }]);
+
+                        notifier([{ Type: 'success', Body: found.LastName + " " + found.FirstName + " " + found.MiddleName + ": " + message.Message }]);
                     }
                     chat.messages.push(message);
                 };
@@ -682,7 +657,7 @@ const app = new Vue({
                         var queue = { type: cam, Id: a.TestingProfileId, candidates: [] };
                         self.queue.push(queue);
                     }
-                    self.initRTCPeer(created, socket, a, cam);
+                    //self.initRTCPeer(created, socket, a, cam);
                     //self.initRTCPeer(created, socket, a, 2);
 
                 };
@@ -1054,7 +1029,7 @@ const app = new Vue({
                 async: true,
                 success: function (errors) {
                     self.currentUser.errors = errors;
-                    notifier([{ Type: 'success', Body: 'Отправлено'}]);
+                    notifier([{ Type: 'success', Body: 'Отправлено' }]);
                     self.shownError = !self.shownError;
                 }
             });

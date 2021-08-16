@@ -24,7 +24,7 @@ namespace WebApp.Models
         public int TestingProfileId { get; set; }
         public int TestingStatusId{ get; set; }
         public DateTime? TestingBegin { get; set; }
-
+        public int UserId { get; set; }
 
 
         public bool IsCameraControl { get; set; }
