@@ -83,11 +83,19 @@ namespace WebApp.Controllers.Api
         {
             return WrapResponse(TestManager.CheckPIN(pin));
         }
+        [Route("SendMessage")]
+        [HttpPost]
+        public async Task<IHttpActionResult> SendMessage(ChatMessage message)
+        {
+            message.UserIdFrom = CurrentUser.Id;
+            message.Date = DateTime.Now;
+            return WrapResponse(await TestManager.SendMessage(message));
+        }
 
         #region process
         [HttpPost]
         [Route("PauseTest")]
-        public async Task PauseTest(int Id, string Localization)
+        public async Task PauseTest(int Id, string Localization = "")
         {
             await TestManager.ToggleTimer(Id, 1, ((CurrentUser == null) ? (Guid?)null : CurrentUser.Id), Localization);
         }

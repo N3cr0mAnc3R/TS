@@ -283,6 +283,18 @@
   border: 1px solid #ddd;
   background: #fff;
 }
+.panel-center.pause {
+  display: flex;
+  width: 80vw;
+  height: 400px;
+  padding: 0;
+}
+.panel-center.pause .base-info {
+  font-family: 'Montserrat';
+  font-size: 24px;
+  text-align: center;
+  margin: auto;
+}
 .panel-center.camera-missing {
   min-width: 1024px;
   font-size: 33px;

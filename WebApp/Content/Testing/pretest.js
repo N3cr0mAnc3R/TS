@@ -150,6 +150,8 @@
                 }
             })
             self.findTestInterval = setInterval(function () {
+                self.loadObject.loading = true;
+                self.loadObject.loaded = false;
                 $.ajax({
                     type: 'POST',
                     dataType: 'json',
@@ -219,8 +221,8 @@
                                 else {
                                     self.verified = true;
                                 }
-                                self.initChat();
-
+                                //self.initChat();
+                                self.initChatSignal(founded);
                                 clearInterval(self.findTestInterval);
                             }
                             self.loadObject.loading = false;
@@ -260,8 +262,8 @@
                                 else {
                                     self.verified = true;
                                 }
-                                self.initChat();
-
+                                //self.initChat();
+                                //self.initStreamSignal();
                                 clearInterval(self.findTestInterval);
                             }
                             clearInterval(self.findTestInterval);
@@ -320,6 +322,33 @@
                 });
             }, 3000);
         },
+        initChatSignal(place) {
+            let self = this;
+            console.log(place);
+
+            self.chatSocket = $.connection.ChatHub;
+            $.connection.hub.url = "../signalr";
+            //$.connection.hub.proxy = 'ChatHub';
+
+            self.chatSocket.client.onMessageGet = function (Id, TestingProfileId, message, date, admin) {
+                let Message = self.initChatMessage(Id, message, date, admin);
+                self.chat.messages.push(Message);
+                if (!self.chat.IsOpened) {
+                    self.unreadCount++;
+                }
+            }
+            self.initStreamSignal();
+
+            self.getMessages(self.testingProfileId);
+            $.connection.hub.start().done(function () {
+                console.log(23);
+                self.chatSocket.server.connect(place.Id, false);
+                self.streamSocket.server.connect(self.testingProfileId, false);
+            }).fail(function (exc) {
+                console.error(exc);
+            });
+
+        },
         initChat: function () {
             var self = this;
             //if (typeof (WebSocket) !== 'undefined') {
@@ -360,6 +389,22 @@
                 self.initChat();
                 // alert('Мы потеряли её. Пожалуйста, обновите страницу');
             };
+        },
+        initStreamSignal() {
+            let self = this;
+            self.streamSocket = $.connection.StreamHub;
+
+            self.streamSocket.url = '../signalr';
+            //$.connection.hub.url = "../signalr";
+            // self.streamSocket.proxy = 'StreamHub';
+
+            self.streamSocket.client.setVerified = function (IsVeified) {
+                self.verified = IsVeified;
+            }
+            self.streamSocket.client.requestReset = function () {
+                localStorage.removeItem('placeConfig');
+                window.open('/account/logout', '_self');
+            }
         },
         checkAuth: function (placeId, PlaceProfile) {
             if (localStorage['placeConfig']) {
@@ -403,7 +448,7 @@
             }
             socket.onopen = function () {
                 socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: id }));
-               // self.initRTCPeer();
+                // self.initRTCPeer();
             };
 
             socket.onmessage = function (msg) {
@@ -455,7 +500,7 @@
         },
         initWebCam: function () {
             var self = this;
-            self.initSocket(self.testingProfileId);
+            //self.initSocket(self.testingProfileId);
             //if (!self.stream) {
             navigator.mediaDevices.getUserMedia(
                 {
@@ -486,7 +531,8 @@
                     //});
                 }).catch(
                     function (er) {/*callback в случае отказа*/
-                        alert(self.switchLocal(8));
+                        notifier([{ Type: 'error', Body: self.switchLocal(8) }]);
+                       // alert(self.switchLocal(8));
                         self.enabled = false;
                     });
             //}
@@ -500,7 +546,10 @@
                 async: false,
                 success: function (messageList) {
                     var messages = messageList;
-                    messages.map(function (a) { a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1))); });
+                    messages.map(function (a) {
+                        a.Date = new Date(a.Date);
+                        //a.Date = new Date(Number(a.Date.substr(a.Date.indexOf('(') + 1, a.Date.indexOf(')') - a.Date.indexOf('(') - 1)));
+                    });
                     self.chat.messages = messages;
                 }
             });
@@ -514,13 +563,42 @@
                 self.sendMessage(self);
             }
         },
+        initChatMessage(Id, message, date, admin) {
+            return {
+                Id: Id,
+                Message: message,
+                Date: new Date(date),
+                IsAdmin: admin
+            };
+        },
         sendMessage: function (self1) {
             var self = self1 ? self1 : this;
             if (self.chat.Message.trim() == "") {
                 return;
             }
-            self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
-            self.chat.Message = "";
+            let date = new Date();
+            self.chat.Message = self.chat.Message.trim();
+            $.ajax({
+                url: "/api/user/SendMessage",
+                type: "POST",
+                async: true,
+                data: {
+                    Message: self.chat.Message,
+                    Date: date,
+                    IsSender: false,
+                    TestingProfileId: self.testingProfileId,
+                    ParentId: null
+                },
+                success: function (Id) {
+                    let Message = self.initChatMessage(Id, self.chat.Message, date, false);
+
+                    self.chat.messages.push(Message);
+                    self.chatSocket.server.sendMessage(Id, self.testingProfileId, self.chat.Message, false);
+                    self.chat.Message = "";
+                }
+            });
+
+            //self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
         },
         getDateFormat: function (date) {
             return date.toLocaleTimeString();

@@ -242,7 +242,8 @@
                             }
                         }
                         //alert('start chat');
-                        self.initChat();
+                        //self.initChat();\
+                        self.initChatSignal()
                     }
                     self.timeAlarm = info.TimeAlarm;
                     self.needShowScore = info.NeedShowScore;
@@ -826,6 +827,38 @@
             self.stepCounter++;
             self.stepNumber += (self.stepCounter * 5);
         },
+        initChatMessage(Id, message, date, admin) {
+            return {
+                Id: Id,
+                Message: message,
+                Date: new Date(date),
+                IsAdmin: admin
+            };
+        },
+        initChatSignal() {
+            let self = this;
+
+            self.chatSocket = $.connection.ChatHub;
+            $.connection.hub.url = "../signalr";
+           // $.connection.hub.proxy = 'ChatHub';
+
+            self.chatSocket.client.onMessageGet = function (Id, TestingProfileId, message, date, admin) {
+                let Message = self.initChatMessage(Id, message, date, admin);
+                self.chat.messages.push(Message);
+                if (!self.chat.IsOpened) {
+                    self.unreadCount++;
+                }
+            }
+            self.initStreamSignal();
+            self.getMessages(self.testingProfileId);
+            $.connection.hub.start().done(function () {
+                self.chatSocket.server.connect(self.testingProfileId, false);
+                self.streamSocket.server.connect(self.testingProfileId, false);
+            }).fail(function (exc) {
+                console.error(exc);
+            });
+
+        },
         initChat: function () {
             var self = this;
             //if (typeof (WebSocket) !== 'undefined') {
@@ -883,6 +916,84 @@
                 //console.log('oh-oh');
                 // alert('Мы потеряли её. Пожалуйста, обновите страницу');
             };
+        },
+        initStreamSignal() {
+            let self = this;
+            self.streamSocket = $.connection.StreamHub;
+
+            self.streamSocket.client.togglePause = function () {
+                self.adminPaused = !self.adminPaused;
+            }
+            self.streamSocket.client.finishTest = function () {
+                notifier([{ Type: 'error', Body: self.switchLocal(28) }]);
+                self.finishTest();
+            }
+            self.streamSocket.client.reconnectCamera = function (uid) {
+                //self.initRTCPeer(uid);
+            }
+            self.streamSocket.client.reconnectScreen = function (uid) {
+
+            }
+            self.streamSocket.client.requestReload = function () {
+                location.href = location.href;
+            }
+            self.streamSocket.client.collapseVideo = function () {
+                self.shownVideos = !self.shownVideos;
+            }
+            self.streamSocket.client.toggleUserChat = function () {
+                self.chat.IsOpened = !self.chat.IsOpened;
+                setTimeout(function () {
+                    $('#full-chat-wrapper')[0].scrollIntoView();
+                }, 300)
+            }
+            self.streamSocket.client.setCameraTrue = function () {
+                self.hasCameraConnection = true;
+                self.hasPermissions = true;
+                self.startTimer();
+                self.isFireFox = false;
+                $(document).on('click', self.goToFullScreen);
+                $(window).on('blur', function (e) {
+                    if (self.blurReady) {
+                        notifier([{ Type: 'error', Body: self.switchLocal(27) }]);
+                        document.title = "!!!!";
+                    }
+                    self.blurReady = true;
+                });
+                $(window).on('focus', function (e) {
+                    if (self.blurReady) {
+                        document.title = self.switchLocal(26);
+                    }
+                    self.blurReady = true;
+                });
+            }
+            self.streamSocket.client.resetCapture = function () {
+                self.startCapture({ video: { cursor: 'always' }, audio: true });
+            }
+            self.streamSocket.client.requestTimeLeft = function () {
+                self.streamSocket.server.sendTimeLeft(self.testingProfileId, self.timeLeft);
+            }
+            self.streamSocket.client.sendError = function (type) {
+                var errorBody = "";
+                switch (type) {
+                    case 1: errorBody = self.switchLocal(39); break;
+                    case 2: errorBody = self.switchLocal(40); break;
+                    case 3: errorBody = self.switchLocal(41); break;
+                    case 4: errorBody = self.switchLocal(42); break;
+                    case 5: errorBody = self.switchLocal(43); break;
+                    case 6: errorBody = self.switchLocal(44); break;
+                    default: errorBody = self.switchLocal(45);
+                }
+                notifier([{ Type: 'error', Body: errorBody }]);
+
+                $('.main-wrapper').addClass('shaker-shaker');
+                setTimeout(function () {
+                    $('.main-wrapper').removeClass('shaker-shaker');
+                }, 2000)
+            }
+            //self.streamSocket.client.requestReset = function () {
+            //    localStorage.removeItem('placeConfig');
+            //    window.open('/account/logout', '_self');
+            //}
         },
         subscribeEnter: function () {
             var self = this;
@@ -1392,7 +1503,7 @@
         },
         subscribeExc() {
             event.stopPropagation();
-            event.preventDefault();
+            //event.preventDefault();
             if (event.keyCode == 27) {
                 app.toggleChat();
                 $(document).off('keydown', app.subscribeExc);
@@ -1568,9 +1679,31 @@
         },
         sendMessage: function (sself) {
             var self = sself ? sself : this;
-            if (!self.chat || self.chat.Message == "" || self.chat.Message.trim() == "") return;
-            self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
-            self.chat.Message = "";
+            if (!self.chat || self.chat.Message.trim() == "") return;
+            let date = new Date();
+            self.chat.Message = self.chat.Message.trim();
+            $.ajax({
+                url: "/api/user/SendMessage",
+                type: "POST",
+                async: true,
+                data: {
+                    Message: self.chat.Message,
+                    Date: date,
+                    IsSender: false,
+                    TestingProfileId: self.testingProfileId,
+                    ParentId: null
+                },
+                success: function (Id) {
+                    let Message = self.initChatMessage(Id, self.chat.Message, date, false);
+
+                    self.chat.messages.push(Message);
+                    self.chatSocket.server.sendMessage(Id, self.testingProfileId, self.chat.Message, false);
+                    self.chat.Message = "";
+                }
+            });
+
+            //self.chatSocket.send(JSON.stringify({ Message: self.chat.Message, Date: new Date(), IsSender: true, TestingProfileId: self.testingProfileId, ParentId: null }));
+            //self.chat.Message = "";
         },
         getDateFormat: function (date) {
             return date.toLocaleTimeString();

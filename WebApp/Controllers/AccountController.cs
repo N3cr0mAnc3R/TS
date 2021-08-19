@@ -139,7 +139,15 @@ namespace WebApp.Controllers
             {
 
                 ApplicationUser user = null;
-                user = getLDAPuuid(model);
+
+                try
+                {
+                    user = getLDAPuuid(model);
+                }
+                catch
+                {
+                    user = null;
+                }
                 if (user == null)
                 {
                     user = AccountManager.GetUser(model.Login, null, model.Password);

@@ -1,4 +1,4 @@
-﻿<link href="~/Content/Auditory/moderate.css?7" rel="stylesheet" />
+﻿<link href="~/Content/Auditory/moderate.css?8" rel="stylesheet" />
 
 <div id="main-window">
     <div class="auditory-header">
@@ -12,9 +12,9 @@
         </div>*@
     <div class="auditory row">
         <div class="computer-list" v-loader="auditoryLoader">
-            <div class="place-table">
-                <div v-for="i in maxX+1" class="place-row row">
-                    <div v-for="item in filterComps(i-1)" class="col">
+            <div class="place-table row">
+                <div v-for="item in computerList" class="place-row">
+                    <div class="col">
                         <div class="place-item" :title="item.Name" :class="{'request': item.RequestReset && item.TestingProfileId }" v-if="item.Name">
                             <div class="video-wrapper" v-if="item.TestingProfileId">
                                 <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" muted class="video-camera"></video>
@@ -43,17 +43,17 @@
                                 </div>
                                 <div class="control-place" v-if="item.TestingProfileId">
                                     <button class="chat-open" v-on:click="select(item.TestingProfileId)" v-if="item.chat">
-                                        <i class="fa fa-keyboard"></i>
-                                        <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
-                                            <span>
-                                                {{item.chat.unreadCount}}
-                                            </span>
-                                        </div>
-                                        <div class="chat-msg-wrapper" v-if="item.chat.messages.length > 0">
-                                            <span>
-                                            </span>
-                                        </div>
-                                    </button>
+                                            <i class="fa fa-keyboard"></i>
+                                            <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
+                                                <span>
+                                                    {{item.chat.unreadCount}}
+                                                </span>
+                                            </div>
+                                            @*<div class="chat-msg-wrapper" v-if="item.chat.messages.length > 0">
+                                                <span>
+                                                </span>
+                                            </div>*@
+                                        </button>
                                     <button class="open-full" v-on:click="openFull(item)">
                                         <img src="~/Files/svg/zoom-in-auditory.svg" />
                                     </button>
@@ -91,7 +91,7 @@
         </div>
         <div class="text-chat-wrapper" v-if="currentChat && currentChat.IsChatMOpened">
             <ul class="chat-wrapper">
-                <li v-for="message in currentChat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id">
+                <li v-for="message in currentChat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message) || message.IsAdmin }" v-bind:id="'message-' + message.Id">
                     <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
                     <br />
                 </li>
@@ -237,13 +237,13 @@
                         <button v-on:click="showError()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(4)}}</button>*@
 
                     <button v-on:click="togglePause()" v-if="currentUser.TestingStatusId == 2"><div v-if="!currentUser.IsPause">{{switchLocal(6)}}</div><div v-if="currentUser.IsPause">{{switchLocal(7)}}</div></button>
-                    <button v-on:click="verifyUser(false)">{{switchLocal(12)}}</button>
-                    <button v-on:click="verifyUser(true)">{{switchLocal(13)}}</button>
+                    <button v-on:click="verifyUser(false)" v-if="currentUser.TestingStatusId == 5">{{switchLocal(12)}}</button>
+                    <button v-on:click="verifyUser(true)" v-if="currentUser.TestingStatusId == 5">{{switchLocal(13)}}</button>
                     <button v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(5)}}</button>
-                    <button v-on:click="resetPlace()">{{switchLocal(8)}}</button>
-                    <button v-on:click="reconnect1()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
+                    <button v-on:click="resetPlace()" v-if="currentUser.TestingStatusId == 5">{{switchLocal(8)}}</button>
+                    <button v-on:click="reconnectCamera()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
                     <button v-on:click="reconnect2()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
-                    <button class="reload" v-on:click="sendReload(currentUser.TestingProfileId)" v-if="isSuperAdmin && currentUser.TestingStatusId == 2">Перезагрузить</button>
+                    <button class="reload" v-on:click="sendReload()" v-if="isSuperAdmin && currentUser.TestingStatusId == 2">Перезагрузить</button>
                     @*<button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>*@
                     <button data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
                     <button v-on:click="collapseVideo()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-minus-square"></i></button>
@@ -261,4 +261,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?16"></script>
+<script src="~/Content/Auditory/moderate.js?17"></script>

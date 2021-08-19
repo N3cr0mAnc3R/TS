@@ -14,6 +14,7 @@ using WebApp.Models.Administration;
 using WebApp.Models.Logs;
 using WebApp.Models.Proctoring;
 
+[assembly: OwinStartup(typeof(WebApp.Startup))]
 namespace WebApp
 {
     public class Startup
@@ -29,6 +30,7 @@ namespace WebApp
             app.CreatePerOwinContext<ApplicationUserManager>(ApplicationUserManager.Create);
             app.CreatePerOwinContext<ApplicationSignInManager>(ApplicationSignInManager.Create);
 
+            app.MapSignalR();
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,

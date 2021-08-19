@@ -1,5 +1,5 @@
 ﻿
-<link href="~/Content/Testing/Index.css?2" rel="stylesheet" />
+<link href="~/Content/Testing/Index.css?3" rel="stylesheet" />
 <div id="main-window">
     @if (ViewBag.PlaceInfo != null)
     {
@@ -13,7 +13,7 @@
     @if (Request.IsAuthenticated)
     {
 
-        <div v-if="!hasPlaceConfig && hasTestsToday" class="container">
+        <div v-if="!hasPlaceConfig && hasTestsToday" class="container" v-loader="loadObject">
 
             <div class="empty-list">
                 {{switchLocal(4)}}
@@ -150,7 +150,7 @@
         </div>
 
 
-        <div class="open-chat-wrapper">
+        <div class="open-chat-wrapper" v-if="tests && tests.length > 0">
             <div v-on:click="toggleChat()">
                 <img src="~/Files/svg/process-toggle-chat.svg" />
             </div>
@@ -175,7 +175,7 @@
             </div>
             <div class="text-chat-wrapper">
                 <ul class="chat-wrapper">
-                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message)}" v-bind:id="'message-' + message.Id">
+                    <li v-for="message in chat.messages" class="chat-message-wrapper" v-bind:class="{'sender': isMe(message) || !message.IsAdmin}" v-bind:id="'message-' + message.Id">
                         <div class="chat-message"><div class="message-text">{{message.Message}}</div><div class="message-date">{{getDateFormat(message.Date)}}</div></div>
                         <br />
                     </li>
@@ -228,4 +228,4 @@
 </div>
 
 <script src="~/Content/aes.js"></script>
-<script src="~/Content/Testing/pretest.js?1"></script>
+<script src="~/Content/Testing/pretest.js?2"></script>

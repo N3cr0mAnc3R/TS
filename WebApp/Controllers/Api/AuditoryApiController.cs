@@ -60,6 +60,18 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AuditoryManager.GetAuditoryByIdForModerate(CurrentUser.Id, Id));
         }
         [HttpPost]
+        [Route("GetInfoAboutPlace")]
+        public async Task<IHttpActionResult> GetInfoAboutPlace(int Id)
+        {
+            return WrapResponse(await AuditoryManager.GetInfoAboutPlace(CurrentUser.Id, Id));
+        }
+        [HttpPost]
+        [Route("GetPlaceByProfile")]
+        public async Task<IHttpActionResult> GetPlaceByProfile(int Id)
+        {
+            return WrapResponse(await AuditoryManager.GetPlaceByProfile(CurrentUser.Id, Id));
+        }
+        [HttpPost]
         [Route("GetTimes")]
         public async Task<IHttpActionResult> GetTimes()
         {

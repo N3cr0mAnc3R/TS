@@ -65,6 +65,21 @@ namespace WebApp.Models
                 await cnt.ExecuteAsync(sql: "[dbo].[Administrator_SetPlaceFree]", new { placeId, userUID }, commandType: CommandType.StoredProcedure);
             }
         }
+
+        public async Task<TestComputer> GetInfoAboutPlace(Guid userUID, int Id, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<TestComputer>(sql: "[dbo].[Administrator_PlaceHasProfileGet]", new { Id, userUID, localization }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<TestComputer> GetPlaceByProfile(Guid userUID, int testingProfileId, string localization = "")
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                return await cnt.QueryFirstOrDefaultAsync<TestComputer>(sql: "[dbo].[Administrator_PlaceIdByTestingProfileGet]", new { testingProfileId, userUID }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<Auditory> GetAuditoryByIdForModerate(Guid userUID, int auditoriumId, string localization = "")
         {
             Auditory aud = new Auditory();
