@@ -646,6 +646,12 @@
                             self.selectedQuestion.fileId = self.selectedQuestion.Answers[0].fileId;
                         }
                     }
+                },
+                error: function () {
+                    notifier([{ Type: 'error', Body: self.switchLocal(49) }]);
+                    setTimeout(function () {
+                        location.reload();
+                    }, 3000);
                 }
             });
         },
@@ -1889,6 +1895,7 @@
                 case 46: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к камере. Прохождение ВИ без камеры запрещено" : "Permission for camera denied. Grant access for camera, or the test won't be passed";
                 case 47: return localStorage["localization"] == 1 ? "Необходимо предоставить доступ к экрану. Нажмите \"Разрешить\" и выберите из списка \"Весь экран\"" : "Permission for screen capture is necessary. Click \"Grant\"";
                 case 48: return localStorage["localization"] == 1 ? "Разрешить" : "Grant";
+                case 49: return localStorage["localization"] == 1 ? "Произошла ошибка. Страница автоматически перезагрузится через 3 секунды" : "An Error occured. Page will be reloaded in 3 seconds";
 
             }
         }
