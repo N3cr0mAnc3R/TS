@@ -31,8 +31,6 @@
         cameraRecorder: null,
         screenRecorder: null,
         peers: [],
-        offer: null,
-        confirmed: false,
         cameraStream: null,
         requestScreenStreams: [],
         requestCameraStreams: [],
@@ -41,7 +39,7 @@
         timerStarted: false,
         finishScreen: false,
         pause: false,
-        testing: false,
+        testing: false,//Под подозрением
         hasCameraConnection: false,
         isCameraControl: true,
         chat: {
@@ -54,21 +52,13 @@
         isFireFox: false,
         flagStopRec: false,
         chatSocket: null,
-        videoSocket: null,
-        loadedSocket: false,
         shownVideos: true,
-        gotICE: false,
         sourceMaterials: [],
         counter: 0,
         loadedCount: 0,
         maxTipWidth: 540,
         unreadCount: 0,
         currentUser: {},
-        queue: [{ type: 1, candidates: [] }, { type: 2, candidates: [] }],
-        mediaSource: null,
-        sourceBuffer: null,
-        streamLoaded: null,
-        streamQueue: [],
         needCalc: false,
         NameDiscipline: "",
         startedTimeRecording: 0,
@@ -91,9 +81,6 @@
             isExpr: false,
             expr: ''
         },
-        errorText: "",
-        adminErrors: [],
-        potentialPeers: [],
         Turn: {},
         QRCodeImage: "",
         QRCodeHref: "",
@@ -1015,12 +1002,6 @@
                 if (found) {
                     var peer = found.peer;
                     peer.setRemoteDescription(new RTCSessionDescription(Answer), function (r) {
-
-                        //var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                        //queue.candidates.forEach(function (candidate) {
-                        //    peer.addIceCandidate(candidate);
-                        //});
-                        //console.log(r);
                     }, function (r) { console.log(r); });
                 }
             }
@@ -1043,7 +1024,7 @@
                     type: "POST",
                     async: true,
                     success: function (data) {
-                        self.selectedQuestion.fileId = message.Id;
+                        self.selectedQuestion.fileId = Id;
                         self.selectedQuestion.answerImage = data;
                         self.selectedQuestion.answered = true;
                     }
@@ -1062,15 +1043,6 @@
         isMe: function (message) {
             var self = this;
             return message.UserIdFrom == self.currentUser || message.IsSender;
-        },
-        reInitPeers: function () {
-            var self = this;
-            self.queue = [{ type: 1, candidates: [] }, { type: 2, candidates: [] }];
-            self.gotICE = false;
-            self.peers.forEach(function (peerWithType) {
-                peerWithType.peer.close();
-                peerWithType.peer = null;
-            });
         },
         initWebCam: function (params) {
             var self = this;

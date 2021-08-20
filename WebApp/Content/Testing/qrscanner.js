@@ -159,7 +159,8 @@
 
             $.ajax({
                 type: 'POST',
-                url: 'https://de.ncfu.ru/api/user/UpdateQuestionAnswer',
+                url: '/api/user/UpdateQuestionAnswer',
+                //url: 'https://de.ncfu.ru/api/user/UpdateQuestionAnswer',
                 async: true,
                 data: { answers: answers },
                 success: function () {

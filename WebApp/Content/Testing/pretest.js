@@ -8,7 +8,6 @@
         testingTests: [],
         user: '',
         //packages: [],
-        interval: null,
         findTestInterval: null,
         findPlaceInterval: null,
         hasTestsToday: false,
@@ -17,15 +16,15 @@
             loading: null,
             loaded: null
         },
+        requestCameraStreams: [],
+        peers: [],
         recordedCamera: [],
         cameraRecorder: null,
-        videoSockets: [],
         loadTestObject: {
             loading: null,
             loaded: null
         },
         localization: 1,
-        videoSocket: null,
         chatSocket: null,
         chat: {
             IsOpened: false,
@@ -43,9 +42,7 @@
         verifyInterval: null,
         pc1: null,
         stream: null,
-        queue: [],
         enabled: false,
-        counter: 0,
         testingProfileId: 0,
         identificationTimeLeft: 45,
         TURN: {}
@@ -55,14 +52,12 @@
             var self = this;
             self.loadTestObject.loading = true;
             self.loadTestObject.loaded = false;
-            self.loadObject.loading = true;
-            self.loadObject.loaded = false;
+            //self.loadObject.loading = true;
+            //self.loadObject.loaded = false;
             var is_safari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
             if (is_safari || navigator.userAgent.indexOf("Edge") > -1 || (typeof document !== 'undefined' && !!document.documentMode)) {
                 notifier([{ Type: 'error', Body: self.switchLocal(18) }]);
             }
-            //Загрузка доступных тестов 
-            self.loadTests();
 
             if (localStorage['placeConfig']) {
 
@@ -102,6 +97,8 @@
                     }
                 });
 
+                //Загрузка доступных тестов 
+                self.loadTests();
                 setInterval(self.findTestInterval);
                 self.hasPlaceConfig = true;
             }
@@ -217,12 +214,11 @@
                                 if (founded) {
                                     console.log(founded);
                                     self.initWebCam();
+                                    self.initChatSignal(founded);
                                 }
                                 else {
                                     self.verified = true;
                                 }
-                                //self.initChat();
-                                self.initChatSignal(founded);
                                 clearInterval(self.findTestInterval);
                             }
                             self.loadObject.loading = false;
@@ -262,8 +258,6 @@
                                 else {
                                     self.verified = true;
                                 }
-                                //self.initChat();
-                                //self.initStreamSignal();
                                 clearInterval(self.findTestInterval);
                             }
                             clearInterval(self.findTestInterval);
@@ -276,30 +270,6 @@
                 });
             }, 5000);
         },
-        //startCapture: function (displayMediaOptions) {
-        //    var self = this;
-        //    //var captureStream = null;
-
-        //    navigator.mediaDevices.getDisplayMedia(displayMediaOptions).then(function (Str) {
-        //        var tracks = Str.getVideoTracks();
-        //        console.log(tracks[0].getSettings());
-        //        if (tracks[0].getSettings().displaySurface != 'monitor') {
-        //            console.log('fuck u');
-        //            self.startCapture();
-        //        }
-        //        $('#video2')[0].srcObject = Str;
-        //        Str.oninactive = function (er) {
-        //            console.log(er);
-        //            self.startCapture(displayMediaOptions);
-        //        };
-        //    })
-        //        .catch(function (err) {
-        //            console.error("Error:" + err);
-        //            self.startCapture(displayMediaOptions);
-        //            alert("Обновите страницу и разрешите запись экрана!");
-        //            return null;
-        //        });
-        //},
         startPlaceConfigInterval: function () {
             var self = this;
             self.findPlaceInterval = setInterval(function () {
@@ -328,7 +298,6 @@
 
             self.chatSocket = $.connection.ChatHub;
             $.connection.hub.url = "../signalr";
-            //$.connection.hub.proxy = 'ChatHub';
 
             self.chatSocket.client.onMessageGet = function (Id, TestingProfileId, message, date, admin) {
                 let Message = self.initChatMessage(Id, message, date, admin);
@@ -340,6 +309,7 @@
             self.initStreamSignal();
 
             self.getMessages(self.testingProfileId);
+
             $.connection.hub.start().done(function () {
                 self.chatSocket.server.connect(place.Id, false);
                 self.streamSocket.server.connect(self.testingProfileId, false);
@@ -348,54 +318,11 @@
             });
 
         },
-        initChat: function () {
-            var self = this;
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-            //} else {
-            //    self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-            //}
-            if (typeof (WebSocket) !== 'undefined') {
-                self.chatSocket = new WebSocket(self.domain + "/ChatHandler.ashx");
-            } else {
-                self.chatSocket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
-            }
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-            //} else {
-            //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-            //}
-            self.chatSocket.onopen = function () {
-                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId, IsSender: true }));
-                self.getMessages(self.testingProfileId);
-            };
-            self.chatSocket.onmessage = function (msg) {
-                //self.messages.push(msg);
-                var message;
-                if (msg.data.indexOf("\0") != -1) {
-                    message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                }
-                else {
-                    message = JSON.parse(msg.data);
-                }
-                message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
-                self.chat.messages.push(message);
-                if (!self.chat.IsOpened) {
-                    self.unreadCount++;
-                }
-            };
-            self.chatSocket.onclose = function (event) {
-                self.initChat();
-                // alert('Мы потеряли её. Пожалуйста, обновите страницу');
-            };
-        },
         initStreamSignal() {
             let self = this;
             self.streamSocket = $.connection.StreamHub;
 
             self.streamSocket.url = '../signalr';
-            //$.connection.hub.url = "../signalr";
-            // self.streamSocket.proxy = 'StreamHub';
 
             self.streamSocket.client.setVerified = function (IsVeified) {
                 self.verified = IsVeified;
@@ -403,6 +330,31 @@
             self.streamSocket.client.requestReset = function () {
                 localStorage.removeItem('placeConfig');
                 window.open('/account/logout', '_self');
+            }
+            self.streamSocket.client.requestOffer = function (Type, guid) {
+                if (self.cameraStream) {
+                    self.initRTCPeer(guid);
+                }
+                else {
+                    self.requestCameraStreams.push(guid);
+                }
+            }
+            self.streamSocket.client.sendAnswer = function (Answer, Type, guid) {
+                var found = self.peers.filter(function (item) { return item.uid == guid; })[0];
+                if (found) {
+                    var peer = found.peer;
+                    peer.setRemoteDescription(new RTCSessionDescription(Answer), function (r) {
+                    }, function (r) { console.log(r); });
+                }
+            }
+            self.streamSocket.client.sendIceCandidate = function (Id, Type, candidate, guid, IsAdmin) {
+                if (IsAdmin) {
+                    var found = self.peers.filter(function (item) { return item.uid == guid; })[0];
+                    if (found) {
+                        var peer = found.peer;
+                        peer.addIceCandidate(candidate);
+                    }
+                }
             }
         },
         checkAuth: function (placeId, PlaceProfile) {
@@ -437,97 +389,23 @@
                 }
             }
         },
-        initSocket: function (id) {
-            let self = this;
-            let socket = null;
-            if (typeof (WebSocket) !== 'undefined') {
-                socket = new WebSocket(self.domain + "/StreamHandler.ashx");
-            } else {
-                socket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
-            }
-            socket.onopen = function () {
-                socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: id }));
-                // self.initRTCPeer();
-            };
-
-            socket.onmessage = function (msg) {
-                var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
-                if (!message.IsSender) {
-                    if (message.candidate && message.candidate != '{}') {
-                        var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                        self.queue.push(candidate);
-                    }
-
-                    else if (message.answer) {
-                        self.pc1.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
-
-                            self.queue.forEach(function (candidate) {
-                                self.pc1.addIceCandidate(candidate);
-                            })
-                        }, function (r) { console.log(r); })
-                    }
-                    else if (message.verified != undefined) {
-                        self.verified = message.verified;
-                        if (message.verified == true) {
-                            notifier([{ Type: 'success', Body: self.switchLocal(16) }]);
-                        }
-                        else {
-                            notifier([{ Type: 'error', Body: self.switchLocal(17) }]);
-                        }
-                        clearInterval(self.verifyInterval);
-                    }
-                    else if (message.requestOffer) {
-                        self.initRTCPeer();
-                    }
-                    else if (message.resetRequest) {
-                        localStorage.removeItem('placeConfig');
-                        window.open('/account/logout', '_self');
-                        //location.reload();
-                    }
-                    else if (message.reloadRequest) {
-                        window.reload(true);
-                        //location.reload();
-                    }
-                }
-            };
-            socket.onclose = function () {
-                console.log('Соединение сброшено');
-                self.initWebCam();
-            };
-            self.videoSocket = socket;
-        },
         initWebCam: function () {
             var self = this;
             //self.initSocket(self.testingProfileId);
             //if (!self.stream) {
             navigator.mediaDevices.getUserMedia(
-                {
-                    video: true//,
-                    //audio: true
-                }).then(function (stream) {/*callback в случае удачи*/
+                { video: { facingMode: 'user' }, audio: false }).then(function (stream) {/*callback в случае удачи*/
                     self.stream = stream;
                     self.enabled = true;
                     $('#video1')[0].srcObject = stream;
 
-                    //if (typeof (WebSocket) !== 'undefined') {
-                    //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                    //} else {
-                    //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/StreamHandler.ashx");
-                    //}
-                    //if (typeof (WebSocket) !== 'undefined') {
-                    //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                    //} else {
-                    //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-                    //}
+                    if (self.requestCameraStreams.length > 0) {
 
-
-                    //self.tests.forEach(function (item) {
-                    //    self.initSocket(item.Id);
-                    //});
-                    //self.testingTests.forEach(function (item) {
-                    //    self.initSocket(item.Id);
-                    //});
+                        self.requestCameraStreams.forEach(function (guid) {
+                            self.initRTCPeer(guid);
+                        });
+                        self.requestCameraStreams = [];
+                    }
                 }).catch(
                     function (er) {/*callback в случае отказа*/
                         notifier([{ Type: 'error', Body: self.switchLocal(8) }]);
@@ -695,11 +573,9 @@
                 console.log(exc);
             }
         },
-        initRTCPeer: function () {
+        initRTCPeer: function (uid) {
+            //console.log('init rtcpeer');
             var self = this;
-            var STUN = {
-                urls: 'stun:stun.advfn.com:3478'
-            };
             var TURN = {
                 url: 'turn:turn.bistri.com:80',
                 credential: 'homeo',
@@ -726,67 +602,77 @@
                 { url: 'stun:stun.voipstunt.com' },
                 { url: 'stun:stun.voxgratia.org' },
                 { url: 'stun:stun.xten.com' },
+                { url: 'STUN:turn.ncfu.ru:9003' },
+                {
+                    url: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
+                    username: '28224511:1379330808'
+                },
+                {
+                    url: 'turn:turn.bistri.com:80',
+                    credential: 'homeo',
+                    username: 'homeo'
+                },
+                {
+                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    credential: 'webrtc',
+                    username: 'webrtc'
+                },
                 self.TURN]
             };
-            self.pc1 = new RTCPeerConnection(configuration);
-            self.pc1.addEventListener('icecandidate', function (e) {
-                self.onIceCandidate(e);
+            var peer = new RTCPeerConnection(configuration);
+            peer.addEventListener('icecandidate', function (e) {
+                self.onIceCandidate(e, uid);
             });
-
-            self.pc1.addEventListener('connectionstatechange', function (event) {
-
-                if (self.pc1.connectionState == 'connecting') {
-                    setTimeout(function () {
-                        if (self.pc1.connectionState == 'connecting') {
-                            self.pc1.close();
-                            self.initRTCPeer();
-                        }
-                    }, 10000)
-                }
-                if (self.pc1.connectionState == 'disconnected') {
-                    self.initRTCPeer();
-                }
-            });
-            self.stream.getTracks().forEach(function (track) {
-                self.pc1.addTrack(track, self.stream);
-            });
-
-            try {
-                self.pc1.createOffer(function (offer) {
-                    self.pc1.setLocalDescription(offer, function () {
-                        var obj1 = {};
-                        for (var i in offer) {
-                            if (typeof offer[i] != 'function')
-                                obj1[i] = offer[i];
-                        }
-                        var obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: 1
-                        };
-                        if (app.videoSocket && app.videoSocket.readyState == 1) {
-                            app.videoSocket.send(JSON.stringify(obj));
-                        }
-                    }, function () { });
-                }, function () { }, { 'mandatory': { 'OfferToReceiveAudio': false, 'OfferToReceiveVideo': false } });
-                self.loadTestObject.loading = false;
-                self.loadTestObject.loaded = true;
+            //peer.addEventListener('iceconnectionstatechange', function (e) {
+            //    self.onIceStateChange(self.pc1, e);
+            //});
+            //peer.addEventListener('connectionstatechange', function (event) {
+            //    console.log(peer.connectionState);
+            //});
+            if (!self.stream) {
+                peer.close();
+                peer = null;
+                setTimeout(function () { self.initRTCPeer(uid) }, 500);
+                return;
             }
-            catch (e) {
+            stream.getTracks().forEach(function (track) {
+                peer.addTrack(track, stream);
+            });
+            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, uid: uid }));
+            var found = self.peers.filter(function (item) { return item.uid == uid; })[0];
+            if (found) {
+                found.peer.close();
+                found.peer = peer;
+            }
+            else {
+                self.peers.push({ peer: peer, uid: uid });
+            }
+            try {
+                peer.createOffer(function (offer) {
+                    peer.setLocalDescription(offer, function () {
+                        self.streamSocket.server.sendOffer(app.testingProfileId, offer, 1, uid);
+                    }, function (r) { console.log(r); });
+                }, function (r) { console.log(r); }, { 'mandatory': { 'OfferToReceiveAudio': false, 'OfferToReceiveVideo': false } });
+            }
+            catch {
                 console.log('error');
             }
+
         },
-        onIceCandidate: function (e) {
-            var obj1 = {};
-            for (var i in e.candidate) {
-                if (typeof e.candidate[i] != 'function')
-                    obj1[i] = e.candidate[i];
-            }
-            var obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: 1
-            };
-            if (app.videoSocket && app.videoSocket.readyState == 1) {
-                //app.gotICE = true;
-                app.videoSocket.send(JSON.stringify(obj));
-            }
+        onIceCandidate: function (e, uid) {
+            let self = app;
+            self.streamSocket.server.sendIceCandidate(app.testingProfileId, 1, e.candidate, uid, false);
         },
         askReset: function () {
             var self = this;

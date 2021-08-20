@@ -145,7 +145,7 @@
 
             </div>
         </div>
-        <div class="open-chat-wrapper" v-if="!testing">
+        <div class="open-chat-wrapper" v-if="!testing  && chat.testingProfileId != 0">
             <div v-on:click="toggleChat()">
                 <img src="~/Files/svg/process-toggle-chat.svg" />
             </div>
