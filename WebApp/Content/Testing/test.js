@@ -1608,7 +1608,6 @@
             if (this.countOfAttemptScreen == 100) {
                 return;
             }
-            //console.log('init rtcpeer');
             var self = this;
             var TURN = {
                 url: 'turn:turn.bistri.com:80',
