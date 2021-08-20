@@ -35,6 +35,8 @@
         offer: null,
         confirmed: false,
         cameraStream: null,
+        requestScreenStreams: [],
+        requestCameraStreams: [],
         screenStream: null,
         lostConnection: false,
         timerStarted: false,
@@ -840,7 +842,7 @@
 
             self.chatSocket = $.connection.ChatHub;
             $.connection.hub.url = "../signalr";
-           // $.connection.hub.proxy = 'ChatHub';
+            // $.connection.hub.proxy = 'ChatHub';
 
             self.chatSocket.client.onMessageGet = function (Id, TestingProfileId, message, date, admin) {
                 let Message = self.initChatMessage(Id, message, date, admin);
@@ -940,6 +942,20 @@
             self.streamSocket.client.collapseVideo = function () {
                 self.shownVideos = !self.shownVideos;
             }
+            self.streamSocket.client.requestOffer = function (Type, guid) {
+                if (self.screenStream && Type == 2) {
+                    self.initRTCPeer(Type, guid);
+                }
+                else if (Type == 2) {
+                    self.requestScreenStreams.push(guid);
+                }
+                if (self.cameraStream && Type == 1) {
+                    self.initRTCPeer(Type, guid);
+                }
+                else if (Type == 1) {
+                    self.requestCameraStreams.push(guid);
+                }
+            }
             self.streamSocket.client.toggleUserChat = function () {
                 self.chat.IsOpened = !self.chat.IsOpened;
                 setTimeout(function () {
@@ -990,10 +1006,29 @@
                     $('.main-wrapper').removeClass('shaker-shaker');
                 }, 2000)
             }
-            //self.streamSocket.client.requestReset = function () {
-            //    localStorage.removeItem('placeConfig');
-            //    window.open('/account/logout', '_self');
-            //}
+            self.streamSocket.client.sendAnswer = function (Answer, Type, guid) {
+                var found = self.peers.filter(function (item) { return item.type == Type && item.uid == guid; })[0];
+                if (found) {
+                    var peer = found.peer;
+                    peer.setRemoteDescription(new RTCSessionDescription(Answer), function (r) {
+
+                        //var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
+                        //queue.candidates.forEach(function (candidate) {
+                        //    peer.addIceCandidate(candidate);
+                        //});
+                        //console.log(r);
+                    }, function (r) { console.log(r); });
+                }
+            }
+            self.streamSocket.client.sendIceCandidate = function (Id, Type, candidate, guid, IsAdmin) {
+                if (IsAdmin) {
+                    var found = self.peers.filter(function (item) { return item.type == Type && item.uid == guid; })[0];
+                    if (found) {
+                        var peer = found.peer;
+                        peer.addIceCandidate(candidate);
+                    }
+                }
+            }
         },
         subscribeEnter: function () {
             var self = this;
@@ -1056,30 +1091,8 @@
                         queue.candidates.push(candidate);
                     }
                     else if (message.requestOffer) {
-                        //console.log('start request');
-                        // self.reInitPeers();
                         console.log(message.typeOffer);
                         self.initRTCPeer(message.typeOffer, message.uid);
-                        /*self.initRTCPeer(1, message.uid);*/
-                        //self.initRTCPeer(2, message.uid);
-                    }
-                    else if (message.reloadRequest) {
-                        location.href = location.href;
-                        //window.reload(true);
-                    }
-                    else if (message.requestScreenOff) {
-                        self.hasCameraConnection = true;
-                        self.hasPermissions = true;
-                    }
-                    else if (message.requestCapture) {
-                        self.startCapture({ video: { cursor: 'always' }, audio: true });
-                    }
-                    else if (message.requestFinish) {
-                        notifier([{ Type: 'error', Body: self.switchLocal(28) }]);
-                        self.finishTest();
-                    }
-                    else if (message.requestCollapse) {
-                        self.shownVideos = !self.shownVideos;
                     }
                     else if (message.requestLoadFile) {
                         self.saveQrCode();
@@ -1096,28 +1109,6 @@
                                 self.selectedQuestion.answered = true;
                             }
                         });
-                    }
-                    else if (message.requestTimeLeft) {
-                        //message.uid
-                        self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: true, TimeLeft: self.timeLeft }));
-                    }
-                    else if (message.requestViolation) {
-                        var errorBody = "";
-                        switch (message.violation) {
-                            case 1: errorBody = self.switchLocal(39); break;
-                            case 2: errorBody = self.switchLocal(40); break;
-                            case 3: errorBody = self.switchLocal(41); break;
-                            case 4: errorBody = self.switchLocal(42); break;
-                            case 5: errorBody = self.switchLocal(43); break;
-                            case 6: errorBody = self.switchLocal(44); break;
-                            default: errorBody = self.switchLocal(45);
-                        }
-                        notifier([{ Type: 'error', Body: errorBody }]);
-                        console.log($('.main-wrapper'));
-                        $('.main-wrapper').addClass('shaker-shaker');
-                        setTimeout(function () {
-                            $('.main-wrapper').removeClass('shaker-shaker');
-                        }, 2000)
                     }
                     else if (message.answer) {
                         //var interval = setInterval(function () {
@@ -1139,17 +1130,6 @@
 
                         }
                         // }, 500);
-                    }
-                    else if (message.requestPause) {
-                        self.adminPaused = !self.adminPaused;
-
-                    }
-                    else if (message.requestCloseChat) {
-                        self.chat.IsOpened = !self.chat.IsOpened;
-                        setTimeout(function () {
-                            $('#full-chat-wrapper')[0].scrollIntoView();
-                        }, 300)
-                        //#full-chat-wrapper
                     }
                 }
             };
@@ -1173,13 +1153,22 @@
             navigator.mediaDevices.getUserMedia(params).then(function (videostream) {/*callback в случае удачи*/
 
                 videostream.oninactive = function (er) {
-                    self.initWebCam(params);
                     self.cameraStream = null;
                     self.cameraRecorder = null;
                     self.hasCameraConnection = false;
                     $('#video1')[0].srcObject = null;
+                    self.initWebCam(params);
                 };
                 self.cameraStream = videostream;
+
+                if (self.requestCameraStreams.length > 0) {
+
+                    self.requestCameraStreams.forEach(function (guid) {
+                        self.initRTCPeer(1, guid);
+                    });
+                    self.requestCameraStreams = [];
+                }
+
                 self.hasCameraConnection = true;
                 var options;
                 self.startTimer();
@@ -1454,6 +1443,16 @@
                 self.hasPermissions = true;
                 self.startTimer();
                 self.screenStream = Str;
+
+                if (self.requestScreenStreams.length > 0) {
+
+                    self.requestScreenStreams.forEach(function (guid) {
+                        self.initRTCPeer(2, guid);
+                    });
+                    self.requestScreenStreams = [];
+                }
+
+
                 self.isFireFox = false;
                 $(document).on('click', self.goToFullScreen);
 
@@ -1801,17 +1800,7 @@
             try {
                 peer.createOffer(function (offer) {
                     peer.setLocalDescription(offer, function () {
-                        var obj1 = {};
-                        for (var i in offer) {
-                            if (typeof offer[i] != 'function')
-                                obj1[i] = offer[i];
-                        }
-                        var obj = {
-                            offer: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type, uid: uid
-                        };
-                        if (app.videoSocket && app.videoSocket.readyState == 1) {
-                            app.videoSocket.send(JSON.stringify(obj));
-                        }
+                        self.streamSocket.server.sendOffer(app.testingProfileId, offer, type, uid);
                     }, function (r) { console.log(r); });
                 }, function (r) { console.log(r); }, { 'mandatory': { 'OfferToReceiveAudio': false, 'OfferToReceiveVideo': false } });
             }
@@ -1821,18 +1810,8 @@
 
         },
         onIceCandidate: function (e, type, uid) {
-            var obj1 = {};
-            for (var i in e.candidate) {
-                if (typeof e.candidate[i] != 'function')
-                    obj1[i] = e.candidate[i];
-            }
-            var obj = {
-                candidate: JSON.stringify(obj1), IsSender: true, TestingProfileId: app.testingProfileId, type: type, uid: uid
-            };
-            if (app.videoSocket && app.videoSocket.readyState == 1) {
-                app.gotICE = true;
-                app.videoSocket.send(JSON.stringify(obj));
-            }
+            let self = app;
+            self.streamSocket.server.sendIceCandidate(app.testingProfileId, type, e.candidate, uid, false);
         },
         confirm: function () {
             window.open('/user/waiting', '_self');

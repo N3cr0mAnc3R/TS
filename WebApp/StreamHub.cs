@@ -105,6 +105,32 @@ namespace WebApp
             List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
             Clients.Clients(founded).sendError(error);
         }
+
+
+
+
+
+        public void requestOffer(int Id, int Type, Guid guid)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).requestOffer(Type, guid);
+        }
+        public void sendIceCandidate(int Id, int Type, dynamic candidate, Guid guid, bool IsAdmin)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).sendIceCandidate(Id, Type, candidate, guid, IsAdmin);
+        }
+        
+        public void sendAnswer(int Id, dynamic Answer, int Type, Guid guid)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).sendAnswer(Answer, Type, guid);
+        }
+        public void sendOffer(int Id, dynamic Offer, int Type, Guid guid)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).sendOffer(Id, Offer, Type, guid);
+        }
         // Отключение пользователя
         public override Task OnDisconnected(bool stopCalled)
         {

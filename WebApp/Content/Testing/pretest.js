@@ -230,7 +230,7 @@
                             //self.initRTCPeer();
                         }
                         else {
-                            //console.log('else', d);
+                            console.log('else', d);
                             d.forEach(function (test) {
                                 var founded = self.tests.filter(function (atest) { return atest.Id == test.Id; })[0];
                                 //console.log('founded', founded);
@@ -244,7 +244,7 @@
                                 }
                             });
                         }
-                        //Информация о человеке, проходящем тест
+                        //Информация о человеке, проходящим тест
                         self.user = d[0].LastName + " " + d[0].FirstName + " " + d[0].MiddleName;
                         //Если назначен тест, то больше не загружать
                         if (flag) {
@@ -341,7 +341,6 @@
 
             self.getMessages(self.testingProfileId);
             $.connection.hub.start().done(function () {
-                console.log(23);
                 self.chatSocket.server.connect(place.Id, false);
                 self.streamSocket.server.connect(self.testingProfileId, false);
             }).fail(function (exc) {

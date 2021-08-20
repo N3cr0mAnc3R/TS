@@ -285,6 +285,10 @@ const app = new Vue({
 
             self.chatSocket.server.connect(id, true);
             self.streamSocket.server.connect(id, true);
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+
+            self.streamSocket.server.requestOffer(id, 1, self.currentUid);
+            self.streamSocket.server.requestOffer(id, 2, self.currentUid);
             self.getMessages(id);
             return chat;
         },
@@ -322,10 +326,7 @@ const app = new Vue({
             self.initStreamSignal();
             $.connection.hub.start().done(function () {
                 auditory.ComputerList.forEach(function (item) {
-                    item.errors = [];
-                    item.Image = "";
-                    item.chat = {};
-                    item.IsPause = false;
+                    item = self.initComputerPlace(item);
                     if ([2, 5].indexOf(item.TestingStatusId) != -1) {
                         self.initChat(item.TestingProfileId);
                     }
@@ -335,13 +336,26 @@ const app = new Vue({
                 console.error(exc);
             })
         },
+        initComputerPlace(item) {
+            let self = this;
+            item.errors = [];
+            item.Image = "";
+            item.chat = {};
+            item.IsPause = false;
+
+            item.cameraInfo = {
+                peer: self.initRTCPeer(item, 1)
+            };
+            item.screenInfo = {
+                peer: self.initRTCPeer(item, 2)
+            };
+            return item;
+        },
         initStreamSignal() {
             let self = this;
             self.streamSocket = $.connection.StreamHub;
 
             self.streamSocket.url = '../signalr';
-            //$.connection.hub.url = "../signalr";
-            //self.streamSocket.proxy = 'StreamHub';
 
             self.streamSocket.client.onNewUserConnected = function (testingProfileId, isAdmin) {
                 if (!isAdmin) {
@@ -349,29 +363,59 @@ const app = new Vue({
                 }
             }
             self.streamSocket.client.onUserDisconnected = function (testingProfileId) {
+                self.dropStreams({TestingProfileId: testingProfileId});
                 self.loadPlace(testingProfileId);
+
             }
             self.streamSocket.client.sendTimeLeft = function (TimeLeft) {
                 if (self.currentUser) {
                     self.currentUser.TimeLeft = TimeLeft;
                 }
             }
-
-            //$.connection.hub.start().done(function () {
-            //    auditory.ComputerList.forEach(function (item) {
-            //        item.errors = [];
-            //        item.Image = "";
-            //        item.chat = {};
-            //        if ([2, 5].indexOf(item.TestingStatusId) != -1) {
-            //            self.streamSocket.server.connect(item.TestingProfileId, true);
-            //        }
-            //        self.computerList.push(item);
-            //    });
-            //    console.log(123);
-            //    //socket.send(JSON.stringify({ TestingProfileId: a.TestingProfileId, requestOffer: true, typeOffer: 1, IsSender: false, uid: self.currentUid }));
-            //}).fail(function (exc) {
-            //    console.error(exc);
-            //})
+            self.streamSocket.client.sendOffer = function (Id, Offer, Type, guid) {
+                console.log(Id, Offer, Type, guid) ;
+                if (guid != self.currentUid) {
+                    return;
+                }
+                let info = null;
+                if (Type == 1) {
+                    info = self.computerList.find(function (a) {
+                        return a.TestingProfileId == Id;
+                    }).cameraInfo;
+                }
+                else {
+                    info = self.computerList.find(function (a) {
+                        return a.TestingProfileId == Id;
+                    }).screenInfo;
+                }
+                let peer = info.peer;
+                //  peer.addStream(stream);
+                peer.setRemoteDescription(new RTCSessionDescription(Offer), function () {
+                    peer.createAnswer(function (answer) {
+                        peer.setLocalDescription(answer, function () {
+                            self.streamSocket.server.sendAnswer(Id, answer, Type, self.currentUid);
+                        }, function (r) { console.log(r); });
+                    }, function (r) { console.log(r); });
+                }, function (r) { console.log(r); });
+            }
+            self.streamSocket.client.sendIceCandidate = function (Id, Type, candidate, guid, IsAdmin) {
+                if (guid != self.currentUid || IsAdmin) {
+                    return;
+                }
+                let info = null;
+                if (Type == 1) {
+                    info = self.computerList.find(function (a) {
+                        return a.TestingProfileId == Id;
+                    }).cameraInfo;
+                }
+                else {
+                    info = self.computerList.find(function (a) {
+                        return a.TestingProfileId == Id;
+                    }).screenInfo;
+                }
+                let peer = info.peer;
+                peer.addIceCandidate(candidate);
+            }
         },
         getInfoForAdmin: function () {
             var self = this;
@@ -445,19 +489,6 @@ const app = new Vue({
             var self = this;
             console.log(item);
             window.open('/statistic/minitotal?Id=' + item.UserId), '_blank';
-            //if (self.isSuperAdmin) {
-            //    $.ajax({
-            //        url: "/api/auditory/GetUserInfo?Id=" + item.TestingProfileId,
-            //        type: "POST",
-            //        async: true,
-            //        success: function (info) {
-            //            info.forEach(function (item) {
-            //                console.log(item);
-            //                console.log('----------------------------');
-            //            });
-            //        }
-            //    });
-            //}
         },
         resetIpConfig: function (item) {
             let self = this;
@@ -521,7 +552,7 @@ const app = new Vue({
             var self = this;
             return self.scheduleUsers.filter(function (item) { return item.PlaceId == place; });
         },
-        initRTCPeer: function (created, socket, a, type) {
+        initRTCPeer: function (item, type) {
             let self = this;
             //let STUN = {
             //    urls: 'stun:stun.advfn.com:3478'
@@ -572,31 +603,26 @@ const app = new Vue({
             let peer = new RTCPeerConnection(configuration);
 
             peer.addEventListener('icecandidate', function (e) {
-                self.onIceCandidate(peer, e, socket, a.TestingProfileId, type, self.currentUid);
+                self.onIceCandidate(item, type, e.candidate);
             })
             peer.addEventListener('connectionstatechange', function (event) {
                 if (peer && peer.connectionState == 'connecting') {
                     setTimeout(function () {
                         if (!peer || peer.connectionState == 'connecting') {
                             peer = null;
-                            self.initRTCPeer(created, socket, a, type);
+                            self.initRTCPeer(item, type);
                         }
                     }, 10000);
                 }
                 else if (peer && peer.connectionState == 'disconnected') {
-                    self.initRTCPeer(created, socket, a, type);
+                    self.initRTCPeer(item, type);
                 }
             });
             peer.addEventListener('track', function (e) {
-                self.gotRemoteStream(e, a, type);
+                self.gotRemoteStream(e, item, type);
             });
-            let found = created.peers.filter(function (item) { return item.type == type; })[0];
-            if (found) {
-                found.peer = peer;
-            }
-            else {
-                created.peers.push({ type: type, peer: peer });
-            }
+
+            return peer;
         },
         InitMainSocket: function () {
             let self = this;
@@ -856,30 +882,16 @@ const app = new Vue({
         },
         addIceCandidateToPeer(peer, self, message, a, inter) {
             let queue = self.queue.filter(function (item) { return item.type == message.type && item.Id == a.TestingProfileId; })[0];
-            console.log(peer.connectionState);
             if (queue.candidates.length > 0) {
                 clearInterval(inter);
                 queue.candidates.forEach(function (candidate) {
                     peer.addIceCandidate(candidate);
-                    //console.log('add candidate');
                 });
             }
         },
-        onIceCandidate: function (pc, e, socket, tpid, type, uid) {
-            let obj1 = {};
-            for (let i in e.candidate) {
-                if (typeof e.candidate[i] != 'function')
-                    obj1[i] = e.candidate[i];
-            }
-            let obj = {
-                candidate: JSON.stringify(obj1), IsSender: false, TestingProfileId: tpid, type: type, uid: uid
-            };
-            if (socket && socket.readyState == 1) {
-                socket.send(JSON.stringify(obj));
-            }
-            else {
-                app.onIceCandidate(pc, e, socket, tpid, type, uid);
-            }
+        onIceCandidate: function (item, type, candidate) {
+            let self = app;
+            self.streamSocket.server.sendIceCandidate(item.TestingProfileId, type, candidate, self.currentUid, true);
         },
         isMe: function (message) {
             let self = this;
@@ -968,16 +980,25 @@ const app = new Vue({
         },
         gotRemoteStream: function (e, a, type) {
             let self = this;
-            let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type; })[0];
-            if (!found) {
-                self.streamObjects.push({ Id: a.TestingProfileId, stream: e.streams[0], type: type });
+            if (type == 1) {
+                a.cameraInfo.stream = e.streams[0];
             }
             else {
-                found.stream = e.streams[0];
+                a.screenInfo.stream = e.streams[0];
             }
+            //let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type; })[0];
+            //if (!found) {
+            //    self.streamObjects.push({ Id: a.TestingProfileId, stream: e.streams[0], type: type });
+            //}
+            //else {
+            //    found.stream = e.streams[0];
+            //}
             $('#video-' + a.TestingProfileId + '-' + type)[0].srcObject = e.streams[0];
         },
-
+        dropStreams(a) {
+            $('#video-' + a.TestingProfileId + '-' + 1)[0].srcObject = null;
+            $('#video-' + a.TestingProfileId + '-' + 2)[0].srcObject = null;
+        },
         b64toBlob: function (b64Data, contentType = '', sliceSize = 512) {
             // console.log(b64Data.substr(b64Data.indexOf('base64') + 7));
             let byteCharacters = atob(b64Data.substr(b64Data.indexOf('base64') + 7));
@@ -1261,6 +1282,8 @@ const app = new Vue({
                             obj.Image = "";
                             obj.chat = {};
                             obj.IsPause = false;
+
+                            obj = self.initComputerPlace(obj);
                             if ([2, 5].indexOf(obj.TestingStatusId) != -1) {
                                 self.initChat(obj.TestingProfileId);
                             }
