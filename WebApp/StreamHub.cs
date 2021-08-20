@@ -107,6 +107,18 @@ namespace WebApp
         }
 
 
+        public void requestLoadFile(int Id)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).requestLoadFile();
+        }
+        public void gotUserAnswer(int Id, Guid guid)
+        {
+            List<string> founded = Users.Where(a => a.Key == Id).FirstOrDefault().Value.Where(a => a != Context.ConnectionId).ToList();
+            Clients.Clients(founded).gotUserAnswer(guid);
+        }
+
+
 
 
 

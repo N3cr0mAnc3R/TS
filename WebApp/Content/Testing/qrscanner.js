@@ -13,6 +13,7 @@
             loaded: null
         },
         socket: null,
+        streamSocket: null,
         testingProfileId: 0,
         isSuperAdmin: false,
         error: {},
@@ -32,15 +33,29 @@
             var str = window.location.href;
             var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
             self.testingProfileId = newId;
-            if (typeof (WebSocket) !== 'undefined') {
-                self.socket = new WebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
-            } else {
-                self.socket = new MozWebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
+
+            self.streamSocket = $.connection.StreamHub;
+            $.connection.hub.url = "../signalr";
+
+            self.streamSocket.client.onMessageGet = function (Id, TestingProfileId, message, date, admin) {
+
             }
-            self.socket.onopen = function () {
-                self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: newId }));
-                self.socket.send(JSON.stringify({ TestingProfileId: newId, IsSender: false, requestLoadFile: true }));
-            };
+
+            $.connection.hub.start().done(function () {
+                self.streamSocket.server.requestLoadFile(self.testingProfileId);
+            }).fail(function (exc) {
+                console.error(exc);
+            });
+            //if (typeof (WebSocket) !== 'undefined') {
+            //    self.socket = new WebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
+            //} else {
+            //    self.socket = new MozWebSocket("wss://de.ncfu.ru/StreamHandler.ashx");
+            //}
+            //self.socket.onopen = function () {
+            //    self.socket.send(JSON.stringify({ ForCreate: true, TestingProfileId: newId }));
+            //    self.socket.send(JSON.stringify({ TestingProfileId: newId, IsSender: false, requestLoadFile: true }));
+            //};
+
             self.camQrResult.parentNode.insertBefore(self.scanner.$canvas, self.camQrResult.nextSibling);
             self.scanner.$canvas.style.display = 'block';
 
@@ -148,10 +163,11 @@
                 async: true,
                 data: { answers: answers },
                 success: function () {
-                    self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
+                    self.streamSocket.server.gotUserAnswer(self.testingProfileId, data);
+                    //self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                 },
                 error: function (er) {
-                    self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
+                    //self.socket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: false, gotUserAnswer: true, Id: data }));
                 }
             });
         },

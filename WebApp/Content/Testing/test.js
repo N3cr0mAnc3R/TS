@@ -24,7 +24,6 @@
         },
         adminPaused: false,
         unloadedImage: "", //Если вопрос много весит, то загружаем по кусочкам
-        buffer: {},
         intervalConnection: null,
         intervalConnectionLost: null,
         recordedCamera: [],
@@ -217,7 +216,6 @@
                     self.testing = info.IsForTesting;
                     if (!self.testing) {
                         //  alert('start socket');
-                        self.initVideoSocket();
                         self.isCameraControl = info.IsCameraControl;
                         if (!self.isFireFox) {
                             // alert('start init webcam');
@@ -1035,6 +1033,22 @@
                     }
                 }
             }
+            self.streamSocket.client.requestLoadFile = function () {
+                self.saveQrCode();
+                self.openedQRPage = true;
+            }
+            self.streamSocket.client.gotUserAnswer = function (Id) {
+                $.ajax({
+                    url: "/api/user/GetUserAnswer?Id=" + Id,
+                    type: "POST",
+                    async: true,
+                    success: function (data) {
+                        self.selectedQuestion.fileId = message.Id;
+                        self.selectedQuestion.answerImage = data;
+                        self.selectedQuestion.answered = true;
+                    }
+                });
+            }
         },
         subscribeEnter: function () {
             var self = this;
@@ -1048,102 +1062,6 @@
         isMe: function (message) {
             var self = this;
             return message.UserIdFrom == self.currentUser || message.IsSender;
-        },
-        initVideoSocket: function () {
-            var self = this;
-
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.videoSocket = new WebSocket("wss://" + window.location.hostname + "/streamhandler.ashx");
-            //} else {
-            //    self.videoSocket = new MozWebSocket("wss://" + window.location.hostname + "/streamhandler.ashx");
-            //}
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.videoSocket = new WebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-            //} else {
-            //    self.videoSocket = new MozWebSocket("ws://" + window.location.hostname + "/StreamHandler.ashx");
-            //}
-            if (typeof (WebSocket) !== 'undefined') {
-                try {
-                    self.videoSocket = new WebSocket(self.domain + "/StreamHandler.ashx");
-                }
-                catch {
-                    notifier([{ Type: 'error', Body: self.switchLocal(16) }]);
-                }
-            } else {
-                try {
-                    self.videoSocket = new MozWebSocket(self.domain + "/StreamHandler.ashx");
-                }
-                catch {
-                    notifier([{ Type: 'error', Body: self.switchLocal(16) }]);
-                }
-            }
-            self.videoSocket.onopen = function () {
-                //console.log('init videosocket');
-                self.videoSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                self.videoSocket.send(JSON.stringify({ TestingProfileId: self.testingProfileId, IsSender: true, startOffer: true }));
-            };
-
-            self.videoSocket.onmessage = function (msg) {
-                var message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-
-                if (!message.IsSender) {
-                    if (message.candidate && message.candidate != '{}') {
-                        var candidate = new RTCIceCandidate(JSON.parse(message.candidate));
-                        //self.queue.push(candidate);
-
-
-                        var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                        //console.log(queue.candidates);
-                        queue.candidates.push(candidate);
-                    }
-                    else if (message.requestOffer) {
-                        console.log(message.typeOffer);
-                        self.initRTCPeer(message.typeOffer, message.uid);
-                    }
-                    else if (message.requestLoadFile) {
-                        self.saveQrCode();
-                        self.openedQRPage = true;
-                    }
-                    else if (message.gotUserAnswer) {
-                        $.ajax({
-                            url: "/api/user/GetUserAnswer?Id=" + message.Id,
-                            type: "POST",
-                            async: true,
-                            success: function (data) {
-                                self.selectedQuestion.fileId = message.Id;
-                                self.selectedQuestion.answerImage = data;
-                                self.selectedQuestion.answered = true;
-                            }
-                        });
-                    }
-                    else if (message.answer) {
-                        //var interval = setInterval(function () {
-                        //console.log('start interval');
-                        var found = self.peers.filter(function (item) { return item.type == message.type && item.uid == message.uid; })[0];
-                        //console.log('found', found);
-                        if (found) {
-                            //  clearInterval(interval);
-                            var peer = found.peer;
-                            peer.setRemoteDescription(new RTCSessionDescription(JSON.parse(message.answer)), function (r) {
-
-                                var queue = self.queue.filter(function (item) { return item.type == message.type; })[0];
-                                queue.candidates.forEach(function (candidate) {
-                                    peer.addIceCandidate(candidate);
-                                });
-                                //console.log(r);
-                            }, function (r) { console.log(r); });
-
-
-                        }
-                        // }, 500);
-                    }
-                }
-            };
-
-            self.videoSocket.onclose = function () {
-                //console.log('close video');
-                self.initVideoSocket();
-            }
         },
         reInitPeers: function () {
             var self = this;
