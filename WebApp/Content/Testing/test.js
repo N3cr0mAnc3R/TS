@@ -158,6 +158,7 @@
             self.selectedQuestion = {};
             var str = window.location.href;
             var newId = parseInt(str.substr(str.lastIndexOf('Id=') + 3));
+            self.chat.testingProfileId = newId;
             window.onerror = function (errorInfo, url, lineNumber) {
                 $.ajax({
                     url: "/api/user/SaveError",
@@ -844,6 +845,9 @@
             }
             self.initStreamSignal();
             self.getMessages(self.testingProfileId);
+            $.connection.hub.reconnecting(function () {
+                location.reload();
+            });
             $.connection.hub.start().done(function () {
                 self.chatSocket.server.connect(self.testingProfileId, false);
                 self.streamSocket.server.connect(self.testingProfileId, false);
@@ -851,64 +855,6 @@
                 console.error(exc);
             });
 
-        },
-        initChat: function () {
-            var self = this;
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.chatSocket = new WebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-            //} else {
-            //    self.chatSocket = new MozWebSocket("wss://" + window.location.hostname + "/ChatHandler.ashx");
-            //}
-            if (typeof (WebSocket) !== 'undefined') {
-                self.chatSocket = new WebSocket(self.domain + "/ChatHandler.ashx");
-            } else {
-                self.chatSocket = new MozWebSocket(self.domain + "/ChatHandler.ashx");
-            }
-            //if (typeof (WebSocket) !== 'undefined') {
-            //    self.chatSocket = new WebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-            //} else {
-            //    self.chatSocket = new MozWebSocket("ws://" + window.location.hostname + "/ChatHandler.ashx");
-            //}
-            self.chatSocket.onopen = function () {
-                self.chatSocket.send(JSON.stringify({ ForCreate: true, TestingProfileId: self.testingProfileId }));
-                self.getMessages(self.testingProfileId);
-            };
-            self.chatSocket.onmessage = function (msg) {
-                //self.messages.push(msg);
-                var message;
-                if (msg.data.indexOf("\0") != -1) {
-                    message = JSON.parse(msg.data.substr(0, msg.data.indexOf("\0")));
-                }
-                else {
-                    message = JSON.parse(msg.data);
-                }
-                message.Date = new Date(Number(message.Date.substr(message.Date.indexOf('(') + 1, message.Date.indexOf(')') - message.Date.indexOf('(') - 1)));
-
-                $('#msg-audio')[0].play();
-                self.chat.messages.push(message);
-
-                if (!message.IsSender) {
-                    notifier([{ Type: 'success', Body: message.Message }]);
-                }
-                var maxId = 0;
-                self.chat.messages.forEach(function (msg) {
-                    maxId = msg.Id > maxId ? msg.Id : maxId;
-                });
-                if (maxId != 0) {
-                    setTimeout(function () {
-                        $('#message-' + maxId)[0].scrollIntoView();
-                    }, 20);
-                }
-
-                if (!self.chat.IsOpened) {
-                    self.unreadCount++;
-                }
-            };
-            self.chatSocket.onclose = function (event) {
-                self.initChat();
-                //console.log('oh-oh');
-                // alert('Мы потеряли её. Пожалуйста, обновите страницу');
-            };
         },
         initStreamSignal() {
             let self = this;
@@ -922,10 +868,22 @@
                 self.finishTest();
             }
             self.streamSocket.client.reconnectCamera = function (uid) {
-                //self.initRTCPeer(uid);
+                self.countOfAttemptScreen = 0;
+                var found = self.peers.filter(function (item) { return item.type == 1 && item.uid == uid; })[0];
+                if (found) {
+                    found.peer.close();
+                    found.peer = null;
+                }
+                self.initRTCPeer(1, guid);
             }
             self.streamSocket.client.reconnectScreen = function (uid) {
-
+                self.countOfAttemptScreen = 0;
+                var found = self.peers.filter(function (item) { return item.type == 2 && item.uid == uid; })[0];
+                if (found) {
+                    found.peer.close();
+                    found.peer = null;
+                }
+                self.initRTCPeer(2, guid);
             }
             self.streamSocket.client.requestReload = function () {
                 location.href = location.href;
@@ -990,12 +948,12 @@
                     case 6: errorBody = self.switchLocal(44); break;
                     default: errorBody = self.switchLocal(45);
                 }
-                notifier([{ Type: 'error', Body: errorBody }]);
 
                 $('.main-wrapper').addClass('shaker-shaker');
                 setTimeout(function () {
                     $('.main-wrapper').removeClass('shaker-shaker');
-                }, 2000)
+                }, 2000);
+                notifier([{ Type: 'error', Body: errorBody }]);
             }
             self.streamSocket.client.sendAnswer = function (Answer, Type, guid) {
                 var found = self.peers.filter(function (item) { return item.type == Type && item.uid == guid; })[0];
@@ -1616,48 +1574,48 @@
             };
 
             var configuration = {
-                iceServers: [{ url: 'stun:stun01.sipphone.com' },
-                { url: 'stun:stun.ekiga.net' },
-                { url: 'stun:stun.fwdnet.net' },
-                { url: 'stun:stun.ideasip.com' },
-                { url: 'stun:stun.iptel.org' },
-                { url: 'stun:stun.rixtelecom.se' },
-                { url: 'stun:stun.schlund.de' },
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' },
-                { url: 'stun:stun2.l.google.com:19302' },
-                { url: 'stun:stun3.l.google.com:19302' },
-                { url: 'stun:stun4.l.google.com:19302' },
-                { url: 'stun:stunserver.org' },
-                { url: 'stun:stun.softjoys.com' },
-                { url: 'stun:stun.voiparound.com' },
-                { url: 'stun:stun.voipbuster.com' },
-                { url: 'stun:stun.voipstunt.com' },
-                { url: 'stun:stun.voxgratia.org' },
-                { url: 'stun:stun.xten.com' },
-                { url: 'STUN:turn.ncfu.ru:9003' },
+                iceServers: [{ urls: 'stun:stun01.sipphone.com' },
+                    { urls: 'stun:stun.ekiga.net' },
+                    { urls: 'stun:stun.fwdnet.net' },
+                    { urls: 'stun:stun.ideasip.com' },
+                    { urls: 'stun:stun.iptel.org' },
+                    { urls: 'stun:stun.rixtelecom.se' },
+                    { urls: 'stun:stun.schlund.de' },
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    { urls: 'stun:stunserver.org' },
+                    { urls: 'stun:stun.softjoys.com' },
+                    { urls: 'stun:stun.voiparound.com' },
+                    { urls: 'stun:stun.voipbuster.com' },
+                    { urls: 'stun:stun.voipstunt.com' },
+                    { urls: 'stun:stun.voxgratia.org' },
+                    { urls: 'stun:stun.xten.com' },
+                    { urls: 'STUN:turn.ncfu.ru:9003' },
                 {
-                    url: 'turn:numb.viagenie.ca',
+                    urls: 'turn:numb.viagenie.ca',
                     credential: 'muazkh',
                     username: 'webrtc@live.com'
                 },
                 {
-                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    urls: 'turn:192.158.29.39:3478?transport=udp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
                 },
                 {
-                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    urls: 'turn:192.158.29.39:3478?transport=tcp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
                 },
                 {
-                    url: 'turn:turn.bistri.com:80',
+                    urls: 'turn:turn.bistri.com:80',
                     credential: 'homeo',
                     username: 'homeo'
                 },
                 {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
                     credential: 'webrtc',
                     username: 'webrtc'
                 },

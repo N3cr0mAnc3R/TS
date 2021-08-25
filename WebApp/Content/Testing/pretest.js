@@ -83,7 +83,7 @@
                                 success: function (info) {
                                     //self.domain = domain;
                                     self.TURN = {
-                                        url: 'turn:turn.ncfu.ru:8443',
+                                        urls: 'turn:turn.ncfu.ru:8443',
                                         credential: info.Password,
                                         username: info.Login
                                     };
@@ -146,129 +146,134 @@
                     }
                 }
             })
+            self.findTests();
             self.findTestInterval = setInterval(function () {
-                self.loadObject.loading = true;
-                self.loadObject.loaded = false;
-                $.ajax({
-                    type: 'POST',
-                    dataType: 'json',
-                    url: '/api/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
-                    success: function (d) {
-                        if (d.Error) {
-                            localStorage.removeItem('placeConfig');
-                            clearInterval(self.findTestInterval);
-                            self.hasPlaceConfig = false;
-                            location.reload();
-                            return;
-                        }
-                        if (d.length == 0) {
-                            self.tests = [];
-                            //localStorage.removeItem('placeConfig');
-                            return;
-                        }
-                        //Отобразить дату в корректном формате
-                        //d.forEach(a => {
-                        //    var date = new Date(Number(a.TestingDate.substr(a.TestingDate.indexOf('(') + 1, a.TestingDate.indexOf(')') - a.TestingDate.indexOf('(') - 1)));
-                        //    a.TestingDate = date.toLocaleString('Ru-ru');
-                        //});
-                        var flag = false;
-                        var min = 0;
-                        //Запись и отображение доступных тестов
-                        if (!self.tests) {
-                            //self.tests = d;
-                            self.tests = d.filter(function (a) { return !a.IsForTesting; });
-                            self.testingTests = d.filter(function (a) { return a.IsForTesting; });
-                            var activeTests = self.testingTests.filter(function (item) { return item.TestingStatusId === 2; });
-                            if (activeTests.length > 0) {
-                                activeTests.forEach(function (test) {
-                                    $.ajax({
-                                        type: 'POST',
-                                        dataType: 'json',
-                                        url: '/api/user/FinishTest?Id=' + test.Id,
-                                        success: function (d) {
-                                            test.TestingStatusId = 3;
-                                        }
-                                    });
-                                });
-                            }
-                            //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
-                            //console.log(window.URL);
-                            //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
-                            min = self.tests.length > 0 ? self.tests[0].Id : 0;
-                            //console.log(min);
-                            self.tests.forEach(function (item) {
-                                min = min > item.Id ? item.Id : min;
-                                if (item.DisciplineName == 'Испытание творческой направленности (Журналистика)') {
-                                    self.artFlag = true;
-                                }
-                            })
-                            //console.log(self.artFlag);
-                            //var min = d[0].Id;
-                            //d.forEach(function (item) {
-                            //    min = min > item.Id ? item.Id : min;
-                            //})
-                            self.testingProfileId = min;// d[0].Id;
-                            if (min != 0) {
-                                console.log(self.tests);
-                                let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
-                                if (founded) {
-                                    console.log(founded);
-                                    self.initWebCam();
-                                    self.initChatSignal(founded);
-                                }
-                                else {
-                                    self.verified = true;
-                                }
-                                clearInterval(self.findTestInterval);
-                            }
-                            self.loadObject.loading = false;
-                            self.loadObject.loaded = true;
-                            //self.initRTCPeer();
-                        }
-                        else {
-                            console.log('else', d);
-                            d.forEach(function (test) {
-                                var founded = self.tests.filter(function (atest) { return atest.Id == test.Id; })[0];
-                                //console.log('founded', founded);
-                                if (!founded) {
-                                    //console.log('!founded', test);
-                                    if (!test.IsForTesting) {
-                                        //console.log('flag', test);
-                                        self.tests.push(test);
-                                        flag = true;
+                self.findTests();
+            }, 5000);
+        },
+        findTests() {
+            let self = this;
+            self.loadObject.loading = true;
+            self.loadObject.loaded = false;
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                url: '/api/user/GetTests?PlaceConfig=' + encodeURIComponent(localStorage['placeConfig']),
+                success: function (d) {
+                    if (d.Error) {
+                        localStorage.removeItem('placeConfig');
+                        clearInterval(self.findTestInterval);
+                        self.hasPlaceConfig = false;
+                        location.reload();
+                        return;
+                    }
+                    if (d.length == 0) {
+                        self.tests = [];
+                        //localStorage.removeItem('placeConfig');
+                        return;
+                    }
+                    //Отобразить дату в корректном формате
+                    //d.forEach(a => {
+                    //    var date = new Date(Number(a.TestingDate.substr(a.TestingDate.indexOf('(') + 1, a.TestingDate.indexOf(')') - a.TestingDate.indexOf('(') - 1)));
+                    //    a.TestingDate = date.toLocaleString('Ru-ru');
+                    //});
+                    var flag = false;
+                    var min = 0;
+                    //Запись и отображение доступных тестов
+                    if (!self.tests) {
+                        //self.tests = d;
+                        self.tests = d.filter(function (a) { return !a.IsForTesting; });
+                        self.testingTests = d.filter(function (a) { return a.IsForTesting; });
+                        var activeTests = self.testingTests.filter(function (item) { return item.TestingStatusId === 2; });
+                        if (activeTests.length > 0) {
+                            activeTests.forEach(function (test) {
+                                $.ajax({
+                                    type: 'POST',
+                                    dataType: 'json',
+                                    url: '/api/user/FinishTest?Id=' + test.Id,
+                                    success: function (d) {
+                                        test.TestingStatusId = 3;
                                     }
-                                }
+                                });
                             });
                         }
-                        //Информация о человеке, проходящим тест
-                        self.user = d[0].LastName + " " + d[0].FirstName + " " + d[0].MiddleName;
-                        //Если назначен тест, то больше не загружать
-                        if (flag) {
-                            min = self.tests[0].Id;
-                            self.tests.forEach(function (item) {
-                                min = min > item.Id ? item.Id : min;
-                            })
-                            self.testingProfileId = min;// d[0].Id;
-                            if (min != 0) {
-                                let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
-                                if (founded) {
-                                    console.log(founded);
-                                    self.initWebCam();
-                                }
-                                else {
-                                    self.verified = true;
-                                }
-                                clearInterval(self.findTestInterval);
+                        //navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+                        //console.log(window.URL);
+                        //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL || webkitURL.createObjectURL() || URL.createObjectURL();
+                        min = self.tests.length > 0 ? self.tests[0].Id : 0;
+                        //console.log(min);
+                        self.tests.forEach(function (item) {
+                            min = min > item.Id ? item.Id : min;
+                            if (item.DisciplineName == 'Испытание творческой направленности (Журналистика)') {
+                                self.artFlag = true;
+                            }
+                        })
+                        //console.log(self.artFlag);
+                        //var min = d[0].Id;
+                        //d.forEach(function (item) {
+                        //    min = min > item.Id ? item.Id : min;
+                        //})
+                        self.testingProfileId = min;// d[0].Id;
+                        if (min != 0) {
+                            console.log(self.tests);
+                            let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
+                            if (founded) {
+                                console.log(founded);
+                                self.initWebCam();
+                                self.initChatSignal(founded);
+                            }
+                            else {
+                                self.verified = true;
                             }
                             clearInterval(self.findTestInterval);
                         }
-                    },
-                    error: function (e) {
-                        console.log(e);
-
+                        self.loadObject.loading = false;
+                        self.loadObject.loaded = true;
+                        //self.initRTCPeer();
                     }
-                });
-            }, 5000);
+                    else {
+                        console.log('else', d);
+                        d.forEach(function (test) {
+                            var founded = self.tests.filter(function (atest) { return atest.Id == test.Id; })[0];
+                            //console.log('founded', founded);
+                            if (!founded) {
+                                //console.log('!founded', test);
+                                if (!test.IsForTesting) {
+                                    //console.log('flag', test);
+                                    self.tests.push(test);
+                                    flag = true;
+                                }
+                            }
+                        });
+                    }
+                    //Информация о человеке, проходящим тест
+                    self.user = d[0].LastName + " " + d[0].FirstName + " " + d[0].MiddleName;
+                    //Если назначен тест, то больше не загружать
+                    if (flag) {
+                        min = self.tests[0].Id;
+                        self.tests.forEach(function (item) {
+                            min = min > item.Id ? item.Id : min;
+                        })
+                        self.testingProfileId = min;// d[0].Id;
+                        if (min != 0) {
+                            let founded = self.tests.find(function (atest) { return atest.IsCameraControl == true; });
+                            if (founded) {
+                                console.log(founded);
+                                self.initWebCam();
+                            }
+                            else {
+                                self.verified = true;
+                            }
+                            clearInterval(self.findTestInterval);
+                        }
+                        clearInterval(self.findTestInterval);
+                    }
+                },
+                error: function (e) {
+                    console.log(e);
+
+                }
+            });
         },
         startPlaceConfigInterval: function () {
             var self = this;
@@ -320,6 +325,7 @@
         },
         initStreamSignal() {
             let self = this;
+            console.log('init str signal');
             self.streamSocket = $.connection.StreamHub;
 
             self.streamSocket.url = '../signalr';
@@ -332,7 +338,8 @@
                 window.open('/account/logout', '_self');
             }
             self.streamSocket.client.requestOffer = function (Type, guid) {
-                if (self.cameraStream) {
+                console.log('try request');
+                if (self.stream) {
                     self.initRTCPeer(guid);
                 }
                 else {
@@ -409,6 +416,7 @@
                 }).catch(
                     function (er) {/*callback в случае отказа*/
                         notifier([{ Type: 'error', Body: self.switchLocal(8) }]);
+                        notifier([{ Type: 'error', Body: er }]);
                        // alert(self.switchLocal(8));
                         self.enabled = false;
                     });
@@ -574,7 +582,7 @@
             }
         },
         initRTCPeer: function (uid) {
-            //console.log('init rtcpeer');
+            console.log('init rtcpeer');
             var self = this;
             var TURN = {
                 url: 'turn:turn.bistri.com:80',
@@ -583,48 +591,48 @@
             };
 
             var configuration = {
-                iceServers: [{ url: 'stun:stun01.sipphone.com' },
-                { url: 'stun:stun.ekiga.net' },
-                { url: 'stun:stun.fwdnet.net' },
-                { url: 'stun:stun.ideasip.com' },
-                { url: 'stun:stun.iptel.org' },
-                { url: 'stun:stun.rixtelecom.se' },
-                { url: 'stun:stun.schlund.de' },
-                { url: 'stun:stun.l.google.com:19302' },
-                { url: 'stun:stun1.l.google.com:19302' },
-                { url: 'stun:stun2.l.google.com:19302' },
-                { url: 'stun:stun3.l.google.com:19302' },
-                { url: 'stun:stun4.l.google.com:19302' },
-                { url: 'stun:stunserver.org' },
-                { url: 'stun:stun.softjoys.com' },
-                { url: 'stun:stun.voiparound.com' },
-                { url: 'stun:stun.voipbuster.com' },
-                { url: 'stun:stun.voipstunt.com' },
-                { url: 'stun:stun.voxgratia.org' },
-                { url: 'stun:stun.xten.com' },
-                { url: 'STUN:turn.ncfu.ru:9003' },
+                iceServers: [{ urls: 'stun:stun01.sipphone.com' },
+                    { urls: 'stun:stun.ekiga.net' },
+                    { urls: 'stun:stun.fwdnet.net' },
+                    { urls: 'stun:stun.ideasip.com' },
+                    { urls: 'stun:stun.iptel.org' },
+                    { urls: 'stun:stun.rixtelecom.se' },
+                    { urls: 'stun:stun.schlund.de' },
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' },
+                    { urls: 'stun:stunserver.org' },
+                    { urls: 'stun:stun.softjoys.com' },
+                    { urls: 'stun:stun.voiparound.com' },
+                    { urls: 'stun:stun.voipbuster.com' },
+                    { urls: 'stun:stun.voipstunt.com' },
+                    { urls: 'stun:stun.voxgratia.org' },
+                    { urls: 'stun:stun.xten.com' },
+                    { urls: 'STUN:turn.ncfu.ru:9003' },
                 {
-                    url: 'turn:numb.viagenie.ca',
+                    urls: 'turn:numb.viagenie.ca',
                     credential: 'muazkh',
                     username: 'webrtc@live.com'
                 },
                 {
-                    url: 'turn:192.158.29.39:3478?transport=udp',
+                    urls: 'turn:192.158.29.39:3478?transport=udp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
                 },
                 {
-                    url: 'turn:192.158.29.39:3478?transport=tcp',
+                    urls: 'turn:192.158.29.39:3478?transport=tcp',
                     credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
                     username: '28224511:1379330808'
                 },
                 {
-                    url: 'turn:turn.bistri.com:80',
+                    urls: 'turn:turn.bistri.com:80',
                     credential: 'homeo',
                     username: 'homeo'
                 },
                 {
-                    url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                    urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
                     credential: 'webrtc',
                     username: 'webrtc'
                 },
@@ -634,22 +642,17 @@
             peer.addEventListener('icecandidate', function (e) {
                 self.onIceCandidate(e, uid);
             });
-            //peer.addEventListener('iceconnectionstatechange', function (e) {
-            //    self.onIceStateChange(self.pc1, e);
-            //});
-            //peer.addEventListener('connectionstatechange', function (event) {
-            //    console.log(peer.connectionState);
-            //});
+
             if (!self.stream) {
                 peer.close();
                 peer = null;
                 setTimeout(function () { self.initRTCPeer(uid) }, 500);
                 return;
             }
-            stream.getTracks().forEach(function (track) {
-                peer.addTrack(track, stream);
+            self.stream.getTracks().forEach(function (track) {
+                peer.addTrack(track, self.stream);
             });
-            //app.videoSocket.send(JSON.stringify({ IsSender: true, TestingProfileId: app.testingProfileId, uid: uid }));
+
             var found = self.peers.filter(function (item) { return item.uid == uid; })[0];
             if (found) {
                 found.peer.close();
@@ -659,6 +662,7 @@
                 self.peers.push({ peer: peer, uid: uid });
             }
             try {
+                console.log('try');
                 peer.createOffer(function (offer) {
                     peer.setLocalDescription(offer, function () {
                         self.streamSocket.server.sendOffer(app.testingProfileId, offer, 1, uid);

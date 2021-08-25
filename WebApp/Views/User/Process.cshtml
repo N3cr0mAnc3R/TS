@@ -159,10 +159,10 @@
             <div :class="{'text-center': !shownVideos, 'text-right': shownVideos}" class="control" v-on:click="shownVideos = !shownVideos"><span v-if="!shownVideos"></span><span><span v-if="shownVideos">{{switchLocal(14)}}</span><span v-if="!shownVideos">@*{{switchLocal(15)}}*@</span><i class="fa" v-bind:class="{'fa-minus' : shownVideos, 'fa-angle-up' : !shownVideos }"></i></span></div>
             <div class="video">
                 <div class="camera-wrapper">
-                    <video id="video1" autoplay="autoplay" muted></video>
+                    <video id="video1" playsinline autoplay="autoplay" muted></video>
                 </div>
                 <div class="screen-wrapper">
-                    <video id="video2" autoplay="autoplay" muted></video>
+                    <video id="video2" playsinline autoplay="autoplay" muted></video>
                 </div>
             </div>
         </div>
@@ -286,4 +286,4 @@
     <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
 </div>
 
-<script src="~/Content/Testing/test.js?28"></script>
+<script src="~/Content/Testing/test.js?31"></script>

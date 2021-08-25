@@ -123,7 +123,7 @@
                         <div><button v-on:click="getUserList()" v-bind:disabled="!currentDate || currentStatus == -1">Отфильтровать</button></div>
                     </div>
                     <div class="selection">
-                        <div><button v-on:click="sendReload()">Перезагрузить</button></div>
+                        <div><button v-on:click="sendReloadForAll()">Перезагрузить</button></div>
                         <div><button v-on:click="ResetServer()">Сбросить сервер</button></div>
                     </div>
                 </div>
@@ -242,7 +242,7 @@
                     <button v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(5)}}</button>
                     <button v-on:click="resetPlace()" v-if="currentUser.TestingStatusId == 5">{{switchLocal(8)}}</button>
                     <button v-on:click="reconnectCamera()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(14)}}</button>
-                    <button v-on:click="reconnect2()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
+                    <button v-on:click="reconnectScreen()" v-if="currentUser.TestingStatusId == 2">{{switchLocal(15)}}</button>
                     <button class="reload" v-on:click="sendReload()" v-if="isSuperAdmin && currentUser.TestingStatusId == 2">Перезагрузить</button>
                     @*<button class="reload" v-on:click="deletePreliminary(currentUser.TestingProfileId)" v-if="isSuperAdmin" title="Удалить пробные"><i class="fa fa-times"></i></button>*@
                     <button data-dismiss="full-wrapper" v-on:click="getInfoForAdmin()" v-if="isSuperAdmin" title="Открыть"><i class="fa fa-folder-open"></i></button>
@@ -261,4 +261,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?17"></script>
+<script src="~/Content/Auditory/moderate.js?19"></script>

@@ -84,7 +84,7 @@
                     </div>
                 </div>
             </template>
-            <div class="not-test" v-loader="loadObject">
+            <div class="not-test" v-loader="loadObject" v-if="testingTests.length > 0">
                 <div class="user-info">
                     <div class="user-either">{{switchLocal(9)}}:</div>
                 </div>
@@ -228,4 +228,4 @@
 </div>
 
 <script src="~/Content/aes.js"></script>
-<script src="~/Content/Testing/pretest.js?2"></script>
+<script src="~/Content/Testing/pretest.js?4"></script>

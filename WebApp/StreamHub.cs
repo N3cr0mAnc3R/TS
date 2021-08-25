@@ -21,19 +21,20 @@ namespace WebApp
             if (!Users.ContainsKey(TestingProfileId))
             {
                 Users.Add(TestingProfileId, new List<string>() { id });
-                //Clients.All.onNewUserConnected(TestingProfileId, IsAdmin);
+                Clients.All.onNewUserConnected(TestingProfileId, IsAdmin);
             }
-            //Если профиль есть, то просто уведомляем всех, кто связан с этим профилем
-            List<string> founded = Users.Where(a => a.Key == TestingProfileId).FirstOrDefault().Value;
-
-            if (!founded.Contains(id))
+            else
             {
-                founded.Add(id);
+                //Если профиль есть, то просто уведомляем всех, кто связан с этим профилем
+                List<string> founded = Users.Where(a => a.Key == TestingProfileId).FirstOrDefault().Value;
+
+                if (!founded.Contains(id))
+                {
+                    founded.Add(id);
+                }
+
+                Clients.Clients(founded).onNewUserConnected(TestingProfileId, IsAdmin);
             }
-
-            //Уведомляем, что подключился новый чувак. Если это абитуриент, то надо будет его попросить камеру и экран
-            Clients.Clients(founded).onNewUserConnected(TestingProfileId, IsAdmin);
-
 
         }
         //Подтвердить насильно пользователя

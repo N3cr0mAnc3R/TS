@@ -33,7 +33,11 @@
                     <td>{{human.Id}}</td>
                     <td>{{human.Name}}</td>
                     <td class="user-select-all">{{human.Guid}}</td>
-                    <td v-if="hasFullAccess"> <button title="Назначить ВИ" v-on:click="openNewTestWindow(human)"> <i class="fa fa-calendar-check"></i></button></td>
+                    <td v-if="hasFullAccess"> 
+                    <button title="Назначить ВИ" v-on:click="openNewTestWindow(human)"> <i class="fa fa-calendar-check"></i></button>
+                    <button title="Опа" v-on:click="openFull(human)"> <i class="fa fa-camera-retro"></i></button>
+                    
+                    </td>
                 </tr>
             </table>
         </div>
@@ -140,7 +144,46 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="button"  v-on:click="closePhoto()" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    <button type="button" v-on:click="closePhoto()" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="full-wrapper" tabindex="-1" role="dialog" aria-labelledby="title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" v-if="currentUser">
+                <div class="modal-header text-center">
+                    <h5 class="modal-title" id="title">{{currentUser.Name}} <span v-if="currentUser.TimeLeft"> ({{showTimeLeft()}})</span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="video-list-wrapper">
+                        <div class="videos-wrapper">
+                            <video id="full-video-camera" autoplay muted controls></video>
+                            <video id="full-video-screen" autoplay muted controls></video>
+                        </div>
+                        <div class="photo-wrapper">
+                            <img id="full-video-photo" v-bind:src="'data:image/png;base64, ' + currentUser.picture" width="280" />
+                        </div>
+                    </div>
+                   
+                    <button v-on:click="togglePause()" v-if="currentUser.TestingStatusId == 2"><div v-if="!currentUser.IsPause">Не пауза</div><div v-if="currentUser.IsPause">Пауза</div></button>
+                    <button v-on:click="verifyUser(false)" v-if="currentUser.TestingStatusId == 5">Отклонить</button>
+                    <button v-on:click="verifyUser(true)" v-if="currentUser.TestingStatusId == 5">Подтвердить</button>
+                    <button v-on:click="finishTest()" v-if="currentUser.TestingStatusId == 2">Завершить</button>
+                    <button v-on:click="reconnectCamera()" v-if="currentUser.TestingStatusId == 2">Переподключиться</button>
+                    <button v-on:click="reconnectScreen()" v-if="currentUser.TestingStatusId == 2">Переподключиться</button>
+                    <button class="reload" v-on:click="sendReload()" v-if="hasFullAccess && currentUser.TestingStatusId == 2">Перезагрузить</button>
+                    <button v-on:click="collapseVideo()" v-if="hasFullAccess" title="Открыть"><i class="fa fa-minus-square"></i></button>
+                    <button v-on:click="toggleUserChat()" v-if="hasFullAccess" title="открыть его чат"><i class="fa fa-comment-dots"></i></button>
+                    <button v-on:click="setCameraTrue()" v-if="hasFullAccess" title="Убрать доступ к камере"><i class="fa fa-camera"></i></button>
+                    <button v-on:click="resetCapture()" v-if="hasFullAccess" title="Перезапустить доступ к экрану"><i class="fa fa-desktop"></i></button>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
                 </div>
             </div>
         </div>

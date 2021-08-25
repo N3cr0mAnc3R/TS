@@ -13,8 +13,11 @@
         currentTest: {},
         places: [],
         disciplines: [],
+        currentUser: null,
         newDate: null,
+        streamSocket: null,
         textForShow: null,
+        currentUid:'',
         assignedModel: {
             DisciplineId: null,
             UserId: null,
@@ -54,7 +57,7 @@
                 }
             })
             this.getAuditoriums();
-
+            self.initStreamSignal();
             let foreignQuery = location.href.split('=');
             if (foreignQuery.length > 1) {
                 self.fromExternal = true;
@@ -76,6 +79,12 @@
                 $('#fio').focus();
             }, 200)
 
+        },
+        uuidv4: function () {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
         },
         findByFIO: function (Id) {
             var self = this;
@@ -129,6 +138,232 @@
         },
         download1: function (item, Id) {
             window.open('/auditory/DownloadReport?Id=' + item.Id + '&Type=' + Id, '_blank');
+        },
+        initStreamSignal() {
+            let self = this;
+            self.streamSocket = $.connection.StreamHub;
+            $.connection.hub.url = "../signalr";
+            //$.connection.hub.proxy = 'ChatHub';
+
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+
+            $.connection.hub.disconnected(function () {
+                setTimeout(function () {
+                    //Connect to hub again
+                    $.connection.hub.start();
+                }, 3000);
+            });
+
+            $.connection.hub.reconnecting(function () {
+                location.reload();
+            });
+
+            self.streamSocket.client.onNewUserConnected = function (testingProfileId, isAdmin) {
+                if (!isAdmin) {
+                    //self.loadPlace(testingProfileId);
+                }
+            }
+            self.streamSocket.client.sendTimeLeft = function (TimeLeft) {
+                if (self.currentUser) {
+                    self.currentUser.TimeLeft = TimeLeft;
+                }
+            }
+            self.streamSocket.client.sendOffer = function (Id, Offer, Type, guid) {
+
+                if (guid != self.currentUid) {/////////
+                    return;
+                }
+                let info = null;
+                if (Type == 1) {
+                    info = self.currentUser.cameraInfo;
+                }
+                else {
+                    info = self.currentUser.screenInfo;
+                }
+                let peer = info.peer;
+                //  peer.addStream(stream);
+                peer.setRemoteDescription(new RTCSessionDescription(Offer), function () {
+                    peer.createAnswer(function (answer) {
+                        peer.setLocalDescription(answer, function () {
+                            self.streamSocket.server.sendAnswer(Id, answer, Type, self.currentUid);
+                        }, function (r) { console.log(r); });
+                    }, function (r) { console.log(r); });
+                }, function (r) { console.log(r); });
+            }
+            self.streamSocket.client.sendIceCandidate = function (Id, Type, candidate, guid, IsAdmin) {
+                if (guid != self.currentUid || IsAdmin) {
+                    return;
+                }
+                let info = null;
+                if (Type == 1) {
+                    info = self.currentUser.cameraInfo;
+                }
+                else {
+                    info = self.currentUser.screenInfo;
+                }
+                let peer = info.peer;
+                peer.addIceCandidate(candidate);
+            }
+            self.streamSocket.client.onUserDisconnected = function (testingProfileId) {
+                //self.loadPlace(testingProfileId);
+
+            }
+            $.connection.hub.start().done(function () {
+            }).fail(function (exc) {
+                console.error(exc);
+            })
+        },
+        openFull: function (user) {
+            let self = this;
+            event.stopPropagation();
+            self.currentUser = user;
+
+            console.log(self.currentUser);
+            let min = 99999999;
+            let hasStarted = false;
+
+            self.currentUser.disciplines.forEach(
+                function (a) {
+                    min = (a.Id < min && a.StatusId == 5 && !hasStarted) ? a.Id : min;
+                    if (a.StatusId == 2) {
+                        hasStarted = true;
+                        min = a.Id;
+                    }
+                });
+            self.currentUser.TestingProfileId = min;
+            if (hasStarted) {
+                self.currentUser.TestingStatusId = 2;
+                self.streamSocket.server.connect(min, true);
+
+                self.currentUser.cameraInfo = {
+                    peer: self.initRTCPeer(1)
+                };
+                self.currentUser.screenInfo = {
+                    peer: self.initRTCPeer(2)
+                }
+
+                self.streamSocket.server.requestOffer(min, 1, self.currentUid);
+                self.streamSocket.server.requestOffer(min, 2, self.currentUid);
+            }
+            else if (min != 99999999) {
+                self.currentUser.TestingStatusId = 5;
+                self.currentUser.cameraInfo = {
+                    peer: self.initRTCPeer(1)
+                };
+                self.currentUser.screenInfo = {
+                    peer: self.initRTCPeer(2)
+                }
+                self.streamSocket.server.connect(min, true);
+                self.streamSocket.server.requestOffer(min, 1, self.currentUid);
+                self.streamSocket.server.requestOffer(min, 2, self.currentUid);
+            }
+            console.log(min);
+            $('#full-wrapper').modal('toggle');
+            ////console.log(self.currentUser);
+            //setTimeout(function () {
+            //    $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-1')[0].srcObject;
+            //    $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
+            //}, 500)
+            //console.log(user);
+        },
+        initRTCPeer: function (type) {
+            let self = this;
+            let configuration = {
+                iceServers: [
+                    { urls: 'stun:stun01.sipphone.com' },
+                    { urls: 'stun:stun.ekiga.net' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stunserver.org' },
+                    { urls: 'stun:stun.voiparound.com' },
+                    {
+                        urls: 'turn:numb.viagenie.ca',
+                        credential: 'muazkh',
+                        username: 'webrtc@live.com'
+                    }
+                    //TURN
+                ]
+            };
+            let peer = new RTCPeerConnection(configuration);
+
+            //peer.addEventListener('icecandidate', function (e) {
+            //    self.onIceCandidate(self.currentUser, type, e.candidate);
+            //})
+            peer.addEventListener('track', function (e) {
+                self.gotRemoteStream(e, type);
+            });
+
+            return peer;
+        },
+        gotRemoteStream: function (e, type) {
+            let self = this;
+            if (type == 1) {
+                self.currentUser.cameraInfo.stream = e.streams[0];
+                $('#full-video-camera')[0].srcObject = self.currentUser.cameraInfo.stream;
+            }
+            else {
+                self.currentUser.screenInfo.stream = e.streams[0];
+                $('#full-video-screen')[0].srcObject = self.currentUser.screenInfo.stream;
+            }
+
+        },
+        togglePause: function () {
+            let self = this;
+            $.ajax({
+                url: "/api/user/PauseTest?Id=" + self.currentUser.TestingProfileId,
+                type: "POST",
+                async: true,
+                success: function () {
+                    self.currentUser.IsPause = !self.currentUser.IsPause;
+                    self.streamSocket.server.togglePause(self.currentUser.TestingProfileId);
+                }
+            });
+
+        },
+        verifyUser: function (Verified) {
+            //SetUserVerified
+            let self = this;
+            self.streamSocket.server.verify(self.currentUser.TestingProfileId, Verified);
+        },
+        finishTest: function () {
+            let self = this;
+            $.ajax({
+                url: "/api/user/FinishTest?Id=" + self.currentUser.TestingProfileId,
+                type: "POST",
+                async: true,
+                success: function () {
+                    self.streamSocket.server.finishTest(self.currentUser.TestingProfileId);
+                }
+            });
+        },
+        sendReload: function () {
+            let self = this;
+            self.streamSocket.server.requestReload(self.currentUser.TestingProfileId);
+        },
+        reconnectCamera: function () {
+            let self = this;
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+            self.streamSocket.server.reconnectCamera(self.currentUser.TestingProfileId, self.currentUid);
+        },
+        reconnectScreen: function () {
+            let self = this;
+            self.currentUid = self.currentUid == '' ? self.uuidv4() : self.currentUid;
+            self.streamSocket.server.reconnectScreen(self.currentUser.TestingProfileId, self.currentUid);
+        },
+        collapseVideo: function () {
+            let self = this;
+            self.streamSocket.server.collapseVideo(self.currentUser.TestingProfileId);
+        },
+        toggleUserChat: function () {
+            let self = this;
+            self.streamSocket.server.toggleUserChat(self.currentUser.TestingProfileId);
+        },
+        setCameraTrue: function () {
+            let self = this;
+            self.streamSocket.server.setCameraTrue(self.currentUser.TestingProfileId);
+        },
+        resetCapture: function () {
+            let self = this;
+            self.streamSocket.server.resetCapture(self.currentUser.TestingProfileId);
         },
         openFullPhoto(human) {
             $('#user-photo-window').modal('show');
