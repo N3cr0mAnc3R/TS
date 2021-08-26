@@ -160,7 +160,7 @@ namespace WebApp.Models
             {
                 return await cnt.QueryAsync<dynamic>(
                     sql: "[dbo].[SuperAdmin_GetTestingProfiles]",
-                    new { userUID, model.date, model.structureDisciplineId, model.testingStatusId, model.needTime, model.testingTime, model.lastName, model.firstName, model.auditoriumId },
+                    new { userUID, model.date, model.structureDisciplineId, model.testingStatusId, model.needTime, model.testingTime, model.lastName, model.firstName, model.auditoriumId, model.Year },
                     commandType: CommandType.StoredProcedure
                 );
             }

@@ -4,9 +4,6 @@
     <div class="auditory-header">
         {{switchLocal(1)}} {{auditoryName}}
     </div>
-    <div class="empty-seat-wrapper">
-        <button v-on:click="emptySeats">Освободить места</button>
-    </div>
     @*<div class="control-wrapper" v-if="artArray.indexOf(auditory) != -1">
             <button v-for="i in (fullComputerList.length / 50)" v-on:click="setOffset(i)">{{i}}</button>
         </div>*@
@@ -14,11 +11,11 @@
         <div class="computer-list" v-loader="auditoryLoader">
             <div class="place-table row">
                 <div v-for="item in computerList" class="place-row">
-                    <div class="col">
+                    <div class="col" v-if="!filteredOccupied || (filteredOccupied && item.IsUsed)">
                         <div class="place-item" :title="item.Name" :class="{'request': item.RequestReset && item.TestingProfileId }" v-if="item.Name">
                             <div class="video-wrapper" v-if="item.TestingProfileId">
-                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" muted class="video-camera"></video>
-                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-2'" muted class="video-screen"></video>
+                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-1'" playsinline muted class="video-camera"></video>
+                                <video autoplay v-bind:id="'video-' + item.TestingProfileId + '-2'" playsinline muted class="video-screen"></video>
                                 <div class="delete" title="Заменить" v-on:click="switchVideo('video-' + item.TestingProfileId)" v-if="!item.Deleted">
                                     <i class="fa fa-sync-alt"></i>
                                 </div>
@@ -43,17 +40,17 @@
                                 </div>
                                 <div class="control-place" v-if="item.TestingProfileId">
                                     <button class="chat-open" v-on:click="select(item.TestingProfileId)" v-if="item.chat">
-                                            <i class="fa fa-keyboard"></i>
-                                            <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
-                                                <span>
-                                                    {{item.chat.unreadCount}}
-                                                </span>
-                                            </div>
-                                            @*<div class="chat-msg-wrapper" v-if="item.chat.messages.length > 0">
+                                        <i class="fa fa-keyboard"></i>
+                                        <div class="chat-unread-wrapper" v-if="item.chat.unreadCount > 0">
+                                            <span>
+                                                {{item.chat.unreadCount}}
+                                            </span>
+                                        </div>
+                                        @*<div class="chat-msg-wrapper" v-if="item.chat.messages.length > 0">
                                                 <span>
                                                 </span>
                                             </div>*@
-                                        </button>
+                                    </button>
                                     <button class="open-full" v-on:click="openFull(item)">
                                         <img src="~/Files/svg/zoom-in-auditory.svg" />
                                     </button>
@@ -66,15 +63,23 @@
             <br />
         </div>
     </div>
-    <button class="btn top-btn" v-on:click="goToTop" title="Наверх">
-        <i class="fa fa-arrow-up"></i>
-    </button>
-    <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
-    <div class="left-schedule">
-        <div class="wrapper">
-            <div v-on:click="openSchedule" class="button"><span><i class="fa fa-calendar-alt"></i></span></div>
-        </div>
+    <div class="left-panel-wrapper">
+
+        <button class="btn top-btn" v-on:click="openSchedule"><span><i class="fa fa-calendar-alt"></i></span></button>
+        <button class="btn top-btn" v-on:click="emptySeats" title="Освободить места"><span><i class="fa fa-couch"></i></span></button>
+        <button class="btn top-btn" v-on:click="filterByOccupied" title="Отобразить только занятые"><span><i class="fa fa-user-alt-slash" v-if="!filteredOccupied"></i><i class="fa fa-user" v-if="filteredOccupied"></i></span></button>
+        <button class="btn top-btn" v-on:click="goToTop" title="Наверх">
+            <span> <i class="fa fa-arrow-up"></i></span>
+        </button>
     </div>
+    <audio src="~/Files/msg.mp3" id="msg-audio"></audio>
+    @*<div class="left-schedule">
+            <div class="wrapper">
+                <div v-on:click="openSchedule" class="button"><span><i class="fa fa-calendar-alt"></i></span></div>
+            </div>
+        </div>*@
+
+
     <div class="control-wrapper" v-if="isSuperAdmin">
         <div class="control">
             <ul>
@@ -261,4 +266,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Auditory/moderate.js?19"></script>
+<script src="~/Content/Auditory/moderate.js?20"></script>

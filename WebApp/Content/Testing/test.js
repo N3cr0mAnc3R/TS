@@ -872,18 +872,16 @@
                 var found = self.peers.filter(function (item) { return item.type == 1 && item.uid == uid; })[0];
                 if (found) {
                     found.peer.close();
-                    found.peer = null;
                 }
-                self.initRTCPeer(1, guid);
+                self.initRTCPeer(1, uid);
             }
             self.streamSocket.client.reconnectScreen = function (uid) {
                 self.countOfAttemptScreen = 0;
                 var found = self.peers.filter(function (item) { return item.type == 2 && item.uid == uid; })[0];
                 if (found) {
                     found.peer.close();
-                    found.peer = null;
                 }
-                self.initRTCPeer(2, guid);
+                self.initRTCPeer(2, uid);
             }
             self.streamSocket.client.requestReload = function () {
                 location.href = location.href;

@@ -18,13 +18,20 @@
                         a.Deleted = false;
                         a.IsNew = false;
                         a.Info = {};
-                        videoStream = {};
-                        hasVideo = false;
+                        a.videoStream = {};
+                        a.hasVideo = false;
                     });
                     self.auditoryList = auditories;
-                    self.auditoryList.forEach(function (a) {
-                        self.getAuditoryStatistic(a.Id);
-                    });
+                    setTimeout(function () {
+                    for (let i = 0; i < self.auditoryList.length; i++) {
+                        setTimeout(function () {
+                            self.getAuditoryStatistic(self.auditoryList[i]);
+                        }, 100)
+                        }
+                    }, 100)
+                    //self.auditoryList.forEach(function (a) {
+                    //    self.getAuditoryStatistic(a.Id);
+                    //});
                 }
             });
 
@@ -37,17 +44,20 @@
                 }
             });
         },
-        getAuditoryStatistic: function (Id) {
+        getAuditoryStatistic: function (item) {
+            //getAuditoryStatistic: function (Id) {
             let self = this;
-            let found = self.auditoryList.filter(function (auditory) {
-                return auditory.Id === Id;
-            })[0];
+            //let found = self.auditoryList.filter(function (auditory) {
+            //    return auditory.Id === Id;
+            //})[0];
             $.ajax({
-                url: "/api/auditory/GetAuditoryStatistic?Id=" + Id,
+                url: "/api/auditory/GetAuditoryStatistic?Id=" + item.Id,
+                //url: "/api/auditory/GetAuditoryStatistic?Id=" + Id,
                 type: "POST",
                 async: false,
                 success: function (info) {
-                    found.Info = info;
+                    item.Info = info;
+                    //found.Info = info;
                 }
             });
         },

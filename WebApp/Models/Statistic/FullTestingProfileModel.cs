@@ -15,5 +15,6 @@ namespace WebApp.Models.Statistic
         public string lastName { get; set; } = null;
         public string firstName { get; set; } = null;
         public int? auditoriumId { get; set; } = null;
+        public int? Year { get; set; } = null;
     }
 }

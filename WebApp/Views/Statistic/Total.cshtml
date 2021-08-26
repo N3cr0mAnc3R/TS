@@ -3,18 +3,19 @@
 <div id="main-window">
     <div class="base-control">
         <form class="input-wrapper" action="" id="form-1">
-            <input type="date" v-model="date" class="form-control" title="Дата проведения" />
-            <select v-model="testingStatusId" class="form-control" title="Статус">
+            <input type="date" v-model="date" class="form-control col" title="Дата проведения" />
+            <select v-model="testingStatusId" class="form-control col" title="Статус">
                 <option value="null">Все</option>
                 <option :value="status.Id" v-for="status in statuses">{{status.Name}}</option>
             </select>
-            <input type="checkbox" v-model="needTime" class="form-control" title="Вкупе, нужно ли обозначать, что до какого-то времени" />
-            <input type="time" v-model="testingTime" class="form-control" title="До какого времени" />
+            <input type="checkbox" v-model="needTime" class="form-control col" title="Вкупе, нужно ли обозначать, что до какого-то времени" />
+            <input type="time" v-model="testingTime" class="form-control col" title="До какого времени" />
+            <input type="number" class="form-control col" v-model="year" title="Год ВИ" />
             <div class="input-group">
-                <input type="text" v-model="lastName" class="form-control" title="Фамилия" placeholder="Фамилия" />
-                <input type="text" v-model="firstName" class="form-control" placeholder="Имя" title="Имя" />
-                <input type="text" v-model="disciplinePattern" v-on:keyup="filterDisciplines" class="form-control" placeholder="дисциплина" title="Дисциплина" id="disc-auto" style="z-index:2" autocomplete="off" />
-                <div id="discipline-select">
+                <input type="text" v-model="lastName" class="form-control col" title="Фамилия" placeholder="Фамилия" />
+                <input type="text" v-model="firstName" class="form-control col" placeholder="Имя" title="Имя" />
+                <input type="text" v-model="disciplinePattern" v-on:keyup="filterDisciplines" class="form-control col" placeholder="дисциплина" title="Дисциплина" id="disc-auto" style="z-index:2" autocomplete="off" />
+                <div id="discipline-select" class="col">
                     <div class="element-wrapper" v-for="disc in filteredDisciplines" :value="disc.Id" v-on:click="selectDiscipline(disc)">
                         <span class="element">{{disc.Name}}</span>
                     </div>
@@ -69,4 +70,4 @@
         </div>
     </div>
 </div>
-<script src="~/Content/Statistic/total.js?10"></script>
+<script src="~/Content/Statistic/total.js?11"></script>

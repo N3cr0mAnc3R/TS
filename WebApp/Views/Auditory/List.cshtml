@@ -12,12 +12,12 @@
     <div class="auditory-list">
         <template v-for="item in auditoryList">
             <div class="auditory-wrapper">
-                <div class="video-info-wrapper">
+                <div class="video-info-wrapper" v-loader="item">
                     <div class="video-wrapper" v-if="item.hasVideo">
                         <video muted autoplay class="video" v-bind:id="'item-' + item.Id">
                         </video>
                     </div>
-                    <div class="alter-wrapper" v-if="!item.hasVideo">
+                    <div class="alter-wrapper" v-if="!item.hasVideo && item.Info.StatisticPlaces">
                         <div class="alter">{{switchLocal(7)}} {{item.Info.StatisticPlaces}} </div>
                         <div class="alter">{{switchLocal(8)}} {{item.Info.Statistic}}</div>
                     </div>
@@ -42,9 +42,9 @@
                         </button>
                     </div>
                 </div>
-                <div class="delete" title="Удалить" v-on:click="deleteAud(item.Id)" v-if="!item.Deleted">
+                @*<div class="delete" title="Удалить" v-on:click="deleteAud(item.Id)" v-if="!item.Deleted">
                     <img src="~/Files/svg/mini-times-auditory.svg" />
-                </div>
+                </div>*@
                 <div class="delete restore" title="Восстановить" v-on:click="deleteAud(item.Id)" v-if="item.Deleted">
                     <img src="~/Files/svg/mini-restore-auditory.svg" />
                 </div>

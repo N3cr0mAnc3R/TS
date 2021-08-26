@@ -16,6 +16,7 @@
         asc: null,
         disciplinePattern: null,
         auditories: [],
+        year: null,
         statuses: [],
         objectLoading: {
             loading: false,
@@ -26,6 +27,7 @@
 
         init: function () {
             let self = this;
+            self.year = new Date().getFullYear();
             $('#form-1').on("submit", function () {
                 event.preventDefault();
             });
@@ -53,7 +55,8 @@
                     testingTime: self.testingTime,
                     lastName: self.lastName,
                     firstName: self.firstName,
-                    auditoriumId: self.auditoriumId
+                    auditoriumId: self.auditoriumId,
+                    year: self.year
                 },
                 success: function (data) {
                     data.map(a => {

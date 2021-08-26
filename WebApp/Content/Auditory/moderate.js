@@ -12,6 +12,7 @@ const app = new Vue({
         auditoryName: '',
         computerList: [],
         maxX: 0,
+        filteredOccupied: false,
         maxY: 0,
         chats: [],
         isChatOpened: false,
@@ -60,7 +61,7 @@ const app = new Vue({
         init: function () {
             let self = this;
             //window.URL.createObjectURL = window.URL.createObjectURL || window.URL.webkitCreateObjectURL || window.URL.mozCreateObjectURL || window.URL.msCreateObjectURL;
-
+            
             $.ajax({
                 url: "/api/account/GetDomain",
                 type: "POST",
@@ -278,7 +279,6 @@ const app = new Vue({
                 }
             }
             self.streamSocket.client.sendOffer = function (Id, Offer, Type, guid) {
-                console.log(Id, Offer, Type, guid) ;
                 if (guid != self.currentUid) {
                     return;
                 }
@@ -321,6 +321,13 @@ const app = new Vue({
                 let peer = info.peer;
                 peer.addIceCandidate(candidate);
             }
+        },
+        filterByOccupied() {
+            let self = this;
+            self.filteredOccupied = !self.filteredOccupied;
+            //if (self.filteredOccupied) {
+
+            //}
         },
         getInfoForAdmin: function () {
             var self = this;
@@ -519,7 +526,7 @@ const app = new Vue({
                         }
                     }, 10000);
                 }
-                else if (peer && peer.connectionState == 'disconnected') {
+                else if (peer && (peer.connectionState == 'disconnected' || peer.connectionState == 'failed')) {
                     self.initRTCPeer(item, type);
                 }
             });
@@ -634,6 +641,10 @@ const app = new Vue({
             }
             else {
                 a.screenInfo.stream = e.streams[0];
+            }
+            if (self.currentUser) {
+                $('#full-video-camera')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-1')[0].srcObject;
+                $('#full-video-screen')[0].srcObject = $('#video-' + self.currentUser.TestingProfileId + '-2')[0].srcObject;
             }
             //let found = self.streamObjects.filter(function (item) { return item.Id == a.TestingProfileId && item.type == type; })[0];
             //if (!found) {
