@@ -170,6 +170,18 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetUserFamilyById(Id));
         }
         [HttpPost]
+        [Route("GetDisciplineQuestions")]
+        public async Task<IHttpActionResult> GetDisciplineQuestions(int Id, int Offset = 0, int Count = 100, int? IsActive = null)
+        {
+            return WrapResponse(await AdministrationManager.GetDisciplineQuestions(Id, Offset, Count, IsActive, CurrentUser.Id));
+        }
+        [HttpPost]
+        [Route("GetQuestionCount")]
+        public async Task<IHttpActionResult> GetQuestionCount(int Id, int? IsActive = null)
+        {
+            return WrapResponse(await AdministrationManager.GetQuestionCount(Id, IsActive, CurrentUser.Id));
+        }
+        [HttpPost]
         [Route("FastUserLoad")]
         [AllowAnonymous]
         public async Task<IHttpActionResult> FastUserLoad(Guid Id)

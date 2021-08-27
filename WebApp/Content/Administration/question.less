@@ -1,0 +1,45 @@
+﻿.discipline-list {
+    display: flex;
+    max-height: 330px;
+    overflow: auto;
+    flex-wrap: wrap;
+
+    .discipline-wrapper {
+        margin: 3px 5px;
+        cursor: pointer;
+        min-width:30%;
+
+        &:hover {
+            background: #ddd;
+        }
+
+        &.current {
+            background: #565c72;
+            color:#fff;
+        }
+    }
+}
+
+.question-page-list {
+    display: flex;
+    margin-top: 20px;
+
+    .page-wrapper {
+        width: 30px;
+        height: 30px;
+        border-radius: 3px;
+        text-align: center;
+        padding: 2px;
+        font-family: Montserrat;
+        font-weight: 600;
+        color: #fff;
+        margin-right: 5px;
+        background: #A6ACBC;
+        cursor: pointer;
+        margin-bottom: 10px;
+
+        &.active {
+            background: rgba(86, 92, 114, 0.8);
+        }
+    }
+}

@@ -11,6 +11,7 @@ namespace WebApp.Models.UserTest
         public int TypeAnswerId { get; set; }
         public string QuestionImage { get; set; }
         public int Rank { get; set; }
+        public bool IsActive { get; set; }
         public IEnumerable<AnswerModel> Answers { get; set; }
     }
 }

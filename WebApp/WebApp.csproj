@@ -206,12 +206,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Administration\question.css">
+      <DependentUpon>question.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Administration\question.js" />
     <Content Include="Content\Administration\administration.css">
       <DependentUpon>administration.less</DependentUpon>
     </Content>
     <Content Include="Content\Administration\administration.js" />
     <Content Include="Content\Administration\administration.min.css">
       <DependentUpon>administration.css</DependentUpon>
+    </Content>
+    <Content Include="Content\Administration\question.min.css">
+      <DependentUpon>question.css</DependentUpon>
     </Content>
     <Content Include="Content\aes.js" />
     <Content Include="Content\Auditory\audVue.js" />
@@ -369,6 +376,7 @@
     <Content Include="Content\Statistic\total.less" />
     <Content Include="Content\Testing\profile.less" />
     <Content Include="Content\Administration\administration.less" />
+    <Content Include="Content\Administration\question.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -615,6 +623,7 @@
     <Content Include="Views\Statistic\Total.cshtml" />
     <Content Include="Views\Administration\Index.cshtml" />
     <Content Include="Views\Auditory\Error.cshtml" />
+    <Content Include="Views\Administration\Question.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

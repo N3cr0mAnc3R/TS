@@ -1,0 +1,32 @@
+﻿<link href="~/Content/Administration/question.css" rel="stylesheet" />
+<div id="main-window">
+    <div class="mt-5">
+        <div class="row">
+            <input type="text" v-model="disciplinePattern" v-on:keyup="filterDisciplines" class="form-control col-3 mr-5" placeholder="дисциплина" title="Дисциплина" id="disc-auto" style="z-index:2" autocomplete="off" />
+            <input type="number" v-model="countOnPage" class="form-control col-3" />
+        </div>
+        <div id="discipline-select" class="col">
+            @*<div class="element-wrapper" v-for="disc in filteredDisciplines" :value="disc.Id" v-on:click="selectDiscipline(disc)">
+                <span class="element">{{disc.Name}}</span>
+            </div>*@
+        </div>
+    </div>
+    <div class="discipline-list mt-5">
+        <div class="discipline-wrapper col-3" v-for="disc in filteredDisciplines" :class="{'current': currentDiscipline == disc}" v-on:click="selectDiscipline(disc)" :id="'disc-' + disc.Id">
+            <div class="discipline">{{disc.Name}}</div>
+        </div>
+    </div>
+    <div class="question-page-list">
+        <div v-for="i in totalCount" class="page-wrapper" :class="{'active': currentPage == i}" v-on:click="selectPage(i)">{{i}}</div>
+    </div>
+    <div class="mt-3 question-list-wrapper" v-loader="questionLoader">
+        <div v-for="question in questions">
+            <img v-bind:src="'data:image/jpg;base64, ' + question.QuestionImage" width="1024" />
+
+            <div class="answer-wrapper" v-for="answer in question.Answers">
+                <img  v-bind:src="'data:image/jpg;base64, ' + answer.AnswerImage" width="1024"/>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="~/Content/Administration/question.js"></script>

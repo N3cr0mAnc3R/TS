@@ -292,6 +292,19 @@
                 self.gotRemoteStream(e, type);
             });
 
+            peer.addEventListener('connectionstatechange', function (event) {
+                if (peer && peer.connectionState == 'connecting') {
+                    setTimeout(function () {
+                        if (!peer || peer.connectionState == 'connecting') {
+                            peer = null;
+                            self.initRTCPeer(type);
+                        }
+                    }, 10000);
+                }
+                else if (peer && (peer.connectionState == 'disconnected' || peer.connectionState == 'failed')) {
+                    self.initRTCPeer(type);
+                }
+            });
             return peer;
         },
         gotRemoteStream: function (e, type) {

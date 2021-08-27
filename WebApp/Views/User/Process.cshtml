@@ -102,7 +102,7 @@
             </div>
             <div class="finish-game"><button class="btn-gray" data-toggle="modal" data-target="#finish-game">{{switchLocal(5)}}</button></div>
         </div>
-        <div class="main-wrapper" v-if="!hasCameraConnection && !isFireFox" v-loader="loadObject">
+        <div class="main-wrapper" v-if="!hasCameraConnection && !isFireFox">
             <div class="panel-top"></div>
             <div class="panel-center camera-missing">
                 {{switchLocal(46)}}

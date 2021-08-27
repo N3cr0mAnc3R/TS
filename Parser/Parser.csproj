@@ -122,5 +122,11 @@
   <ItemGroup>
     <Resource Include="Frame 288.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Cropper\Cropping.csproj">
+      <Project>{6480e47e-5542-425a-87b2-cb1c3578c3ff}</Project>
+      <Name>Cropping</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

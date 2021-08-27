@@ -25,6 +25,20 @@ namespace WebApp.Controllers
                 return Redirect("/user/waiting");
             }
         }
+        
+        public async Task<ActionResult> Question()
+        {
+            List<int> roles = (await AccountManager.GetAllUserRoles(CurrentUser.Id)).ToList();
+            if (AccountManager.HasOneOfRoles(roles, new int[] { 6, 7 }))
+            {
+                return View();
+            }
+            else
+            {
+                return Redirect("/user/waiting");
+            }
+        }
+        
 
         protected AdministrationManager AdministrationManager
         {

@@ -22,6 +22,8 @@ namespace Parser
     {
         int countTotal = 0;
         bool IsStraight = true;
+        string TotalCountQuery = "select sum(total) from (select count(1) as total from questions nolock where isLoadedAgain = 0 union all select count(1) as total from Answers nolock where isLoadedAgain = 0) as t";
+        //string TotalCountQuery = "select count(1) from questions (nolock) where isLoadedAgain = 0";
         public MainWindow()
         {
             InitializeComponent();
@@ -29,7 +31,8 @@ namespace Parser
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
-            cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 union all select count(1) as total from Answers nolock where  loaded = 0) as t";
+            cmd.CommandText = TotalCountQuery;
+            //cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 union all select count(1) as total from Answers nolock where  loaded = 0) as t";
 
             conn.Open();
             using (var reader = cmd.ExecuteReader())
@@ -47,7 +50,7 @@ namespace Parser
 
         }
         int finished;
-       // int Id1 = 0;
+        // int Id1 = 0;
 
         private void Bck_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
@@ -118,7 +121,8 @@ namespace Parser
 
                     SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                     SqlCommand cmd = conn.CreateCommand();
-                    cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where  loaded = 0 union all select count(1) as total from Answers nolock where loaded = 0) as t";
+                    cmd.CommandText = TotalCountQuery;
+                    //cmd.CommandText = "select sum(total) from (select count(1) as total from questions nolock where  loaded = 0 union all select count(1) as total from Answers nolock where loaded = 0) as t";
                     conn.Open();
                     int count = 0;
                     using (var reader = cmd.ExecuteReader())
@@ -143,11 +147,186 @@ namespace Parser
             p.Dispose();
             //Process.Start("taskkill", "/IM gswin64.exe");
         }
+        public void CropImageWithFix()
+        {
+            bck.ReportProgress(0);
+            SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
+            SqlCommand cmd = conn.CreateCommand();
+            if (IsChecked)
+            {
+                cmd.CommandText = "select top 1 ID, questionImage from [Questions] where isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+            }
+            else
+            {
+                cmd.CommandText = "select top 1 ID, answerImage from [Answers] where  isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+            }
+            conn.Open();
+
+            int Id = 0;
+            string img = "";
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Id = (int)reader["ID"];
+                    bck.ReportProgress(Id);
+                    if (Id == 0)
+                    {
+                        return;
+                    }
+                    if (IsChecked)
+                    {
+                        img = (string)reader["questionImage"];
+
+                        img = Cropper.Cropper.CropImageWithFix(img);
+
+
+                    }
+                    else
+                    {
+                        img = (string)reader["answerImage"];
+
+                        img = Cropper.Cropper.CropImageWithFix(img);
+                    }
+
+                    bck.ReportProgress(50);
+                }
+            }
+            if (IsChecked)
+            {
+
+                SqlCommand cmd1 = conn.CreateCommand();
+                cmd1.CommandText = "update Questions set newLoadedImage = '" + img + "'  where ID = " + Id;
+
+                cmd1.ExecuteScalar();
+                bck.ReportProgress(99);
+                bck.ReportProgress(80);
+                SqlCommand cmd2 = conn.CreateCommand();
+                cmd2.CommandText = "update Questions set isLoadedAgain = 1 where ID = " + Id;
+                cmd2.ExecuteScalar();
+            }
+            else
+            {
+
+                SqlCommand cmd1 = conn.CreateCommand();
+                img = Cropper.Cropper.CropImageWithFix(img);
+
+                cmd1.CommandText = "update Answers set newLoadedImage = '" + img + "'  where ID = " + Id;
+
+                cmd1.ExecuteScalar();
+                bck.ReportProgress(80);
+                SqlCommand cmd2 = conn.CreateCommand();
+                bck.ReportProgress(99);
+                cmd2.CommandText = "update Answers set isLoadedAgain = 1 where ID = " + Id;
+                cmd2.ExecuteScalar();
+            }
+
+            bck.ReportProgress(100);
+            conn.Close();
+
+            //Parsing parser = new Parsing();
+            //parser.ParseAsync("E:\\test4.doc", input, IsChecked);
+
+
+            //string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
+            //String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
+            //Process proc = new Process();
+            //proc.StartInfo.FileName = ghostScriptPath;
+            //proc.StartInfo.Arguments = ars;
+            //proc.StartInfo.CreateNoWindow = true;
+            //proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            //proc.Start();
+            //proc.EnableRaisingEvents = true;
+            //if (!proc.WaitForExit(4000))
+            //{
+            //    proc.CloseMainWindow();
+            //    proc.Close();
+            //    if (!proc.WaitForExit(4000))
+            //    {
+            //        proc.Kill();
+            //    }
+            //}
+            //bck.ReportProgress(50);
+            //int maxHeight = 0;
+
+            //using (Image img1 = Image.FromFile(output + ".jpg"))
+            //{
+            //    using (Bitmap bmp = new Bitmap(img1))
+            //    {
+
+            //        LockBitmap bmp1 = new LockBitmap(bmp);
+            //        bmp1.LockBits();
+            //        int step = bmp1.Depth == 32 ? 4 : bmp1.Depth == 24 ? 3 : 1;
+            //        for (int i = bmp1.Width * bmp1.Height; i >= 0; i -= step)
+            //        {
+            //            if (bmp1.Pixels[i] != 255)
+            //            {
+            //                maxHeight = i;
+            //                break;
+            //            }
+            //        }
+            //        maxHeight = (int)Math.Ceiling((double)(maxHeight / bmp1.Width));
+            //        if (maxHeight + 30 <= bmp1.Height)
+            //        {
+            //            maxHeight += 30;
+            //        }
+            //        bck.ReportProgress(79);
+
+            //        Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
+            //        //cropBmp.Save(output + "1.bmp");
+
+            //        ImageConverter converter = new ImageConverter();
+            //        bck.ReportProgress(91);
+
+            //        SqlCommand cmd1 = conn.CreateCommand();
+            //        byte[] bytes;
+            //        using (var stream = new MemoryStream())
+            //        {
+            //            cropBmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            //            bytes = stream.ToArray();
+            //        }
+            //        bck.ReportProgress(98);
+
+
+            //        string img = Convert.ToBase64String(bytes);
+
+            //        img = Cropper.Cropper.CropImageWithFix(img);
+            //        if (IsChecked)
+            //        {
+            //            cmd1.CommandText = "update Questions set newLoadedImage = '" + img + "'  where ID = " + Id;
+            //            SqlCommand cmd2 = conn.CreateCommand();
+            //            cmd2.CommandText = "update Questions set isLoadedAgain = 1 where ID = " + Id;
+            //            //cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
+            //            cmd2.ExecuteScalar();
+            //        }
+            //        else
+            //        {
+            //            cmd1.CommandText = "update Answers set newLoadedImage = '" + img + "'  where ID = " + Id;
+            //            SqlCommand cmd2 = conn.CreateCommand();
+            //            cmd2.CommandText = "update Answers set isLoadedAgain = 1 where ID = " + Id;
+            //            cmd2.ExecuteScalar();
+            //        }
+            //        cmd1.ExecuteScalar();
+
+            //        conn.Close();
+            //        bck.ReportProgress(99);
+            //    }
+            //}
+
+            //File.Delete(input);
+            //File.Delete("E:\\test4.doc");
+            //File.Delete(output + ".jpg");
+            //bck.ReportProgress(100);
+
+
+        }
         string dpi1 = "300";
         public void Process1(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
             try
             {
+                CropImageWithFix();
+                return;
                 bck.ReportProgress(0);
                 SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
                 SqlCommand cmd = conn.CreateCommand();
@@ -155,7 +334,8 @@ namespace Parser
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0" + (IsStraight? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+                    //cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0" + (IsStraight? "" : " order by ID desc");
                 }
                 else
                 {
@@ -194,7 +374,7 @@ namespace Parser
                 parser.ParseAsync("E:\\test4.doc", input, IsChecked);
 
 
-                string ghostScriptPath = IsUra? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
+                string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
                 //string ghostScriptPath = @"C:\Program Files\gs\gs9.50\bin\gswin64.exe";
                 String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
                 Process proc = new Process();
@@ -261,7 +441,8 @@ namespace Parser
                         {
                             cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
                             SqlCommand cmd2 = conn.CreateCommand();
-                            cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
+                            cmd2.CommandText = "update Questions set isLoadedAgain = 1 where ID = " + Id;
+                            //cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
                             cmd2.ExecuteScalar();
                         }
                         else
@@ -291,11 +472,11 @@ namespace Parser
             catch (IOException exc)
             {
 
-             //   File.Delete("E:\\test4.doc");
+                //   File.Delete("E:\\test4.doc");
                 MessageBox.Show(exc.Message);
                 //Process1(sender, e);
             }
-            catch(Exception exc)
+            catch (Exception exc)
             {
                 var t = 1;
             }

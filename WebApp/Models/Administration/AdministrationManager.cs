@@ -89,6 +89,32 @@ namespace WebApp.Models.Administration
                 return await cnt.QueryFirstAsync<IndexItem>("Administrator_GetUserFamilyNameById", new { UserId }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<int> GetQuestionCount(int disciplineId, int? isActive, Guid UserUid)
+        {
+
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return await cnt.QueryFirstAsync<int>("SuperAdmin_GeNumberOfDisciplineQuestions", new { UserUid, disciplineId, isActive }, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public async Task<IEnumerable<QuestionModel>> GetDisciplineQuestions(int disciplineId, int Offset, int Count, int? IsActive, Guid UserUid)
+        {
+            using (var cnt = await Concrete.OpenConnectionAsync())
+            {
+                using (var multi = await cnt.QueryMultipleAsync(sql: "[dbo].[SuperAdmin_GetDisciplineQuestionsAndAnswers]", new { disciplineId, Offset, Count, IsActive, UserUid }, commandType: CommandType.StoredProcedure))
+                {
+                    List<QuestionModel> result = (await multi.ReadAsync<QuestionModel>()).ToList();
+                    List<UserTest.AnswerModel> answers = (await multi.ReadAsync<UserTest.AnswerModel>()).ToList();
+
+                    foreach (var item in result)
+                    {
+                        item.Answers = answers.Where(a => a.QuestionId == item.Id);
+                    }
+
+                    return result;
+                }
+            }
+        }
         public async Task FastUserLoad(Guid userUID)
         {
 
