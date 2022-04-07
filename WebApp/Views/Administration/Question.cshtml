@@ -1,32 +1,176 @@
-﻿<link href="~/Content/Administration/question.css" rel="stylesheet" />
-<div id="main-window">
-    <div class="mt-5">
-        <div class="row">
-            <input type="text" v-model="disciplinePattern" v-on:keyup="filterDisciplines" class="form-control col-3 mr-5" placeholder="дисциплина" title="Дисциплина" id="disc-auto" style="z-index:2" autocomplete="off" />
-            <input type="number" v-model="countOnPage" class="form-control col-3" />
-        </div>
-        <div id="discipline-select" class="col">
-            @*<div class="element-wrapper" v-for="disc in filteredDisciplines" :value="disc.Id" v-on:click="selectDiscipline(disc)">
-                <span class="element">{{disc.Name}}</span>
-            </div>*@
-        </div>
+﻿@{
+    ViewBag.Title = "Модерация заданий";
+}
+<link href="~/Content/Administration/question.css" rel="stylesheet" />
+<div id="main-window" class="mt-5">
+    <div class="main-buton-list">
+        <button class="btn btn-outline-secondary" v-on:click="openDisciplineList"><span v-if="disciplineListSelected">Скрыть список дисциплин</span><span v-if="!disciplineListSelected">Показать список дисциплин</span></button>
+        <button class="btn btn-outline-secondary" v-on:click="showNewDiscipline"><span>Добавить дисциплину</span></button>
     </div>
-    <div class="discipline-list mt-5">
-        <div class="discipline-wrapper col-3" v-for="disc in filteredDisciplines" :class="{'current': currentDiscipline == disc}" v-on:click="selectDiscipline(disc)" :id="'disc-' + disc.Id">
-            <div class="discipline">{{disc.Name}}</div>
+    <div v-if="!disciplineListSelected"></div>
+    <template v-if="disciplineListSelected">
+        <div class="mt-5">
+            <div class="row">
+                <input type="text" v-model="disciplinePattern" v-on:keyup="filterDisciplines" class="form-control col-3 mr-5" placeholder="дисциплина" title="Дисциплина" id="disc-auto" style="z-index:2" autocomplete="off" />
+                <input type="number" v-model="countOnPage" class="form-control col-3" />
+            </div>
+            <div id="discipline-select" class="col">
+                @*<div class="element-wrapper" v-for="disc in filteredDisciplines" :value="disc.Id" v-on:click="selectDiscipline(disc)">
+                        <span class="element">{{disc.Name}}</span>
+                    </div>*@
+            </div>
         </div>
-    </div>
-    <div class="question-page-list">
-        <div v-for="i in totalCount" class="page-wrapper" :class="{'active': currentPage == i}" v-on:click="selectPage(i)">{{i}}</div>
+        <div class="discipline-list mt-5">
+            <div class="discipline-wrapper col-3" v-for="disc in filteredDisciplines" :class="{'current': currentDiscipline == disc}" v-on:click="selectDiscipline(disc)" :id="'disc-' + disc.Id">
+                <div class="discipline">{{disc.Name}}</div>
+            </div>
+        </div>
+    </template>
+    <template v-if="newDisciplineShow">
+        <div class="create-discipline-form mt-4">
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Название</span>
+                <input type="text" class="form-control" v-model="newDiscipline.Name" />
+                <span class="mt-auto mb-auto mr-5 col-2">На английском</span>
+                <input type="text" class="form-control" v-model="newDiscipline.NameEn" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Количество вопросов</span>
+                <input type="number" class="form-control" v-model="newDiscipline.CountOfQuestions" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Максимальный балл</span>
+                <input type="number" class="form-control" v-model="newDiscipline.Scale" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Время прохождения теста (мин)</span>
+                <input type="number" class="form-control" v-model="newDiscipline.TestingTime" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Год проведения</span>
+                <input type="number" class="form-control" v-model="newDiscipline.Year" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Время оповещения (мин)</span>
+                <input type="number" class="form-control" v-model="newDiscipline.TimeAlarm" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Вид экзамена</span>
+                <select class="form-control" v-model="newDiscipline.TypeTesting">
+                    <option v-for="testingType in testingTypes" :value="testingType.Id">{{testingType.Name}}</option>
+                </select>
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Рамки проведения</span>
+                <select class="form-control" v-model="newDiscipline.TestingPass">
+                    <option v-for="testingPass in testingPasses" :value="testingPass.Id">{{testingPass.Name}}</option>
+                </select>
+            </label>
+            <button class="btn btn-outline-success" v-on:click="saveDiscipline">Сохранить</button>
+        </div>
+    </template>
+    <div class="question-page-list-wrapper">
+        <div class="question-page-list">
+            <template v-if="totalCount < 20">
+                <div v-for="i in totalCount" class="page-wrapper" :class="{'active': currentPage == i}" v-on:click="selectPage(i)">{{i}}</div>
+            </template>
+            <template v-if="totalCount > 20">
+                <div class="page-wrapper" :class="{'active': currentPage == 1}" v-on:click="selectPage(1)">{{1}}</div>
+                <template v-if="currentPage < 4">
+                    <div v-for="i in 3" class="page-wrapper" :class="{'active': currentPage == (i + 1)}" v-on:click="selectPage(i + 1)">{{i + 1}}</div>
+                </template>
+                <template v-if="currentPage >= 4 && currentPage < totalCount - 2">
+                    ... 
+                    <div v-for="i in 3" class="page-wrapper" :class="{'active': currentPage == (currentPage - - i - 2)}" v-on:click="selectPage(currentPage - - i - 2)">{{currentPage - - i - 2}}</div>
+                    @*<div class="page-wrapper" :class="{'active': currentPage == (currentPage - 1)}" v-on:click="selectPage(currentPage -1)">{{currentPage - 1}}</div>
+                    <div class="page-wrapper" :class="{'active': currentPage == (currentPage)}" v-on:click="selectPage(currentPage)">{{currentPage}}</div>
+                    <div class="page-wrapper" :class="{'active': currentPage == (currentPage +1)}" v-on:click="selectPage(currentPage +1)">{{(currentPage - - 1)}}</div>*@
+                    ... 
+                </template>
+                <template v-if="currentPage >= totalCount - 2 && currentPage <= totalCount">
+                    ... 
+                    <div v-for="i in 3" class="page-wrapper" :class="{'active': currentPage == (totalCount - (4 - i))}" v-on:click="selectPage(totalCount - (4 - i))">{{totalCount - (4 - i)}}</div>
+                </template>
+                @*<div v-for="i in totalCount" class="page-wrapper" :class="{'active': currentPage == i}" v-on:click="selectPage(i)">{{i}}</div>*@
+                <div class="page-wrapper" :class="{'active': currentPage == totalCount}" v-on:click="selectPage(totalCount)">{{totalCount}}</div>
+            </template>
+            <input class="" type="number" v-model="forcePage" v-if="totalCount > 0" />
+            <button v-on:click="showPage" v-if="totalCount > 0">Перейти к странице</button>
+        </div>
     </div>
     <div class="mt-3 question-list-wrapper" v-loader="questionLoader">
-        <div v-for="question in questions">
-            <img v-bind:src="'data:image/jpg;base64, ' + question.QuestionImage" width="1024" />
+        <div class="button-panel" v-if="currentDiscipline">
+            <a :href="'/administration/questionCreating?Id='+currentDiscipline.Id">Изменение структуры и вопросов</a>
+            <button class="btn btn-outline-primary" v-on:click="addQuestion(null)">Добавить вопрос</button>
+            <button class="btn btn-outline-primary" v-on:click="showQuestions()">Получить список вопросов</button>
+        </div>
+        <div v-for="question in questions" class="question-wrapper" v-if="!newQuestionShow">
+            <div class="button-panel">
+                <button class="btn btn-outline-secondary" v-on:click="toggleQuestion(question)"><i class="fa" :class="{'fa-eye': question.IsActive, 'fa-eye-slash': !question.IsActive}" :title="question.IsActive? 'Спрятать':'Вернуть в пул'"></i></button>
+            </div>
+            <img v-bind:src="'data:image/jpg;base64, ' + question.QuestionImage" />
 
             <div class="answer-wrapper" v-for="answer in question.Answers">
-                <img  v-bind:src="'data:image/jpg;base64, ' + answer.AnswerImage" width="1024"/>
+                <div class="checkbox-wrapper"><i v-if="answer.IsRight" class="fa fa-check"></i></div>
+                <img v-bind:src="'data:image/jpg;base64, ' + answer.AnswerImage" />
+            </div>
+            <hr />
+        </div>
+        <div v-if="newQuestionShow">
+            <div v-if="newQuestion.QuestionImage" class="d-flex">
+                <img v-bind:src="'data:image/jpg;base64, ' + question.QuestionImage" />
+                <button class="btn btn-outline-secondary" title="Редактировать"><i class="fa fa-pencil"></i></button>
+            </div>
+            <div v-if="!newQuestion.QuestionImage">
+                @*<input class="form-control" type="text" v-model="newQuestion.textQuestion" />*@
+                <div class="text-danger" v-if="categories.length == 0 || themes.length ==0">Необходимо добавить хотя бы одну категорию и тему</div>
+            </div>
+            <div v-if="newQuestion.Answers.length == 0">
+                <div class="d-flex justify-content-between p-3">
+                    <select class="form-control" v-model="newQuestion.TypeAnswerId" v-on:change="changeQuestionTypes">
+                        <option disabled value="0" selected>Выберите тип ответа</option>
+                        <option v-for="typeAnswer in testingAnswerTypes" :value="typeAnswer.Id">{{typeAnswer.Name}}</option>
+                    </select>
+                    <select class="form-control" v-model="newQuestion.CategoryQuestionId" v-on:change="changeQuestionTypes">
+                        <option disabled value="0" selected>Выберите категорию вопроса</option>
+                        <option v-for="category in categories" :value="category.Id">{{category.Name}}</option>
+                    </select>
+                    <select class="form-control" v-model="newQuestion.ThemeId" v-on:change="changeQuestionTypes">
+                        <option disabled value="0" selected>Выберите тему</option>
+                        <option v-for="theme in themes" :value="theme.Id">{{theme.Name}}</option>
+                    </select>
+                    <div>
+                        <label class="d-flex" style="width: 100px;">
+                            <span>Активно</span>
+                            <input class="form-control" type="checkbox" v-model="newQuestion.IsActivity" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div v-if="!newQuestion.QuestionImage && !(newQuestion.CategoryQuestionId == 0 || newQuestion.ThemeId ==0 || newQuestion.TypeAnswerId == 0)">
+                    <div id="editor"></div>
+                    <span>или загрузите документ, содержащий ТОЛЬКО вопрос</span>
+                    <input type="file" accept="application/document" v-on:change="loadQuestion" />
+                
+            </div>
+            <div class="answer-wrapper" v-for="answer in newQuestion.Answers">
+                <div class="answer-wrapper" v-if="answer.AnswerImage">
+                    <div class="checkbox-wrapper"><i v-if="answer.IsRight" class="fa fa-check"></i></div>
+                    <img v-bind:src="'data:image/jpg;base64, ' + answer.AnswerImage" />
+                </div>
+                <div class="answer-wrapper" v-if="!answer.AnswerImage">
+                    <input class="form-control" type="text" v-model="answer.textAnswer" />
+                    <span>или загрузите документ, содержащий ТОЛЬКО ответ</span>
+                    <input type="file" accept="application/document" v-model="answer.docAnswer" />
+                </div>
+            </div>
+            <div class="btn-wrapper">
+                <button class="btn btn-outline-primary" v-on:click="addAnswer()">Добавить ответ</button>
+                <button class="btn btn-outline-success" v-on:click="saveQuestion()">Сохранить</button>
             </div>
         </div>
     </div>
+
 </div>
+<script src="~/Content/Shared/ckeditor.js"></script>
 <script src="~/Content/Administration/question.js"></script>

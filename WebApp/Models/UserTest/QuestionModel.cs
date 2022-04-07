@@ -14,4 +14,13 @@ namespace WebApp.Models.UserTest
         public bool IsActive { get; set; }
         public IEnumerable<AnswerModel> Answers { get; set; }
     }
+    public class QuestionEditModel
+    {
+        public int Id { get; set; }
+        public int TypeAnswerId { get; set; }
+        public string QuestionImage { get; set; }
+        public int Rank { get; set; }
+        public bool IsActive { get; set; }
+        public IEnumerable<AnswerEditModel> Answers { get; set; }
+    }
 }

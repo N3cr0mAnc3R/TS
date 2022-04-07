@@ -504,6 +504,10 @@
             }
 
         },
+        showTimeLeft: function () {
+            var self = this;
+            return Math.floor(self.currentUser.TimeLeft / 60) + ':' + self.isZeroNeed(self.currentUser.TimeLeft % 60);
+        },
         openChangeTimeMWindow: function (item) {
             let self = this;
 

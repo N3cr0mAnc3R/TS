@@ -11,6 +11,7 @@
         <li class="clickable" v-on:click="setReportManagement()" :class="{'current': reportManagement}">Назначить ответственного за отчёты</li>
         <li><a href="/statistic/minitotal">Перейти к поиску</a></li>
         <li v-if="hasFullAccess"><a href="/statistic/total">Открыть модерирование</a></li>
+        <li v-if="hasFullAccess"><a href="/administration/question">Доступ к вопросам</a></li>
     </ul>
     <br />
     <div class="auditory-list mb-3" v-if="auditories.length > 0 && (auditoryManagement || reportManagement)">

@@ -7,7 +7,7 @@
     .discipline-wrapper {
         margin: 3px 5px;
         cursor: pointer;
-        min-width:30%;
+        min-width: 30%;
 
         &:hover {
             background: #ddd;
@@ -15,31 +15,78 @@
 
         &.current {
             background: #565c72;
-            color:#fff;
+            color: #fff;
         }
     }
 }
 
-.question-page-list {
-    display: flex;
-    margin-top: 20px;
+.question-page-list-wrapper {
 
-    .page-wrapper {
-        width: 30px;
-        height: 30px;
-        border-radius: 3px;
-        text-align: center;
-        padding: 2px;
-        font-family: Montserrat;
-        font-weight: 600;
-        color: #fff;
-        margin-right: 5px;
-        background: #A6ACBC;
-        cursor: pointer;
-        margin-bottom: 10px;
+    .question-page-list {
+        display: flex;
+        margin-top: 20px;
+        overflow: auto;
+        justify-content: center;
 
-        &.active {
-            background: rgba(86, 92, 114, 0.8);
+        .page-wrapper {
+            width: 30px;
+            height: 30px;
+            border-radius: 3px;
+            text-align: center;
+            padding: 2px;
+            font-family: Montserrat;
+            font-weight: 600;
+            color: #fff;
+            margin-right: 5px;
+            background: #A6ACBC;
+            cursor: pointer;
+            margin-bottom: 10px;
+
+            &.active {
+                background: rgba(86, 92, 114, 0.8);
+            }
+        }
+    }
+}
+
+.question-list-wrapper {
+    background: #fff;
+
+    .button-panel {
+        width: 100%;
+        height: 50px;
+        display: flex;
+
+        button {
+            height: 40px;
+            margin-right: 20px;
+        }
+    }
+
+    img {
+        width: 100%;
+    }
+
+    .question-wrapper {
+        .answer-wrapper {
+            display: flex;
+
+            .checkbox-wrapper {
+                width: 30px;
+                height: 30px;
+                margin-top: auto;
+                margin-bottom: auto;
+                color: green;
+                display: flex;
+
+                i {
+                    margin: auto;
+                }
+            }
+
+            img {
+                width: calc(100% - 30px);
+            }
         }
     }
 }

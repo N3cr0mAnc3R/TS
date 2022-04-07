@@ -14,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>WebApp</RootNamespace>
     <AssemblyName>WebApp</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort />
@@ -206,6 +206,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\Administration\question-creating.css">
+      <DependentUpon>question-creating.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Administration\question-creating.js" />
+    <Content Include="Content\Administration\question-creating.min.css">
+      <DependentUpon>question-creating.css</DependentUpon>
+    </Content>
     <Content Include="Content\Administration\question.css">
       <DependentUpon>question.less</DependentUpon>
     </Content>
@@ -265,6 +272,7 @@
     <Content Include="Content\Proctoring\list.js" />
     <Content Include="Content\reply.png" />
     <Content Include="Content\send-chat.png" />
+    <Content Include="Content\Shared\ckeditor.js" />
     <Content Include="Content\Shared\Notify.css">
       <DependentUpon>Notify.less</DependentUpon>
     </Content>
@@ -377,6 +385,7 @@
     <Content Include="Content\Testing\profile.less" />
     <Content Include="Content\Administration\administration.less" />
     <Content Include="Content\Administration\question.less" />
+    <Content Include="Content\Administration\question-creating.less" />
     <None Include="Properties\PublishProfiles\CustomProfile.pubxml" />
     <Content Include="Scripts\bootstrap.bundle.js" />
     <Content Include="Scripts\bootstrap.bundle.min.js" />
@@ -521,6 +530,7 @@
     <Compile Include="Models\Administration\AccessModel.cs" />
     <Compile Include="Models\Administration\AdministrationManager.cs" />
     <Compile Include="Models\Administration\AssignDisciplineModel.cs" />
+    <Compile Include="Models\Administration\QuestionUploadModel.cs" />
     <Compile Include="Models\Administration\UserAnswerLogModel.cs" />
     <Compile Include="Models\Administration\UserTestForTotal.cs" />
     <Compile Include="Models\Auditory\Auditory.cs" />
@@ -550,6 +560,8 @@
     <Compile Include="Models\DB\Extender.cs" />
     <Compile Include="Models\DB\Manager.cs" />
     <Compile Include="Models\DB\StructuredDynamicParameters.cs" />
+    <Compile Include="Models\Disciplines\CategoryQuestion.cs" />
+    <Compile Include="Models\Disciplines\DisciplineModel.cs" />
     <Compile Include="Models\Logs\LogManager.cs" />
     <Compile Include="Models\Proctoring\AnonymUser.cs" />
     <Compile Include="Models\Proctoring\AnswerInfoScore.cs" />
@@ -624,6 +636,7 @@
     <Content Include="Views\Administration\Index.cshtml" />
     <Content Include="Views\Auditory\Error.cshtml" />
     <Content Include="Views\Administration\Question.cshtml" />
+    <Content Include="Views\Administration\QuestionCreating.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

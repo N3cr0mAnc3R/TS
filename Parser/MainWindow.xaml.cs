@@ -147,11 +147,138 @@ namespace Parser
             p.Dispose();
             //Process.Start("taskkill", "/IM gswin64.exe");
         }
+        void WorkWithFile()
+        {
+
+            SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
+            SqlCommand cmd = conn.CreateCommand();
+            if (IsChecked)
+            {
+                cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
+            }
+            else
+            {
+                cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
+            }
+            conn.Open();
+            string input = "E:\\test4.pdf", output = "E:\\test";
+            int Id = 0;
+            using (var reader = cmd.ExecuteReader())
+            {
+                while (reader.Read())
+                {
+                    Id = (int)reader["ID"];
+                    if (IsChecked)
+                    {
+                        File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
+
+                    }
+                    else
+                    {
+                        File.WriteAllBytes("E:\\test4.doc", (byte[])reader["answer"]);
+                    }
+                }
+            }
+            if (Id == 0)
+            {
+                return;
+            }
+            Parsing parser = new Parsing();
+            parser.ParseAsync("E:\\test4.doc", input, IsChecked);
+            string ghostScriptPath = @"E:\Old\gs9.50\bin\gswin64.exe";
+            String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
+            Process proc = new Process();
+            proc.StartInfo.FileName = ghostScriptPath;
+            proc.StartInfo.Arguments = ars;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            proc.Start();
+            proc.EnableRaisingEvents = true;
+            if (!proc.WaitForExit(4000))
+            {
+                proc.CloseMainWindow();
+                proc.Close();
+                if (!proc.WaitForExit(4000))
+                {
+                    proc.Kill();
+                }
+            }
+            int maxHeight = 0;
+
+            using (Image img1 = Image.FromFile(output + ".jpg"))
+            {
+                using (Bitmap bmp = new Bitmap(img1))
+                {
+
+                    LockBitmap bmp1 = new LockBitmap(bmp);
+                    bmp1.LockBits();
+                    int step = bmp1.Depth == 32 ? 4 : bmp1.Depth == 24 ? 3 : 1;
+                    for (int i = bmp1.Width * bmp1.Height; i >= 0; i -= step)
+                    {
+                        if (bmp1.Pixels[i] != 255)
+                        {
+                            maxHeight = i;
+                            break;
+                        }
+                    }
+                    maxHeight = (int)Math.Ceiling((double)(maxHeight / bmp1.Width));
+                    if (maxHeight + 30 <= bmp1.Height)
+                    {
+                        maxHeight += 30;
+                    }
+                    bck.ReportProgress(79);
+
+                    Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
+                    //cropBmp.Save(output + "1.bmp");
+
+                    ImageConverter converter = new ImageConverter();
+                    bck.ReportProgress(91);
+
+                    SqlCommand cmd1 = conn.CreateCommand();
+                    byte[] bytes;
+                    using (var stream = new MemoryStream())
+                    {
+                        cropBmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                        bytes = stream.ToArray();
+                    }
+                    bck.ReportProgress(98);
+
+
+                    string img = Convert.ToBase64String(bytes);
+                    if (IsChecked)
+                    {
+                        cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
+                        SqlCommand cmd2 = conn.CreateCommand();
+                        cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
+                        cmd2.ExecuteScalar();
+                    }
+                    else
+                    {
+                        cmd1.CommandText = "update Answers set answerImage = '" + img + "'  where ID = " + Id;
+                        SqlCommand cmd2 = conn.CreateCommand();
+                        cmd2.CommandText = "update Answers set loaded = 1 where ID = " + Id;
+                        cmd2.ExecuteScalar();
+                    }
+                    //cmd1.CommandText = "update tests set QuestionIMG = '" + img + "'  where KOD_TEST = " + Id;
+                    //cmd1.CommandText = "update testans set ANSWERIMG = '" + img + "'  where KOD_ANS = " + Id;
+                    //cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
+                    cmd1.ExecuteScalar();
+
+                    conn.Close();
+                    bck.ReportProgress(99);
+                }
+            }
+
+            File.Delete(input);
+            File.Delete("E:\\test4.doc");
+            File.Delete(output + ".jpg");
+        }
         public void CropImageWithFix()
         {
             bck.ReportProgress(0);
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
+            WorkWithFile();
             if (IsChecked)
             {
                 cmd.CommandText = "select top 1 ID, questionImage from [Questions] where isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
@@ -373,7 +500,7 @@ namespace Parser
                 Parsing parser = new Parsing();
                 parser.ParseAsync("E:\\test4.doc", input, IsChecked);
 
-
+                //
                 string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
                 //string ghostScriptPath = @"C:\Program Files\gs\gs9.50\bin\gswin64.exe";
                 String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;

@@ -54,5 +54,9 @@
   {
     "outputFile": "Content/Administration/question.css",
     "inputFile": "Content/Administration/question.less"
+  },
+  {
+    "outputFile": "Content/Administration/question-creating.css",
+    "inputFile": "Content/Administration/question-creating.less"
   }
 ]

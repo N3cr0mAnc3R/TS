@@ -1,0 +1,146 @@
+﻿
+@{
+    ViewBag.Title = "Структура вопросов";
+}
+
+<link href="~/Content/Administration/question-creating.css" rel="stylesheet" />
+
+<div id="main-window">
+    <h2>Структура</h2>
+    <div class="discipline-info">
+        <div class="create-discipline-form mt-4">
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Название</span>
+                <input type="text" class="form-control" v-model="disciplineStructure.Name" v-if="structureEditing" />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.Name}}
+                </span>
+                <span class="mt-auto mb-auto mr-5 col-2">На английском</span>
+                <input type="text" class="form-control" v-model="disciplineStructure.NameEn"  v-if="structureEditing" />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.NameEn}}
+                </span>
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Количество вопросов</span>
+                <input type="number" class="form-control" v-model="disciplineStructure.CountOfQuestions" v-if="structureEditing"  />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.CountOfQuestions}}
+                </span>
+                <span class="mt-auto mb-auto mr-5 col-2">Максимальный балл</span>
+                <input type="number" class="form-control" v-model="disciplineStructure.Scale" v-if="structureEditing"  />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.Scale}}
+                </span>
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Время прохождения теста (мин)</span>
+                <input type="number" class="form-control" v-model="disciplineStructure.TestingTime" v-if="structureEditing"  />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.TestingTime}}
+                </span>
+                <span class="mt-auto mb-auto mr-5 col-2">Год проведения</span>
+                <input type="number" class="form-control" v-model="disciplineStructure.Year" v-if="structureEditing"  />
+                <span class="value col-4" v-if="!structureEditing">
+                    {{disciplineStructure.Year}}
+                </span>
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Время оповещения (мин)</span>
+                <input type="number" class="form-control" v-model="disciplineStructure.TimeAlarm" v-if="structureEditing"  />
+                <span class="value col" v-if="!structureEditing">
+                    {{disciplineStructure.TimeAlarm}}
+                </span>
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Вид экзамена</span>
+                <select class="form-control" v-model="disciplineStructure.TypeTesting" v-if="structureEditing" >
+                    <option v-for="testingType in testingTypes" :value="testingType.Id">{{testingType.Name}}</option>
+                </select>
+                <span class="value col-4" v-if="!structureEditing">
+                    {{getTypeName(disciplineStructure.TypeTesting)}}
+                </span>
+                <span class="mt-auto mb-auto mr-5 col-2">Рамки проведения</span>
+                <select class="form-control" v-model="disciplineStructure.TestingPass" v-if="structureEditing" >
+                    <option v-for="testingPass in testingPasses" :value="testingPass.Id">{{testingPass.Name}}</option>
+                </select>
+                <span class="value col-4" v-if="!structureEditing">
+                    {{getPassName(disciplineStructure.TestingPass)}}
+                </span>
+            </label>
+            <div class="d-flex">
+                <button class="btn btn-outline-primary" v-on:click="startEdit"><span v-if="structureEditing">Отменить</span><span v-if="!structureEditing">Редактировать</span></button>
+                <button class="btn btn-outline-success" v-if="structureEditing" v-on:click="saveStructure">Сохранить</button>
+            </div>
+        </div>
+    </div>
+    <h2>Структура вопросов</h2>
+    <div class="text-danger" v-if="getTotalScale() != disciplineStructure.Scale">Необходимо пересчитать категории (сумма {{getTotalScale()}})</div>
+    <div class="d-flex">
+        <div class="category-list">
+            <div v-for="category in categories" class="category-wrapper d-flex">
+                <span>{{category.Name}}</span>
+                <div class="button-list d-flex">
+                    <button class="btn btn-outline-primary" v-on:click="editCategory(category)" title="Редактировать"><i class="fa fa-pen"></i></button>
+                    <button class="btn btn-outline-danger" title="Удалить"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <div class="panel-bottom"><buton class="btn btn-outline-success" v-on:click="addCategory">Добавить категорию</buton></div>
+        </div>
+        <div class="category-list">
+            <div v-for="theme in themes" class="category-wrapper d-flex">
+                <span>{{theme.Name}}</span>
+                <div class="button-list d-flex">
+                    <button class="btn btn-outline-primary" v-on:click="editTheme(theme)" title="Редактировать"><i class="fa fa-pen"></i></button>
+                    <button class="btn btn-outline-danger" title="Удалить"><i class="fa fa-times"></i></button>
+                </div>
+            </div>
+            <div class="panel-bottom"><buton class="btn btn-outline-success" v-on:click="addTheme">Добавить тему</buton></div>
+        </div>
+    </div>
+    <div v-if="categoryEditing">
+        <div class="edit-category-form">
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Название</span>
+                <input type="text" class="form-control" v-model="currentCategory.Name" />
+                <span class="mt-auto mb-auto mr-5 col-2">На английском</span>
+                <input type="text" class="form-control" v-model="currentCategory.NameEn" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Вес</span>
+                <input type="number" class="form-control" v-model="currentCategory.Weight" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Порядковый номер</span>
+                <input type="number" class="form-control" v-model="currentCategory.Number" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Количество вопросов</span>
+                <input type="number" class="form-control" v-model="currentCategory.Count" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Группа</span>
+                <input type="number" class="form-control" v-model="currentCategory.Rank" />
+            </label>
+            <button class="btn btn-outline-success" v-on:click="saveCategory">Сохранить</button>
+        </div>
+    </div>
+    <div v-if="themeEditing">
+        <div class="edit-category-form">
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Название</span>
+                <input type="text" class="form-control" v-model="currentTheme.Name" />
+                <span class="mt-auto mb-auto mr-5 col-2">На английском</span>
+                <input type="text" class="form-control" v-model="currentTheme.NameEn" />
+            </label>
+            <label class="d-flex">
+                <span class="mt-auto mb-auto mr-5 col-2">Активно</span>
+                <input type="checkbox" class="form-control" v-model="currentTheme.IsActive" />
+            </label>
+            <button class="btn btn-outline-success" v-on:click="saveTheme">Сохранить</button>
+        </div>
+    </div>
+</div>
+
+
+<script src="~/Content/Administration/question-creating.js"></script>

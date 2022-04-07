@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Http;
 using WebApp.Models.Administration;
 using WebApp.Models.Common;
+using WebApp.Models.Disciplines;
 using WebApp.Models.UserTest;
 
 namespace WebApp.Controllers.Api
@@ -176,10 +177,90 @@ namespace WebApp.Controllers.Api
             return WrapResponse(await AdministrationManager.GetDisciplineQuestions(Id, Offset, Count, IsActive, CurrentUser.Id));
         }
         [HttpPost]
+        [Route("ToggleQuestion")]
+        public async Task<IHttpActionResult> ToggleQuestion(int Id, bool IsActive)
+        {
+            await AdministrationManager.ToggleQuestion(Id, IsActive, CurrentUser.Id);
+            return WrapResponse(true);
+        }
+        [HttpPost]
         [Route("GetQuestionCount")]
         public async Task<IHttpActionResult> GetQuestionCount(int Id, int? IsActive = null)
         {
             return WrapResponse(await AdministrationManager.GetQuestionCount(Id, IsActive, CurrentUser.Id));
+        }
+        [HttpPost]
+        [Route("GetTestingPassTimes")]
+        public async Task<IHttpActionResult> GetTestingPassTimes()
+        {
+            return WrapResponse(await AdministrationManager.GetTestingPassTimes());
+        }
+        [HttpPost]
+        [Route("CreateDiscipline")]
+        public async Task<IHttpActionResult> CreateDiscipline(DisciplineModel model)
+        {
+            return WrapResponse(await AdministrationManager.CreateDiscipline(model));
+        }
+        [HttpPost]
+        [Route("UpdateDiscipline")]
+        public async Task<IHttpActionResult> UpdateDiscipline(DisciplineModel model)
+        {
+            await AdministrationManager.UpdateDiscipline(model);
+            return WrapResponse(true);
+        }
+        [HttpPost]
+        [Route("GetQuestionCategories")]
+        public async Task<IHttpActionResult> GetQuestionCategories(int Id)
+        {
+            return WrapResponse(await AdministrationManager.GetQuestionCategories(Id));
+        }
+        [HttpPost]
+        [Route("GetQuestionThemes")]
+        public async Task<IHttpActionResult> GetQuestionThemes(int Id)
+        {
+            return WrapResponse(await AdministrationManager.GetQuestionThemes(Id));
+        }
+        [HttpPost]
+        [Route("GetStructureDiscipline")]
+        public async Task<IHttpActionResult> GetStructureDiscipline(int Id, int? year = null)
+        {
+            return WrapResponse(await AdministrationManager.GetStructureDiscipline(Id, year));
+        }
+        [HttpPost]
+        [Route("SaveQuestionCategory")]
+        public async Task<IHttpActionResult> SaveQuestionCategory(CategoryQuestion model)
+        {
+            await AdministrationManager.SaveQuestionCategory(model);
+            return WrapResponse(true);
+        }
+        [HttpPost]
+        [Route("SaveQuestionTheme")]
+        public async Task<IHttpActionResult> SaveQuestionTheme(CategoryQuestion model)
+        {
+            await AdministrationManager.SaveQuestionTheme(model);
+            return WrapResponse(true);
+        }
+        [HttpPost]
+        [Route("GetTestingTypes")]
+        public async Task<IHttpActionResult> GetTestingTypes()
+        {
+            return WrapResponse(await AdministrationManager.GetTestingTypes());
+        }
+        [HttpPost]
+        [Route("GetTestingAnswerTypes")]
+        public async Task<IHttpActionResult> GetTestingAnswerTypes()
+        {
+            return WrapResponse(await AdministrationManager.GetTestingAnswerTypes());
+        }
+        [HttpPost]
+        [Route("SaveQuestionString")]
+        public async Task<IHttpActionResult> SaveQuestionString(QuestionUploadModel model)
+        {
+            string first = "<html><head></head><body>";
+            string second = "</body></html>";
+            model.Question = Cropper.Cropper.ConvertToWord(first + model.QuestionString + second);
+            await AdministrationManager.SaveQuestionFile(model);
+            return WrapResponse(true);
         }
         [HttpPost]
         [Route("FastUserLoad")]

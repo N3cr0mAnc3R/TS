@@ -312,28 +312,9 @@ namespace WebApp.Models
                 IDbTransaction trans = conn.BeginTransaction();
                 try
                 {
-                    //Может быть залезть внутрь и вообще биндинг еще сделать для MvcResultSqlFileStream
                     byte[] filestream = await conn.QueryFirstOrDefaultAsync<byte[]>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure);
 
-                    //return Convert.ToBase64String(filestream);
                     return filestream;
-
-                    //FileStreamDownload filestream = conn.Query<FileStreamDownload>("UserPlace_FileGet", new { FileId, UserId }, trans, commandType: CommandType.StoredProcedure).FirstOrDefault();
-
-                    //MvcResultSqlFileStream stream = new MvcResultSqlFileStream()
-                    //{
-                    //    Connection = conn,
-                    //    SqlStream = new SqlFileStream(filestream.FileStreamPath, filestream.FileStreamContext, FileAccess.Read),
-                    //    Transaction = trans
-                    //};
-
-                    //// filestream.Stream = stream;
-                    //// byte[] data = new byte[(int)stream.Length];
-                    //// stream.Read(data, 0, data.Length);
-                    //filestream.Stream = stream;
-                    //// Теперь помечаем, используемые ресурсы, т
-
-                    //return filestream;
 
                 }
                 catch

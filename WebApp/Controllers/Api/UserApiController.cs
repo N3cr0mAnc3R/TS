@@ -128,7 +128,7 @@ namespace WebApp.Controllers.Api
         public async Task<IHttpActionResult> GetAnswerImage(int Id)
         {
             AnswerModel model = (await TestManager.GetAnswerImage(Id)).First();
-            model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
+            //model.AnswerImage = Cropper.Cropper.CropImageWithFix(model.AnswerImage);
             return WrapResponse(model);
         }
         [HttpPost]
@@ -138,7 +138,7 @@ namespace WebApp.Controllers.Api
             QuestionModel model = (await TestManager.GetQuestionImage(Id)).First();
             if (Type != 4)
             {
-                model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
+                //model.QuestionImage = Cropper.Cropper.CropImageWithFix(model.QuestionImage);
             }
             int Partition = 1200000;
             int left = model.QuestionImage.Length - (Part * Partition);

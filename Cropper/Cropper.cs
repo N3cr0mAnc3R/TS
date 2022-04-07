@@ -1,13 +1,58 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.Word;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Cropper
 {
     public class Cropper
     {
+
+        public static byte[] ConvertToWord(string content, byte[] fileBytes = null) {
+            Application word =new Application();
+            Document wordDoc =
+                new Document();
+            Object oMissing = System.Reflection.Missing.Value;
+            wordDoc = word.Documents.Add(ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            word.Visible = false;
+            var tmpFile = Path.GetTempFileName();
+            content = content ?? "<p>qwe <i>ewq</i></p> абвк <p>Второй абзац</p>";
+            File.WriteAllText(tmpFile,content, Encoding.UTF8);
+            //File.WriteAllBytes(tmpFile, fileBytes);
+            Object filepath = tmpFile;
+
+            Object confirmconversion = System.Reflection.Missing.Value;
+            Object readOnly = false;
+            Object saveto = "e:\\doc.docx";
+            Object oallowsubstitution = System.Reflection.Missing.Value;
+
+            wordDoc = word.Documents.Open(ref filepath, ref confirmconversion,
+                ref readOnly, ref oMissing,
+                ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+                ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+                ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            object fileFormat = WdSaveFormat.wdFormatDocument;
+            byte[] array;
+            try
+            {
+                wordDoc.Close();
+                array = File.ReadAllBytes(tmpFile);
+            }
+            catch (Exception exc)
+            {
+                array = new byte[1];
+            }
+
+
+
+            File.Delete(tmpFile);
+
+            return array;
+        }
         public static string CropImage(string input)
         {
             string output = "";
@@ -190,7 +235,7 @@ namespace Cropper
                 int PixelCount = Width * Height;
 
                 // Create rectangle to lock
-                Rectangle rect = new Rectangle(0, 0, Width, Height);
+                System.Drawing.Rectangle rect = new System.Drawing.Rectangle(0, 0, Width, Height);
 
                 // get source bitmap pixel format size
                 Depth = System.Drawing.Bitmap.GetPixelFormatSize(source.PixelFormat);

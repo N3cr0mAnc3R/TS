@@ -240,6 +240,7 @@ body footer {
 }
 body #window-without-loader {
   display: none;
+  margin-bottom: 75px;
 }
 body .localization-wrapper {
   display: -webkit-box;
