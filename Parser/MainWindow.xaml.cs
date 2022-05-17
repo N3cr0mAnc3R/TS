@@ -22,12 +22,17 @@ namespace Parser
     {
         int countTotal = 0;
         bool IsStraight = true;
-        string TotalCountQuery = "select sum(total) from (select count(1) as total from questions nolock where isLoadedAgain = 0 union all select count(1) as total from Answers nolock where isLoadedAgain = 0) as t";
+        string DocPath;
+        string GhostScriptPath;
+        string DocName;
+        string TotalCountQuery = "select sum(total) from (select count(1) as total from questions nolock where loaded = 0 union all select count(1) as total from Answers nolock where loaded = 0) as t";
         //string TotalCountQuery = "select count(1) from questions (nolock) where isLoadedAgain = 0";
         public MainWindow()
         {
             InitializeComponent();
-
+            DocPath = ConfigurationManager.AppSettings["docPath"];
+            GhostScriptPath = ConfigurationManager.AppSettings["gswinPath"];
+            DocName = DocPath.Substring(0, DocPath.LastIndexOf(".doc"));
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
 
@@ -64,14 +69,14 @@ namespace Parser
 
         BackgroundWorker bck = new BackgroundWorker();
         List<Test> tests;
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void StartProcess(object sender, RoutedEventArgs e)
         {
             //var task = Process1();
             //task.Start();
             errors.Text = "Начало положено\n";
             bck.RunWorkerAsync();
         }
-        private void Button_Click2(object sender, RoutedEventArgs e)
+        private void DownloadFiles(object sender, RoutedEventArgs e)
         {
             SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["Testing"].ConnectionString);
             SqlCommand cmd = conn.CreateCommand();
@@ -82,14 +87,14 @@ namespace Parser
                 int i = 1;
                 while (reader.Read())
                 {
-                    //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["QUESTION1"]);
-                    //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
-                    File.WriteAllBytes("E:\\test4" + i + ".doc", (byte[])reader["question"]);
+                    //File.WriteAllBytes(DocPath, (byte[])reader["QUESTION1"]);
+                    //File.WriteAllBytes(DocPath, (byte[])reader["question"]);
+                    File.WriteAllBytes(DocName + i + ".doc", (byte[])reader["question"]);
                     i++;
                 }
             }
         }
-        private void Button_Click1(object sender, RoutedEventArgs e)
+        private void TryStop(object sender, RoutedEventArgs e)
         {
             //var task = Process1();
             //task.Start();
@@ -161,7 +166,7 @@ namespace Parser
                 cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
             }
             conn.Open();
-            string input = "E:\\test4.pdf", output = "E:\\test";
+            string input = DocName + ".pdf", output = "E:\\test";
             int Id = 0;
             using (var reader = cmd.ExecuteReader())
             {
@@ -170,12 +175,12 @@ namespace Parser
                     Id = (int)reader["ID"];
                     if (IsChecked)
                     {
-                        File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
+                        File.WriteAllBytes(DocPath, (byte[])reader["question"]);
 
                     }
                     else
                     {
-                        File.WriteAllBytes("E:\\test4.doc", (byte[])reader["answer"]);
+                        File.WriteAllBytes(DocPath, (byte[])reader["answer"]);
                     }
                 }
             }
@@ -184,11 +189,13 @@ namespace Parser
                 return;
             }
             Parsing parser = new Parsing();
-            parser.ParseAsync("E:\\test4.doc", input, IsChecked);
-            string ghostScriptPath = @"E:\Old\gs9.50\bin\gswin64.exe";
+            parser.ParseAsync(DocPath, input, IsChecked);
+            //parser.ParseAsync(DocPath, input, IsChecked);
+            //string ghostScriptPath = ConfigurationManager.AppSettings["gswinPath"];
+            //string ghostScriptPath = @"E:\Old\gs9.50\bin\gswin64.exe";
             String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
             Process proc = new Process();
-            proc.StartInfo.FileName = ghostScriptPath;
+            proc.StartInfo.FileName = GhostScriptPath;
             proc.StartInfo.Arguments = ars;
             proc.StartInfo.CreateNoWindow = true;
             proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -245,6 +252,7 @@ namespace Parser
 
 
                     string img = Convert.ToBase64String(bytes);
+                    img = Cropper.Cropper.CropImageWithFix(img);
                     if (IsChecked)
                     {
                         cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
@@ -270,7 +278,7 @@ namespace Parser
             }
 
             File.Delete(input);
-            File.Delete("E:\\test4.doc");
+            File.Delete(DocPath);
             File.Delete(output + ".jpg");
         }
         public void CropImageWithFix()
@@ -281,11 +289,11 @@ namespace Parser
             WorkWithFile();
             if (IsChecked)
             {
-                cmd.CommandText = "select top 1 ID, questionImage from [Questions] where isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+                cmd.CommandText = "select top 1 ID, questionImage from [Questions] where loaded = 0" + (IsStraight ? "" : " order by ID desc");
             }
             else
             {
-                cmd.CommandText = "select top 1 ID, answerImage from [Answers] where  isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+                cmd.CommandText = "select top 1 ID, answerImage from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
             }
             conn.Open();
 
@@ -329,7 +337,7 @@ namespace Parser
                 bck.ReportProgress(99);
                 bck.ReportProgress(80);
                 SqlCommand cmd2 = conn.CreateCommand();
-                cmd2.CommandText = "update Questions set isLoadedAgain = 1 where ID = " + Id;
+                cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
                 cmd2.ExecuteScalar();
             }
             else
@@ -344,15 +352,15 @@ namespace Parser
                 bck.ReportProgress(80);
                 SqlCommand cmd2 = conn.CreateCommand();
                 bck.ReportProgress(99);
-                cmd2.CommandText = "update Answers set isLoadedAgain = 1 where ID = " + Id;
+                cmd2.CommandText = "update Answers set loaded = 1 where ID = " + Id;
                 cmd2.ExecuteScalar();
             }
 
             bck.ReportProgress(100);
-            conn.Close();
+            //conn.Close();
 
             //Parsing parser = new Parsing();
-            //parser.ParseAsync("E:\\test4.doc", input, IsChecked);
+            //parser.ParseAsync(DocPath, input, IsChecked);
 
 
             //string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
@@ -441,7 +449,7 @@ namespace Parser
             //}
 
             //File.Delete(input);
-            //File.Delete("E:\\test4.doc");
+            //File.Delete(DocPath);
             //File.Delete(output + ".jpg");
             //bck.ReportProgress(100);
 
@@ -461,7 +469,7 @@ namespace Parser
                 //cmd.CommandText = "select top 1 KOD_ANS, ANSWER1 from testans where ANSWERIMG is null";
                 if (IsChecked)
                 {
-                    cmd.CommandText = "select top 1 ID, question from [Questions] where isLoadedAgain = 0" + (IsStraight ? "" : " order by ID desc");
+                    cmd.CommandText = "select top 1 ID, question from [Questions] where loaded = 0" + (IsStraight ? "" : " order by ID desc");
                     //cmd.CommandText = "select top 1 ID, question from [Questions] where  loaded = 0" + (IsStraight? "" : " order by ID desc");
                 }
                 else
@@ -469,7 +477,7 @@ namespace Parser
                     cmd.CommandText = "select top 1 ID, answer from [Answers] where  loaded = 0" + (IsStraight ? "" : " order by ID desc");
                 }
                 conn.Open();
-                string input = "E:\\test4.pdf", output = "E:\\test";
+                string input = DocName + ".pdf", output = "E:\\test";
 
                 //File.WriteAllBytes(input, cmd.ExecuteScalar() as byte[]);
                 int Id = 0;
@@ -480,15 +488,15 @@ namespace Parser
                         Id = (int)reader["ID"];
                         if (IsChecked)
                         {
-                            File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
+                            File.WriteAllBytes(DocPath, (byte[])reader["question"]);
 
                         }
                         else
                         {
-                            File.WriteAllBytes("E:\\test4.doc", (byte[])reader["answer"]);
+                            File.WriteAllBytes(DocPath, (byte[])reader["answer"]);
                         }
-                        //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["QUESTION1"]);
-                        //File.WriteAllBytes("E:\\test4.doc", (byte[])reader["question"]);
+                        //File.WriteAllBytes(DocPath, (byte[])reader["QUESTION1"]);
+                        //File.WriteAllBytes(DocPath, (byte[])reader["question"]);
                         //Id1 =(int)reader["questionId"];
                     }
                 }
@@ -498,14 +506,14 @@ namespace Parser
                     return;
                 }
                 Parsing parser = new Parsing();
-                parser.ParseAsync("E:\\test4.doc", input, IsChecked);
+                parser.ParseAsync(DocPath, input, IsChecked);
 
                 //
-                string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
+                //string ghostScriptPath = IsUra ? @"C:\Program Files\gs\gs9.50\bin\gswin64.exe" : @"E:\Old\gs9.50\bin\gswin64.exe";
                 //string ghostScriptPath = @"C:\Program Files\gs\gs9.50\bin\gswin64.exe";
                 String ars = "-dNOPAUSE -sDEVICE=jpeg -r" + dpi1 + " -o  " + output + ".jpg -sPAPERSIZE=a4 " + input;
                 Process proc = new Process();
-                proc.StartInfo.FileName = ghostScriptPath;
+                proc.StartInfo.FileName = GhostScriptPath;
                 proc.StartInfo.Arguments = ars;
                 proc.StartInfo.CreateNoWindow = true;
                 proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
@@ -547,7 +555,7 @@ namespace Parser
                         }
                         bck.ReportProgress(79);
 
-                        Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
+                        Bitmap cropBmp = bmp.Clone(new Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
                         //cropBmp.Save(output + "1.bmp");
 
                         ImageConverter converter = new ImageConverter();
@@ -557,7 +565,7 @@ namespace Parser
                         byte[] bytes;
                         using (var stream = new MemoryStream())
                         {
-                            cropBmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            cropBmp.Save(stream,ImageFormat.Png);
                             bytes = stream.ToArray();
                         }
                         bck.ReportProgress(98);
@@ -568,7 +576,7 @@ namespace Parser
                         {
                             cmd1.CommandText = "update Questions set questionImage = '" + img + "'  where ID = " + Id;
                             SqlCommand cmd2 = conn.CreateCommand();
-                            cmd2.CommandText = "update Questions set isLoadedAgain = 1 where ID = " + Id;
+                            cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
                             //cmd2.CommandText = "update Questions set loaded = 1 where ID = " + Id;
                             cmd2.ExecuteScalar();
                         }
@@ -590,7 +598,7 @@ namespace Parser
                 }
 
                 File.Delete(input);
-                File.Delete("E:\\test4.doc");
+                File.Delete(DocPath);
                 File.Delete(output + ".jpg");
                 bck.ReportProgress(100);
 
@@ -599,7 +607,7 @@ namespace Parser
             catch (IOException exc)
             {
 
-                //   File.Delete("E:\\test4.doc");
+                //   File.Delete(DocPath);
                 MessageBox.Show(exc.Message);
                 //Process1(sender, e);
             }

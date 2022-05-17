@@ -95,7 +95,7 @@
                 <div class="page-wrapper" :class="{'active': currentPage == totalCount}" v-on:click="selectPage(totalCount)">{{totalCount}}</div>
             </template>
             <input class="" type="number" v-model="forcePage" v-if="totalCount > 0" />
-            <button v-on:click="showPage" v-if="totalCount > 0">Перейти к странице</button>
+            <button class="btn btn-outline-secondary" v-on:click="showPage" v-if="totalCount > 0">Перейти к странице</button>
         </div>
     </div>
     <div class="mt-3 question-list-wrapper" v-loader="questionLoader">

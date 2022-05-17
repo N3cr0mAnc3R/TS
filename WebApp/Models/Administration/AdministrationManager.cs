@@ -179,6 +179,20 @@ namespace WebApp.Models.Administration
                 await cnt.ExecuteAsync("Administrator_ThemeSave", new { themeId = model.Id, model.StructureDisciplineId, model.Name, Name_En = model.NameEn, model.IsActive }, commandType: CommandType.StoredProcedure);
             }
         }
+        public async Task<string> GetQuestionImage(int QuestionId)
+        {
+            using (var cnt = Concrete.OpenConnection())
+            {
+                return (await cnt.QueryFirstAsync<QuestionModel>("Administrator_QuestionImageGet", new { QuestionId }, commandType: CommandType.StoredProcedure)).QuestionImage;
+            }
+        }
+        public async Task SaveQuestionImage(int QuestionId, string questionImage)
+        {
+            using (var cnt = Concrete.OpenConnection())
+            {
+                await cnt.ExecuteAsync("Administrator_QuestionNewImageSave", new { QuestionId, questionImage }, commandType: CommandType.StoredProcedure);
+            }
+        }
         public async Task<QuestionUploadModel> SaveQuestionFile(QuestionUploadModel model)
         {
             using (var cnt = Concrete.OpenConnection())

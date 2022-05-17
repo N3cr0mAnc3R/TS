@@ -168,7 +168,7 @@
                     success: function () {
                     },
                     error: function () {
-                        location.reload();
+                        //location.reload();
                     }
                 });
             }
@@ -197,11 +197,13 @@
                 type: "POST",
                 async: true,
                 success: function (info) {
+                            console.log(info);
                     if (info.TestingTimeRemaining <= 0) {
                         //self.finishTest();
                         //window.open('/user/waiting','_self');
                     }
-                    self.testing = info.IsForTesting;
+                    self.testing = false;
+                    //self.testing = info.IsForTesting;
                     if (!self.testing) {
                         //  alert('start socket');
                         self.isCameraControl = info.IsCameraControl;

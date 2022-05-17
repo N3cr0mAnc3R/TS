@@ -1,57 +1,239 @@
-﻿using Microsoft.Office.Interop.Word;
+﻿
+using DocumentFormat.OpenXml.Packaging;
+//using Microsoft.Office.Interop.Word;
 using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using WebSupergoo.WordGlue3;
+using WebSupergoo.WordGlue3.Layout;
 
 namespace Cropper
 {
     public class Cropper
     {
 
-        public static byte[] ConvertToWord(string content, byte[] fileBytes = null) {
-            Application word =new Application();
-            Document wordDoc =
-                new Document();
-            Object oMissing = System.Reflection.Missing.Value;
-            wordDoc = word.Documents.Add(ref oMissing, ref oMissing, ref oMissing, ref oMissing);
-            word.Visible = false;
-            var tmpFile = Path.GetTempFileName();
-            content = content ?? "<p>qwe <i>ewq</i></p> абвк <p>Второй абзац</p>";
-            File.WriteAllText(tmpFile,content, Encoding.UTF8);
-            //File.WriteAllBytes(tmpFile, fileBytes);
-            Object filepath = tmpFile;
+        static void ParseAsync(string path, string outputPath)
+        {
 
-            Object confirmconversion = System.Reflection.Missing.Value;
-            Object readOnly = false;
-            Object saveto = "e:\\doc.docx";
-            Object oallowsubstitution = System.Reflection.Missing.Value;
+            SautinSoft.PdfMetamorphosis p = new SautinSoft.PdfMetamorphosis();
 
-            wordDoc = word.Documents.Open(ref filepath, ref confirmconversion,
-                ref readOnly, ref oMissing,
-                ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-                ref oMissing, ref oMissing, ref oMissing, ref oMissing,
-                ref oMissing, ref oMissing, ref oMissing, ref oMissing);
-            object fileFormat = WdSaveFormat.wdFormatDocument;
-            byte[] array;
-            try
+            p.DocToPdfConvertFile(path, outputPath);
+            
+            //using (Doc doc = new Doc(path))
+            //{
+            //    ParagraphFrame paragraphFrame = new ParagraphFrame();
+            //    doc.DocumentFrame.Scan(a =>
+            //    {
+            //        if(a is ParagraphFrame)
+            //        {
+            //            paragraphFrame = a as ParagraphFrame;
+            //        }
+            //    });
+            //    TextRunFrame run = new TextRunFrame();
+            //    paragraphFrame.Scan(a => {
+            //        if(a is TextRunFrame)
+            //        {
+            //            run = a as TextRunFrame;
+            //        }
+            //    });
+            //    run.StyleStore.Entries["FontSize"] = "12";
+            //    run.StyleStore.Entries["FontFamily"] = "Times New Roman";
+            //    doc.SaveAs(outputPath);
+            //}
+            //    Document document = new Document(path);
+            //DocumentBuilder builder = new DocumentBuilder(document);
+            //builder.Font.Name = "Times New Roman";
+            //builder.Write(document.GetText());
+            //PdfSaveOptions pso = new PdfSaveOptions();
+            //pso.Compliance = PdfCompliance.Pdf17;
+            //document.Save(outputPath, pso);
+
+            //    object oMissing = System.Reflection.Missing.Value;
+            //    Application word = new Application();
+            //    Object filename = (Object)path;
+            //    Document doc = word.Documents.Open(ref filename, ref oMissing,
+            //ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //ref oMissing, ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            //    try
+            //    {
+
+
+            //        object outputFileName;
+
+            //        object fileFormat = WdSaveFormat.wdFormatPDF;
+            //        outputFileName = outputPath.Replace(".doc", ".pdf");
+            //        doc.Content.Font.Size = 12;
+
+            //        doc.Content.Font.Name = "Times New Roman";
+
+
+            //        doc.SaveAs(ref outputFileName,
+            //   ref fileFormat, ref oMissing, ref oMissing,
+            //   ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //   ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //   ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+
+            //        object saveChanges = WdSaveOptions.wdSaveChanges;
+            //        ((_Document)doc).Close(ref saveChanges, ref oMissing, ref oMissing);
+            //        doc = null;
+
+            //        ((_Application)word).Quit(ref oMissing, ref oMissing, ref oMissing);
+            //        word = null;
+
+            //        return outputFileName.ToString();
+            //    }
+            //    catch (Exception e)
+            //    {
+
+            //        object saveChanges = WdSaveOptions.wdDoNotSaveChanges;
+            //        ((_Document)doc).Close(ref saveChanges, ref oMissing, ref oMissing);
+            //        doc = null;
+
+            //        ((_Application)word).Quit(ref oMissing, ref oMissing, ref oMissing);
+            //        word = null;
+            //    }
+            //    return "";
+        }
+        public static string CropImage(byte[] file)
+        {
+            string result = "";
+            string InputDoc = "C:\\test4.docx", OutputPdf = "C:\\test4.pdf", output = "C:\\test";
+            File.WriteAllBytes(InputDoc, file);
+
+            SautinSoft.PdfMetamorphosis p = new SautinSoft.PdfMetamorphosis();
+            p.TextSettings.FontSize = 12;
+            p.TextSettings.FontFace.TimesNewRoman();
+            int ConvertResult = p.DocxToPdfConvertFile(InputDoc, OutputPdf);
+            //ParseAsync("C:\\test4.doc", input);
+
+
+
+            string ghostScriptPath = @"E:\Old\gs9.50\bin\gswin64.exe";
+            //string ghostScriptPath = @"C:\Program Files\gs\gs9.50\bin";
+            String ars = "-dNOPAUSE -sDEVICE=jpeg -r300 -o  " + output + ".jpg -sPAPERSIZE=a4 " + OutputPdf;
+            Process proc = new Process();
+            proc.StartInfo.FileName = ghostScriptPath;
+            proc.StartInfo.Arguments = ars;
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            proc.Start();
+            proc.EnableRaisingEvents = true;
+            if (!proc.WaitForExit(4000))
             {
-                wordDoc.Close();
-                array = File.ReadAllBytes(tmpFile);
+                proc.CloseMainWindow();
+                proc.Close();
+                if (!proc.WaitForExit(4000))
+                {
+                    proc.Kill();
+                }
             }
-            catch (Exception exc)
+            int maxHeight = 0;
+            using (Image img1 = Image.FromFile(output + ".jpg"))
             {
-                array = new byte[1];
+                using (Bitmap bmp = new Bitmap(img1))
+                {
+
+                    LockBitmap bmp1 = new LockBitmap(bmp);
+                    bmp1.LockBits();
+                    int step = bmp1.Depth == 32 ? 4 : bmp1.Depth == 24 ? 3 : 1;
+                    for (int i = bmp1.Width * bmp1.Height; i >= 0; i -= step)
+                    {
+                        if (bmp1.Pixels[i] != 255)
+                        {
+                            maxHeight = i;
+                            break;
+                        }
+                    }
+                    maxHeight = (int)Math.Ceiling((double)(maxHeight / bmp1.Width));
+                    if (maxHeight + 30 <= bmp1.Height)
+                    {
+                        maxHeight += 30;
+                    }
+                    Bitmap cropBmp = bmp.Clone(new System.Drawing.Rectangle(0, 0, bmp.Width, maxHeight), bmp.PixelFormat);
+                    //cropBmp.Save(output + "1.bmp");
+
+                    ImageConverter converter = new ImageConverter();
+                    byte[] bytes;
+                    using (var stream = new MemoryStream())
+                    {
+                        cropBmp.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                        bytes = stream.ToArray();
+                    }
+
+                    result = Convert.ToBase64String(bytes);
+                }
             }
+            File.Delete(OutputPdf);
+            File.Delete(InputDoc);
+            File.Delete(output + ".jpg");
+
+            return result;
+        }
+        public static byte[] ConvertToWord(string content, byte[] fileBytes = null)
+        {
+            SautinSoft.HtmlToRtf h = new SautinSoft.HtmlToRtf();
+            h.OpenHtml(content);
+            return h.ToDocx(); 
+            //return File.ReadAllBytes();
+            //using (Doc doc = new Doc())
+            //{
+            //    ParagraphFrame paragraphFrame = new ParagraphFrame();
+            //    TextRunFrame run = new TextRunFrame();
+            //    run.Text = content;
+            //    doc.DocumentFrame.Adopt(paragraphFrame.Children.AddLast(run));
+            //    //doc.SaveAs(outputPath);
+            //    string path = "C:\\doObj.doc";
+            //    doc.SaveAs(path);
+            //    return File.ReadAllBytes(path);
+            //}
+            //Document document = new Document();
+            //DocumentBuilder builder = new DocumentBuilder(document);
+            //builder.Font.Name = "Times New Roman";
+            //builder.InsertHtml(content);
+            //Application word = new Application();
+            //Document wordDoc; /*= new Document();*/
+            //Object oMissing = System.Reflection.Missing.Value;
+            ////wordDoc = word.Documents.Add(ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            //word.Visible = false;
+            //var tmpFile = Path.GetTempFileName();
+            //content = content ?? "<p>qwe <i>ewq</i></p> абвк <p>Второй абзац</p>";
+            //File.WriteAllText(tmpFile, content, Encoding.UTF8);
+            ////File.WriteAllBytes(tmpFile, fileBytes);
+            //Object filepath = tmpFile;
+
+            //Object confirmconversion = System.Reflection.Missing.Value;
+            //Object readOnly = false;
+            ////Object saveto = "e:\\doc.docx";
+            ////Object oallowsubstitution = System.Reflection.Missing.Value;
+
+            //wordDoc = word.Documents.Open(ref filepath, ref confirmconversion,
+            //    ref readOnly, ref oMissing,
+            //    ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    ref oMissing, ref oMissing, ref oMissing, ref oMissing,
+            //    ref oMissing, ref oMissing, ref oMissing, ref oMissing);
+            ////object fileFormat = WdSaveFormat.wdFormatDocument;
+            //byte[] array;
+            //try
+            //{
+            //    wordDoc.Close();
+            //    array = File.ReadAllBytes(tmpFile);
+            //}
+            //catch (Exception exc)
+            //{
+            //    array = new byte[1];
+            //}
 
 
 
-            File.Delete(tmpFile);
+            //File.Delete(tmpFile);
 
-            return array;
+            //return array;
         }
         public static string CropImage(string input)
         {
@@ -60,7 +242,7 @@ namespace Cropper
             {
                 output = Convert.ToBase64String(ConvertImage(input));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 output = UnpackException(e);
             }
@@ -73,7 +255,7 @@ namespace Cropper
             {
                 output = Convert.ToBase64String(FinishImage(input));
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 output = UnpackException(e);
             }
@@ -102,7 +284,7 @@ namespace Cropper
         private static string UnpackException(Exception exc)
         {
             string result = exc.Message + "\n";
-            if(exc.InnerException != null)
+            if (exc.InnerException != null)
             {
                 result += UnpackException(exc.InnerException);
             }
@@ -147,7 +329,7 @@ namespace Cropper
                     catch
                     {
                         int width = right - left > bmp.Width ? bmp.Width : right - left;
-                        cropBmp =  bmp.Clone(new System.Drawing.Rectangle(left, top, width - left, bottom - top), bmp.PixelFormat);
+                        cropBmp = bmp.Clone(new System.Drawing.Rectangle(left, top, width - left, bottom - top), bmp.PixelFormat);
                     }
                     byte[] bytes;
                     using (var stream1 = new MemoryStream())

@@ -258,8 +258,23 @@ namespace WebApp.Controllers.Api
         {
             string first = "<html><head></head><body>";
             string second = "</body></html>";
-            model.Question = Cropper.Cropper.ConvertToWord(first + model.QuestionString + second);
-            await AdministrationManager.SaveQuestionFile(model);
+            try
+            {
+                model.Question = Cropper.Cropper.ConvertToWord(first + model.QuestionString + second);
+                int Id = (int)(await AdministrationManager.SaveQuestionFile(model)).QuestionId;
+                if (Id != 0)
+                {
+                    string file = Cropper.Cropper.CropImage(model.Question);
+                    string img = Cropper.Cropper.CropImageWithFix(file);
+                    await AdministrationManager.SaveQuestionImage(Id, img);
+
+                }
+                //string file = await AdministrationManager.GetQuestionImage(Id);
+            }
+            catch (Exception ex)
+            {
+                return WrapResponse(ex.Message);
+            }
             return WrapResponse(true);
         }
         [HttpPost]

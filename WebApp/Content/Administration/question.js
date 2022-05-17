@@ -327,6 +327,11 @@ const app = new Vue({
             self.newQuestion.docQuestion = e.target.files[0];
 
             var formaData = new FormData();
+            if (!self.newQuestion.Id) {
+
+            }
+            console.log(self.newQuestion.Id);
+            return;
             formaData.append('Id', self.newQuestion.Id);
             formaData.append('QuestionFile', self.newQuestion.docQuestion);
             formaData.append('TypeAnswerId', self.newQuestion.TypeAnswerId);
@@ -361,6 +366,7 @@ const app = new Vue({
             };
             //var formaData = { QuestionString: "<p>qwe <i>ewq</i></p> абвк <p>Второй абзац</p>"};
             console.log(formaData);
+           //return;
             $.ajax({
                 url: "/api/Administration/SaveQuestionString",
                 type: 'post',

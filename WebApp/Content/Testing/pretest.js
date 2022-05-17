@@ -238,11 +238,12 @@
                             //console.log('founded', founded);
                             if (!founded) {
                                 //console.log('!founded', test);
-                                if (!test.IsForTesting) {
+                                //ToDo раскомментить в начале
+                               // if (!test.IsForTesting) {
                                     //console.log('flag', test);
                                     self.tests.push(test);
                                     flag = true;
-                                }
+                                //}
                             }
                         });
                     }
